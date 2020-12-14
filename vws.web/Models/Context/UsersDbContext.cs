@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace vws.web.Models.Context
 {
-    public class UsersDbContext : IdentityDbContext
+    public class UsersDbContext : IdentityDbContext<IdentityUser>
     {
         public UsersDbContext(DbContextOptions dbContextOptions)
         : base(dbContextOptions)
