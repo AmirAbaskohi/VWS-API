@@ -18,7 +18,7 @@ import { HomeComponent } from './Home/home.component';
     FormsModule,
     RouterModule.forRoot([
       { path: '', component: HomeComponent, pathMatch: 'full' },
-    ])
+    ]),
   ],
   providers: [],
   bootstrap: [AppComponent]
