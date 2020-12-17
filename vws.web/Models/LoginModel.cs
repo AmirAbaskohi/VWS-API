@@ -12,5 +12,6 @@ namespace vws.web.Models
         public string UsernameOrEmail { get; set; }
         [Required(ErrorMessage = "رمز عبور الزامی است")]
         public string Password { get; set; }
+        public bool? RememberMe { get; set; }
     }
 }
