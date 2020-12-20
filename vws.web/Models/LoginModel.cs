@@ -8,9 +8,9 @@ namespace vws.web.Models
 {
     public class LoginModel
     {
-        [Required(ErrorMessage = "ایمیل یا نام کاربری الزامی است")]
+        [Required]
         public string UsernameOrEmail { get; set; }
-        [Required(ErrorMessage = "رمز عبور الزامی است")]
+        [Required]
         public string Password { get; set; }
         public bool? RememberMe { get; set; }
     }
