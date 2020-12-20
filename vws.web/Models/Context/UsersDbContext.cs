@@ -8,12 +8,17 @@ using System.Threading.Tasks;
 
 namespace vws.web.Models.Context
 {
-    public class UsersDbContext : IdentityDbContext<IdentityUser>
+    public class UsersDbContext : IdentityDbContext<ApplicationUser>
     {
         public UsersDbContext(DbContextOptions dbContextOptions)
         : base(dbContextOptions)
         {
 
+        }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
         }
     }
 }

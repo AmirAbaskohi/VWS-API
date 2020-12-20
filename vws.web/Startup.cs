@@ -13,6 +13,7 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.Swagger;
 using System;
 using System.Text;
+using vws.web.Models;
 using vws.web.Models.Context;
 using vws.web.Repositories;
 
@@ -71,7 +72,7 @@ namespace vws.web
                 options.UseSqlServer(Configuration.GetConnectionString("SqlServer"));
             });
 
-            services.AddIdentity<IdentityUser, IdentityRole>()
+            services.AddIdentity<ApplicationUser, IdentityRole>()
                     .AddEntityFrameworkStores<UsersDbContext>()
                     .AddDefaultTokenProviders();
 
