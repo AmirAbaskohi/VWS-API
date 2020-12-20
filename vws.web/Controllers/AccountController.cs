@@ -55,6 +55,8 @@ namespace vws.web.Controllers
             if (!result.Succeeded)
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User creation failed!" });
 
+            await SendConfirmEmail(new UserModel { UserName = user.UserName });
+
             return Ok(new ResponseModel { Status = "Success", Message = "User created successfully!" });
         }
 
