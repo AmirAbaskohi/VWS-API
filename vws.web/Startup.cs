@@ -14,6 +14,7 @@ using Swashbuckle.Swagger;
 using System;
 using System.Text;
 using vws.web.Models.Context;
+using vws.web.Repositories;
 
 namespace vws.web
 {
@@ -73,6 +74,8 @@ namespace vws.web
             services.AddIdentity<IdentityUser, IdentityRole>()
                     .AddEntityFrameworkStores<UsersDbContext>()
                     .AddDefaultTokenProviders();
+
+            services.AddScoped<IEmailSender, EmailSender>();
 
             services.AddAuthentication(option =>
             {
