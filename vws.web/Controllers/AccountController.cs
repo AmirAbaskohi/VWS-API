@@ -4,12 +4,14 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using vws.web.Models;
+using vws.web.Repositories;
 
 namespace vws.web.Controllers
 {
@@ -17,18 +19,20 @@ namespace vws.web.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> userManager;
+        private readonly UserManager<ApplicationUser> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
-        private readonly SignInManager<IdentityUser> signInManager;
+        private readonly SignInManager<ApplicationUser> signInManager;
+        private readonly IEmailSender emailSender;
         private readonly IConfiguration configuration;
 
-        public AccountController(UserManager<IdentityUser> _userManager, RoleManager<IdentityRole> _roleManager,
-            SignInManager<IdentityUser> _signInManager, IConfiguration _configuration)
+        public AccountController(UserManager<ApplicationUser> _userManager, RoleManager<IdentityRole> _roleManager,
+            SignInManager<ApplicationUser> _signInManager, IConfiguration _configuration, IEmailSender _emailSender)
         {
             userManager = _userManager;
             roleManager = _roleManager;
             signInManager = _signInManager;
             configuration = _configuration;
+            emailSender = _emailSender;
         }
 
         [HttpPost]
@@ -40,15 +44,17 @@ namespace vws.web.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     new ResponseModel { Status = "Error", Message = "User already exists!" });
 
-            IdentityUser user = new IdentityUser()
+            ApplicationUser user = new ApplicationUser()
             {
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Username
             };
+
             var result = await userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User creation failed!" });
+
             return Ok(new ResponseModel { Status = "Success", Message = "User created successfully!" });
         }
 
@@ -88,6 +94,27 @@ namespace vws.web.Controllers
                 });
             }
             return Unauthorized();
+        }
+		
+        [HttpPost]
+        [Route("sendConfirmEmail")]
+        public async Task<IActionResult> SendConfirmEmail([FromBody] UserModel model)
+        {
+
+            var user = await userManager.FindByNameAsync(model.UserName);
+            if(user == null)
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User does not exist!" });
+
+            var random = new Random();
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var randomCode = new string(Enumerable.Repeat(chars, 5).Select(s => s[random.Next(s.Length)]).ToArray());
+
+            await emailSender.SendEmailAsync(user.Email, "EmailConfirmation", randomCode);
+
+            user.EmailVerificationSendTime = DateTime.Now;
+            user.EmailVerificationCode = randomCode;
+
+            return Ok(new ResponseModel { Status = "Success", Message = "Email sent successfully!" });
         }
     }
 }
