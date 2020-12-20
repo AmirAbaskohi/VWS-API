@@ -97,7 +97,31 @@ namespace vws.web.Controllers
             }
             return Unauthorized();
         }
-		
+
+        [HttpPost]
+        [Route("confirmEmail")]
+        public async Task<IActionResult> ConfirmEmail([FromBody] ValidationModel model)
+        {
+
+            var user = await userManager.FindByNameAsync(model.UserName);
+            if (user == null)
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User does not exist!" });
+
+            var timeDiff = user.EmailVerificationSendTime - DateTime.Now;
+
+            if (user.EmailConfirmed)
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Email already confirmed!" });
+
+            if(user.EmailVerificationCode == model.ValidationCode &&
+                timeDiff.TotalMinutes <= 15)
+            {
+                user.EmailConfirmed = true;
+                return Ok(new ResponseModel { Status = "Success", Message = "Email confirmed successfully!" });
+            }
+
+            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Email confirmation failed!" });
+        }
+
         [HttpPost]
         [Route("sendConfirmEmail")]
         public async Task<IActionResult> SendConfirmEmail([FromBody] UserModel model)
