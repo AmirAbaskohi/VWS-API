@@ -8,12 +8,12 @@ namespace vws.web.Models
 {
     public class RegisterModel
     {
-        [Required(ErrorMessage = "نام کاربری الزامی است")]
+        [Required]
         public string Username { get; set; }
         [EmailAddress]
-        [Required(ErrorMessage = "ایمیل الزامی است")]
+        [Required]
         public string Email { get; set; }
-        [Required(ErrorMessage = "رمز عبور الزامی است")]
+        [Required]
         public string Password { get; set; }
     }
 }
