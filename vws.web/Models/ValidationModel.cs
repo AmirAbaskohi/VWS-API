@@ -9,7 +9,7 @@ namespace vws.web.Models
     public class ValidationModel
     {
         [Required]
-        public string UserName { get; set; }
+        public string Email { get; set; }
         [Required]
         public string ValidationCode { get; set; }
     }
