@@ -119,7 +119,9 @@ namespace vws.web.Controllers
                 timeDiff.TotalMinutes <= Int16.Parse(configuration["EmailCode:ValidDurationTimeInMinutes"]))
             {
                 user.EmailConfirmed = true;
-                return Ok(new ResponseModel { Status = "Success", Message = "Email confirmed successfully!" });
+                var result = await userManager.UpdateAsync(user);
+                if(result.Succeeded)
+                    return Ok(new ResponseModel { Status = "Success", Message = "Email confirmed successfully!" });
             }
 
             return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Email confirmation failed!" });
@@ -137,12 +139,15 @@ namespace vws.web.Controllers
             var random = new Random();
             var randomCode = new string(Enumerable.Repeat(configuration["EmailCode:CodeCharSet"], Int16.Parse(configuration["EmailCode:SizeOfCode"])).Select(s => s[random.Next(s.Length)]).ToArray());
 
-            await emailSender.SendEmailAsync(user.Email, "EmailConfirmation", randomCode);
-
             user.EmailVerificationSendTime = DateTime.Now;
             user.EmailVerificationCode = randomCode;
-
-            return Ok(new ResponseModel { Status = "Success", Message = "Email sent successfully!" });
+            var result = await userManager.UpdateAsync(user);
+            if(result.Succeeded)
+            {
+                await emailSender.SendEmailAsync(user.Email, "EmailConfirmation", randomCode);
+                return Ok(new ResponseModel { Status = "Success", Message = "Email sent successfully!" });
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Sending email failed!" });
         }
 
         [HttpPost]
@@ -157,13 +162,17 @@ namespace vws.web.Controllers
             var random = new Random();
             var randomCode = new string(Enumerable.Repeat(configuration["EmailCode:CodeCharSet"], Int16.Parse(configuration["EmailCode:SizeOfCode"])).Select(s => s[random.Next(s.Length)]).ToArray());
 
-            await emailSender.SendEmailAsync(user.Email, "EmailConfirmation", randomCode);
-
             user.ResetPasswordSendTime = DateTime.Now;
             user.ResetPasswordCode = randomCode;
             user.ResetPasswordCodeIsValid = true;
+            var result = await userManager.UpdateAsync(user);
 
-            return Ok(new ResponseModel { Status = "Success", Message = "Email sent successfully!" });
+            if(result.Succeeded)
+            {
+                await emailSender.SendEmailAsync(user.Email, "EmailConfirmation", randomCode);
+                return Ok(new ResponseModel { Status = "Success", Message = "Email sent successfully!" });
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Sending email failed!" });
         }
 
         [HttpPost]
@@ -188,7 +197,11 @@ namespace vws.web.Controllers
                 if(result.Succeeded)
                 {
                     user.PasswordHash = passwordHasher.HashPassword(user, model.NewPassword);
-                    return Ok(new ResponseModel { Status = "Success", Message = "Password changed successfully!" });
+                    user.ResetPasswordCodeIsValid = false;
+                    var res = await userManager.UpdateAsync(user);
+                    if(res.Succeeded == true)
+                        return Ok(new ResponseModel { Status = "Success", Message = "Password changed successfully!" });
+                    return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Password changing failed!" });
                 }
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "New password is not valid!" });
             }
