@@ -142,5 +142,27 @@ namespace vws.web.Controllers
 
             return Ok(new ResponseModel { Status = "Success", Message = "Email sent successfully!" });
         }
+
+        [HttpPost]
+        [Route("sendResetPassEmail")]
+        public async Task<IActionResult> SendResetPassEmail([FromBody] UserModel model)
+        {
+
+            var user = await userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User does not exist!" });
+
+            var random = new Random();
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var randomCode = new string(Enumerable.Repeat(chars, Int16.Parse(configuration["EmailCode:SizeOfCode"])).Select(s => s[random.Next(s.Length)]).ToArray());
+
+            await emailSender.SendEmailAsync(user.Email, "EmailConfirmation", randomCode);
+
+            user.ResetPasswordSendTime = DateTime.Now;
+            user.ResetPasswordCode = randomCode;
+            user.ResetPasswordCodeIsValid = true;
+
+            return Ok(new ResponseModel { Status = "Success", Message = "Email sent successfully!" });
+        }
     }
 }
