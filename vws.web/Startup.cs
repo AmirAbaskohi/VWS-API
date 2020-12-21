@@ -76,6 +76,14 @@ namespace vws.web
                     .AddEntityFrameworkStores<UsersDbContext>()
                     .AddDefaultTokenProviders();
 
+            services.Configure<IdentityOptions>(opts => {
+                opts.Password.RequiredLength = 8;
+                opts.Password.RequireNonAlphanumeric = false;
+                opts.Password.RequireLowercase = true;
+                opts.Password.RequireUppercase = false;
+                opts.Password.RequireDigit = true;
+            });
+
             services.AddScoped<IEmailSender, EmailSender>();
 
             services.AddAuthentication(option =>
