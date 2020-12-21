@@ -127,7 +127,7 @@ namespace vws.web.Controllers
         public async Task<IActionResult> SendConfirmEmail([FromBody] UserModel model)
         {
 
-            var user = await userManager.FindByNameAsync(model.UserName);
+            var user = await userManager.FindByEmailAsync(model.Email);
             if(user == null)
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User does not exist!" });
 
