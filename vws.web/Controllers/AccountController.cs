@@ -24,15 +24,18 @@ namespace vws.web.Controllers
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly IEmailSender emailSender;
         private readonly IConfiguration configuration;
+        private readonly IPasswordHasher<ApplicationUser> passwordHasher;
 
         public AccountController(UserManager<ApplicationUser> _userManager, RoleManager<IdentityRole> _roleManager,
-            SignInManager<ApplicationUser> _signInManager, IConfiguration _configuration, IEmailSender _emailSender)
+            SignInManager<ApplicationUser> _signInManager, IConfiguration _configuration, IEmailSender _emailSender,
+            IPasswordHasher<ApplicationUser> _passwordHasher)
         {
             userManager = _userManager;
             roleManager = _roleManager;
             signInManager = _signInManager;
             configuration = _configuration;
             emailSender = _emailSender;
+            passwordHasher = _passwordHasher;
         }
 
         [HttpPost]
@@ -161,6 +164,35 @@ namespace vws.web.Controllers
             user.ResetPasswordCodeIsValid = true;
 
             return Ok(new ResponseModel { Status = "Success", Message = "Email sent successfully!" });
+        }
+
+        [HttpPost]
+        [Route("resetPassword")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordModel model)
+        {
+            var user = await userManager.FindByEmailAsync(model.Email);
+
+            if(user == null)
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User does not exist!" });
+
+            var timeDiff = user.ResetPasswordSendTime - DateTime.Now;
+
+            if (!user.ResetPasswordCodeIsValid)
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Reset password is not valid!" });
+
+            if (user.ResetPasswordCode == model.ValidationCode &&
+                timeDiff.TotalMinutes <= Int16.Parse(configuration["EmailCode:ValidDurationTimeInMinutes"]))
+            {
+                var passwordValidator = new PasswordValidator<ApplicationUser>();
+                var result = await passwordValidator.ValidateAsync(userManager, user, model.NewPassword);
+                if(result.Succeeded)
+                {
+                    user.PasswordHash = passwordHasher.HashPassword(user, model.NewPassword);
+                    return Ok(new ResponseModel { Status = "Success", Message = "Password changed successfully!" });
+                }
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "New password is not valid!" });
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Password changing failed!" });
         }
     }
 }
