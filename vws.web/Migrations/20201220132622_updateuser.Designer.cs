@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using vws.web.Models.Context;
 
 namespace vws.web.Migrations
 {
     [DbContext(typeof(UsersDbContext))]
-    partial class UsersDbContextModelSnapshot : ModelSnapshot
+    [Migration("20201220132622_updateuser")]
+    partial class updateuser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

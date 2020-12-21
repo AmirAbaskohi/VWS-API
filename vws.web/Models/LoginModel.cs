@@ -6,14 +6,12 @@ using System.Threading.Tasks;
 
 namespace vws.web.Models
 {
-    public class RegisterModel
+    public class LoginModel
     {
         [Required]
-        public string Username { get; set; }
-        [EmailAddress]
-        [Required]
-        public string Email { get; set; }
+        public string UsernameOrEmail { get; set; }
         [Required]
         public string Password { get; set; }
+        public bool? RememberMe { get; set; }
     }
 }
