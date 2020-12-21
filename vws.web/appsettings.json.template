@@ -14,5 +14,9 @@
     "Audience": "VWS App",
     "Issuer": "https://vws.ir",
     "Secret": "ByYM000OLlMQG6VVVp1OH7Xzyr7gHuw1qvUC5dcGt3SNM"
+  },
+  "EmailCode": {
+    "SizeOfCode": 5,
+    "ValidDurationTimeInMinutes": 15
   }
 }
