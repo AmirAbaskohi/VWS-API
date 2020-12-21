@@ -17,6 +17,7 @@
   },
   "EmailCode": {
     "SizeOfCode": 5,
-    "ValidDurationTimeInMinutes": 15
+    "ValidDurationTimeInMinutes": 15,
+    "CodeCharSet": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
   }
 }
