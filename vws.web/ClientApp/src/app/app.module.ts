@@ -7,6 +7,7 @@ import { RouterModule } from '@angular/router';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './Home/home.component';
 import { SignInComponent } from './Pages/sign-in/sign-in.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [
@@ -22,6 +23,7 @@ import { SignInComponent } from './Pages/sign-in/sign-in.component';
       { path: '', component: HomeComponent, pathMatch: 'full' },
       { path: 'sign-in', component: SignInComponent, pathMatch: 'full' },
     ]),
+    BrowserAnimationsModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
