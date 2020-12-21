@@ -113,7 +113,7 @@ namespace vws.web.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Email already confirmed!" });
 
             if(user.EmailVerificationCode == model.ValidationCode &&
-                timeDiff.TotalMinutes <= 15)
+                timeDiff.TotalMinutes <= Int16.Parse(configuration["EmailCode:ValidDurationTimeInMinutes"]))
             {
                 user.EmailConfirmed = true;
                 return Ok(new ResponseModel { Status = "Success", Message = "Email confirmed successfully!" });
@@ -133,7 +133,7 @@ namespace vws.web.Controllers
 
             var random = new Random();
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            var randomCode = new string(Enumerable.Repeat(chars, 5).Select(s => s[random.Next(s.Length)]).ToArray());
+            var randomCode = new string(Enumerable.Repeat(chars, Int16.Parse(configuration["EmailCode:SizeOfCode"])).Select(s => s[random.Next(s.Length)]).ToArray());
 
             await emailSender.SendEmailAsync(user.Email, "EmailConfirmation", randomCode);
 
