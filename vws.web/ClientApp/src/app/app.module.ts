@@ -27,6 +27,7 @@ import { OnBoardingComponent } from './Pages/on-boarding/on-boarding.component';
 import { SignUpComponent } from './Pages/sign-up/sign-up.component';
 import { ForgetPasswordComponent } from './Pages/forget-password/forget-password.component';
 import { ProfileSettingsComponent } from './Pages/profile-settings/profile-settings.component';
+import { SignInService } from './Services/sign-in.service';
 
 @NgModule({
   declarations: [
@@ -68,7 +69,7 @@ import { ProfileSettingsComponent } from './Pages/profile-settings/profile-setti
         MatCheckboxModule,
         MatRadioModule
     ],
-  providers: [],
+  providers: [SignInService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
