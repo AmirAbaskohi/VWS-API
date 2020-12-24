@@ -24,3 +24,14 @@ html, body { height: 100%; }
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+input[type="checkbox" i] {
+  background-color: initial;
+  cursor: default;
+  box-sizing: border-box;
+  margin: 3px 3px 3px 4px;
+  padding: initial;
+  border: initial;
+}
+a {
+  text-decoration: none;
+}
