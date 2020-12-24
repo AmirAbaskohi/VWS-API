@@ -1,7 +1,4 @@
 <body class="main">
-<link rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.16.0/themes/prism.css"/>
 
 <!--header-->
 <div class="login-page-new__header">
@@ -24,30 +21,54 @@
       <form id="login-page-new__main-form-row">
         <div class="form-group">
           <label class="login-page-new__main-form-row-label">Email address</label>
-<!--          <div class="login-page-new__main-form-row-icon">-->
-<!--            <svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">-->
-<!--              <path fill-rule="evenodd" clip-rule="evenodd" d="M10.121.878a3 3 0 00-4.242 0L.877 4.88A2.989 2.989 0 000 7v7a2 2 0 002 2h12a2 2 0 002-2V7a2.99 2.99 0 00-.879-2.122l-5-4zm3.042 4.986L8 8.844l-5.164-2.98 4.457-3.565a1 1 0 011.414 0l4.456 3.565zm.838 1.825l-5.49 3.17a.993.993 0 01-1.012.007L2 7.69V14h12V7.69z" fill="#B9BEC7"/>-->
-<!--            </svg>-->
-<!--          </div>-->
-          <input type="email" class="form-control" id="exampleDropdownFormEmail1" placeholder="email@example.com"
-                 [(ngModel)]="Email" [ngModelOptions]="{standalone: true}">
+          <div class="input-group mb-3">
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="basic-addon1">
+              <mat-icon>mail</mat-icon>
+              </span>
+            </div>
+            <input type="text" class="form-control" placeholder="Example@vws.com" aria-label="Username"
+                   aria-describedby="basic-addon1">
+          </div>
         </div>
         <div class="login-page-new__main-form-row">
           <label class="login-page-new__main-form-row-label">Password</label>
-          <input type="password" class="form-control" id="exampleDropdownFormPassword1" placeholder="Password"
-                 [(ngModel)]="Pass" [ngModelOptions]="{standalone: true}">
+          <div class="input-group mb-3">
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="basic-addon2">
+              <mat-icon>lock</mat-icon>
+              </span>
+            </div>
+            <input type="text" class="form-control" placeholder="Password" aria-label="Password"
+                   aria-describedby="basic-addon1" type="password" autocomplete="false" autocorrect="false"
+                   spellcheck="false">
+          </div>
         </div>
-        <div class="form-check">
-          <input type="checkbox" class="form-check-input" id="dropdownCheck">
-          <label class="form-check-label" for="dropdownCheck">
-            Remember me
-          </label>
+        <div class="login-page-new__main-form-options">
+          <div class="login-page-new__main-form-options-remember">
+            <label>
+              <input id="login-remember-me" name="remember" type="checkbox">
+              <span>Remember me</span>
+            </label>
+          </div>
+          <a id="login-forgot" class="cu-show-pwd">Forgot Password?</a>
         </div>
-        <button type="submit" class="btn btn-primary" (click)="login()">Sign in</button>
+        <button id="login-submit" class="login-page-new__main-form-button" type="submit">
+          <div class="login-page-new__main-form-button-text">Login</div>
+        </button>
       </form>
-      <button ngbDropdownItem>Forgot password?</button>
-
     </div>
+
+    <div class="login-page-new__main-bot">
+      <div class="login-page-new__main-bot-text">Let's make the world more productive with 7Task, together.</div>
+    </div>
+
+    <a href="https://clickup.com/help" target="_blank" class="login-page-new__main-form-help login-page-new__main-form-help-index">
+      <svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M0 6a6 6 0 016-6h4a6 6 0 016 6v4a6 6 0 01-6 6H6a6 6 0 01-6-6V6zm2 0a4 4 0 014-4h4a4 4 0 014 4v4a4 4 0 01-4 4H6a4 4 0 01-4-4V6zm5.117-.483c-.12.25-.34.483-.617.483H6c-.552 0-1.016-.46-.836-.982A3.001 3.001 0 0111 6c0 1.126-.62 1.863-1.538 2.308C9.192 8.44 9 8.7 9 9a1 1 0 01-2 0v-.5c0-.828.724-1.313 1.482-1.647C8.787 6.72 9 6.467 9 6a1 1 0 00-1-1c-.512 0-.761.262-.883.517zM8 13a1 1 0 100-2 1 1 0 000 2z" fill="#fff"/>
+      </svg>
+      <div class="login-page-new__main-form-help-text">Help</div>
+    </a>
   </div>
 </div>
 

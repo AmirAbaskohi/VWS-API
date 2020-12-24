@@ -8,6 +8,7 @@ import { AppComponent } from './app.component';
 import { HomeComponent } from './Home/home.component';
 import { SignInComponent } from './Pages/sign-in/sign-in.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import {MatIconModule} from "@angular/material/icon";
 
 @NgModule({
   declarations: [
@@ -15,16 +16,17 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     HomeComponent,
     SignInComponent
   ],
-  imports: [
-    BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
-    HttpClientModule,
-    FormsModule,
-    RouterModule.forRoot([
-      { path: '', component: HomeComponent, pathMatch: 'full' },
-      { path: 'sign-in', component: SignInComponent, pathMatch: 'full' },
-    ]),
-    BrowserAnimationsModule,
-  ],
+    imports: [
+        BrowserModule.withServerTransition({appId: 'ng-cli-universal'}),
+        HttpClientModule,
+        FormsModule,
+        RouterModule.forRoot([
+            {path: '', component: HomeComponent, pathMatch: 'full'},
+            {path: 'sign-in', component: SignInComponent, pathMatch: 'full'},
+        ]),
+        BrowserAnimationsModule,
+        MatIconModule,
+    ],
   providers: [],
   bootstrap: [AppComponent]
 })
