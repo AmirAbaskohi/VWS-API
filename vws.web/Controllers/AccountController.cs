@@ -9,13 +9,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
 using vws.web.Models;
 using vws.web.Repositories;
 
 namespace vws.web.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("{culture:culture}/[controller]")]
     [ApiController]
     public class AccountController : ControllerBase
     {
@@ -25,10 +26,11 @@ namespace vws.web.Controllers
         private readonly IEmailSender emailSender;
         private readonly IConfiguration configuration;
         private readonly IPasswordHasher<ApplicationUser> passwordHasher;
+        private readonly IStringLocalizer<AccountController> localizer;
 
         public AccountController(UserManager<ApplicationUser> _userManager, RoleManager<IdentityRole> _roleManager,
             SignInManager<ApplicationUser> _signInManager, IConfiguration _configuration, IEmailSender _emailSender,
-            IPasswordHasher<ApplicationUser> _passwordHasher)
+            IPasswordHasher<ApplicationUser> _passwordHasher, IStringLocalizer<AccountController> _localizer)
         {
             userManager = _userManager;
             roleManager = _roleManager;
@@ -36,6 +38,7 @@ namespace vws.web.Controllers
             configuration = _configuration;
             emailSender = _emailSender;
             passwordHasher = _passwordHasher;
+            localizer = _localizer;
         }
 
         [HttpPost]

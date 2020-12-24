@@ -3,16 +3,23 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Localization.Routing;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.Swagger;
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
+using vws.web.Extensions;
 using vws.web.Models;
 using vws.web.Models.Context;
 using vws.web.Repositories;
@@ -31,6 +38,26 @@ namespace vws.web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddLocalization(options => { options.ResourcesPath = "Resources"; });
+            services.Configure<RequestLocalizationOptions>(options =>
+            {
+                var supportedCultures = new List<CultureInfo>
+                {
+                    new CultureInfo("en-US"),
+                    new CultureInfo("fa-IR")
+                };
+
+                options.DefaultRequestCulture = new RequestCulture(culture: "en-US", uiCulture: "en-US");
+                options.SupportedCultures = supportedCultures;
+                options.SupportedUICultures = supportedCultures;
+                options.RequestCultureProviders = new[] { new vws.web.Extensions.RouteDataRequestCultureProvider { IndexOfCulture = 1, IndexofUICulture = 1 } };
+            });
+
+            services.Configure<RouteOptions>(options =>
+            {
+                options.ConstraintMap.Add("culture", typeof(LanguageRouteConstraint));
+            });
+
             services.AddControllersWithViews();
 
             services.AddSwaggerGen(c =>
@@ -140,6 +167,9 @@ namespace vws.web
                 app.UseSpaStaticFiles();
             }
 
+            var localizeOptions = app.ApplicationServices.GetService<IOptions<RequestLocalizationOptions>>();
+            app.UseRequestLocalization(localizeOptions.Value);
+
             app.UseRouting();
 
             app.UseAuthentication();
@@ -149,7 +179,7 @@ namespace vws.web
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller}/{action=Index}/{id?}");
+                    pattern: "{culture:culture}/{controller}/{action=Index}/{id?}");
             });
 
             app.UseSpa(spa =>
