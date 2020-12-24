@@ -1,0 +1,48 @@
+.mainContent {
+  background-image: url("src/assets/Images/back.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.center{
+  width: 100px;
+  height: 100px;
+
+  position: absolute;
+  top:0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+
+}
+
+.example-card {
+  width: 480px;
+  height: 522px;
+}
+
+.container i {
+  margin-left: -30px;
+  cursor: pointer;
+}
+
+
+.toolbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  font-family: Anjoman;
+  color: black;
+  font-weight: 600;
+  z-index: 1;
+}
+.toolbar img {
+  margin: 0 16px;
+}
+
+

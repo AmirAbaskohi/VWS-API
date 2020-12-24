@@ -1,0 +1,331 @@
+.split {
+  position: fixed;
+  top: 0;
+  overflow-x: hidden;
+
+}
+
+/* Control the left side */
+.left {
+  height: 100%;
+  width: 15%;
+  left: 0;
+  background-color: #2b343b;
+}
+
+/* Control the right side */
+.right {
+  height: 100%;
+  width: 100%;
+  right: -250px;
+  background-color: #1e272e;
+}
+
+.profile{
+  height: 100%;
+  width: 11%;
+  left: 250px;
+  background-color: #1e272e;
+  text-align: center;
+  overflow-x: hidden;
+  position: fixed;
+}
+.content{
+  height: 100%;
+  width: 76%;
+  right: 0;
+  overflow-x: hidden;
+  position: fixed;
+  padding-left: 40px;
+  padding-top: 90px;
+  padding-right: 40px ;
+}
+
+.profileAvatar {
+  height: 140px;
+  width: 140px;
+  background-color: #555;
+  border-radius: 50%;
+  margin-top: 30px;
+  margin-left: 40px;
+  display: inline-block;
+  background-color: #02579b;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 50px;
+  color: white;
+}
+.pageName{
+  font-size: 21px;
+  font-weight: 900;
+  font: -apple-system-headline;
+  color: #d5d6d7;
+  margin-top: 40px;
+  margin-left: 35px;
+}
+
+.subject{
+  font-weight: 900;
+  font: -apple-system-headline;
+  font-size: 10px;
+  text-align: left;
+  color: #d5d6d7;
+}
+.input{
+  background-color: #1e272e ;
+}
+.contentSubject{
+  font-weight: 900;
+  font: -apple-system-headline;
+  font-size: 21px;
+  text-align: left;
+  color: #d5d6d7;
+  padding-bottom: 12px;
+}
+.twoStepAuthGridTitle{
+  border: 1px #313a40 solid;
+  border-radius: 4px;
+  margin-right: 10px;
+
+}
+.logoInGrid{
+  height: 82px;
+  text-align: center;
+  float: left;
+  width:8%;
+  padding-top: 29px;
+  padding-bottom: 29px;
+}
+
+.contentInGrid{
+  height: 82px;
+  display: inline-block;
+  float: left;
+  width:83%;
+  padding-left: 5px;
+  padding-top: 20px;
+}
+.slideToggleInGrid{
+  float: right;
+  width:9%;
+  padding-top: 29px;
+  padding-bottom: 29px;
+  padding-right: 5px;
+}
+.square {
+  height: 15px;
+  width: 60px;
+  border-radius: 5px;
+  background-color: #7b68ee;
+  color: white;
+  font-size: 10px;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  text-align: center;
+  padding: 3px 4px 2px;
+  margin-left: 5px;
+}
+
+
+.theme{
+  width: 370px;
+}
+
+.theme-selected{
+  width: 39px;
+  height: 39px;
+}
+.circle-effect1:hover{
+  width: 39px;
+  height: 39px;
+}
+
+.circle-1 {
+  height: 21px;
+  width: 21px;
+  background-color: #7b68ee;
+  border-radius: 50%;
+  transition: width 0.3s, height 0.3s;
+}
+.circle-1-selected {
+  height: 39px;
+  width: 39px;
+  background-color: #7b68ee;
+  border-radius: 50%;
+  transition: width 0.3s, height 0.3s;
+}
+.circle-2 {
+  height: 21px;
+  width: 21px;
+  background-color: #ffa12f;
+  border-radius: 50%;
+  transition: width 0.3s, height 0.3s;
+}
+.circle-2-selected {
+  height: 39px;
+  width: 39px;
+  background-color: #ffa12f;
+  border-radius: 50%;
+  transition: width 0.3s, height 0.3s;
+}
+
+.circle-3 {
+  height: 21px;
+  width: 21px;
+  background-color: #4169e1;
+  border-radius: 50%;
+  transition: width 0.3s, height 0.3s;
+}
+.circle-3-selected {
+  height: 39px;
+  width: 39px;
+  background-color: #4169e1;
+  border-radius: 50%;
+  transition: width 0.3s, height 0.3s;
+}
+
+.circle-4 {
+  height: 21px;
+  width: 21px;
+  background-color: #08c7e0;
+  border-radius: 50%;
+  transition: width 0.3s, height 0.3s;
+}
+.circle-4-selected {
+  height: 39px;
+  width: 39px;
+  background-color: #08c7e0;
+  border-radius: 50%;
+  transition: width 0.3s, height 0.3s;
+}
+
+.example-form {
+  min-width: 150px;
+  max-width: 500px;
+  width: 100%;
+  color: #cacccd;
+}
+
+.example-full-width {
+  width: 100%;
+  color: #cacccd;
+}
+
+::ng-deep .mat-focused .mat-form-field-label {
+  /*change color of label*/
+  color: #cacccd !important;
+}
+
+::ng-deep.mat-form-field-underline {
+  /*change color of underline*/
+  background-color: #cacccd !important;
+}
+
+::ng-deep.mat-form-field-ripple {
+  /*change color of underline when focused*/
+  background-color: #cacccd !important;;
+}
+
+.preferencesDiv{
+  height: 55px;
+  border: 1px #283138 solid;
+  border-top: 0;
+  border-right: 0;
+  border-left: 0;
+  padding-bottom: 30px;
+  margin-bottom: 30px;
+}
+.slideToggleInPreferences{
+  height: 42px;
+  float: left;
+  width:4%;
+}
+.contentInPreferences{
+  height: 42px;
+  float: right;
+  width:96%;
+  padding-bottom: 10px;
+}
+
+.square2{
+  height: 20px;
+  width: 92px;
+  border-radius: 2px;
+  background-color: #2b343b;
+  color: #cb6162;
+  font-size: 12px;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  text-align: center;
+  padding: 3px 4px 2px;
+  margin: 0 5px;
+}
+.square3{
+  height: 20px;
+  width: 53px;
+  border-radius: 2px;
+  background-color: #2b343b;
+  color: #cb6162;
+  font-size: 15px;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  text-align: center;
+  padding: 3px 4px 2px;
+  margin: 0 5px;
+}
+.backBtn{
+  background-color: #7b68ee;
+  color: #ffffff;
+  border-radius: 30px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;font: 500 14px/1 Gotham Pro, Nova,arial,serif;
+  padding: 6px 15px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.menuItem{
+  display: block;
+  margin: 5px 0;
+  padding: 10px 0;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 400;
+  font: -apple-system-body;
+  color: #808386;
+  cursor: pointer;
+}
+.menuItem:hover{
+  color: #d5d6d7;
+}
+.selected{
+  color: #d5d6d7;
+  font-weight: 900;
+  font: -apple-system-headline;
+}
+.unSelected{
+  color: #808386;
+}
+.savedBtnDiv{
+  position:fixed;
+  bottom: 0;
+  height: 100px;
+  padding: 30px 40px;
+
+  z-index: 1;
+  width: 100%;
+  background-color: #384047;
+}
+.saveBtn{
+  min-width: 130px;
+  height: 44px;
+  right: 40px;
+  position: fixed;
+  font-size: 20px;
+  color: white;
+}
