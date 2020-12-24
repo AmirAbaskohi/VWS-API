@@ -26,6 +26,7 @@ import {MatRadioModule} from '@angular/material/radio';
 import { OnBoardingComponent } from './Pages/on-boarding/on-boarding.component';
 import { SignUpComponent } from './Pages/sign-up/sign-up.component';
 import { ForgetPasswordComponent } from './Pages/forget-password/forget-password.component';
+import { ProfileSettingsComponent } from './Pages/profile-settings/profile-settings.component';
 
 @NgModule({
   declarations: [
@@ -34,7 +35,8 @@ import { ForgetPasswordComponent } from './Pages/forget-password/forget-password
     SignInComponent,
     OnBoardingComponent,
     SignUpComponent,
-    ForgetPasswordComponent
+    ForgetPasswordComponent,
+    ProfileSettingsComponent
   ],
     imports: [
         BrowserModule.withServerTransition({appId: 'ng-cli-universal'}),
@@ -45,7 +47,8 @@ import { ForgetPasswordComponent } from './Pages/forget-password/forget-password
             {path: 'sign-in', component: SignInComponent, pathMatch: 'full'},
             {path: 'on-boarding', component: OnBoardingComponent, pathMatch: 'full'},
             {path: 'sign-up', component: SignUpComponent, pathMatch: 'full'},
-            {path: 'forget-password', component: ForgetPasswordComponent, pathMatch: 'full'}
+            {path: 'forget-password', component: ForgetPasswordComponent, pathMatch: 'full'},
+            {path: 'profile-settings', component: ProfileSettingsComponent, pathMatch: 'full'}
         ]),
         BrowserAnimationsModule,
         MatStepperModule,
