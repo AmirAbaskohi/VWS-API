@@ -12,10 +12,11 @@
 
 <mat-card class="example-card center">
   <div style="text-align: center; padding: 40px 60px 26px;">
+    <form [formGroup]="signUpForm">
     <h1 style="font-weight: 900; font-family: '-apple-system'; font-size: 35px; margin-bottom: 20px">Let's go!</h1>
 
     <div style="font-weight: 900; font-family: '-apple-system'; font-size: 10px; text-align: left">
-      Full Name
+      Username
     </div>
     <div class="input-group mb-3">
       <div class="input-group-prepend">
@@ -24,8 +25,8 @@
             <mat-icon style="color: #c2c3c4;">perm_identity</mat-icon>
           </span>
       </div>
-      <input type="text" class="form-control" placeholder="John Doe" aria-label="Mail" aria-describedby="basic-addon1"
-             style="border-left: 0;border-bottom-left-radius: 0;border-top-left-radius: 0">
+      <input type="text" class="form-control" placeholder="John" aria-label="Mail" aria-describedby="basic-addon1"
+             style="border-left: 0;border-bottom-left-radius: 0;border-top-left-radius: 0" formControlName="username">
     </div>
 
 
@@ -41,7 +42,7 @@
       </div>
       <input type="text" class="form-control" placeholder="examole@email.com" aria-label="Mail"
              aria-describedby="basic-addon1"
-             style="border-left: 0;border-bottom-left-radius: 0;border-top-left-radius: 0">
+             style="border-left: 0;border-bottom-left-radius: 0;border-top-left-radius: 0" formControlName="email">
     </div>
 
     <div style="font-weight: 900; font-family: '-apple-system'; font-size: 10px; text-align: left">
@@ -57,7 +58,7 @@
       </div>
       <input [type]="hide ? 'password' : 'text'" class="form-control" placeholder="Enter your password" aria-label="Mail"
              aria-describedby="basic-addon1"
-             style="border-left: 0;border-right: 0;border-bottom-left-radius: 0;border-top-left-radius: 0; ">
+             style="border-left: 0;border-right: 0;border-bottom-left-radius: 0;border-top-left-radius: 0;" formControlName="password">
       <span class="input-group-text" id="visibility" style="background-color: white; border-left: 0;border-bottom-left-radius: 0;border-top-left-radius: 0">
            <mat-icon matSuffix (click)="hide = !hide" style="cursor: pointer;">{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
       </span>
@@ -66,12 +67,12 @@
 
 
     <div>
-      <button mat-raised-button
-              style="margin-right: 5px;width: 100%;height: 50px;font-weight: 900; font-family: '-apple-system'; font-size: 15px; margin-bottom: 20px; background-color: #7b68ee; color: white; margin-top: 10px">
+      <button mat-raised-button (click)="clicked()" style="margin-right: 5px;width: 100%;height: 50px;font-weight: 900; font-family: '-apple-system'; font-size: 15px; margin-bottom: 20px; background-color: #7b68ee; color: white; margin-top: 10px">
         Play with ClickUp
       </button>
     </div>
     <a href="url" style="text-align: center;margin:0 auto; display:block;margin-top: 15px; color:#7b68ee ">or signup with SSO</a>
+    </form>
   </div>
   <div class="center"
        style="border: #24292e;border-bottom-left-radius: 4px; border-bottom-right-radius: 4px; text-align: center;width: 480px;height:30px;display: table; margin: 0 auto; margin-top: 505px;font-weight:400; font-family: '-apple-system'; font-size: 10px; color: slategrey; background-color: #fafbfc">
