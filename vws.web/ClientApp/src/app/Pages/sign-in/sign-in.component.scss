@@ -1,6 +1,110 @@
-.main{
+.main {
   background-image: url("src/assets/Images/back.jpg");
   background-repeat: no-repeat;
   background-size: cover;
 }
 
+.login-page-new__header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100px;
+  padding: 0 30px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+}
+a {
+  text-decoration: none;
+}
+.login-page-new__header-logo {
+  width: 124px;
+  height: auto;
+}
+.login-page-new__header-right {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+.login-page-new__header-right-text {
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 16px;
+  font-family: Gotham Pro,Proxima Nova,arial,serif;
+  color: #292d34;
+  margin-right: 20px;
+}
+.login-page-new__header-right-button, .login-page-new__header-right-button a {
+  font-weight: 800;
+  font-size: 14px;
+  font-family: Gotham Pro,Proxima Nova,arial,serif;
+  color: #e01a76;
+}
+.login-page-new__header-right-button {
+  line-height: 16px;
+  transition: transform .2s cubic-bezier(.785,.135,.15,.86) 0s;
+  width: 92px;
+  height: 40px;
+  background-color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 5px 15px rgba(0,0,0,.15);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+//main form styles
+.login-page-new__main{
+  margin: auto;
+  flex-grow: 1;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 70px;
+}
+
+.login-page-new__main-container{
+  overflow: visible;
+  position: relative;
+}
+.login-page-new__main-form{
+  width: 480px;
+  background: #fff;
+  box-shadow: 0 25px 75px rgba(16,30,54,.25);
+  border-radius: 6px;
+  padding: 30px 60px 26px;
+  margin-top: -75px;
+  position: relative;
+}
+
+.login-page-new__main-form-row {
+  width: 100%;
+  position: relative;
+  margin-bottom: 25px;
+}
+.login-page-new__main-form-row-label {
+  font-weight: 500;
+  font-size: 11px;
+  line-height: 11px;
+  font-family: Gotham Pro,Proxima Nova,arial,serif;
+  color: #292d34;
+  padding: 0 0 8px 2px;
+}
+.login-page-new__main-form-row-icon {
+  position: relative;
+  left: 12px;
+  top: 29px;
+  width: 18px;
+  height: 18px;
+}
+.login-page-new__main-form-title {
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 46px;
+  font-family: Gotham Pro,Proxima Nova,arial,serif;
+  color: #292d34;
+  text-align: center;
+  margin-bottom: 20px;
+}

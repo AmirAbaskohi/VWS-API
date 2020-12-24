@@ -1,12 +1,56 @@
 <body class="main">
+<link rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.16.0/themes/prism.css"/>
 
-  Lorem ipsum dolor sit amet, consectetur adipisicing elit. A ab ad alias architecto aspernatur, delectus doloribus fuga
-  iste maxime non numquam possimus quae qui quia quibusdam quidem repellat reprehenderit sint ut voluptas? Blanditiis,
-  delectus expedita ipsam molestias nam obcaecati repellendus? Accusamus accusantium blanditiis cum debitis deserunt
-  distinctio dolorem doloribus esse ex fugit incidunt ipsa, libero optio placeat, quia quisquam quos repellat rerum
-  saepe sed tenetur ullam veniam? Aliquid esse optio quaerat voluptates. Alias culpa cumque doloremque ea harum quas?
-  Accusantium consectetur deleniti doloremque fugiat libero perspiciatis quis repellendus temporibus. Ad aliquid amet
-  aperiam eum eveniet mollitia, pariatur placeat? Ipsam, reprehenderit?
+<!--header-->
+<div class="login-page-new__header">
+  <a href="https://clickup.com/?noRedirect=true" target="_blank">
+    <img class="login-page-new__header-logo"
+         src="https://app-cdn.clickup.com/assets/images/brand/clickup_color-new.svg">
+  </a>
+  <div class="login-page-new__header-right">
+    <div class="login-page-new__header-right-text">Don't have an account?</div>
+    <div class="login-page-new__header-right-button" onclick="signUpLink()">Sign up</div>
+  </div>
+</div>
 
-  </body>
+
+<div class="login-page-new__main">
+  <div class="login-page-new__main-container">
+    <div class="login-page-new__main-form">
+
+      <div class="login-page-new__main-form-title">Welcome back!</div>
+      <form id="login-page-new__main-form-row">
+        <div class="form-group">
+          <label class="login-page-new__main-form-row-label">Email address</label>
+<!--          <div class="login-page-new__main-form-row-icon">-->
+<!--            <svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">-->
+<!--              <path fill-rule="evenodd" clip-rule="evenodd" d="M10.121.878a3 3 0 00-4.242 0L.877 4.88A2.989 2.989 0 000 7v7a2 2 0 002 2h12a2 2 0 002-2V7a2.99 2.99 0 00-.879-2.122l-5-4zm3.042 4.986L8 8.844l-5.164-2.98 4.457-3.565a1 1 0 011.414 0l4.456 3.565zm.838 1.825l-5.49 3.17a.993.993 0 01-1.012.007L2 7.69V14h12V7.69z" fill="#B9BEC7"/>-->
+<!--            </svg>-->
+<!--          </div>-->
+          <input type="email" class="form-control" id="exampleDropdownFormEmail1" placeholder="email@example.com"
+                 [(ngModel)]="Email" [ngModelOptions]="{standalone: true}">
+        </div>
+        <div class="login-page-new__main-form-row">
+          <label class="login-page-new__main-form-row-label">Password</label>
+          <input type="password" class="form-control" id="exampleDropdownFormPassword1" placeholder="Password"
+                 [(ngModel)]="Pass" [ngModelOptions]="{standalone: true}">
+        </div>
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" id="dropdownCheck">
+          <label class="form-check-label" for="dropdownCheck">
+            Remember me
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary" (click)="login()">Sign in</button>
+      </form>
+      <button ngbDropdownItem>Forgot password?</button>
+
+    </div>
+  </div>
+</div>
+
+
+</body>
 
