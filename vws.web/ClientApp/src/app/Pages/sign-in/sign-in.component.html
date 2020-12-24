@@ -8,7 +8,7 @@
   </a>
   <div class="login-page-new__header-right">
     <div class="login-page-new__header-right-text">Don't have an account?</div>
-    <div class="login-page-new__header-right-button" onclick="signUpLink()">Sign up</div>
+    <div class="login-page-new__header-right-button" router routerLink="../sign-up">Sign up</div>
   </div>
 </div>
 
@@ -52,7 +52,7 @@
               <span>Remember me</span>
             </label>
           </div>
-          <a id="login-forgot" class="cu-show-pwd">Forgot Password?</a>
+          <a id="login-forgot" class="cu-show-pwd" routerLink="../forget-password">Forgot Password?</a>
         </div>
         <button id="login-submit" class="login-page-new__main-form-button" type="submit">
           <div class="login-page-new__main-form-button-text">Login</div>
