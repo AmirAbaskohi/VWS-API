@@ -1,0 +1,518 @@
+
+
+<div class="split left">
+  <div style="margin-left: 40px; margin-right: 40px">
+    <div style="margin-top: 40px; margin-bottom: 30px">
+      <button mat-button class="backBtn" [ngStyle]="{'background-color':userMainTheme}">
+        < BACK
+      </button>
+    </div>
+
+    <div class="contentSubject" style="margin-bottom: 30px">
+      Settings
+    </div>
+
+    <div class="contentSubject" style="margin-bottom: 20px; font-weight: 800; font-size: 18px; color: #7b68ee" [ngStyle]="{'color':userMainTheme}">
+      M.Sadra Haeri's Workspace
+    </div>
+    <div id="ImportExport" class="menuItem"  (click)="selectMenuItem('ImportExport')" [ngClass]="ImportExport? 'selected': 'unSelected'">
+      Import/Export
+    </div>
+    <div id="Trash" class="menuItem"  (click)="selectMenuItem('Trash')" [ngClass]="Trash? 'selected': 'unSelected'">
+      Trash
+    </div>
+
+    <hr style="color: #d5d6d7; height: 0.5px; width: 170px">
+
+    <div class="contentSubject" style="margin-bottom: 20px; margin-top: 20px;font-weight: 800; font-size: 18px; color: #7b68ee" [ngStyle]="{'color':userMainTheme}">
+      Mohammad Sadra Haeri
+    </div>
+    <div id="MySettings" class="menuItem"  (click)="selectMenuItem('MySettings')" [ngClass]="MySettings? 'selected': 'unSelected'">
+      My Settings
+    </div>
+    <div id="Workspaces" class="menuItem"  (click)="selectMenuItem('Workspaces')" [ngClass]="Workspaces? 'selected': 'unSelected'">
+      Workspaces
+    </div>
+    <div id="Notifications" class="menuItem"  (click)="selectMenuItem('Notifications')" [ngClass]="Notifications? 'selected': 'unSelected'">
+      Notifications
+    </div>
+    <div id="Rewards" class="menuItem"  (click)="selectMenuItem('Rewards')" [ngClass]="Rewards? 'selected': 'unSelected'">
+      Rewards
+    </div>
+    <div id="LogOut" class="menuItem"  (click)="selectMenuItem('LogOut')" [ngClass]="LogOut? 'selected': 'unSelected'">
+      Log out
+    </div>
+
+    <hr style="color: #d5d6d7; height: 0.5px; width: 170px">
+
+    <div class="contentSubject" style="margin-bottom: 20px; margin-top: 20px;font-weight: 800; font-size: 18px; color: #7b68ee" [ngStyle]="{'color':userMainTheme}">
+      MY APPS
+    </div>
+    <div id="CloudStorage" class="menuItem"  (click)="selectMenuItem('CloudStorage')" [ngClass]="CloudStorage? 'selected': 'unSelected'">
+      Cloud Storage
+    </div>
+    <div id="TimeTracking" class="menuItem"  (click)="selectMenuItem('TimeTracking')" [ngClass]="TimeTracking? 'selected': 'unSelected'">
+      Time Tracking
+    </div>
+    <div id="SlackNotifications" class="menuItem"  (click)="selectMenuItem('SlackNotifications')" [ngClass]="SlackNotifications? 'selected': 'unSelected'">
+      Slack Notifications
+    </div>
+    <div id="Apps" class="menuItem"  (click)="selectMenuItem('Apps')" [ngClass]="Apps? 'selected': 'unSelected'">
+      Apps
+    </div>
+    <div id="Calendar" class="menuItem"  (click)="selectMenuItem('Calendar')" [ngClass]="Calendar? 'selected': 'unSelected'">
+      Calendar
+    </div>
+    <div id="Zoom" class="menuItem"  (click)="selectMenuItem('Zoom')" [ngClass]="Zoom? 'selected': 'unSelected'">
+      Zoom
+    </div>
+
+  </div>
+</div>
+
+<div class="split right ">
+
+  <div class="profile">
+    <div class="pageName">
+      My Settings
+    </div>
+    <div class="profileAvatar">
+      MH
+    </div>
+  </div>
+
+  <div class="content" style="z-index: -1">
+
+    <div style="margin-bottom: 30px">
+
+      <div class="subject">
+        Full Name
+      </div>
+      <div class="input-group mb-3">
+        <input type="text" class="form-control input" placeholder="Enter your full name" aria-label="Mail"
+               aria-describedby="basic-addon1"
+               style="border-left: 0; border-right:0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-top-left-radius: 0; border-color: #384047; border-top: 0;">
+      </div>
+
+      <div class="subject">
+        Email
+      </div>
+      <div class="input-group mb-3">
+        <input type="text" class="form-control input" placeholder="examole@email.com" aria-label="Mail"
+               aria-describedby="basic-addon1"
+               style="border-left: 0; border-right:0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-top-left-radius: 0; border-color: #384047; border-top: 0;">
+      </div>
+
+      <div class="subject">
+        Password
+      </div>
+      <div class="input-group mb-3">
+        <input [type]="hide ? 'password' : 'text'" class="form-control input" placeholder="Enter your password"
+               aria-label="Mail"
+               aria-describedby="basic-addon1"
+               style="border-left: 0; border-right:0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-top-left-radius: 0; border-color: #384047; border-top: 0;">
+        <span class="input-group-text" id="visibility"
+              style="background-color: #1e272e;border:1px #384047 solid; border-left: 0; border-top:0; border-right: 0;border-bottom-left-radius: 0;border-bottom-right-radius: 0;border-top-left-radius: 0;">
+           <mat-icon matSuffix (click)="hide = !hide"
+                     style="cursor: pointer; color: #c2c3c4; border-left: 0; border-top:0; border-right: 0;">{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+      </span>
+      </div>
+
+    </div>
+
+    <div style="margin-bottom: 60px">
+      <div class="contentSubject">
+        Two-Factor Authentication (2FA)
+      </div>
+      <div style="color: #7c8083; font-size: 14px; padding-bottom: 36px">
+        Ensure top-level security for your account with Two-Factor Authentication.
+      </div>
+      <div>
+        <mat-grid-list cols="2" rowHeight="82px" [gutterSize]="'24px'">
+          <mat-grid-tile class="twoStepAuthGridTitle">
+
+            <div class="logoInGrid">
+              <mat-icon style="color: #b4b7b9;">phone</mat-icon>
+            </div>
+
+            <div class="contentInGrid">
+              <div style="color: #b4b7b9; font: -apple-system-body; font-size: 16px; font-weight: 400">
+                Text Message (SMS)
+              </div>
+              <div>
+                <span style="color: #596069; font: -apple-system-caption1; font-size: 12px; font-weight: 400">
+                  Get a text message each time you log in.
+                </span>
+                <div class="square" [ngStyle]="{'background-color':userMainTheme}">
+                  Business
+                </div>
+              </div>
+            </div>
+            <div class="slideToggleInGrid">
+              <mat-slide-toggle></mat-slide-toggle>
+            </div>
+          </mat-grid-tile>
+
+          <mat-grid-tile class="twoStepAuthGridTitle">
+            <div class="logoInGrid">
+              <mat-icon style="color: #b4b7b9;">verified_user</mat-icon>
+            </div>
+
+            <div class="contentInGrid">
+              <div style="color: #b4b7b9; font: -apple-system-body; font-size: 16px; font-weight: 400">
+                Authentication App (TOTP)
+              </div>
+              <div>
+                <span style="color: #596069; font: -apple-system-caption1; font-size: 12px; font-weight: 400">
+                  Use an app to log in with time-based one-time codes.
+                </span>
+              </div>
+            </div>
+            <div class="slideToggleInGrid">
+              <mat-slide-toggle></mat-slide-toggle>
+            </div>
+          </mat-grid-tile>
+        </mat-grid-list>
+
+      </div>
+    </div>
+
+    <div style="margin-bottom: 40px">
+      <div class="contentSubject">
+        Your color theme
+      </div>
+
+      <div>
+        <mat-grid-list cols="5" rowHeight="70px" [gutterSize]="'5px'" class="theme">
+          <mat-grid-tile id="theme1" class="theme-title">
+            <div id="7b68ee" class="circle-1 circle-effect1" (click)="selectTheme('7b68ee')"
+                 *ngIf="userMainTheme != '#7b68ee'">
+            </div>
+
+            <div class="theme-selected circle-1-selected" *ngIf="userMainTheme == '#7b68ee'"
+                 style="position: relative;">
+              <mat-icon style="color: white; position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);">
+                done_outline
+              </mat-icon>
+            </div>
+          </mat-grid-tile>
+
+          <mat-grid-tile id="theme2" class="theme-title">
+            <div id="ffa12f" class="circle-2 circle-effect1" (click)="selectTheme('ffa12f')"
+                 *ngIf="userMainTheme != '#ffa12f'">
+            </div>
+
+            <div class="theme-selected circle-2-selected" *ngIf="userMainTheme == '#ffa12f'"
+                 style="position: relative;">
+              <mat-icon style="color: white; position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);">
+                done_outline
+              </mat-icon>
+            </div>
+          </mat-grid-tile>
+
+          <mat-grid-tile id="theme3" class="theme-title">
+            <div id="4169e1" class="circle-3 circle-effect1" (click)="selectTheme('4169e1')"
+                 *ngIf="userMainTheme != '#4169e1'">
+            </div>
+
+            <div class="theme-selected circle-3-selected" *ngIf="userMainTheme == '#4169e1'"
+                 style="position: relative;">
+              <mat-icon style="color: white; position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);">
+                done_outline
+              </mat-icon>
+            </div>
+          </mat-grid-tile>
+
+          <mat-grid-tile id="theme4" class="theme-title">
+            <div id="08c7e0" class="circle-4 circle-effect1" (click)="selectTheme('08c7e0')"
+                 *ngIf="userMainTheme != '#08c7e0'">
+            </div>
+
+            <div class="theme-selected circle-4-selected" *ngIf="userMainTheme == '#08c7e0'"
+                 style="position: relative;">
+              <mat-icon style="color: white; position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);">
+                done_outline
+              </mat-icon>
+            </div>
+          </mat-grid-tile>
+
+        </mat-grid-list>
+      </div>
+
+    </div>
+
+    <div style="margin-bottom: 45px">
+      <div class="contentSubject">
+        Time Settings
+      </div>
+
+      <form class="example-form" style="margin-bottom: 10px">
+        <mat-form-field class="example-full-width">
+          <div class="subject"
+               style=" font-weight: 400;font: -apple-system-body;font-size: 15px;text-align: left;color: #d5d6d7;margin-bottom: 10px;">
+            Timezone
+          </div>
+          <input type="text"
+                 aria-label="Number"
+                 matInput
+                 [formControl]="myControl"
+                 [matAutocomplete]="auto"
+                 style="border-left: 0; border-right:0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-top-left-radius: 0; border-color: #384047; border-top: 0;color: #cacccd">
+
+          <mat-autocomplete #auto="matAutocomplete">
+            <mat-option *ngFor="let option of filteredOptions | async" [value]="option"
+                        style="background-color: #384047; color: #b4b7b9;">
+              {{option}}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+      </form>
+
+      <div style="margin-bottom: 24px">
+        <mat-checkbox class="example-margin" style="color: #d5d6d7; font-weight: 600; font:-apple-system-headline;">
+          Notify me of Timezone changes
+        </mat-checkbox>
+      </div>
+
+      <div style="margin-bottom: 20px">
+        <div class="subject"
+             style=" font-weight: 400;font: -apple-system-body;font-size: 15px;text-align: left;color: #d5d6d7;margin-bottom: 10px;">
+          Start of the calendar week
+        </div>
+
+        <mat-radio-group aria-label="Select an option">
+          <div style="color: #d5d6d7">
+            <div style="margin-bottom: 10px">
+              <mat-radio-button value="1">Sunday</mat-radio-button>
+            </div>
+            <div>
+              <mat-radio-button value="2">Monday</mat-radio-button>
+            </div>
+          </div>
+        </mat-radio-group>
+      </div>
+
+      <div style="margin-bottom: 20px">
+        <div>
+          <div class="subject"
+               style=" font-weight: 400;font: -apple-system-body;font-size: 15px;text-align: left;color: #d5d6d7;margin-bottom: 10px;">
+            Time format
+          </div>
+
+          <mat-radio-group aria-label="Select an option">
+            <div style="color: #d5d6d7">
+            <span style="margin-right: 10px">
+              <mat-radio-button value="1">24 hour</mat-radio-button>
+            </span>
+              <span>
+              <mat-radio-button value="2">12 hour</mat-radio-button>
+            </span>
+            </div>
+          </mat-radio-group>
+        </div>
+      </div>
+
+      <div>
+        <div>
+          <div class="subject"
+               style=" font-weight: 400;font: -apple-system-body;font-size: 15px;text-align: left;color: #d5d6d7;margin-bottom: 10px;">
+            Date format
+          </div>
+
+          <mat-radio-group aria-label="Select an option">
+            <div style="color: #d5d6d7">
+            <span style="margin-right: 10px">
+              <mat-radio-button value="1">M/D/Y</mat-radio-button>
+            </span>
+
+              <span style="margin-right: 10px">
+              <mat-radio-button value="2">D/M/Y</mat-radio-button>
+            </span>
+
+              <span>
+              <mat-radio-button value="3">D/M/Y</mat-radio-button>
+            </span>
+            </div>
+          </mat-radio-group>
+        </div>
+      </div>
+
+
+    </div>
+
+    <div style="margin-bottom: 140px">
+      <div class="contentSubject" style="margin-bottom: 9px">
+        Preferences
+      </div>
+
+      <div class="preferencesDiv">
+        <div class="slideToggleInPreferences">
+          <mat-slide-toggle></mat-slide-toggle>
+        </div>
+        <div class="contentInPreferences">
+          <div style="color: #b4b7b9; font: -apple-system-body; font-size: 16px; font-weight: 400">
+            Flyout Toast Message
+          </div>
+          <div>
+            <span style="color: #596069; font: -apple-system-caption1; font-size: 12px; font-weight: 400">
+              When performing actions, toast messages may appear in the bottom left-hand of your screen. You can disable that here.
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="preferencesDiv">
+        <div class="slideToggleInPreferences">
+          <mat-slide-toggle></mat-slide-toggle>
+        </div>
+        <div class="contentInPreferences">
+          <div style="color: #b4b7b9; font: -apple-system-body; font-size: 16px; font-weight: 400">
+            Don't post comments with 'Enter'
+          </div>
+          <div>
+            <span style="color: #596069; font: -apple-system-caption1; font-size: 12px; font-weight: 400">
+             Use  <div class="square2"> CMD + ENTER</div> to send comments (instead of just<div class="square3">ENTER</div>).
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="preferencesDiv">
+        <div class="slideToggleInPreferences">
+          <mat-slide-toggle></mat-slide-toggle>
+        </div>
+        <div class="contentInPreferences">
+          <div style="color: #b4b7b9; font: -apple-system-body; font-size: 16px; font-weight: 400">
+            Markdown
+          </div>
+          <div>
+            <span style="color: #596069; font: -apple-system-caption1; font-size: 12px; font-weight: 400">
+             You can disable Markdown (shortcuts when typing) by turning it off here.
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="preferencesDiv">
+        <div class="slideToggleInPreferences">
+          <mat-slide-toggle></mat-slide-toggle>
+        </div>
+        <div class="contentInPreferences">
+          <div style="color: #b4b7b9; font: -apple-system-body; font-size: 16px; font-weight: 400">
+            Hotkeys
+          </div>
+          <div>
+            <span style="color: #596069; font: -apple-system-caption1; font-size: 12px; font-weight: 400">
+             Use hotkeys to quickly navigate through ClickUp without using your mouse.
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="preferencesDiv">
+        <div class="slideToggleInPreferences">
+          <mat-slide-toggle></mat-slide-toggle>
+        </div>
+        <div class="contentInPreferences">
+          <div style="color: #b4b7b9; font: -apple-system-body; font-size: 16px; font-weight: 400">
+            Notepad
+          </div>
+          <div>
+            <span style="color: #596069; font: -apple-system-caption1; font-size: 12px; font-weight: 400">
+             Turn this off to hide the notepad in the bottom right corner of your screen.
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="preferencesDiv">
+        <div class="slideToggleInPreferences">
+          <mat-slide-toggle></mat-slide-toggle>
+        </div>
+        <div class="contentInPreferences">
+          <div style="color: #b4b7b9; font: -apple-system-body; font-size: 16px; font-weight: 400">
+            High Contrast Mode
+          </div>
+          <div>
+            <span style="color: #596069; font: -apple-system-caption1; font-size: 12px; font-weight: 400">
+             Enabling this mode adjusts contrast to make ClickUp easier on your eyes (Recommended for Windows and low resolution monitors).
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="preferencesDiv">
+        <div class="slideToggleInPreferences">
+          <mat-slide-toggle></mat-slide-toggle>
+        </div>
+        <div class="contentInPreferences">
+          <div style="color: #b4b7b9; font: -apple-system-body; font-size: 16px; font-weight: 400">
+            Dark Mode
+          </div>
+          <div>
+            <span style="color: #596069; font: -apple-system-caption1; font-size: 12px; font-weight: 400">
+             Don't like the brightness? Go to the dark side of ClickUp.
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="preferencesDiv">
+        <div class="slideToggleInPreferences">
+          <mat-slide-toggle></mat-slide-toggle>
+        </div>
+        <div class="contentInPreferences">
+          <div style="color: #b4b7b9; font: -apple-system-body; font-size: 16px; font-weight: 400">
+            Global font support
+          </div>
+          <div>
+            <span style="color: #596069; font: -apple-system-caption1; font-size: 12px; font-weight: 400">
+             Enable global fonts if you have issues displaying characters from your language in ClickUp (recommended for Asian languages).
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="preferencesDiv">
+        <div class="slideToggleInPreferences">
+          <mat-slide-toggle></mat-slide-toggle>
+        </div>
+        <div class="contentInPreferences">
+          <div style="color: #b4b7b9; font: -apple-system-body; font-size: 16px; font-weight: 400">
+            Show Celebrations
+          </div>
+          <div>
+            <span style="color: #596069; font: -apple-system-caption1; font-size: 12px; font-weight: 400">
+             Show confetti celebrations when you reach inbox zero, clear all notifications or complete a goal target.
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="preferencesDiv">
+        <div class="slideToggleInPreferences">
+          <mat-slide-toggle></mat-slide-toggle>
+        </div>
+        <div class="contentInPreferences">
+          <div style="color: #b4b7b9; font: -apple-system-body; font-size: 16px; font-weight: 400">
+            Sync data for offline mode
+          </div>
+          <div>
+            <span style="color: #596069; font: -apple-system-caption1; font-size: 12px; font-weight: 400">
+             Sync tasks data in background to be able to view tasks in offline mode.
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+  <div class="savedBtnDiv">
+    <button mat-button class="saveBtn" [ngStyle]="{'background-color':userMainTheme}">
+      Save
+    </button>
+  </div>
+
+
+</div>

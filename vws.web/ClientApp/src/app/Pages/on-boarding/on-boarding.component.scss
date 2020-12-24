@@ -1,0 +1,210 @@
+.mat-stepper-vertical {
+    margin-top: 8px;
+    margin-left: 30px;
+    background: white;
+    z-index: 1;
+    font-family: Anjoman;
+  }
+
+
+  .extera{
+   width: 940px;
+  }
+  .theme{
+    width: 370px;
+  }
+  .extera-title{
+    border: solid 1px #7b68ee;
+    border-radius: 5px;
+    background: #fafbfc;
+  }
+  .theme-title{
+    border: solid 0px ;
+    border-radius: 5px;
+    background: white;
+  }
+  .circle-effect1:hover{
+    width: 39px;
+    height: 39px;
+  }
+
+
+  .circle-1 {
+    height: 21px;
+    width: 21px;
+    background-color: #7b68ee;
+    border-radius: 50%;
+    transition: width 0.3s, height 0.3s;
+  }
+  .circle-1-selected {
+    height: 39px;
+    width: 39px;
+    background-color: #7b68ee;
+    border-radius: 50%;
+    transition: width 0.3s, height 0.3s;
+  }
+  .circle-2 {
+    height: 21px;
+    width: 21px;
+    background-color: #ffa12f;
+    border-radius: 50%;
+    transition: width 0.3s, height 0.3s;
+  }
+  .circle-2-selected {
+    height: 39px;
+    width: 39px;
+    background-color: #ffa12f;
+    border-radius: 50%;
+    transition: width 0.3s, height 0.3s;
+  }
+
+  .circle-3 {
+    height: 21px;
+    width: 21px;
+    background-color: #4169e1;
+    border-radius: 50%;
+    transition: width 0.3s, height 0.3s;
+  }
+  .circle-3-selected {
+    height: 39px;
+    width: 39px;
+    background-color: #4169e1;
+    border-radius: 50%;
+    transition: width 0.3s, height 0.3s;
+  }
+
+  .circle-4 {
+    height: 21px;
+    width: 21px;
+    background-color: #08c7e0;
+    border-radius: 50%;
+    transition: width 0.3s, height 0.3s;
+  }
+  .circle-4-selected {
+    height: 39px;
+    width: 39px;
+    background-color: #08c7e0;
+    border-radius: 50%;
+    transition: width 0.3s, height 0.3s;
+  }
+
+  .mat-form-field {
+    margin-top: 16px;
+    z-index: 1;
+    /*font-family: Anjoman;*/
+  }
+
+  .logo-grid{
+    width: 100px;
+    height: 40px;
+  }
+  .logo-grid-2{
+    width: 100px;
+    height: 30px;
+  }
+
+
+  .btn{
+    margin-top: 50px;
+    margin-left: 30px;
+    font-family: Anjoman;
+  }
+  ::ng-deep .mat-step-header .mat-step-icon  {
+    background: slateblue;
+    margin-bottom: 13px;
+      width: 30px;
+      height: 30px;
+      font-size: 23px;
+      line-height: 30px;
+
+  }
+
+  /*p{*/
+  /*  font-family: Anjoman ;*/
+  /*}*/
+
+
+
+  .split {
+
+    position: fixed;
+    top: 0;
+    overflow-x: hidden;
+    padding-top: 20px;
+  }
+
+  /* Control the left side */
+  .left {
+    height: 100%;
+    width: 100%;
+    left: 0;
+    background-color: white;
+  }
+
+  /* Control the right side */
+  .right {
+    height: 100%;
+    width: 30%;
+    right: -300px;
+    background-color: slateblue;
+  }
+
+  /* If you want the content centered horizontally and vertically */
+  .centered {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+
+  /* Style the image inside the centered container, if needed */
+  .centered img {
+    width: 150px;
+    border-radius: 50%;
+  }
+
+
+  /*.a:hover{*/
+  /*  width: 30px;*/
+  /*  height: 30px;*/
+  /*  font-size: 30px;*/
+  /*  line-height: 30px;*/
+  /*}*/
+  .theme-selected{
+    width: 39px;
+    height: 39px;
+  }
+
+
+  /* CSS to change Default/'Accent' color */
+
+  ::ng-deep .mat-slide-toggle.mat-checked:not(.mat-disabled) .mat-slide-toggle-thumb {
+    background-color: white; /*replace with your color*/
+  }
+
+  ::ng-deep .mat-slide-toggle.mat-checked:not(.mat-disabled) .mat-slide-toggle-bar {
+    background-color: mediumslateblue;  /*replace with your color*/
+  }
+
+  /* CSS to change 'Primary' color */
+
+  ::ng-deep .mat-slide-toggle.mat-primary.mat-checked:not(.mat-disabled) .mat-slide-toggle-thumb {
+    background-color: green;
+  }
+
+  ::ng-deep .mat-slide-toggle.mat-primary.mat-checked:not(.mat-disabled) .mat-slide-toggle-bar {
+    background-color: white;
+  }
+
+  /* CSS to change 'Warn' color */
+
+  ::ng-deep .mat-slide-toggle.mat-warn.mat-checked:not(.mat-disabled) .mat-slide-toggle-thumb {
+    background-color: red;
+  }
+
+  ::ng-deep .mat-slide-toggle.mat-warn.mat-checked:not(.mat-disabled) .mat-slide-toggle-bar {
+    background-color: #ffe066;
+  }
+
+
