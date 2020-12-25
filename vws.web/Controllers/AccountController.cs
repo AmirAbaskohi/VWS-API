@@ -45,7 +45,7 @@ namespace vws.web.Controllers
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
-            var userExists = await userManager.FindByNameAsync(model.Username)
+            var userExists = await userManager.FindByNameAsync(model.Username);
             if (userExists != null)
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     new ResponseModel { Status = "Error", Message = "User already exists!" });
