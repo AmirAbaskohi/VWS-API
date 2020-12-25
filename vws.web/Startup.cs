@@ -39,6 +39,7 @@ namespace vws.web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddLocalization(options => { options.ResourcesPath = "Resources"; });
+            services.AddCors();
             services.Configure<RequestLocalizationOptions>(options =>
             {
                 var supportedCultures = new List<CultureInfo>
@@ -152,6 +153,11 @@ namespace vws.web
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+            app.UseCors(builder => builder.WithOrigins(Configuration["Angular:Url"])
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials());
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
