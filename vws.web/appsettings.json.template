@@ -19,7 +19,7 @@
     "SizeOfCode": 5,
     "ValidDurationTimeInMinutes": 15,
     "CodeCharSet": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-  }
+  },
   "Angular": {
 	"Url": "http://localhost:4200"
   }
