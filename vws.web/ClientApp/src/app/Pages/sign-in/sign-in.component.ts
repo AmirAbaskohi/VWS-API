@@ -18,22 +18,22 @@ export class SignInComponent implements OnInit {
   ngOnInit() {
 
     this.signInForm = new FormGroup({
-      usernameOrEmail: new FormControl(
+      UsernameOrEmail: new FormControl(
         null,
         [
           Validators.required
         ]
       ),
-      password: new FormControl(),
-      rememberMe: new FormControl(),
+      Password: new FormControl(),
+      RememberMe: new FormControl(),
     });
   }
 
   submitSignInForm() {
     const signInData = new SignInUserDTO(
-      this.signInForm.controls.usernameOrEmail.value,
-      this.signInForm.controls.password.value,
-      this.signInForm.controls.rememberMe.value,
+      this.signInForm.controls.UsernameOrEmail.value,
+      this.signInForm.controls.Password.value,
+      this.signInForm.controls.RememberMe.value ? true : false,
     );
     console.log(signInData);
     this.signInService.signIn(signInData).subscribe(res => {
