@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using vws.web.Extensions;
+using vws.web.Hubs;
 using vws.web.Models;
 using vws.web.Models.Context;
 using vws.web.Repositories;
@@ -39,6 +40,7 @@ namespace vws.web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddLocalization(options => { options.ResourcesPath = "Resources"; });
+            services.AddSignalR();
             services.AddCors();
             services.Configure<RequestLocalizationOptions>(options =>
             {
@@ -186,6 +188,7 @@ namespace vws.web
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{culture:culture}/{controller}/{action=Index}/{id?}");
+                endpoints.MapHub<ChatHub>("/chatHub");
             });
 
             app.UseSpa(spa =>
