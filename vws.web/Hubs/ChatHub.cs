@@ -16,5 +16,9 @@ namespace vws.web.Hubs
         {
             await Clients.Others.ReciveMessage(String.Format("Message with Id {0} Deleted.", messageId));
         }
+        public async Task MakeMessageSeen(int messageId)
+        {
+            await Clients.Others.ReciveMessage(String.Format("Message with Id {0} have been saw.", messageId));
+        }
     }
 }
