@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text;
@@ -45,10 +46,30 @@ namespace vws.web.Controllers
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
+            List<string> errors = new List<string>();
+
+            if(model.Username.Contains("@"))
+            {
+                errors.Add(localizer["Username should not contain @ character."]);
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new ResponseModel { Status = "Error", HasError = true, Message = "Username has @ character.", Errors = errors });
+            }
+
+            var emailChecker = new EmailAddressAttribute();
+            if(!emailChecker.IsValid(model.Email))
+            {
+                errors.Add(localizer["Email is invalid."]);
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new ResponseModel { Status = "Error", HasError = true, Message = "Invalid Email.", Errors = errors });
+            }
+
             var userExists = await userManager.FindByNameAsync(model.Username);
             if (userExists != null)
+            {
+                errors.Add(localizer["User already exists!"]);
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                    new ResponseModel { Status = "Error", Message = "User already exists!" });
+                    new ResponseModel { Status = "Error", HasError = true, Message = "User already exists!", Errors = errors });
+            }
 
             ApplicationUser user = new ApplicationUser()
             {
@@ -59,9 +80,15 @@ namespace vws.web.Controllers
 
             var result = await userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User creation failed!" });
+            {
+                foreach (var error in result.Errors)
+                {
+                    errors.Add(localizer[error.Description]);
+                }
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User creation failed!", HasError = true, Errors = errors });
+            }
 
-            return Ok(new ResponseModel { Status = "Success", Message = "User created successfully!" });
+            return Ok(new ResponseModel { Status = "Success", Message = "User created successfully!", HasError = false });
         }
 
         [HttpPost]
