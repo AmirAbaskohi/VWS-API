@@ -129,7 +129,7 @@
   <data name="Passwords must have at least one lowercase ('a'-'z')." xml:space="preserve">
     <value>رمز عبور حتما باید شامل یک حرف انگلیسی کوچک باشد.</value>
   </data>
-  <data name="User already exists!User already exists!" xml:space="preserve">
+  <data name="User already exists!" xml:space="preserve">
     <value>کاربری با این مشخصات وجود دارد.</value>
   </data>
   <data name="Username should not contain @ character." xml:space="preserve">
