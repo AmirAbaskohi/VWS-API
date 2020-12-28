@@ -129,6 +129,9 @@
   <data name="Passwords must have at least one lowercase ('a'-'z')." xml:space="preserve">
     <value>Passwords must have at least one lowercase ('a'-'z').</value>
   </data>
+  <data name="User already exists!" xml:space="preserve">
+    <value>User already exists!</value>
+  </data>
   <data name="Username should not contain @ character." xml:space="preserve">
     <value>Username should not contain @ character.</value>
   </data>
