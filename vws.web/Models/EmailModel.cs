@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace vws.web.Models
 {
-    public class UserModel
+    public class EmailModel
     {
         [Required]
         public string Email { get; set; }

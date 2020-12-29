@@ -180,7 +180,7 @@ namespace vws.web.Controllers
 
         [HttpPost]
         [Route("sendConfirmEmail")]
-        public async Task<IActionResult> SendConfirmEmail([FromBody] UserModel model)
+        public async Task<IActionResult> SendConfirmEmail([FromBody] EmailModel model)
         {
             List<string> errors = new List<string>();
 
@@ -217,7 +217,7 @@ namespace vws.web.Controllers
 
         [HttpPost]
         [Route("sendResetPassEmail")]
-        public async Task<IActionResult> SendResetPassEmail([FromBody] UserModel model)
+        public async Task<IActionResult> SendResetPassEmail([FromBody] EmailModel model)
         {
             List<string> errors = new List<string>();
 
