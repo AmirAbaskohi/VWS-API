@@ -95,9 +95,6 @@ namespace vws.web.Controllers
         [Route("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
-            if (signInManager.IsSignedIn(User))
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User already signed in!" });
-
             bool rememberMe = true;
             if (model.RememberMe.HasValue)
                 rememberMe = model.RememberMe.Value;
@@ -126,7 +123,14 @@ namespace vws.web.Controllers
                     expiration = token.ValidTo
                 });
             }
-            return Unauthorized();
+            var response = new ResponseModel
+            {
+                HasError = true,
+                Message = "User login failed.",
+                Status = "Error"
+            };
+            response.AddError(localizer["Password or Usernamed is wrong."]);
+            return StatusCode(StatusCodes.Status401Unauthorized, response);
         }
 
         [HttpPost]
