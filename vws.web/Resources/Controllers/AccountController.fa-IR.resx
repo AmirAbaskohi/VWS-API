@@ -141,6 +141,12 @@
   <data name="Problem happened in sending email." xml:space="preserve">
     <value>در روند ارسال ایمیل مشکلی پیش آمد.</value>
   </data>
+  <data name="Request for reset password is not valid. Request for reset password again." xml:space="preserve">
+    <value>درخواست برای تغییر رمز عبور معتبر نیست. دوباره درخواست بدهید.</value>
+  </data>
+  <data name="Reseting the password was unsuccessful." xml:space="preserve">
+    <value>تغییر رمز عبور ناموفق بود.</value>
+  </data>
   <data name="User already exists!" xml:space="preserve">
     <value>کاربری با این مشخصات وجود دارد.</value>
   </data>

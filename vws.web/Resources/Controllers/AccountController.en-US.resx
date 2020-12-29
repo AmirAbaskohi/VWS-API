@@ -141,6 +141,12 @@
   <data name="Problem happened in sending email." xml:space="preserve">
     <value>Problem happened in sending email.</value>
   </data>
+  <data name="Request for reset password is not valid. Request for reset password again." xml:space="preserve">
+    <value>Request for reset password is not valid. Request for reset password again.</value>
+  </data>
+  <data name="Reseting the password was unsuccessful." xml:space="preserve">
+    <value>Reseting the password was unsuccessful.</value>
+  </data>
   <data name="User already exists!" xml:space="preserve">
     <value>User already exists!</value>
   </data>
