@@ -1,7 +1,7 @@
 export class SignUpUserDTO {
   public username: string;
   public email: string;
-  public password: boolean;
+  public password: string;
   constructor(
     username: string,
     email: string,

@@ -21,7 +21,7 @@
       <div class="login-page-new__main-form-title">Welcome back!</div>
       <form [formGroup]="signInForm" (ngSubmit)="submitSignInForm()" id="login-page-new__main-form-row">
         <div class="form-group">
-          <label class="login-page-new__main-form-row-label">Email address</label>
+          <label class="login-page-new__main-form-row-label">Username or Email</label>
           <div class="input-group mb-3">
             <div class="input-group-prepend">
               <span class="input-group-text" id="basic-addon1">
@@ -31,6 +31,7 @@
             <input formControlName="UsernameOrEmail" type="text" class="form-control" placeholder="Example@vws.com" aria-label="Username"
                    aria-describedby="basic-addon1">
           </div>
+          <p class="mat-error"  *ngIf="signInForm.controls.UsernameOrEmail.errors?.required && signInForm.controls.UsernameOrEmail.touched">Please enter your username or Email</p>
         </div>
         <div class="login-page-new__main-form-row">
           <label class="login-page-new__main-form-row-label">Password</label>
@@ -44,6 +45,7 @@
                    aria-describedby="basic-addon1" type="password" autocomplete="false" autocorrect="false"
                    spellcheck="false">
           </div>
+          <p class="mat-error"  *ngIf="signInForm.controls.Password.errors?.required && signInForm.controls.Password.touched">Please enter your password</p>
         </div>
         <div class="login-page-new__main-form-options">
           <div class="login-page-new__main-form-options-remember">
@@ -54,7 +56,7 @@
           </div>
           <a id="login-forgot" class="cu-show-pwd" routerLink="../forget-password">Forgot Password?</a>
         </div>
-        <button id="login-submit" class="login-page-new__main-form-button" type="submit">
+        <button [disabled]="signInForm.invalid" id="login-submit"  class="login-page-new__main-form-button" type="submit">
           <div class="login-page-new__main-form-button-text">Login</div>
         </button>
       </form>
