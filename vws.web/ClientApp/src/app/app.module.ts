@@ -3,7 +3,6 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
-
 import { AppComponent } from './app.component';
 import { HomeComponent } from './Home/home.component';
 import { SignInComponent } from './Pages/sign-in/sign-in.component';
@@ -27,7 +26,9 @@ import { OnBoardingComponent } from './Pages/on-boarding/on-boarding.component';
 import { SignUpComponent } from './Pages/sign-up/sign-up.component';
 import { ForgetPasswordComponent } from './Pages/forget-password/forget-password.component';
 import { ProfileSettingsComponent } from './Pages/profile-settings/profile-settings.component';
-
+import {VwsInterceptor} from "./Utilities/VwsInterceptor";
+import {SignInService} from "./Services/sign-in.service"
+import {UserService} from "./Services/user.service"
 
 
 @NgModule({
@@ -71,6 +72,13 @@ import { ProfileSettingsComponent } from './Pages/profile-settings/profile-setti
         MatRadioModule
     ],
   providers: [
+    SignInService,
+    UserService,
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: VwsInterceptor,
+      multi: true
+    }
   ],
   bootstrap: [AppComponent]
 })
