@@ -28,6 +28,8 @@ namespace vws.web.Controllers
         private readonly IConfiguration configuration;
         private readonly IPasswordHasher<ApplicationUser> passwordHasher;
         private readonly IStringLocalizer<AccountController> localizer;
+        private readonly EmailAddressAttribute emailChecker;
+        private readonly Random random;
 
         public AccountController(UserManager<ApplicationUser> _userManager, RoleManager<IdentityRole> _roleManager,
             SignInManager<ApplicationUser> _signInManager, IConfiguration _configuration, IEmailSender _emailSender,
@@ -40,6 +42,8 @@ namespace vws.web.Controllers
             emailSender = _emailSender;
             passwordHasher = _passwordHasher;
             localizer = _localizer;
+            emailChecker = new EmailAddressAttribute();
+            random = new Random();
         }
 
         [HttpPost]
@@ -55,7 +59,6 @@ namespace vws.web.Controllers
                     new ResponseModel { Status = "Error", HasError = true, Message = "Username has @ character.", Errors = errors });
             }
 
-            var emailChecker = new EmailAddressAttribute();
             if(!emailChecker.IsValid(model.Email))
             {
                 errors.Add(localizer["Email is invalid."]);
@@ -137,15 +140,29 @@ namespace vws.web.Controllers
         [Route("confirmEmail")]
         public async Task<IActionResult> ConfirmEmail([FromBody] ValidationModel model)
         {
+            List<string> errors = new List<string>();
+
+            if (!emailChecker.IsValid(model.Email))
+            {
+                errors.Add(localizer["Email is invalid."]);
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new ResponseModel { Status = "Error", HasError = true, Message = "Invalid Email.", Errors = errors });
+            }
 
             var user = await userManager.FindByEmailAsync(model.Email);
             if (user == null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User does not exist!" });
+            {
+                errors.Add(localizer["User does not exist."]);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User does not exist!", Errors = errors, HasError = true });
+            }
 
             var timeDiff = user.EmailVerificationSendTime - DateTime.Now;
 
             if (user.EmailConfirmed)
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Email already confirmed!" });
+            {
+                errors.Add(localizer["Email already confirmed."]);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Email already confirmed!", Errors = errors, HasError = true });
+            }
 
             if(user.EmailVerificationCode == model.ValidationCode &&
                 timeDiff.TotalMinutes <= Int16.Parse(configuration["EmailCode:ValidDurationTimeInMinutes"]))
@@ -156,7 +173,8 @@ namespace vws.web.Controllers
                     return Ok(new ResponseModel { Status = "Success", Message = "Email confirmed successfully!" });
             }
 
-            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Email confirmation failed!" });
+            errors.Add(localizer["Emil confirmation failed."]);
+            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Email confirmation failed!", Errors = errors, HasError = true });
         }
 
         [HttpPost]
@@ -168,7 +186,6 @@ namespace vws.web.Controllers
             if(user == null)
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User does not exist!" });
 
-            var random = new Random();
             var randomCode = new string(Enumerable.Repeat(configuration["EmailCode:CodeCharSet"], Int16.Parse(configuration["EmailCode:SizeOfCode"])).Select(s => s[random.Next(s.Length)]).ToArray());
 
             user.EmailVerificationSendTime = DateTime.Now;
@@ -191,7 +208,6 @@ namespace vws.web.Controllers
             if (user == null)
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User does not exist!" });
 
-            var random = new Random();
             var randomCode = new string(Enumerable.Repeat(configuration["EmailCode:CodeCharSet"], Int16.Parse(configuration["EmailCode:SizeOfCode"])).Select(s => s[random.Next(s.Length)]).ToArray());
 
             user.ResetPasswordSendTime = DateTime.Now;
