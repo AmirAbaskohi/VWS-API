@@ -7,6 +7,6 @@ namespace vws.web.Repositories
 {
     public interface IEmailSender
     {
-        public Task SendEmailAsync(string toEmail, string subject, string message, bool isMessageHtml = false);
+        public Task SendEmailAsync(string toEmail, string subject, string message, out string errorMessage, bool isMessageHtml = false);
     }
 }

@@ -9,33 +9,39 @@ namespace vws.web.Repositories
 {
     public class EmailSender : IEmailSender
     {
-        public Task SendEmailAsync(string toEmail, string subject, string message, bool isMessageHtml = false)
+        public Task SendEmailAsync(string toEmail, string subject, string message, out string errorMessage, bool isMessageHtml = false)
         {
-            using (var client = new SmtpClient())
+            errorMessage = "";
+            try
             {
-                var credentials = new NetworkCredential()
+                using (var client = new SmtpClient())
                 {
-                    UserName = "seventasktest", // without @gmail.com
-                    Password = "@dmin123321"
-                };
+                    var credentials = new NetworkCredential()
+                    {
+                        UserName = "seventasktest", // without @gmail.com
+                        Password = "@dmin123321"
+                    };
 
-                client.Credentials = credentials;
-                client.Host = "smtp.gmail.com";
-                client.Port = 587;
-                client.EnableSsl = true;
+                    client.Credentials = credentials;
+                    client.Host = "smtp.gmail.com";
+                    client.Port = 587;
+                    client.EnableSsl = true;
 
-                using var emailMessage = new MailMessage()
-                {
-                    To = { new MailAddress(toEmail) },
-                    From = new MailAddress("seventasktest@gmail.com"),
-                    Subject = subject,
-                    Body = message,
-                    IsBodyHtml = isMessageHtml
-                };
-
-                client.Send(emailMessage);
+                    using var emailMessage = new MailMessage()
+                    {
+                        To = { new MailAddress(toEmail) },
+                        From = new MailAddress("seventasktest@gmail.com"),
+                        Subject = subject,
+                        Body = message,
+                        IsBodyHtml = isMessageHtml
+                    };
+                    client.Send(emailMessage);
+                }
             }
-
+            catch(Exception ex)
+            {
+                errorMessage = "Problem happened in sending email.";
+            }
             return Task.CompletedTask;
         }
     }

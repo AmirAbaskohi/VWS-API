@@ -203,8 +203,12 @@ namespace vws.web.Controllers
             var result = await userManager.UpdateAsync(user);
             if(result.Succeeded)
             {
-                await emailSender.SendEmailAsync(user.Email, "EmailConfirmation", randomCode);
-                return Ok(new ResponseModel { Status = "Success", Message = "Email sent successfully!", HasError = false });
+                string emailErrorMessage;
+                await emailSender.SendEmailAsync(user.Email, "EmailConfirmation", randomCode, out emailErrorMessage);
+                if(string.IsNullOrEmpty(emailErrorMessage))
+                    return Ok(new ResponseModel { Status = "Success", Message = "Email sent successfully!", HasError = false });
+                errors.Add(localizer[emailErrorMessage]);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Sending email failed!", Errors = errors, HasError = true });
             }
             errors.Add(localizer["Problem happened in sending email."]);
             return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Sending email failed!", Errors = errors, HasError = true });
@@ -239,8 +243,12 @@ namespace vws.web.Controllers
 
             if(result.Succeeded)
             {
-                await emailSender.SendEmailAsync(user.Email, "EmailConfirmation", randomCode);
-                return Ok(new ResponseModel { Status = "Success", Message = "Email sent successfully!", HasError = false });
+                string emailErrorMessage;
+                await emailSender.SendEmailAsync(user.Email, "EmailConfirmation", randomCode, out emailErrorMessage);
+                if (string.IsNullOrEmpty(emailErrorMessage))
+                    return Ok(new ResponseModel { Status = "Success", Message = "Email sent successfully!", HasError = false });
+                errors.Add(localizer[emailErrorMessage]);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Sending email failed!", Errors = errors, HasError = true });
             }
             errors.Add(localizer["Problem happened in sending email."]);
             return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Sending email failed!", Errors = errors, HasError = true });
