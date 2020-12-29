@@ -170,7 +170,7 @@ namespace vws.web.Controllers
                 user.EmailConfirmed = true;
                 var result = await userManager.UpdateAsync(user);
                 if(result.Succeeded)
-                    return Ok(new ResponseModel { Status = "Success", Message = "Email confirmed successfully!" });
+                    return Ok(new ResponseModel { Status = "Success", Message = "Email confirmed successfully!", HasError = false });
             }
 
             errors.Add(localizer["Emil confirmation failed."]);
@@ -204,7 +204,7 @@ namespace vws.web.Controllers
             if(result.Succeeded)
             {
                 await emailSender.SendEmailAsync(user.Email, "EmailConfirmation", randomCode);
-                return Ok(new ResponseModel { Status = "Success", Message = "Email sent successfully!" });
+                return Ok(new ResponseModel { Status = "Success", Message = "Email sent successfully!", HasError = false });
             }
             errors.Add(localizer["Problem happened in sending email."]);
             return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Sending email failed!", Errors = errors, HasError = true });
@@ -240,7 +240,7 @@ namespace vws.web.Controllers
             if(result.Succeeded)
             {
                 await emailSender.SendEmailAsync(user.Email, "EmailConfirmation", randomCode);
-                return Ok(new ResponseModel { Status = "Success", Message = "Email sent successfully!" });
+                return Ok(new ResponseModel { Status = "Success", Message = "Email sent successfully!", HasError = false });
             }
             errors.Add(localizer["Problem happened in sending email."]);
             return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Sending email failed!", Errors = errors, HasError = true });
@@ -250,15 +250,30 @@ namespace vws.web.Controllers
         [Route("resetPassword")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordModel model)
         {
+            List<string> errors = new List<string>();
+
+            if (!emailChecker.IsValid(model.Email))
+            {
+                errors.Add(localizer["Email is invalid."]);
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new ResponseModel { Status = "Error", HasError = true, Message = "Invalid Email.", Errors = errors });
+            }
+
             var user = await userManager.FindByEmailAsync(model.Email);
 
-            if(user == null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User does not exist!" });
+            if (user == null)
+            {
+                errors.Add(localizer["User does not exist."]);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User does not exist!", HasError = true, Errors = errors });
+            }
 
             var timeDiff = user.ResetPasswordSendTime - DateTime.Now;
 
             if (!user.ResetPasswordCodeIsValid)
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Reset password is not valid!" });
+            {
+                errors.Add(localizer["Request for reset password is not valid. Request for reset password again."]);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Reset password is not valid!", HasError = true, Errors = errors });
+            }
 
             if (user.ResetPasswordCode == model.ValidationCode &&
                 timeDiff.TotalMinutes <= Int16.Parse(configuration["EmailCode:ValidDurationTimeInMinutes"]))
@@ -271,12 +286,18 @@ namespace vws.web.Controllers
                     user.ResetPasswordCodeIsValid = false;
                     var res = await userManager.UpdateAsync(user);
                     if(res.Succeeded == true)
-                        return Ok(new ResponseModel { Status = "Success", Message = "Password changed successfully!" });
-                    return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Password changing failed!" });
+                        return Ok(new ResponseModel { Status = "Success", Message = "Password changed successfully!", HasError = false });
+                    errors.Add("Reseting the password was unsuccessful.");
+                    return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Password changing failed!", HasError = true, Errors = errors });
                 }
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "New password is not valid!" });
+                foreach (var error in result.Errors)
+                {
+                    errors.Add(localizer[error.Description]);
+                }
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "New password is not valid!", Errors = errors, HasError = true });
             }
-            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Password changing failed!" });
+            errors.Add(localizer["Reset password failed. Code is invalid or code validation time is paased."]);
+            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Password changing failed!", Errors = errors, HasError = true });
         }
     }
 }
