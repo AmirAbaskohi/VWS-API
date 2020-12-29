@@ -181,11 +181,14 @@ namespace vws.web.Controllers
         [Route("sendConfirmEmail")]
         public async Task<IActionResult> SendConfirmEmail([FromBody] UserModel model)
         {
+            List<string> errors = new List<string>();
 
             var user = await userManager.FindByEmailAsync(model.Email);
-            if(user == null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User does not exist!" });
-
+            if (user == null)
+            {
+                errors.Add(localizer["User does not exist."]);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User does not exist!", HasError = true, Errors = errors });
+            }
             var randomCode = new string(Enumerable.Repeat(configuration["EmailCode:CodeCharSet"], Int16.Parse(configuration["EmailCode:SizeOfCode"])).Select(s => s[random.Next(s.Length)]).ToArray());
 
             user.EmailVerificationSendTime = DateTime.Now;
@@ -196,7 +199,8 @@ namespace vws.web.Controllers
                 await emailSender.SendEmailAsync(user.Email, "EmailConfirmation", randomCode);
                 return Ok(new ResponseModel { Status = "Success", Message = "Email sent successfully!" });
             }
-            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Sending email failed!" });
+            errors.Add(localizer["Problem happened in sending email."]);
+            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Sending email failed!", Errors = errors, HasError = true });
         }
 
         [HttpPost]
