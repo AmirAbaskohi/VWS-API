@@ -182,3 +182,9 @@
 .login-page-new__main-form-help.login-page-new__main-form-help-index, .login-page-new__main-form-help.login-page-new__main-form-help-login {
   bottom: 56px;
 }
+
+input.ng-touched.ng-invalid {
+  border: 1px solid red;
+  box-shadow: 5px 5px 20px #ff5051;
+}
+

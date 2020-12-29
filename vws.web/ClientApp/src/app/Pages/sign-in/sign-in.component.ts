@@ -24,7 +24,12 @@ export class SignInComponent implements OnInit {
           Validators.required
         ]
       ),
-      Password: new FormControl(),
+      Password: new FormControl(
+        null,
+        [
+          Validators.required
+        ]
+      ),
       RememberMe: new FormControl(),
     });
   }
@@ -40,7 +45,11 @@ export class SignInComponent implements OnInit {
       console.log(res);
       if (res.status === 200) {
         this.signInForm.reset();
+      }else if(res.status === 401){
+        console.log("Incorrect user/pass");
       }
+      else
+        console.log("Error");
     });
 
   }
