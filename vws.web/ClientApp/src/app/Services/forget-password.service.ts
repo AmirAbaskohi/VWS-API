@@ -11,6 +11,6 @@ export class ForgetPasswordService {
   constructor(private http: HttpClient) { }
 
   forgetPassword(forgetPasswordData: ForgetPasswordUserDTO): Observable<any> {
-    return this.http.post<any>('/en-US/Account/register', forgetPasswordData);
+    return this.http.post<any>('/en-US/Account/sendResetPassEmail', forgetPasswordData);
   }
 }
