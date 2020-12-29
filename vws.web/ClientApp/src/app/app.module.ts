@@ -26,9 +26,9 @@ import { OnBoardingComponent } from './Pages/on-boarding/on-boarding.component';
 import { SignUpComponent } from './Pages/sign-up/sign-up.component';
 import { ForgetPasswordComponent } from './Pages/forget-password/forget-password.component';
 import { ProfileSettingsComponent } from './Pages/profile-settings/profile-settings.component';
-import {VwsInterceptor} from "./Utilities/VwsInterceptor";
-import {SignInService} from "./Services/sign-in.service"
-import {UserService} from "./Services/user.service"
+import {VwsInterceptor} from './Utilities/VwsInterceptor';
+import {SignInService} from "./Services/sign-in.service";
+import {SignUpService} from "./Services/sign-up.service";
 
 
 @NgModule({
@@ -73,7 +73,7 @@ import {UserService} from "./Services/user.service"
     ],
   providers: [
     SignInService,
-    UserService,
+    SignUpService,
     {
       provide: HTTP_INTERCEPTORS,
       useClass: VwsInterceptor,

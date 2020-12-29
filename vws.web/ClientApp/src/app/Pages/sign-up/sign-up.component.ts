@@ -1,6 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {UserService} from 'src/app/Services/user.service';
+import {SignUpService} from 'src/app/Services/sign-up.service';
+import {SignUpUserDTO} from '../../DTOs/Account/SignUpUserDTO';
+
 
 
 @Component({
@@ -15,7 +17,7 @@ export class SignUpComponent implements OnInit {
 
   signUpForm: FormGroup;
 
-  constructor(private _formBuilder: FormBuilder, public userService: UserService) {
+  constructor(private _formBuilder: FormBuilder, public signUpService: SignUpService) {
   }
 
   ngOnInit() {
@@ -26,16 +28,19 @@ export class SignUpComponent implements OnInit {
     });
   }
 
-  clicked(): void {
-    console.log(this.signUpForm.get('username').value);
-    console.log(this.signUpForm.get('email').value);
-    console.log(this.signUpForm.get('password').value);
-  }
 
-  registerUser() {
-    const newUser = { username: this.signUpForm.get('username').value, email: this.signUpForm.get('email').value, password: this.signUpForm.get('password').value};
-    this.userService.register(newUser).subscribe(data =>{
-      console.log("hi");
+  submitSignUpForm() {
+    const signUpData = new SignUpUserDTO(
+      this.signUpForm.controls.username.value,
+      this.signUpForm.controls.email.value,
+      this.signUpForm.controls.password.value ,
+    );
+    console.log(signUpData);
+    this.signUpService.signUp(signUpData).subscribe(res => {
+      console.log(res);
+      if (res.status === 200) {
+        this.signUpForm.reset();
+      }
     });
 
   }
