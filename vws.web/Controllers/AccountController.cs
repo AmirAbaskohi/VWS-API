@@ -204,7 +204,7 @@ namespace vws.web.Controllers
             if(result.Succeeded)
             {
                 string emailErrorMessage;
-                await emailSender.SendEmailAsync(user.Email, "EmailConfirmation", randomCode, out emailErrorMessage);
+                await emailSender.SendEmailAsync(user.Email, "EmailConfirmation", randomCode, configuration, out emailErrorMessage);
                 if(string.IsNullOrEmpty(emailErrorMessage))
                     return Ok(new ResponseModel { Status = "Success", Message = "Email sent successfully!", HasError = false });
                 errors.Add(localizer[emailErrorMessage]);
@@ -244,7 +244,7 @@ namespace vws.web.Controllers
             if(result.Succeeded)
             {
                 string emailErrorMessage;
-                await emailSender.SendEmailAsync(user.Email, "EmailConfirmation", randomCode, out emailErrorMessage);
+                await emailSender.SendEmailAsync(user.Email, "EmailConfirmation", randomCode, configuration, out emailErrorMessage);
                 if (string.IsNullOrEmpty(emailErrorMessage))
                     return Ok(new ResponseModel { Status = "Success", Message = "Email sent successfully!", HasError = false });
                 errors.Add(localizer[emailErrorMessage]);

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -9,7 +10,7 @@ namespace vws.web.Repositories
 {
     public class EmailSender : IEmailSender
     {
-        public Task SendEmailAsync(string toEmail, string subject, string message, out string errorMessage, bool isMessageHtml = false)
+        public Task SendEmailAsync(string toEmail, string subject, string message, IConfiguration configuration, out string errorMessage, bool isMessageHtml = false)
         {
             errorMessage = "";
             try
@@ -18,8 +19,8 @@ namespace vws.web.Repositories
                 {
                     var credentials = new NetworkCredential()
                     {
-                        UserName = "seventasktest", // without @gmail.com
-                        Password = "@dmin123321"
+                        UserName = configuration["EmailSender:UserName"], // without @gmail.com
+                        Password = configuration["EmailSender:Password"]
                     };
 
                     client.Credentials = credentials;
@@ -30,7 +31,7 @@ namespace vws.web.Repositories
                     using var emailMessage = new MailMessage()
                     {
                         To = { new MailAddress(toEmail) },
-                        From = new MailAddress("seventasktest@gmail.com"),
+                        From = new MailAddress(configuration["EmailSender:EmailAddress"]),
                         Subject = subject,
                         Body = message,
                         IsBodyHtml = isMessageHtml
