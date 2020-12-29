@@ -138,6 +138,9 @@
   <data name="Passwords must have at least one lowercase ('a'-'z')." xml:space="preserve">
     <value>Passwords must have at least one lowercase ('a'-'z').</value>
   </data>
+  <data name="Problem happened in sending email." xml:space="preserve">
+    <value>Problem happened in sending email.</value>
+  </data>
   <data name="User already exists!" xml:space="preserve">
     <value>User already exists!</value>
   </data>
