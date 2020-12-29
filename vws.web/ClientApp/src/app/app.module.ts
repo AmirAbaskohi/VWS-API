@@ -27,7 +27,8 @@ import { OnBoardingComponent } from './Pages/on-boarding/on-boarding.component';
 import { SignUpComponent } from './Pages/sign-up/sign-up.component';
 import { ForgetPasswordComponent } from './Pages/forget-password/forget-password.component';
 import { ProfileSettingsComponent } from './Pages/profile-settings/profile-settings.component';
-import {UserService} from 'src/app/Services/user.service';
+
+
 
 @NgModule({
   declarations: [
@@ -70,7 +71,6 @@ import {UserService} from 'src/app/Services/user.service';
         MatRadioModule
     ],
   providers: [
-    UserService
   ],
   bootstrap: [AppComponent]
 })

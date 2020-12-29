@@ -8,7 +8,7 @@
   </a>
   <div class="login-page-new__header-right">
     <div class="login-page-new__header-right-text">Don't have an account?</div>
-    <div class="login-page-new__header-right-button" onclick="signUpLink()">Sign up</div>
+    <div class="login-page-new__header-right-button" router routerLink="../sign-up">Sign up</div>
   </div>
 </div>
 
@@ -19,7 +19,7 @@
     <div class="login-page-new__main-form">
 
       <div class="login-page-new__main-form-title">Welcome back!</div>
-      <form id="login-page-new__main-form-row">
+      <form [formGroup]="signInForm" (ngSubmit)="submitSignInForm()" id="login-page-new__main-form-row">
         <div class="form-group">
           <label class="login-page-new__main-form-row-label">Email address</label>
           <div class="input-group mb-3">
@@ -28,7 +28,7 @@
               <mat-icon>mail</mat-icon>
               </span>
             </div>
-            <input type="text" class="form-control" placeholder="Example@vws.com" aria-label="Username"
+            <input formControlName="UsernameOrEmail" type="text" class="form-control" placeholder="Example@vws.com" aria-label="Username"
                    aria-describedby="basic-addon1">
           </div>
         </div>
@@ -40,7 +40,7 @@
               <mat-icon>lock</mat-icon>
               </span>
             </div>
-            <input type="text" class="form-control" placeholder="Password" aria-label="Password"
+            <input formControlName="Password" type="text" class="form-control" placeholder="Password" aria-label="Password"
                    aria-describedby="basic-addon1" type="password" autocomplete="false" autocorrect="false"
                    spellcheck="false">
           </div>
@@ -48,11 +48,11 @@
         <div class="login-page-new__main-form-options">
           <div class="login-page-new__main-form-options-remember">
             <label>
-              <input id="login-remember-me" name="remember" type="checkbox">
+              <input formControlName="RememberMe" id="login-remember-me" name="remember" type="checkbox">
               <span>Remember me</span>
             </label>
           </div>
-          <a id="login-forgot" class="cu-show-pwd">Forgot Password?</a>
+          <a id="login-forgot" class="cu-show-pwd" routerLink="../forget-password">Forgot Password?</a>
         </div>
         <button id="login-submit" class="login-page-new__main-form-button" type="submit">
           <div class="login-page-new__main-form-button-text">Login</div>
