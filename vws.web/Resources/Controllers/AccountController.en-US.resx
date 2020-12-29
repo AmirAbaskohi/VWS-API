@@ -120,6 +120,9 @@
   <data name="Email is invalid." xml:space="preserve">
     <value>Email is invalid.</value>
   </data>
+  <data name="Password or Usernamed is wrong." xml:space="preserve">
+    <value>Password or Usernamed is wrong.</value>
+  </data>
   <data name="Passwords must be at least 8 characters." xml:space="preserve">
     <value>Passwords must be at least 8 characters.</value>
   </data>

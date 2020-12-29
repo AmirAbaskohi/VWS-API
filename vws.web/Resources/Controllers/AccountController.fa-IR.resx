@@ -120,6 +120,9 @@
   <data name="Email is invalid." xml:space="preserve">
     <value>ایمیل وارد شده نا معتبر است.</value>
   </data>
+  <data name="Password or Usernamed is wrong." xml:space="preserve">
+    <value>نام کاربری یا رمز عبور اشتباه است.</value>
+  </data>
   <data name="Passwords must be at least 8 characters." xml:space="preserve">
     <value>رمز عبور باید حداقل 8 رقم داشته باشد.</value>
   </data>
