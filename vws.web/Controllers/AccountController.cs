@@ -183,6 +183,13 @@ namespace vws.web.Controllers
         {
             List<string> errors = new List<string>();
 
+            if (!emailChecker.IsValid(model.Email))
+            {
+                errors.Add(localizer["Email is invalid."]);
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new ResponseModel { Status = "Error", HasError = true, Message = "Invalid Email.", Errors = errors });
+            }
+
             var user = await userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
@@ -207,10 +214,21 @@ namespace vws.web.Controllers
         [Route("sendResetPassEmail")]
         public async Task<IActionResult> SendResetPassEmail([FromBody] UserModel model)
         {
+            List<string> errors = new List<string>();
+
+            if (!emailChecker.IsValid(model.Email))
+            {
+                errors.Add(localizer["Email is invalid."]);
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new ResponseModel { Status = "Error", HasError = true, Message = "Invalid Email.", Errors = errors });
+            }
 
             var user = await userManager.FindByEmailAsync(model.Email);
             if (user == null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User does not exist!" });
+            {
+                errors.Add(localizer["User does not exist."]);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User does not exist!", HasError = true, Errors = errors });
+            }
 
             var randomCode = new string(Enumerable.Repeat(configuration["EmailCode:CodeCharSet"], Int16.Parse(configuration["EmailCode:SizeOfCode"])).Select(s => s[random.Next(s.Length)]).ToArray());
 
@@ -224,7 +242,8 @@ namespace vws.web.Controllers
                 await emailSender.SendEmailAsync(user.Email, "EmailConfirmation", randomCode);
                 return Ok(new ResponseModel { Status = "Success", Message = "Email sent successfully!" });
             }
-            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Sending email failed!" });
+            errors.Add(localizer["Problem happened in sending email."]);
+            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Sending email failed!", Errors = errors, HasError = true });
         }
 
         [HttpPost]
