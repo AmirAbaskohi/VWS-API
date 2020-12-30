@@ -4,6 +4,7 @@ import {SignUpUserDTO} from '../../DTOs/Account/SignUpUserDTO';
 import {AccountService} from 'src/app/Services/AccountService/account.service';
 import {SendConfirmEmailDTO} from "../../DTOs/Account/SendConfirmEmailDTO";
 import {ConfirmEmailDTO} from "../../DTOs/Account/ConfirmEmailDTO";
+import {Router} from "@angular/router";
 
 
 @Component({
@@ -21,7 +22,7 @@ export class SignUpComponent implements OnInit {
 
   signUpForm: FormGroup;
 
-  constructor(private _formBuilder: FormBuilder, public accountService: AccountService) {
+  constructor(private _formBuilder: FormBuilder, private accountService: AccountService,private router: Router) {
   }
 
   ngOnInit() {
@@ -63,6 +64,7 @@ export class SignUpComponent implements OnInit {
       this.accountService.confirmEmail(confirmatEmailData).subscribe(res => {
         console.log(res);
         if (res.status === 'Success') {
+          this.router.navigate(["/sign-in"]);
           console.log("so happy:)");
         }
       })

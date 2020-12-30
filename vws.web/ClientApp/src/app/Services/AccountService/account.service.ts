@@ -6,6 +6,7 @@ import {SignUpUserDTO} from "../../DTOs/Account/SignUpUserDTO";
 import {ForgetPasswordUserDTO} from "../../DTOs/Account/ForgetPasswordUserDTO";
 import {SendConfirmEmailDTO} from "../../DTOs/Account/SendConfirmEmailDTO";
 import {ConfirmEmailDTO} from "../../DTOs/Account/ConfirmEmailDTO";
+import {ResetPasswordDTO} from "../../DTOs/Account/ResetPasswordDTO";
 
 @Injectable({
   providedIn: 'root'
@@ -28,6 +29,10 @@ export class AccountService {
     return this.http.post<any>('/en-US/Account/sendResetPassEmail', forgetPasswordData);
   }
 
+  resetPassword(resetPasswordData: ResetPasswordDTO): Observable<any> {
+    return this.http.post<any>('/en-US/Account/resetPassword', resetPasswordData)
+  }
+
   sendConfirmEmail(sendConfirmEmailData: SendConfirmEmailDTO): Observable<any> {
     return this.http.post<any>('/en-US/Account/sendConfirmEmail', sendConfirmEmailData)
   }
@@ -35,5 +40,6 @@ export class AccountService {
   confirmEmail(ConfirmEmailData: ConfirmEmailDTO): Observable<any> {
     return this.http.post<any>('/en-US/Account/confirmEmail', ConfirmEmailData)
   }
+
 
 }
