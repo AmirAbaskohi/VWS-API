@@ -308,5 +308,14 @@ namespace vws.web.Controllers
             errors.Add(localizer["Reset password failed. Code is invalid or code validation time is paased."]);
             return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Password changing failed!", Errors = errors, HasError = true });
         }
+
+        [HttpPost]
+        [Route("isUserNameInUse")]
+        public async Task<bool> IsUserNameInUse(UsernameModel model)
+        {
+            var user = await userManager.FindByNameAsync(model.Username);
+            if (user == null) return false;
+            return true;
+        }
     }
 }
