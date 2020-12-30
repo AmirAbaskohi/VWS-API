@@ -147,8 +147,11 @@
   <data name="Reseting the password was unsuccessful." xml:space="preserve">
     <value>تغییر رمز عبور ناموفق بود.</value>
   </data>
-  <data name="User already exists!" xml:space="preserve">
-    <value>کاربری با این مشخصات وجود دارد.</value>
+  <data name="There is a user with this email." xml:space="preserve">
+    <value>کاربری با این ایمیل وجود دارد.</value>
+  </data>
+  <data name="There is a user with this username." xml:space="preserve">
+    <value>کاربری با این نام کاربری وجود دارد.</value>
   </data>
   <data name="User does not exist." xml:space="preserve">
     <value>کاربری با این مشخصات وجود ندارد.</value>

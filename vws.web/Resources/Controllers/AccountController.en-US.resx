@@ -147,8 +147,11 @@
   <data name="Reseting the password was unsuccessful." xml:space="preserve">
     <value>Reseting the password was unsuccessful.</value>
   </data>
-  <data name="User already exists!" xml:space="preserve">
-    <value>User already exists!</value>
+  <data name="There is a user with this email." xml:space="preserve">
+    <value>There is a user with this email.</value>
+  </data>
+  <data name="There is a user with this username." xml:space="preserve">
+    <value>There is a user with this username.</value>
   </data>
   <data name="User does not exist." xml:space="preserve">
     <value>User does not exist.</value>
