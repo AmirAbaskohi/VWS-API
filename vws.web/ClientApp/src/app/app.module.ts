@@ -52,7 +52,8 @@ import { ChatComponent } from './Pages/chat/chat.component';
       {path: 'on-boarding', component: OnBoardingComponent, pathMatch: 'full'},
       {path: 'sign-up', component: SignUpComponent, pathMatch: 'full'},
       {path: 'forget-password', component: ForgetPasswordComponent, pathMatch: 'full'},
-      {path: 'profile-settings', component: ProfileSettingsComponent, pathMatch: 'full'}
+      {path: 'profile-settings', component: ProfileSettingsComponent, pathMatch: 'full'},
+      {path: 'chat-room', component: ChatComponent, pathMatch: 'full'}
     ]),
     BrowserAnimationsModule,
     MatStepperModule,
