@@ -70,7 +70,12 @@ namespace vws.web.Controllers
             var userExistsWithEmail = await userManager.FindByEmailAsync(model.Email);
             if (userExistsWithUserName != null || userExistsWithEmail != null)
             {
-                errors.Add(localizer["User already exists!"]);
+                if(userExistsWithUserName != null)
+                    errors.Add(localizer["There is a user with this username."]);
+
+                if (userExistsWithEmail != null)
+                    errors.Add(localizer["There is a user with this email."]);
+
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     new ResponseModel { Status = "Error", HasError = true, Message = "User already exists!", Errors = errors });
             }
