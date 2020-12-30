@@ -317,5 +317,14 @@ namespace vws.web.Controllers
             if (user == null) return false;
             return true;
         }
+
+        [HttpPost]
+        [Route("isEmailInUse")]
+        public async Task<bool> IsEmailInUse(EmailModel model)
+        {
+            var user = await userManager.FindByEmailAsync(model.Email);
+            if (user == null) return false;
+            return true;
+        }
     }
 }
