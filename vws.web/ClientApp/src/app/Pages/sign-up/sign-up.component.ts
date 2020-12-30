@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {SignUpService} from 'src/app/Services/sign-up.service';
 import {SignUpUserDTO} from '../../DTOs/Account/SignUpUserDTO';
+import {AccountService} from 'src/app/Services/AccountService/account.service';
 
 
 
@@ -17,7 +17,7 @@ export class SignUpComponent implements OnInit {
 
   signUpForm: FormGroup;
 
-  constructor(private _formBuilder: FormBuilder, public signUpService: SignUpService) {
+  constructor(private _formBuilder: FormBuilder, public accountService: AccountService) {
   }
 
   ngOnInit() {
@@ -36,7 +36,7 @@ export class SignUpComponent implements OnInit {
       this.signUpForm.controls.password.value ,
     );
     console.log(signUpData);
-    this.signUpService.signUp(signUpData).subscribe(res => {
+    this.accountService.signUp(signUpData).subscribe(res => {
       console.log(res);
       if (res.status === 200) {
         this.signUpForm.reset();

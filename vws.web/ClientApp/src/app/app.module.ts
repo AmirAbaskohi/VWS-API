@@ -27,9 +27,7 @@ import {SignUpComponent} from './Pages/sign-up/sign-up.component';
 import {ForgetPasswordComponent} from './Pages/forget-password/forget-password.component';
 import {ProfileSettingsComponent} from './Pages/profile-settings/profile-settings.component';
 import {VwsInterceptor} from './Utilities/VwsInterceptor';
-import {SignInService} from "./Services/sign-in.service";
-import {SignUpService} from "./Services/sign-up.service";
-import {ForgetPasswordService} from './Services/forget-password.service';
+import {AccountService} from "./Services/AccountService/account.service";
 
 
 @NgModule({
@@ -74,9 +72,7 @@ import {ForgetPasswordService} from './Services/forget-password.service';
 
   ],
   providers: [
-    SignInService,
-    SignUpService,
-    ForgetPasswordService,
+    AccountService,
     {
       provide: HTTP_INTERCEPTORS,
       useClass: VwsInterceptor,

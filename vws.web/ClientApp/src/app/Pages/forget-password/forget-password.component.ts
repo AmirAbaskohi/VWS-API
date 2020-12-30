@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {ForgetPasswordUserDTO} from '../../DTOs/Account/ForgetPasswordUserDTO';
-import {ForgetPasswordService} from 'src/app/Services/forget-password.service';
+import {AccountService} from 'src/app/Services/AccountService/account.service';
 
 @Component({
   selector: 'app-forget-password',
@@ -13,7 +13,7 @@ export class ForgetPasswordComponent implements OnInit {
   logo = '/assets/Images/logo.png';
   forgetPasswordForm: FormGroup;
 
-  constructor(private _formBuilder: FormBuilder, public forgetPasswordService: ForgetPasswordService) {
+  constructor(private _formBuilder: FormBuilder, public accountService: AccountService) {
   }
 
   ngOnInit() {
@@ -28,7 +28,7 @@ export class ForgetPasswordComponent implements OnInit {
       this.forgetPasswordForm.controls.email.value
     );
     console.log(forgetPasswordData);
-    this.forgetPasswordService.forgetPassword(forgetPasswordData).subscribe(res => {
+    this.accountService.forgetPassword(forgetPasswordData).subscribe(res => {
       console.log(res);
       if (res.status === 200) {
         this.forgetPasswordForm.reset();

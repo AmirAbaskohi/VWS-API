@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {SignInUserDTO} from "../../DTOs/Account/SignInUserDTO";
-import {SignInService} from "../../Services/sign-in.service";
+import {AccountService} from "../../Services/AccountService/account.service";
 
 @Component({
   selector: 'app-sign-in',
@@ -12,7 +12,7 @@ export class SignInComponent implements OnInit {
 
   public signInForm: FormGroup;
 
-  constructor(private signInService: SignInService) {
+  constructor(private accountService: AccountService) {
   }
 
   ngOnInit() {
@@ -41,7 +41,7 @@ export class SignInComponent implements OnInit {
       this.signInForm.controls.RememberMe.value ? true : false,
     );
     console.log(signInData);
-    this.signInService.signIn(signInData).subscribe(res => {
+    this.accountService.signIn(signInData).subscribe(res => {
       console.log(res);
       if (res.status === 200) {
         this.signInForm.reset();
