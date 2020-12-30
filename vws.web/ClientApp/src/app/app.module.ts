@@ -28,6 +28,7 @@ import {ForgetPasswordComponent} from './Pages/forget-password/forget-password.c
 import {ProfileSettingsComponent} from './Pages/profile-settings/profile-settings.component';
 import {VwsInterceptor} from './Utilities/VwsInterceptor';
 import {AccountService} from "./Services/AccountService/account.service";
+import { ChatComponent } from './Pages/chat/chat.component';
 
 
 @NgModule({
@@ -38,7 +39,8 @@ import {AccountService} from "./Services/AccountService/account.service";
     OnBoardingComponent,
     SignUpComponent,
     ForgetPasswordComponent,
-    ProfileSettingsComponent
+    ProfileSettingsComponent,
+    ChatComponent
   ],
   imports: [
     BrowserModule.withServerTransition({appId: 'ng-cli-universal'}),
