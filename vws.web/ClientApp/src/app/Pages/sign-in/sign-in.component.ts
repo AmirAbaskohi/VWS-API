@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {SignInUserDTO} from "../../DTOs/Account/SignInUserDTO";
 import {AccountService} from "../../Services/AccountService/account.service";
+import {CookieService} from "ngx-cookie-service";
 
 @Component({
   selector: 'app-sign-in',
@@ -12,7 +13,7 @@ export class SignInComponent implements OnInit {
 
   public signInForm: FormGroup;
 
-  constructor(private accountService: AccountService) {
+  constructor(private accountService: AccountService, private cookieService:CookieService) {
   }
 
   ngOnInit() {
@@ -43,9 +44,10 @@ export class SignInComponent implements OnInit {
     console.log(signInData);
     this.accountService.signIn(signInData).subscribe(res => {
       console.log(res);
-      if (res.status === 200) {
+      if (res.status === 'Success') {
+        this.cookieService.set('7TaskCookie',res.data.token,3 * 60);
         this.signInForm.reset();
-      }else if(res.status === 401){
+      }else if(res.status === '401'){
         console.log("Incorrect user/pass");
       }
       else

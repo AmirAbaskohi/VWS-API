@@ -7,6 +7,7 @@ import {ForgetPasswordUserDTO} from "../../DTOs/Account/ForgetPasswordUserDTO";
 import {SendConfirmEmailDTO} from "../../DTOs/Account/SendConfirmEmailDTO";
 import {ConfirmEmailDTO} from "../../DTOs/Account/ConfirmEmailDTO";
 import {ResetPasswordDTO} from "../../DTOs/Account/ResetPasswordDTO";
+import {ISignInUser} from "../../DTOs/Account/ISignInUser";
 
 @Injectable({
   providedIn: 'root'
@@ -17,8 +18,8 @@ export class AccountService {
   }
 
 
-  signIn(signInData: SignInUserDTO): Observable<any> {
-    return this.http.post<any>('/en-US/Account/login', signInData);
+  signIn(signInData: SignInUserDTO): Observable<ISignInUser> {
+    return this.http.post<ISignInUser>('/en-US/Account/login', signInData);
   }
 
   signUp(signUpData: SignUpUserDTO): Observable<any> {
@@ -40,6 +41,7 @@ export class AccountService {
   confirmEmail(ConfirmEmailData: ConfirmEmailDTO): Observable<any> {
     return this.http.post<any>('/en-US/Account/confirmEmail', ConfirmEmailData)
   }
+
 
 
 }

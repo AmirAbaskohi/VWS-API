@@ -28,8 +28,9 @@ import {ForgetPasswordComponent} from './Pages/forget-password/forget-password.c
 import {ProfileSettingsComponent} from './Pages/profile-settings/profile-settings.component';
 import {VwsInterceptor} from './Utilities/VwsInterceptor';
 import {AccountService} from "./Services/AccountService/account.service";
-import { ChatComponent } from './Pages/chat/chat.component';
-import { SsoComponent } from './Pages/sso/sso.component';
+import {ChatComponent} from './Pages/chat/chat.component';
+import {SsoComponent} from './Pages/sso/sso.component';
+import {CookieService} from 'ngx-cookie-service';
 
 
 @NgModule({
@@ -79,6 +80,7 @@ import { SsoComponent } from './Pages/sso/sso.component';
   ],
   providers: [
     AccountService,
+    CookieService,
     {
       provide: HTTP_INTERCEPTORS,
       useClass: VwsInterceptor,
