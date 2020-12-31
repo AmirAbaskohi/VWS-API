@@ -1,7 +1,6 @@
 <div class="toolbar" role="banner">
   <img width="150"
        [src]="logo" />
-  <!--  <span><h2>Click Up</h2></span>-->
 </div>
 
 
@@ -9,60 +8,55 @@
 </body>
 
 <mat-card class="example-card center">
-  <div style="text-align: center; padding: 40px 60px 26px;">
+  <div class="contentOfCard">
     <form [formGroup]="signUpForm">
-      <h1 style="font-weight: 900; font-family: '-apple-system'; font-size: 35px; margin-bottom: 20px">Let's go!</h1>
+      <h1 class="titleOfCard">Let's go!</h1>
       <div *ngIf="!signUpSuccessful" class="sign-up">
-        <div style="font-weight: 900; font-family: '-apple-system'; font-size: 10px; text-align: left">
+        <div class="titleOfInput">
           Username
         </div>
         <div class="input-group mb-3">
           <div class="input-group-prepend">
-            <span class="input-group-text" id="fullName"
-                  style="background-color: white; border-right: 0;border-bottom-right-radius: 0;border-top-right-radius: 0">
-              <mat-icon style="color: #c2c3c4;">perm_identity</mat-icon>
+            <span class="input-group-text InputSpan" id="fullName">
+              <mat-icon class="matIcon">perm_identity</mat-icon>
             </span>
           </div>
-          <input type="text" class="form-control" placeholder="John" aria-label="Mail" aria-describedby="basic-addon1"
-                 style="border-left: 0;border-bottom-left-radius: 0;border-top-left-radius: 0"
+          <input type="text" class="form-control Input" placeholder="John" aria-label="Mail" aria-describedby="basic-addon1"
                  formControlName="username">
         </div>
 
 
-        <div style="font-weight: 900; font-family: '-apple-system'; font-size: 10px; text-align: left">
+        <div class="titleOfInput">
           Email
         </div>
         <div class="input-group mb-3">
           <div class="input-group-prepend">
-            <span class="input-group-text" id="mail"
-                  style="background-color: white; border-right: 0;border-bottom-right-radius: 0;border-top-right-radius: 0">
-              <mat-icon style="color: #c2c3c4;">mail</mat-icon>
+            <span class="input-group-text InputSpan" id="mail">
+              <mat-icon class="matIcon">mail</mat-icon>
             </span>
           </div>
-          <input type="text" class="form-control" placeholder="examole@email.com" aria-label="Mail"
+          <input type="text" class="form-control Input" placeholder="examole@email.com" aria-label="Mail"
                  aria-describedby="basic-addon1"
-                 style="border-left: 0;border-bottom-left-radius: 0;border-top-left-radius: 0" formControlName="email">
+                 formControlName="email">
         </div>
 
-        <div style="font-weight: 900; font-family: '-apple-system'; font-size: 10px; text-align: left">
+        <div class="titleOfInput" >
           Choose Password
         </div>
 
         <div class="input-group mb-3">
           <div class="input-group-prepend">
-            <span class="input-group-text" id="password"
-                  style="background-color: white; border-right: 0;border-bottom-right-radius: 0;border-top-right-radius: 0">
-              <mat-icon style="color: #c2c3c4;">lock</mat-icon>
+            <span class="input-group-text InputSpan" id="password">
+              <mat-icon class="matIcon">lock</mat-icon>
             </span>
           </div>
           <input [type]="hide ? 'password' : 'text'" class="form-control" placeholder="Enter your password"
                  aria-label="Mail"
                  aria-describedby="basic-addon1"
-                 style="border-left: 0;border-right: 0;border-bottom-left-radius: 0;border-top-left-radius: 0;"
+                 claas="PasswordInput"
                  formControlName="password">
-          <span class="input-group-text" id="visibility"
-                style="background-color: white; border-left: 0;border-bottom-left-radius: 0;border-top-left-radius: 0">
-            <mat-icon matSuffix (click)="hide = !hide"
+          <span class="input-group-text visibilitySpan" id="visibility">
+            <mat-icon matSuffix (click)="hide = !hide" class="matIcon"
                       style="cursor: pointer;">{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
           </span>
         </div>
@@ -70,48 +64,42 @@
       <div *ngIf="signUpSuccessful" class="alert-success" id="successfulSignUp">Email sent</div>
 
       <div>
-        <div *ngIf="signUpSuccessful"
-             style="font-weight: 900; font-family: '-apple-system'; font-size: 10px; text-align: left">
+        <div *ngIf="signUpSuccessful" class="titleOfInput">
           Confirm
         </div>
         <div *ngIf="signUpSuccessful" class="input-group mb-3">
           <div class="input-group-prepend">
-            <span class="input-group-text" id="confirmEmail"
-                  style="background-color: white; border-right: 0;border-bottom-right-radius: 0;border-top-right-radius: 0">
-              <mat-icon style="color: #c2c3c4;">check_circle_outline</mat-icon>
+            <span class="input-group-text InputSpan" id="confirmEmail">
+              <mat-icon class="matIcon">check_circle_outline</mat-icon>
             </span>
           </div>
-          <input type="text" class="form-control" placeholder="_ _ _ _ _" aria-label="Mail"
+          <input type="text" class="form-control verifyCodeInput" placeholder="_ _ _ _ _" aria-label="Mail"
                  aria-describedby="basic-addon1"
-                 style="border-left: 0;border-bottom-left-radius: 0;border-top-left-radius: 0"
                  formControlName="confirm">
         </div>
       </div>
 
       <div>
-        <button *ngIf="!signUpSuccessful" mat-raised-button (click)="submitSignUpForm()"
-                style="margin-right: 5px;width: 100%;height: 50px;font-weight: 900; font-family: '-apple-system'; font-size: 15px; margin-bottom: 20px; background-color: #7b68ee; color: white; margin-top: 10px">
+        <button *ngIf="!signUpSuccessful" mat-raised-button (click)="submitSignUpForm()" class="playWithClick">
           Play with 7Task
         </button>
 
-        <button *ngIf="signUpSuccessful && emailSent" mat-raised-button (click)="confirmAccount()"
-                style="margin-right: 5px;width: 100%;height: 50px;font-weight: 900; font-family: '-apple-system'; font-size: 15px; margin-bottom: 20px; background-color: #7b68ee; color: white; margin-top: 10px">
+        <button *ngIf="signUpSuccessful && emailSent" mat-raised-button (click)="confirmAccount()" class="confirmButton">
           Confirm
         </button>
 
       </div>
-      <a href="url" style="text-align: center;margin:0 auto; display:block;margin-top: 15px; color:#7b68ee ">
+      <a href="url" class="SSOLink">
         or signup
         with SSO
       </a>
     </form>
   </div>
-  <div class="center"
-       style="border: #24292e;border-bottom-left-radius: 4px; border-bottom-right-radius: 4px; text-align: center;width: 480px;height:30px;display: table; margin: 0 auto; margin-top: 505px;font-weight:400; font-family: '-apple-system'; font-size: 10px; color: slategrey; background-color: #fafbfc">
-    By clicking the button above, you agree to our <a href="url" style="color: slategrey; font-weight: bold">
+  <div class="center textUnderTheCard">
+    By clicking the button above, you agree to our <a href="url" class="hrefLinkUnderOfCard">
       Terms of
       Service
-    </a> and <a href="url" style="color: slategrey; font-weight: bold">Privacy Policy</a> .
+    </a> and <a href="url" class="hrefLinkUnderOfCard">Privacy Policy</a> .
   </div>
 </mat-card>
 
