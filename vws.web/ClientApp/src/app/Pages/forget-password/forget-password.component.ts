@@ -37,6 +37,7 @@ export class ForgetPasswordComponent implements OnInit {
     this.accountService.forgetPassword(forgetPasswordData).subscribe(res => {
       console.log(res);
       if (res.status === 'Success') {
+        document.getElementById('card').style.height = '450px';
         this.emailSent = true;
         //this.forgetPasswordForm.reset();
       }
