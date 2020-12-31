@@ -4,7 +4,7 @@ import {DomainName} from '../../Utilities/PathTools';
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.component.html',
-  styleUrls: ['./chat.component.css']
+  styleUrls: ['./chat.component.scss']
 })
 export class ChatComponent implements OnInit {
 
@@ -29,5 +29,7 @@ export class ChatComponent implements OnInit {
     this.hubConnection.send('SendMessage', this.newMessage);
     this.newMessage = '';
   }
+
+
 
 }
