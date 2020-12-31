@@ -29,6 +29,7 @@ import {ProfileSettingsComponent} from './Pages/profile-settings/profile-setting
 import {VwsInterceptor} from './Utilities/VwsInterceptor';
 import {AccountService} from "./Services/AccountService/account.service";
 import { ChatComponent } from './Pages/chat/chat.component';
+import { SsoComponent } from './Pages/sso/sso.component';
 
 
 @NgModule({
@@ -40,7 +41,8 @@ import { ChatComponent } from './Pages/chat/chat.component';
     SignUpComponent,
     ForgetPasswordComponent,
     ProfileSettingsComponent,
-    ChatComponent
+    ChatComponent,
+    SsoComponent
   ],
   imports: [
     BrowserModule.withServerTransition({appId: 'ng-cli-universal'}),
@@ -53,7 +55,8 @@ import { ChatComponent } from './Pages/chat/chat.component';
       {path: 'sign-up', component: SignUpComponent, pathMatch: 'full'},
       {path: 'forget-password', component: ForgetPasswordComponent, pathMatch: 'full'},
       {path: 'profile-settings', component: ProfileSettingsComponent, pathMatch: 'full'},
-      {path: 'chat-room', component: ChatComponent, pathMatch: 'full'}
+      {path: 'chat-room', component: ChatComponent, pathMatch: 'full'},
+      {path: 'sso', component: SsoComponent, pathMatch: 'full'}
     ]),
     BrowserAnimationsModule,
     MatStepperModule,
