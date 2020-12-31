@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import {HubConnection, HubConnectionBuilder} from '@microsoft/signalr';
-
+import {DomainName} from '../../Utilities/PathTools';
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.component.html',
@@ -16,7 +16,7 @@ export class ChatComponent implements OnInit {
 
   ngOnInit() {
     this.hubConnection = new HubConnectionBuilder()
-      .withUrl('https://localhost:44303/chatHub')
+      .withUrl(DomainName + '/chatHub')
       .build();
     this.hubConnection.on('ReciveMessage', (message: string) => {
       this.messages.push(message);
