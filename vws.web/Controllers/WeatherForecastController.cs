@@ -23,7 +23,7 @@ namespace vws.web.Controllers
         {
             _logger = logger;
         }
-        [Authorize]
+
         [HttpGet]
         public IEnumerable<WeatherForecast> Get()
         {
