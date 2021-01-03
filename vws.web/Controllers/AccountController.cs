@@ -68,16 +68,44 @@ namespace vws.web.Controllers
 
             var userExistsWithUserName = await userManager.FindByNameAsync(model.Username);
             var userExistsWithEmail = await userManager.FindByEmailAsync(model.Email);
-            if (userExistsWithUserName != null || userExistsWithEmail != null)
+
+            if(userExistsWithEmail != null)
+            {
+                if(userExistsWithEmail.EmailConfirmed)
+                {
+                    errors.Add(localizer["There is a user with this email."]);
+                    if(userExistsWithUserName != null)
+                        errors.Add(localizer["There is a user with this username."]);
+                    return StatusCode(StatusCodes.Status500InternalServerError,
+                        new ResponseModel { Status = "Error", HasError = true, Message = "User already exists!", Errors = errors });
+                }
+                else
+                {
+                    if(userExistsWithUserName != null)
+                    {
+                        if (model.Username == userExistsWithEmail.UserName)
+                            await userManager.DeleteAsync(userExistsWithEmail);
+                        else
+                        {
+                            errors.Add(localizer["There is a user with this username."]);
+                            return StatusCode(StatusCodes.Status500InternalServerError,
+                                new ResponseModel { Status = "Error", HasError = true, Message = "User already exists!", Errors = errors });
+                        }
+                    }
+                    else
+                    {
+                        await userManager.DeleteAsync(userExistsWithEmail);
+                    }
+                }
+            }
+            else
             {
                 if(userExistsWithUserName != null)
+                {
                     errors.Add(localizer["There is a user with this username."]);
-
-                if (userExistsWithEmail != null)
-                    errors.Add(localizer["There is a user with this email."]);
-
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    new ResponseModel { Status = "Error", HasError = true, Message = "User already exists!", Errors = errors });
+                    return StatusCode(StatusCodes.Status500InternalServerError,
+                        new ResponseModel { Status = "Error", HasError = true, Message = "User already exists!", Errors = errors });
+                }
             }
 
             ApplicationUser user = new ApplicationUser()
