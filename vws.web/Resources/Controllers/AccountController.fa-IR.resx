@@ -123,6 +123,9 @@
   <data name="Email is invalid." xml:space="preserve">
     <value>ایمیل وارد شده نا معتبر است.</value>
   </data>
+  <data name="Email is not confirmed yet." xml:space="preserve">
+    <value>ایمیل شما هنوز تایید نشده است.</value>
+  </data>
   <data name="Emil confirmation failed." xml:space="preserve">
     <value>تایید ایمیل موفق نبود.</value>
   </data>
