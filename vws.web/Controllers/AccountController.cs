@@ -372,7 +372,9 @@ namespace vws.web.Controllers
         {
             var user = await userManager.FindByEmailAsync(model.Email);
             if (user == null) return false;
-            return true;
+            if (user.EmailConfirmed)
+                return true;
+            return false;
         }
     }
 }
