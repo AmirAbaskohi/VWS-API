@@ -198,13 +198,13 @@ namespace vws.web.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User does not exist!", Errors = errors, HasError = true });
             }
 
+            var timeDiff = user.EmailVerificationSendTime - DateTime.Now;
+
             if (user.EmailConfirmed)
             {
                 errors.Add(localizer["Email already confirmed."]);
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Email already confirmed!", Errors = errors, HasError = true });
             }
-
-            var timeDiff = user.EmailVerificationSendTime - DateTime.Now;
 
             if (user.EmailVerificationCode == model.ValidationCode &&
                 timeDiff.TotalMinutes <= Int16.Parse(configuration["EmailCode:ValidDurationTimeInMinutes"]))
