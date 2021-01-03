@@ -145,6 +145,18 @@ namespace vws.web.Controllers
 
             if (user != null && await userManager.CheckPasswordAsync(user, model.Password))
             {
+                if(user.EmailConfirmed == false)
+                {
+                    var _response = new ResponseModel
+                    {
+                        HasError = true,
+                        Message = "User login failed.",
+                        Status = "Error"
+                    };
+                    _response.AddError(localizer["Email is not confirmed yet."]);
+                    return StatusCode(StatusCodes.Status401Unauthorized, _response);
+                }
+
                 var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]));
 
                 var token = new JwtSecurityToken(
