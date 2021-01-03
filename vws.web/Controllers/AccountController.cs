@@ -67,6 +67,7 @@ namespace vws.web.Controllers
             }
 
             var userExistsWithUserName = await userManager.FindByNameAsync(model.Username);
+
             var userExistsWithEmail = await userManager.FindByEmailAsync(model.Email);
 
             if(userExistsWithEmail != null)
@@ -83,14 +84,9 @@ namespace vws.web.Controllers
                 {
                     if(userExistsWithUserName != null)
                     {
-                        if (model.Username == userExistsWithEmail.UserName)
-                            await userManager.DeleteAsync(userExistsWithEmail);
-                        else
-                        {
-                            errors.Add(localizer["There is a user with this username."]);
-                            return StatusCode(StatusCodes.Status500InternalServerError,
-                                new ResponseModel { Status = "Error", HasError = true, Message = "User already exists!", Errors = errors });
-                        }
+                        errors.Add(localizer["There is a user with this username."]);
+                        return StatusCode(StatusCodes.Status500InternalServerError,
+                            new ResponseModel { Status = "Error", HasError = true, Message = "User already exists!", Errors = errors });
                     }
                     else
                     {
@@ -202,15 +198,15 @@ namespace vws.web.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User does not exist!", Errors = errors, HasError = true });
             }
 
-            var timeDiff = user.EmailVerificationSendTime - DateTime.Now;
-
             if (user.EmailConfirmed)
             {
                 errors.Add(localizer["Email already confirmed."]);
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Email already confirmed!", Errors = errors, HasError = true });
             }
 
-            if(user.EmailVerificationCode == model.ValidationCode &&
+            var timeDiff = user.EmailVerificationSendTime - DateTime.Now;
+
+            if (user.EmailVerificationCode == model.ValidationCode &&
                 timeDiff.TotalMinutes <= Int16.Parse(configuration["EmailCode:ValidDurationTimeInMinutes"]))
             {
                 user.EmailConfirmed = true;
@@ -242,6 +238,13 @@ namespace vws.web.Controllers
                 errors.Add(localizer["User does not exist."]);
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User does not exist!", HasError = true, Errors = errors });
             }
+
+            if (user.EmailConfirmed)
+            {
+                errors.Add(localizer["Email already confirmed."]);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Email already confirmed!", Errors = errors, HasError = true });
+            }
+
             var randomCode = new string(Enumerable.Repeat(configuration["EmailCode:CodeCharSet"], Int16.Parse(configuration["EmailCode:SizeOfCode"])).Select(s => s[random.Next(s.Length)]).ToArray());
 
             user.EmailVerificationSendTime = DateTime.Now;
