@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -153,12 +155,18 @@ namespace vws.web.Controllers
                     return StatusCode(StatusCodes.Status401Unauthorized, _response);
                 }
 
+                var authClaims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Email, user.Email)
+                };
+
                 var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]));
 
                 var token = new JwtSecurityToken(
                     issuer: configuration["JWT:Issuer"],
                     audience: configuration["JWT:Audience"],
-                    expires: DateTime.Now.AddMinutes(2),
+                    expires: DateTime.Now.AddMinutes(10),
+                    claims: authClaims,
                     signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
                     );
 
@@ -375,6 +383,14 @@ namespace vws.web.Controllers
             if (user.EmailConfirmed)
                 return true;
             return false;
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getUserEmail")]
+        public string GetUserEmail()
+        {
+            return User.Claims.First().Value;
         }
     }
 }
