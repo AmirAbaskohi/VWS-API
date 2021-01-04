@@ -67,17 +67,41 @@ namespace vws.web.Controllers
             }
 
             var userExistsWithUserName = await userManager.FindByNameAsync(model.Username);
+
             var userExistsWithEmail = await userManager.FindByEmailAsync(model.Email);
-            if (userExistsWithUserName != null || userExistsWithEmail != null)
+
+            if(userExistsWithEmail != null)
+            {
+                if(userExistsWithEmail.EmailConfirmed)
+                {
+                    errors.Add(localizer["There is a user with this email."]);
+                    if(userExistsWithUserName != null)
+                        errors.Add(localizer["There is a user with this username."]);
+                    return StatusCode(StatusCodes.Status500InternalServerError,
+                        new ResponseModel { Status = "Error", HasError = true, Message = "User already exists!", Errors = errors });
+                }
+                else
+                {
+                    if(userExistsWithUserName != null)
+                    {
+                        errors.Add(localizer["There is a user with this username."]);
+                        return StatusCode(StatusCodes.Status500InternalServerError,
+                            new ResponseModel { Status = "Error", HasError = true, Message = "User already exists!", Errors = errors });
+                    }
+                    else
+                    {
+                        await userManager.DeleteAsync(userExistsWithEmail);
+                    }
+                }
+            }
+            else
             {
                 if(userExistsWithUserName != null)
+                {
                     errors.Add(localizer["There is a user with this username."]);
-
-                if (userExistsWithEmail != null)
-                    errors.Add(localizer["There is a user with this email."]);
-
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    new ResponseModel { Status = "Error", HasError = true, Message = "User already exists!", Errors = errors });
+                    return StatusCode(StatusCodes.Status500InternalServerError,
+                        new ResponseModel { Status = "Error", HasError = true, Message = "User already exists!", Errors = errors });
+                }
             }
 
             ApplicationUser user = new ApplicationUser()
@@ -117,6 +141,18 @@ namespace vws.web.Controllers
 
             if (user != null && await userManager.CheckPasswordAsync(user, model.Password))
             {
+                if(user.EmailConfirmed == false)
+                {
+                    var _response = new ResponseModel
+                    {
+                        HasError = true,
+                        Message = "User login failed.",
+                        Status = "Error"
+                    };
+                    _response.AddError(localizer["Email is not confirmed yet."]);
+                    return StatusCode(StatusCodes.Status401Unauthorized, _response);
+                }
+
                 var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]));
 
                 var token = new JwtSecurityToken(
@@ -170,7 +206,7 @@ namespace vws.web.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Email already confirmed!", Errors = errors, HasError = true });
             }
 
-            if(user.EmailVerificationCode == model.ValidationCode &&
+            if (user.EmailVerificationCode == model.ValidationCode &&
                 timeDiff.TotalMinutes <= Int16.Parse(configuration["EmailCode:ValidDurationTimeInMinutes"]))
             {
                 user.EmailConfirmed = true;
@@ -202,6 +238,13 @@ namespace vws.web.Controllers
                 errors.Add(localizer["User does not exist."]);
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User does not exist!", HasError = true, Errors = errors });
             }
+
+            if (user.EmailConfirmed)
+            {
+                errors.Add(localizer["Email already confirmed."]);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Email already confirmed!", Errors = errors, HasError = true });
+            }
+
             var randomCode = new string(Enumerable.Repeat(configuration["EmailCode:CodeCharSet"], Int16.Parse(configuration["EmailCode:SizeOfCode"])).Select(s => s[random.Next(s.Length)]).ToArray());
 
             user.EmailVerificationSendTime = DateTime.Now;
@@ -329,7 +372,9 @@ namespace vws.web.Controllers
         {
             var user = await userManager.FindByEmailAsync(model.Email);
             if (user == null) return false;
-            return true;
+            if (user.EmailConfirmed)
+                return true;
+            return false;
         }
     }
 }
