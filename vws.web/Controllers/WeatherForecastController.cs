@@ -31,7 +31,7 @@ namespace vws.web.Controllers
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
                 Date = DateTime.Now.AddDays(index),
-                TemperatureC = 69,
+                TemperatureC = 70,
                 Summary = Summaries[rng.Next(Summaries.Length)]
             })
             .ToArray();
