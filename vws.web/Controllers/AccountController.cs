@@ -157,7 +157,7 @@ namespace vws.web.Controllers
 
                 var authClaims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.Email, user.Email)
+                    new Claim("UserEmail", user.Email)
                 };
 
                 var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]));
@@ -390,7 +390,7 @@ namespace vws.web.Controllers
         [Route("getUserEmail")]
         public string GetUserEmail()
         {
-            return User.Claims.First().Value;
+            return User.Claims.First(claim=>claim.Type == "UserEmail").Value;
         }
     }
 }
