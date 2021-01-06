@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using vws.web.Models.Context.chat;
+using vws.web.Domain.chat;
 
 namespace vws.web.Migrations.MessageDb
 {
@@ -18,7 +18,7 @@ namespace vws.web.Migrations.MessageDb
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("ProductVersion", "5.0.1");
 
-            modelBuilder.Entity("vws.web.Models.Context.chat.Message", b =>
+            modelBuilder.Entity("vws.web.Domain.chat.Message", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -26,7 +26,8 @@ namespace vws.web.Migrations.MessageDb
                         .UseIdentityColumn();
 
                     b.Property<string>("Body")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<byte>("MessageTypeId")
                         .HasColumnType("tinyint");
@@ -35,22 +36,22 @@ namespace vws.web.Migrations.MessageDb
 
                     b.HasIndex("MessageTypeId");
 
-                    b.ToTable("Messages");
+                    b.ToTable("Message", "chat");
                 });
 
-            modelBuilder.Entity("vws.web.Models.Context.chat.MessageType", b =>
+            modelBuilder.Entity("vws.web.Domain.chat.MessageType", b =>
                 {
                     b.Property<byte>("Id")
                         .HasColumnType("tinyint");
 
                     b.HasKey("Id");
 
-                    b.ToTable("MessageTypes");
+                    b.ToTable("MessageType", "chat");
                 });
 
-            modelBuilder.Entity("vws.web.Models.Context.chat.Message", b =>
+            modelBuilder.Entity("vws.web.Domain.chat.Message", b =>
                 {
-                    b.HasOne("vws.web.Models.Context.chat.MessageType", "MessageType")
+                    b.HasOne("vws.web.Domain.chat.MessageType", "MessageType")
                         .WithMany()
                         .HasForeignKey("MessageTypeId")
                         .OnDelete(DeleteBehavior.Cascade)

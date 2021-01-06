@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using vws.web.Models.Context;
+using vws.web.Domain.dbo;
 
 namespace vws.web.Migrations
 {
@@ -232,7 +232,7 @@ namespace vws.web.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("vws.web.Models.Context.Culture", b =>
+            modelBuilder.Entity("vws.web.Domain.dbo.Culture", b =>
                 {
                     b.Property<byte>("Id")
                         .HasColumnType("tinyint");
@@ -245,7 +245,7 @@ namespace vws.web.Migrations
                     b.ToTable("Cultures");
                 });
 
-            modelBuilder.Entity("vws.web.Models.Context.UserProfile", b =>
+            modelBuilder.Entity("vws.web.Domain.dbo.UserProfile", b =>
                 {
                     b.Property<int>("UserId")
                         .ValueGeneratedOnAdd()
@@ -317,9 +317,9 @@ namespace vws.web.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("vws.web.Models.Context.UserProfile", b =>
+            modelBuilder.Entity("vws.web.Domain.dbo.UserProfile", b =>
                 {
-                    b.HasOne("vws.web.Models.Context.Culture", "Culture")
+                    b.HasOne("vws.web.Domain.dbo.Culture", "Culture")
                         .WithMany()
                         .HasForeignKey("CultureId")
                         .OnDelete(DeleteBehavior.Cascade)

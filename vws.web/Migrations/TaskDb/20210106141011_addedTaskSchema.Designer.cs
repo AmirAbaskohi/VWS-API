@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using vws.web.Models.Context.task;
+using vws.web.Domain.task;
 
 namespace vws.web.Migrations.TaskDb
 {
@@ -21,7 +21,7 @@ namespace vws.web.Migrations.TaskDb
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("ProductVersion", "5.0.1");
 
-            modelBuilder.Entity("vws.web.Models.Context.task.GeneralTask", b =>
+            modelBuilder.Entity("vws.web.Domain.task.GeneralTask", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()

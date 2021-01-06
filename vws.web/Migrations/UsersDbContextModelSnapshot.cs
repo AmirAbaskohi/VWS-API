@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using vws.web.Models.Context;
+using vws.web.Domain.dbo;
 
 namespace vws.web.Migrations
 {
@@ -230,6 +230,40 @@ namespace vws.web.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
+            modelBuilder.Entity("vws.web.Domain.dbo.Culture", b =>
+                {
+                    b.Property<byte>("Id")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("CultureAbbreviation")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Cultures");
+                });
+
+            modelBuilder.Entity("vws.web.Domain.dbo.UserProfile", b =>
+                {
+                    b.Property<int>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<byte>("CultureId")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("ThemeColorCode")
+                        .HasMaxLength(6)
+                        .HasColumnType("nvarchar(6)");
+
+                    b.HasKey("UserId");
+
+                    b.HasIndex("CultureId");
+
+                    b.ToTable("UserProfiles");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -279,6 +313,17 @@ namespace vws.web.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("vws.web.Domain.dbo.UserProfile", b =>
+                {
+                    b.HasOne("vws.web.Domain.dbo.Culture", "Culture")
+                        .WithMany()
+                        .HasForeignKey("CultureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Culture");
                 });
 #pragma warning restore 612, 618
         }
