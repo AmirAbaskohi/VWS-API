@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -22,7 +22,9 @@ using System.Text;
 using vws.web.Extensions;
 using vws.web.Hubs;
 using vws.web.Models;
-using vws.web.Models.Context;
+using vws.web.Domain.dbo;
+using vws.web.Domain.chat;
+using vws.web.Domain.task;
 using vws.web.Repositories;
 
 namespace vws.web
@@ -105,6 +107,16 @@ namespace vws.web
             services.AddIdentity<ApplicationUser, IdentityRole>()
                     .AddEntityFrameworkStores<UsersDbContext>()
                     .AddDefaultTokenProviders();
+
+            services.AddDbContext<MessageDbContext>(Options =>
+            {
+                Options.UseSqlServer(Configuration.GetConnectionString("SqlServer"));
+            });
+
+            services.AddDbContext<TaskDbContext>(Options =>
+            {
+                Options.UseSqlServer(Configuration.GetConnectionString("SqlServer"));
+            });
 
             services.Configure<IdentityOptions>(opts => {
                 opts.Password.RequiredLength = 8;
