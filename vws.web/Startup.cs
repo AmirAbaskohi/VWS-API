@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
-using Microsoft.AspNetCore.Localization.Routing;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
@@ -14,18 +12,15 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Swashbuckle.Swagger;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using vws.web.Extensions;
 using vws.web.Hubs;
-using vws.web.Models;
-using vws.web.Domain.dbo;
-using vws.web.Domain.chat;
-using vws.web.Domain.task;
 using vws.web.Repositories;
+using vws.web.Domain;
+using vws.web.Domain._base;
 
 namespace vws.web
 {
@@ -98,27 +93,18 @@ namespace vws.web
                     }
                 });
             });
-            
-            services.AddDbContextPool<UsersDbContext>(options =>
+
+            services.AddDbContextPool<VWS_DbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("SqlServer"));
             });
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
-                    .AddEntityFrameworkStores<UsersDbContext>()
+                    .AddEntityFrameworkStores<VWS_DbContext>()
                     .AddDefaultTokenProviders();
 
-            services.AddDbContext<MessageDbContext>(Options =>
+            services.Configure<IdentityOptions>(opts =>
             {
-                Options.UseSqlServer(Configuration.GetConnectionString("SqlServer"));
-            });
-
-            services.AddDbContext<TaskDbContext>(Options =>
-            {
-                Options.UseSqlServer(Configuration.GetConnectionString("SqlServer"));
-            });
-
-            services.Configure<IdentityOptions>(opts => {
                 opts.Password.RequiredLength = 8;
                 opts.Password.RequireNonAlphanumeric = false;
                 opts.Password.RequireLowercase = true;
