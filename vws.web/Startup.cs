@@ -36,6 +36,7 @@ namespace vws.web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<IVWS_DbContext, VWS_DbContext>();
             services.AddLocalization(options => { options.ResourcesPath = "Resources"; });
             services.AddSignalR();
             services.AddCors();
@@ -133,11 +134,7 @@ namespace vws.web
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Secret"]))
                 };
             });
-            // In production, the Angular files will be served from this directory
-            services.AddSpaStaticFiles(configuration =>
-            {
-                configuration.RootPath = "ClientApp/dist";
-            });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -160,6 +157,7 @@ namespace vws.web
                     .AllowCredentials());
 
             app.UseSwagger();
+
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "VWSAPI");
@@ -167,18 +165,17 @@ namespace vws.web
             });
 
             app.UseHttpsRedirection();
-            app.UseStaticFiles();
-            if (!env.IsDevelopment())
-            {
-                app.UseSpaStaticFiles();
-            }
 
+            app.UseStaticFiles();
+           
             var localizeOptions = app.ApplicationServices.GetService<IOptions<RequestLocalizationOptions>>();
+
             app.UseRequestLocalization(localizeOptions.Value);
 
             app.UseRouting();
 
             app.UseAuthentication();
+
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
@@ -189,18 +186,7 @@ namespace vws.web
                 endpoints.MapHub<ChatHub>("/chatHub");
             });
 
-            app.UseSpa(spa =>
-            {
-                // To learn more about options for serving an Angular SPA from ASP.NET Core,
-                // see https://go.microsoft.com/fwlink/?linkid=864501
-
-                spa.Options.SourcePath = "ClientApp";
-
-                if (env.IsDevelopment())
-                {
-                    spa.UseAngularCliServer(npmScript: "start");
-                }
-            });
+          
         }
     }
 }
