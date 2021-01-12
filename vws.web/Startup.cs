@@ -105,11 +105,11 @@ namespace vws.web
 
             services.Configure<IdentityOptions>(opts =>
             {
-                opts.Password.RequiredLength = 8;
-                opts.Password.RequireNonAlphanumeric = false;
-                opts.Password.RequireLowercase = true;
-                opts.Password.RequireUppercase = false;
-                opts.Password.RequireDigit = true;
+                opts.Password.RequiredLength = Int16.Parse(Configuration["Security:PasswordLength"]);
+                opts.Password.RequireNonAlphanumeric = Boolean.Parse(Configuration["Security:RequireNonAlphanumeric"]);
+                opts.Password.RequireLowercase = Boolean.Parse(Configuration["Security:RequireLowercase"]);
+                opts.Password.RequireUppercase = Boolean.Parse(Configuration["Security:RequireUppercase"]);
+                opts.Password.RequireDigit = Boolean.Parse(Configuration["Security:RequireDigit"]);
             });
 
             services.AddScoped<IEmailSender, EmailSender>();
