@@ -27,5 +27,12 @@
     "UserName": "seventasktest",
     "Password": "@dmin123321",
     "EmailAddress": "seventasktest@gmail.com"
+  },
+  "Security": {
+    "PasswordLength": 8,
+    "RequireNonAlphanumeric": false,
+    "RequireDigit": true,
+    "RequireUppercase": false,
+    "RequireLowercase":  true
   }
 }
