@@ -30,7 +30,7 @@ namespace vws.web.Domain._project
         [MaxLength(6)]
         public string Color { get; set; }
 
-        public virtual Status Status { get; set; }
+        public virtual ProjectStatus Status { get; set; }
 
         public virtual ICollection<ProjectMember> ProjectMembers { get; set; }
 

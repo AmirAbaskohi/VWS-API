@@ -5,9 +5,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace vws.web.Domain._project
 {
     [Table("Project_Status")]
-    public class Status
+    public class ProjectStatus
     {
-        public Status()
+        public ProjectStatus()
         {
             Projects = new HashSet<Project>();
         }
