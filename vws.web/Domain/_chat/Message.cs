@@ -22,9 +22,13 @@ namespace vws.web.Domain._chat
         [MaxLength(256)]
         public string FromUserName { get; set; }
 
-        public long ReplyTo { get; set; }
+        public long? ReplyTo { get; set; }
+
+        public long? EditTo { get; set; }
 
         public DateTime SendOn { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         public virtual MessageType MessageType { get; set; }
 
