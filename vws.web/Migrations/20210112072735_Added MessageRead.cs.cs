@@ -2,7 +2,7 @@
 
 namespace vws.web.Migrations
 {
-    public partial class IdentityUserAdded : Migration
+    public partial class AddedMessageReadcs : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

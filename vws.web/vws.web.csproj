@@ -24,4 +24,15 @@
     <PackageReference Include="Swashbuckle.Core" Version="5.6.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Domain\" />
+    <Folder Include="Domain\_chat\" />
+    <Folder Include="Domain\_task\" />
+    <Folder Include="Domain\_base\" />
+    <Folder Include="Domain\_team\" />
+    <Folder Include="Domain\_department\" />
+    <Folder Include="Domain\_project\" />
+    <Folder Include="Domain\_calendar\" />
+    <Folder Include="Services\" />
+  </ItemGroup>
 </Project>
