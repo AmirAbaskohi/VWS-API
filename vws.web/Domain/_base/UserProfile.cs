@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace vws.web.Domain._base
@@ -7,7 +8,7 @@ namespace vws.web.Domain._base
     public class UserProfile
     {
         [Key]
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
 
         public byte CultureId { get; set; }
 

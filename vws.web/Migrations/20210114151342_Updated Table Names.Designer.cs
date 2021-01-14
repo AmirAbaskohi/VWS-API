@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using vws.web.Domain;
 
 namespace vws.web.Migrations
 {
     [DbContext(typeof(VWS_DbContext))]
-    partial class VWS_DbContextModelSnapshot : ModelSnapshot
+    [Migration("20210114151342_Updated Table Names")]
+    partial class UpdatedTableNames
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -245,9 +247,10 @@ namespace vws.web.Migrations
 
             modelBuilder.Entity("vws.web.Domain._base.UserProfile", b =>
                 {
-                    b.Property<Guid>("UserId")
+                    b.Property<int>("UserId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
 
                     b.Property<byte>("CultureId")
                         .HasColumnType("tinyint");
@@ -405,11 +408,14 @@ namespace vws.web.Migrations
                     b.Property<Guid>("UserProfileId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("UserProfileUserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DepartmentId");
 
-                    b.HasIndex("UserProfileId");
+                    b.HasIndex("UserProfileUserId");
 
                     b.ToTable("Department_DepartmentMember");
                 });
@@ -468,11 +474,14 @@ namespace vws.web.Migrations
                     b.Property<Guid>("UserProfileId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("UserProfileUserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ProjectId");
 
-                    b.HasIndex("UserProfileId");
+                    b.HasIndex("UserProfileUserId");
 
                     b.ToTable("Project_ProjectMember");
                 });
@@ -651,12 +660,15 @@ namespace vws.web.Migrations
                     b.Property<Guid>("RemindUserId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("RemindUserUserId")
+                        .HasColumnType("int");
+
                     b.Property<long>("TaskReminderId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RemindUserId");
+                    b.HasIndex("RemindUserUserId");
 
                     b.HasIndex("TaskReminderId");
 
@@ -738,11 +750,14 @@ namespace vws.web.Migrations
                     b.Property<Guid>("UserProfileId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("UserProfileUserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("TeamId");
 
-                    b.HasIndex("UserProfileId");
+                    b.HasIndex("UserProfileUserId");
 
                     b.ToTable("Team_TeamMember");
                 });
@@ -874,9 +889,7 @@ namespace vws.web.Migrations
 
                     b.HasOne("vws.web.Domain._base.UserProfile", "UserProfile")
                         .WithMany()
-                        .HasForeignKey("UserProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserProfileUserId");
 
                     b.Navigation("Department");
 
@@ -904,9 +917,7 @@ namespace vws.web.Migrations
 
                     b.HasOne("vws.web.Domain._base.UserProfile", "UserProfile")
                         .WithMany()
-                        .HasForeignKey("UserProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserProfileUserId");
 
                     b.Navigation("Project");
 
@@ -959,9 +970,7 @@ namespace vws.web.Migrations
                 {
                     b.HasOne("vws.web.Domain._base.UserProfile", "RemindUser")
                         .WithMany()
-                        .HasForeignKey("RemindUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("RemindUserUserId");
 
                     b.HasOne("vws.web.Domain._task.TaskReminder", "TaskReminder")
                         .WithMany("TaskReminderLinkedUsers")
@@ -995,9 +1004,7 @@ namespace vws.web.Migrations
 
                     b.HasOne("vws.web.Domain._base.UserProfile", "UserProfile")
                         .WithMany()
-                        .HasForeignKey("UserProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserProfileUserId");
 
                     b.Navigation("Team");
 

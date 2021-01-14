@@ -93,6 +93,30 @@ namespace vws.web.Domain
 
         public DbSet<GeneralTask> GeneralTasks { get; set; }
 
+        IQueryable<TaskCheckList> IVWS_DbContext.TaskCheckLists { get => TaskCheckLists; }
+
+        public DbSet<TaskCheckList> TaskCheckLists { get; set; }
+
+        IQueryable<TaskCheckListItem> IVWS_DbContext.TaskCheckListItems { get => TaskCheckListItems; }
+
+        public DbSet<TaskCheckListItem> TaskCheckListItems { get; set; }
+
+        IQueryable<TaskCommentTemplate> IVWS_DbContext.TaskCommentTemplates { get => TaskCommentTemplates; }
+
+        public DbSet<TaskCommentTemplate> TaskCommentTemplates { get; set; }
+
+        IQueryable<TaskReminder> IVWS_DbContext.TaskReminders { get => TaskReminders; }
+
+        public DbSet<TaskReminder> TaskReminders { get; set; }
+
+        IQueryable<TaskReminderLinkedUser> IVWS_DbContext.TaskReminderLinkedUsers { get => TaskReminderLinkedUsers; }
+
+        public DbSet<TaskReminderLinkedUser> TaskReminderLinkedUsers { get; set; }
+
+        IQueryable<TaskScheduleType> IVWS_DbContext.TaskScheduleTypes { get => TaskScheduleTypes; }
+
+        public DbSet<TaskScheduleType> TaskScheduleTypes { get; set; }
+
         #endregion
 
         #region team
@@ -109,6 +133,7 @@ namespace vws.web.Domain
 
         public DbSet<TeamType> TeamTypes { get; set; }
 
+
         #endregion
 
 
@@ -117,6 +142,14 @@ namespace vws.web.Domain
             base.OnModelCreating(builder);
         }
 
+        void IVWS_DbContext.Save()
+        {
+            throw new System.NotImplementedException();
+        }
 
+        void IVWS_DbContext.AddMessage(Message message)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

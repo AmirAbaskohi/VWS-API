@@ -86,6 +86,18 @@ namespace vws.web.Domain
 
         public IQueryable<GeneralTask> GeneralTasks { get; }
 
+        public IQueryable<TaskCheckList> TaskCheckLists { get; }
+
+        public IQueryable<TaskCheckListItem> TaskCheckListItems { get; }
+
+        public IQueryable<TaskCommentTemplate> TaskCommentTemplates { get; }
+
+        public IQueryable<TaskReminder> TaskReminders { get; }
+
+        public IQueryable<TaskReminderLinkedUser> TaskReminderLinkedUsers { get; }
+
+        public IQueryable<TaskScheduleType> TaskScheduleTypes { get; }
+
         #endregion
 
         #endregion

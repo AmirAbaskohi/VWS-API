@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using vws.web.Domain;
 
 namespace vws.web.Migrations
 {
     [DbContext(typeof(VWS_DbContext))]
-    partial class VWS_DbContextModelSnapshot : ModelSnapshot
+    [Migration("20210114151827_Removed Id from UserProfile")]
+    partial class RemovedIdfromUserProfile
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -245,18 +247,12 @@ namespace vws.web.Migrations
 
             modelBuilder.Entity("vws.web.Domain._base.UserProfile", b =>
                 {
-                    b.Property<Guid>("UserId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<byte>("CultureId")
                         .HasColumnType("tinyint");
 
                     b.Property<string>("ThemeColorCode")
                         .HasMaxLength(6)
                         .HasColumnType("nvarchar(6)");
-
-                    b.HasKey("UserId");
 
                     b.HasIndex("CultureId");
 
@@ -409,8 +405,6 @@ namespace vws.web.Migrations
 
                     b.HasIndex("DepartmentId");
 
-                    b.HasIndex("UserProfileId");
-
                     b.ToTable("Department_DepartmentMember");
                 });
 
@@ -471,8 +465,6 @@ namespace vws.web.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ProjectId");
-
-                    b.HasIndex("UserProfileId");
 
                     b.ToTable("Project_ProjectMember");
                 });
@@ -656,8 +648,6 @@ namespace vws.web.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RemindUserId");
-
                     b.HasIndex("TaskReminderId");
 
                     b.ToTable("Task_TaskReminderLinkedUser");
@@ -741,8 +731,6 @@ namespace vws.web.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("TeamId");
-
-                    b.HasIndex("UserProfileId");
 
                     b.ToTable("Team_TeamMember");
                 });
@@ -872,15 +860,7 @@ namespace vws.web.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("vws.web.Domain._base.UserProfile", "UserProfile")
-                        .WithMany()
-                        .HasForeignKey("UserProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Department");
-
-                    b.Navigation("UserProfile");
                 });
 
             modelBuilder.Entity("vws.web.Domain._project.Project", b =>
@@ -902,15 +882,7 @@ namespace vws.web.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("vws.web.Domain._base.UserProfile", "UserProfile")
-                        .WithMany()
-                        .HasForeignKey("UserProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Project");
-
-                    b.Navigation("UserProfile");
                 });
 
             modelBuilder.Entity("vws.web.Domain._task.GeneralTask", b =>
@@ -957,19 +929,11 @@ namespace vws.web.Migrations
 
             modelBuilder.Entity("vws.web.Domain._task.TaskReminderLinkedUser", b =>
                 {
-                    b.HasOne("vws.web.Domain._base.UserProfile", "RemindUser")
-                        .WithMany()
-                        .HasForeignKey("RemindUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("vws.web.Domain._task.TaskReminder", "TaskReminder")
                         .WithMany("TaskReminderLinkedUsers")
                         .HasForeignKey("TaskReminderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("RemindUser");
 
                     b.Navigation("TaskReminder");
                 });
@@ -993,15 +957,7 @@ namespace vws.web.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("vws.web.Domain._base.UserProfile", "UserProfile")
-                        .WithMany()
-                        .HasForeignKey("UserProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Team");
-
-                    b.Navigation("UserProfile");
                 });
 
             modelBuilder.Entity("vws.web.Domain._chat.ChannelType", b =>

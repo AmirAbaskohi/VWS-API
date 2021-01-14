@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using vws.web.Domain;
 
 namespace vws.web.Migrations
 {
     [DbContext(typeof(VWS_DbContext))]
-    partial class VWS_DbContextModelSnapshot : ModelSnapshot
+    [Migration("20210114130228_Updated Task Classes")]
+    partial class UpdatedTaskClasses
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -245,9 +247,10 @@ namespace vws.web.Migrations
 
             modelBuilder.Entity("vws.web.Domain._base.UserProfile", b =>
                 {
-                    b.Property<Guid>("UserId")
+                    b.Property<int>("UserId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
 
                     b.Property<byte>("CultureId")
                         .HasColumnType("tinyint");
@@ -340,7 +343,7 @@ namespace vws.web.Migrations
 
                     b.HasIndex("MessageId");
 
-                    b.ToTable("Chat_MessageRead");
+                    b.ToTable("MessageReads");
                 });
 
             modelBuilder.Entity("vws.web.Domain._chat.MessageType", b =>
@@ -405,11 +408,14 @@ namespace vws.web.Migrations
                     b.Property<Guid>("UserProfileId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("UserProfileUserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DepartmentId");
 
-                    b.HasIndex("UserProfileId");
+                    b.HasIndex("UserProfileUserId");
 
                     b.ToTable("Department_DepartmentMember");
                 });
@@ -468,11 +474,14 @@ namespace vws.web.Migrations
                     b.Property<Guid>("UserProfileId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("UserProfileUserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ProjectId");
 
-                    b.HasIndex("UserProfileId");
+                    b.HasIndex("UserProfileUserId");
 
                     b.ToTable("Project_ProjectMember");
                 });
@@ -498,9 +507,6 @@ namespace vws.web.Migrations
                         .HasColumnType("bigint")
                         .UseIdentityColumn();
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
@@ -512,14 +518,8 @@ namespace vws.web.Migrations
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsArchived")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
-
-                    b.Property<Guid>("ModifiedBy")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("ModifiedOn")
                         .HasColumnType("datetime2");
@@ -540,127 +540,6 @@ namespace vws.web.Migrations
                     b.HasIndex("TaskScheduleTypeId");
 
                     b.ToTable("Task_GeneralTask");
-                });
-
-            modelBuilder.Entity("vws.web.Domain._task.TaskCheckList", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .UseIdentityColumn();
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long>("GeneralTaskId")
-                        .HasColumnType("bigint");
-
-                    b.Property<Guid>("ModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("ModifiedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Title")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GeneralTaskId");
-
-                    b.ToTable("Task_TaskCheckList");
-                });
-
-            modelBuilder.Entity("vws.web.Domain._task.TaskCheckListItem", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .UseIdentityColumn();
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("ModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("ModifiedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long>("TaskCheckListId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Title")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TaskCheckListId");
-
-                    b.ToTable("Task_TaskCheckListItem");
-                });
-
-            modelBuilder.Entity("vws.web.Domain._task.TaskCommentTemplate", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .UseIdentityColumn();
-
-                    b.Property<string>("NameMultiLang")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Task_TaskCommentTemplate");
-                });
-
-            modelBuilder.Entity("vws.web.Domain._task.TaskReminder", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .UseIdentityColumn();
-
-                    b.Property<long>("GeneralTaskId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GeneralTaskId");
-
-                    b.ToTable("Task_TaskReminder");
-                });
-
-            modelBuilder.Entity("vws.web.Domain._task.TaskReminderLinkedUser", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .UseIdentityColumn();
-
-                    b.Property<Guid>("RemindUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<long>("TaskReminderId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RemindUserId");
-
-                    b.HasIndex("TaskReminderId");
-
-                    b.ToTable("Task_TaskReminderLinkedUser");
                 });
 
             modelBuilder.Entity("vws.web.Domain._task.TaskScheduleType", b =>
@@ -738,11 +617,14 @@ namespace vws.web.Migrations
                     b.Property<Guid>("UserProfileId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("UserProfileUserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("TeamId");
 
-                    b.HasIndex("UserProfileId");
+                    b.HasIndex("UserProfileUserId");
 
                     b.ToTable("Team_TeamMember");
                 });
@@ -874,9 +756,7 @@ namespace vws.web.Migrations
 
                     b.HasOne("vws.web.Domain._base.UserProfile", "UserProfile")
                         .WithMany()
-                        .HasForeignKey("UserProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserProfileUserId");
 
                     b.Navigation("Department");
 
@@ -904,9 +784,7 @@ namespace vws.web.Migrations
 
                     b.HasOne("vws.web.Domain._base.UserProfile", "UserProfile")
                         .WithMany()
-                        .HasForeignKey("UserProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserProfileUserId");
 
                     b.Navigation("Project");
 
@@ -916,62 +794,10 @@ namespace vws.web.Migrations
             modelBuilder.Entity("vws.web.Domain._task.GeneralTask", b =>
                 {
                     b.HasOne("vws.web.Domain._task.TaskScheduleType", "TaskScheduleType")
-                        .WithMany("GeneralTasks")
+                        .WithMany()
                         .HasForeignKey("TaskScheduleTypeId");
 
                     b.Navigation("TaskScheduleType");
-                });
-
-            modelBuilder.Entity("vws.web.Domain._task.TaskCheckList", b =>
-                {
-                    b.HasOne("vws.web.Domain._task.GeneralTask", "GeneralTask")
-                        .WithMany()
-                        .HasForeignKey("GeneralTaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("GeneralTask");
-                });
-
-            modelBuilder.Entity("vws.web.Domain._task.TaskCheckListItem", b =>
-                {
-                    b.HasOne("vws.web.Domain._task.TaskCheckList", "TaskCheckList")
-                        .WithMany("TaskCheckListItems")
-                        .HasForeignKey("TaskCheckListId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("TaskCheckList");
-                });
-
-            modelBuilder.Entity("vws.web.Domain._task.TaskReminder", b =>
-                {
-                    b.HasOne("vws.web.Domain._task.GeneralTask", "GeneralTask")
-                        .WithMany("TaskReminders")
-                        .HasForeignKey("GeneralTaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("GeneralTask");
-                });
-
-            modelBuilder.Entity("vws.web.Domain._task.TaskReminderLinkedUser", b =>
-                {
-                    b.HasOne("vws.web.Domain._base.UserProfile", "RemindUser")
-                        .WithMany()
-                        .HasForeignKey("RemindUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("vws.web.Domain._task.TaskReminder", "TaskReminder")
-                        .WithMany("TaskReminderLinkedUsers")
-                        .HasForeignKey("TaskReminderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("RemindUser");
-
-                    b.Navigation("TaskReminder");
                 });
 
             modelBuilder.Entity("vws.web.Domain._team.Team", b =>
@@ -995,9 +821,7 @@ namespace vws.web.Migrations
 
                     b.HasOne("vws.web.Domain._base.UserProfile", "UserProfile")
                         .WithMany()
-                        .HasForeignKey("UserProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserProfileUserId");
 
                     b.Navigation("Team");
 
@@ -1027,26 +851,6 @@ namespace vws.web.Migrations
             modelBuilder.Entity("vws.web.Domain._project.ProjectStatus", b =>
                 {
                     b.Navigation("Projects");
-                });
-
-            modelBuilder.Entity("vws.web.Domain._task.GeneralTask", b =>
-                {
-                    b.Navigation("TaskReminders");
-                });
-
-            modelBuilder.Entity("vws.web.Domain._task.TaskCheckList", b =>
-                {
-                    b.Navigation("TaskCheckListItems");
-                });
-
-            modelBuilder.Entity("vws.web.Domain._task.TaskReminder", b =>
-                {
-                    b.Navigation("TaskReminderLinkedUsers");
-                });
-
-            modelBuilder.Entity("vws.web.Domain._task.TaskScheduleType", b =>
-                {
-                    b.Navigation("GeneralTasks");
                 });
 
             modelBuilder.Entity("vws.web.Domain._team.Team", b =>
