@@ -122,6 +122,11 @@ namespace vws.web.Domain
 
         public DbSet<TaskScheduleType> TaskScheduleTypes { get; set; }
 
+        public void AddTask(GeneralTask generalTask)
+        {
+            GeneralTasks.Add(generalTask);
+        }
+
         #endregion
 
         #region team

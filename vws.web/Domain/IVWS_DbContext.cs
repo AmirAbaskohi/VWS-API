@@ -105,6 +105,11 @@ namespace vws.web.Domain
         public IQueryable<TaskScheduleType> TaskScheduleTypes { get; }
 
         #endregion
+        #region methods
+
+        public void AddTask(GeneralTask generalTask);
+
+        #endregion
 
         #endregion
 
