@@ -10,7 +10,7 @@ namespace vws.web.Domain._base
         [Key]
         public Guid UserId { get; set; }
 
-        public byte CultureId { get; set; }
+        public byte? CultureId { get; set; }
 
         [MaxLength(6)]
         public string ThemeColorCode { get; set; }

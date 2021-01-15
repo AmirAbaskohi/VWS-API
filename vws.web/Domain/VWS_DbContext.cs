@@ -33,6 +33,11 @@ namespace vws.web.Domain
 
         public DbSet<Culture> Cultures { get; set; }
 
+        public void AddUserProfile(UserProfile userProfile)
+        {
+            UserProfiles.Add(userProfile);
+        }
+
         #endregion
 
         #region chat
@@ -140,16 +145,6 @@ namespace vws.web.Domain
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-        }
-
-        void IVWS_DbContext.Save()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        void IVWS_DbContext.AddMessage(Message message)
-        {
-            throw new System.NotImplementedException();
         }
     }
 }

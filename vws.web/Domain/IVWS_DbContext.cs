@@ -23,6 +23,12 @@ namespace vws.web.Domain
 
         #endregion
 
+        #region methods
+
+        public void AddUserProfile(UserProfile userProfile);
+
+        #endregion
+
         #endregion
 
 

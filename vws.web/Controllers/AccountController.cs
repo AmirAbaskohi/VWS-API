@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
+using vws.web.Domain;
 using vws.web.Domain._base;
 using vws.web.Models;
 using vws.web.Repositories;
@@ -32,10 +33,12 @@ namespace vws.web.Controllers
         private readonly IStringLocalizer<AccountController> localizer;
         private readonly EmailAddressAttribute emailChecker;
         private readonly Random random;
+        private readonly IVWS_DbContext vwsDbContext;
 
         public AccountController(UserManager<ApplicationUser> _userManager, RoleManager<IdentityRole> _roleManager,
             SignInManager<ApplicationUser> _signInManager, IConfiguration _configuration, IEmailSender _emailSender,
-            IPasswordHasher<ApplicationUser> _passwordHasher, IStringLocalizer<AccountController> _localizer)
+            IPasswordHasher<ApplicationUser> _passwordHasher, IStringLocalizer<AccountController> _localizer,
+            IVWS_DbContext _vwsDbContext)
         {
             userManager = _userManager;
             roleManager = _roleManager;
@@ -46,6 +49,7 @@ namespace vws.web.Controllers
             localizer = _localizer;
             emailChecker = new EmailAddressAttribute();
             random = new Random();
+            vwsDbContext = _vwsDbContext;
         }
 
         [HttpPost]
@@ -122,6 +126,14 @@ namespace vws.web.Controllers
                 }
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User creation failed!", HasError = true, Errors = errors });
             }
+
+            UserProfile userProfile = new UserProfile()
+            {
+                UserId = new Guid(user.Id),
+                ThemeColorCode = ""
+            };
+            vwsDbContext.AddUserProfile(userProfile);
+            vwsDbContext.Save();
 
             return Ok(new ResponseModel { Status = "Success", Message = "User created successfully!", HasError = false });
         }
