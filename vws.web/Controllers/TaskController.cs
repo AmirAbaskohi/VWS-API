@@ -111,6 +111,102 @@ namespace vws.web.Controllers
 
         }
 
+        [HttpPut]
+        [Authorize]
+        [Route("updateTask")]
+        public async Task<IActionResult> UpdateTask([FromBody] UpdateTaskModel model)
+        {
+            var response = new ResponseModel();
+
+            if (model.Description.Length > 2000)
+            {
+                response.HasError = true;
+                response.Status = "Error";
+                response.Message = "Task model data has problem";
+                response.AddError(localizer["Length of description is more than 2000 characters."]);
+            }
+            if (model.Title.Length > 500)
+            {
+                response.HasError = true;
+                response.Status = "Error";
+                response.Message = "Task model data has problem";
+                response.AddError(localizer["Length of title is more than 500 characters."]);
+            }
+            if (model.StartDate.HasValue && model.EndDate.HasValue)
+            {
+                if (model.StartDate > model.EndDate)
+                {
+                    response.HasError = true;
+                    response.Status = "Error";
+                    response.Message = "Task model data has problem";
+                    response.AddError(localizer["Start Date should be before End Date."]);
+                }
+            }
+
+            if (response.HasError)
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+
+            string userEmail = User.Claims.First(claim => claim.Type == "UserEmail").Value;
+            Guid userId = await GetUserId(userEmail);
+
+            var selectedTask = vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == model.TaskId);
+
+            if(selectedTask == null)
+            {
+                response.HasError = true;
+                response.Status = "Error";
+                response.Message = "Task not found";
+                response.AddError(localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status404NotFound, response);
+            }
+            if(selectedTask.CreatedBy != userId)
+            {
+                response.HasError = true;
+                response.Status = "Error";
+                response.Message = "Task access forbidden";
+                response.AddError(localizer["You don't have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            if(model.StartDate.HasValue && !(model.EndDate.HasValue) && selectedTask.EndDate.HasValue)
+            {
+                if(model.StartDate > selectedTask.EndDate)
+                {
+                    response.HasError = true;
+                    response.Status = "Error";
+                    response.Message = "Task model data has problem";
+                    response.AddError(localizer["Start Date should be before End Date."]);
+                    return StatusCode(StatusCodes.Status500InternalServerError, response);
+                }
+            }
+            if (model.EndDate.HasValue && !(model.StartDate.HasValue) && selectedTask.StartDate.HasValue)
+            {
+                if (model.EndDate < selectedTask.StartDate)
+                {
+                    response.HasError = true;
+                    response.Status = "Error";
+                    response.Message = "Task model data has problem";
+                    response.AddError(localizer["Start Date should be before End Date."]);
+                    return StatusCode(StatusCodes.Status500InternalServerError, response);
+                }
+            }
+
+            selectedTask.StartDate = model.StartDate;
+            selectedTask.EndDate = model.EndDate;
+            selectedTask.ModifiedBy = userId;
+            selectedTask.ModifiedOn = DateTime.Now;
+            selectedTask.Title = model.Title;
+            selectedTask.Description = model.Description;
+
+            vwsDbContext.Save();
+
+            response.HasError = false;
+            response.Status = "Success";
+            response.Message = "Task updated successfully!";
+            return Ok(response);
+
+        }
+
         [HttpGet]
         [Authorize]
         [Route("getTasks")]

@@ -126,4 +126,10 @@
   <data name="Start Date should be before End Date." xml:space="preserve">
     <value>Start Date should be before End Date.</value>
   </data>
+  <data name="Task does not exist." xml:space="preserve">
+    <value>Task does not exist.</value>
+  </data>
+  <data name="You don't have access to this task." xml:space="preserve">
+    <value>You don't have access to this task.</value>
+  </data>
 </root>
