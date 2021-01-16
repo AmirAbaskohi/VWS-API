@@ -276,5 +276,44 @@ namespace vws.web.Controllers
             response.Message = "Task updated successfully!";
             return Ok(response);
         }
+
+        [HttpPut]
+        [Authorize]
+        [Route("archiveTask")]
+        public async Task<IActionResult> ArchiveTask(long taskId)
+        {
+            var response = new ResponseModel();
+
+            string userEmail = User.Claims.First(claim => claim.Type == "UserEmail").Value;
+            Guid userId = await GetUserId(userEmail);
+
+            var selectedTask = vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == taskId);
+
+            if (selectedTask == null)
+            {
+                response.HasError = true;
+                response.Status = "Error";
+                response.Message = "Task not found";
+                response.AddError(localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status404NotFound, response);
+            }
+            if (selectedTask.CreatedBy != userId)
+            {
+                response.HasError = true;
+                response.Status = "Error";
+                response.Message = "Task access forbidden";
+                response.AddError(localizer["You don't have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            selectedTask.IsArchived = true;
+
+            vwsDbContext.Save();
+
+            response.HasError = false;
+            response.Status = "Success";
+            response.Message = "Task updated successfully!";
+            return Ok(response);
+        }
     }
 }
