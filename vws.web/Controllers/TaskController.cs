@@ -110,5 +110,36 @@ namespace vws.web.Controllers
             return Ok(response);
 
         }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getTasks")]
+        public async Task<IEnumerable<TaskResponseModel>> GetTasks()
+        {
+            string userEmail = User.Claims.First(claim => claim.Type == "UserEmail").Value;
+            Guid userId = await GetUserId(userEmail);
+
+            List<TaskResponseModel> response = new List<TaskResponseModel>();
+
+            var userTasks = vwsDbContext.GeneralTasks.Where(task => task.CreatedBy == userId);
+            foreach (var userTask in userTasks)
+            {
+                if (userTask.IsDeleted || userTask.IsArchived)
+                    continue;
+
+                response.Add(new TaskResponseModel()
+                {
+                    Title = userTask.Title,
+                    Description = userTask.Description,
+                    StartDate = userTask.StartDate,
+                    EndDate = userTask.EndDate,
+                    CreatedOn = userTask.CreatedOn,
+                    ModifiedOn = userTask.ModifiedOn,
+                    CreatedBy = (await userManager.FindByIdAsync(userTask.CreatedBy.ToString())).UserName,
+                    ModifiedBy = (await userManager.FindByIdAsync(userTask.ModifiedBy.ToString())).UserName
+                });
+            }
+            return response;
+        }
     }
 }
