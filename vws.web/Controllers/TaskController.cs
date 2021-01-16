@@ -53,7 +53,7 @@ namespace vws.web.Controllers
 
         [HttpPost]
         [Authorize]
-        [Route("createTask")]
+        [Route("create")]
         public async Task<IActionResult> CreateTask([FromBody] TaskModel model)
         {
             var response = new ResponseModel();
@@ -113,7 +113,7 @@ namespace vws.web.Controllers
 
         [HttpPut]
         [Authorize]
-        [Route("updateTask")]
+        [Route("update")]
         public async Task<IActionResult> UpdateTask([FromBody] UpdateTaskModel model)
         {
             var response = new ResponseModel();
@@ -209,7 +209,7 @@ namespace vws.web.Controllers
 
         [HttpGet]
         [Authorize]
-        [Route("getTasks")]
+        [Route("get")]
         public async Task<IEnumerable<TaskResponseModel>> GetTasks()
         {
             string userEmail = User.Claims.First(claim => claim.Type == "UserEmail").Value;
@@ -240,7 +240,7 @@ namespace vws.web.Controllers
 
         [HttpPut]
         [Authorize]
-        [Route("deleteTask")]
+        [Route("delete")]
         public async Task<IActionResult> DeleteTask(long taskId)
         {
             var response = new ResponseModel();
@@ -279,7 +279,7 @@ namespace vws.web.Controllers
 
         [HttpPut]
         [Authorize]
-        [Route("archiveTask")]
+        [Route("archive")]
         public async Task<IActionResult> ArchiveTask(long taskId)
         {
             var response = new ResponseModel();
