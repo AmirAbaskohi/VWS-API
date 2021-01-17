@@ -176,7 +176,7 @@ namespace vws.web.Controllers
                 var token = new JwtSecurityToken(
                     issuer: configuration["JWT:Issuer"],
                     audience: configuration["JWT:Audience"],
-                    expires: DateTime.Now.AddMinutes(10),
+                    expires: DateTime.Now.AddMinutes(Int16.Parse(configuration["JWT:ValidTime"])),
                     claims: authClaims,
                     signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
                     );
