@@ -60,14 +60,12 @@ namespace vws.web.Controllers
 
             if(model.Description.Length > 2000)
             {
-                response.HasError = true;
                 response.Status = "Error";
                 response.Message = "Task model data has problem.";
                 response.AddError(localizer["Length of description is more than 2000 characters."]);
             }
             if (model.Title.Length > 500)
             {
-                response.HasError = true;
                 response.Status = "Error";
                 response.Message = "Task model data has problem.";
                 response.AddError(localizer["Length of title is more than 500 characters."]);
@@ -76,7 +74,6 @@ namespace vws.web.Controllers
             {
                 if(model.StartDate > model.EndDate)
                 {
-                    response.HasError = true;
                     response.Status = "Error";
                     response.Message = "Task model data has problem.";
                     response.AddError(localizer["Start Date should be before End Date."]);
@@ -104,7 +101,6 @@ namespace vws.web.Controllers
             vwsDbContext.AddTask(newTask);
             vwsDbContext.Save();
 
-            response.HasError = false;
             response.Status = "Success";
             response.Message = "Task created successfully!";
             return Ok(response);
@@ -120,14 +116,12 @@ namespace vws.web.Controllers
 
             if (model.Description.Length > 2000)
             {
-                response.HasError = true;
                 response.Status = "Error";
                 response.Message = "Task model data has problem";
                 response.AddError(localizer["Length of description is more than 2000 characters."]);
             }
             if (model.Title.Length > 500)
             {
-                response.HasError = true;
                 response.Status = "Error";
                 response.Message = "Task model data has problem";
                 response.AddError(localizer["Length of title is more than 500 characters."]);
@@ -136,7 +130,6 @@ namespace vws.web.Controllers
             {
                 if (model.StartDate > model.EndDate)
                 {
-                    response.HasError = true;
                     response.Status = "Error";
                     response.Message = "Task model data has problem";
                     response.AddError(localizer["Start Date should be before End Date."]);
@@ -153,7 +146,6 @@ namespace vws.web.Controllers
 
             if(selectedTask == null)
             {
-                response.HasError = true;
                 response.Status = "Error";
                 response.Message = "Task not found";
                 response.AddError(localizer["Task does not exist."]);
@@ -161,7 +153,6 @@ namespace vws.web.Controllers
             }
             if(selectedTask.CreatedBy != userId)
             {
-                response.HasError = true;
                 response.Status = "Error";
                 response.Message = "Task access forbidden";
                 response.AddError(localizer["You don't have access to this task."]);
@@ -172,7 +163,6 @@ namespace vws.web.Controllers
             {
                 if(model.StartDate > selectedTask.EndDate)
                 {
-                    response.HasError = true;
                     response.Status = "Error";
                     response.Message = "Task model data has problem";
                     response.AddError(localizer["Start Date should be before End Date."]);
@@ -183,7 +173,6 @@ namespace vws.web.Controllers
             {
                 if (model.EndDate < selectedTask.StartDate)
                 {
-                    response.HasError = true;
                     response.Status = "Error";
                     response.Message = "Task model data has problem";
                     response.AddError(localizer["Start Date should be before End Date."]);
@@ -200,7 +189,6 @@ namespace vws.web.Controllers
 
             vwsDbContext.Save();
 
-            response.HasError = false;
             response.Status = "Success";
             response.Message = "Task updated successfully!";
             return Ok(response);
@@ -252,7 +240,6 @@ namespace vws.web.Controllers
 
             if (selectedTask == null)
             {
-                response.HasError = true;
                 response.Status = "Error";
                 response.Message = "Task not found";
                 response.AddError(localizer["Task does not exist."]);
@@ -260,7 +247,6 @@ namespace vws.web.Controllers
             }
             if (selectedTask.CreatedBy != userId)
             {
-                response.HasError = true;
                 response.Status = "Error";
                 response.Message = "Task access forbidden";
                 response.AddError(localizer["You don't have access to this task."]);
@@ -271,7 +257,6 @@ namespace vws.web.Controllers
             
             vwsDbContext.Save();
 
-            response.HasError = false;
             response.Status = "Success";
             response.Message = "Task updated successfully!";
             return Ok(response);
@@ -291,7 +276,6 @@ namespace vws.web.Controllers
 
             if (selectedTask == null)
             {
-                response.HasError = true;
                 response.Status = "Error";
                 response.Message = "Task not found";
                 response.AddError(localizer["Task does not exist."]);
@@ -299,7 +283,6 @@ namespace vws.web.Controllers
             }
             if (selectedTask.CreatedBy != userId)
             {
-                response.HasError = true;
                 response.Status = "Error";
                 response.Message = "Task access forbidden";
                 response.AddError(localizer["You don't have access to this task."]);
@@ -310,7 +293,6 @@ namespace vws.web.Controllers
 
             vwsDbContext.Save();
 
-            response.HasError = false;
             response.Status = "Success";
             response.Message = "Task updated successfully!";
             return Ok(response);

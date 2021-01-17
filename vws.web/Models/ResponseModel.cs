@@ -14,7 +14,7 @@ namespace vws.web.Models
         public void AddError(string error) => Errors.Add(error);
         public string Status { get; set; }
         public string Message { get; set; }
-        public bool HasError { get; set; }
+        public bool HasError { get => Errors.Count > 0;}
         public List<string> Errors { get; set; }
     }
 }
