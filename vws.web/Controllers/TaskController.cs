@@ -226,7 +226,7 @@ namespace vws.web.Controllers
             return response;
         }
 
-        [HttpPut]
+        [HttpDelete]
         [Authorize]
         [Route("delete")]
         public async Task<IActionResult> DeleteTask(long taskId)
