@@ -19,7 +19,7 @@ namespace vws.web.Controllers
 {
     [Route("{culture:culture}/[controller]")]
     [ApiController]
-    public class TaskController : ControllerBase
+    public class TaskController : BaseController
     {
         private readonly UserManager<ApplicationUser> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
@@ -45,11 +45,11 @@ namespace vws.web.Controllers
             vwsDbContext = _vwsDbContext;
         }
 
-        private async Task<Guid> GetUserId(string email)
-        {
-            var user = await userManager.FindByEmailAsync(email);
-            return new Guid(user.Id);
-        }
+        //private async Task<Guid> GetUserId(string email)
+        //{
+        //    var user = await userManager.FindByEmailAsync(email);
+        //    return new Guid(user.Id);
+        //}
 
         [HttpPost]
         [Authorize]
@@ -58,7 +58,7 @@ namespace vws.web.Controllers
         {
             var response = new ResponseModel();
 
-            if(model.Description.Length > 2000)
+            if (!String.IsNullOrEmpty(model.Description) && model.Description.Length > 2000)
             {
                 response.Status = "Error";
                 response.Message = "Task model data has problem.";
@@ -70,9 +70,9 @@ namespace vws.web.Controllers
                 response.Message = "Task model data has problem.";
                 response.AddError(localizer["Length of title is more than 500 characters."]);
             }
-            if(model.StartDate.HasValue && model.EndDate.HasValue)
+            if (model.StartDate.HasValue && model.EndDate.HasValue)
             {
-                if(model.StartDate > model.EndDate)
+                if (model.StartDate > model.EndDate)
                 {
                     response.Status = "Error";
                     response.Message = "Task model data has problem.";
@@ -80,16 +80,16 @@ namespace vws.web.Controllers
                 }
             }
 
-            if(response.HasError)
+            if (response.HasError)
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
 
-            string userEmail = User.Claims.First(claim => claim.Type == "UserEmail").Value;
-            Guid userId = await GetUserId(userEmail);
+            //string userEmail = User.Claims.First(claim => claim.Type == "UserEmail").Value;
+            Guid userId = LoggedInUserId.Value;
 
             var newTask = new GeneralTask()
             {
                 Title = model.Title,
-                Description = model.Description,
+                Description = model.Description ?? String.Empty,
                 StartDate = model.StartDate,
                 EndDate = model.EndDate,
                 CreatedBy = userId,
@@ -140,18 +140,18 @@ namespace vws.web.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
 
             string userEmail = User.Claims.First(claim => claim.Type == "UserEmail").Value;
-            Guid userId = await GetUserId(userEmail);
+            Guid userId = LoggedInUserId.Value;
 
             var selectedTask = vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == model.TaskId);
 
-            if(selectedTask == null)
+            if (selectedTask == null)
             {
                 response.Status = "Error";
                 response.Message = "Task not found";
                 response.AddError(localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status404NotFound, response);
             }
-            if(selectedTask.CreatedBy != userId)
+            if (selectedTask.CreatedBy != userId)
             {
                 response.Status = "Error";
                 response.Message = "Task access forbidden";
@@ -159,9 +159,9 @@ namespace vws.web.Controllers
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            if(model.StartDate.HasValue && !(model.EndDate.HasValue) && selectedTask.EndDate.HasValue)
+            if (model.StartDate.HasValue && !(model.EndDate.HasValue) && selectedTask.EndDate.HasValue)
             {
-                if(model.StartDate > selectedTask.EndDate)
+                if (model.StartDate > selectedTask.EndDate)
                 {
                     response.Status = "Error";
                     response.Message = "Task model data has problem";
@@ -201,7 +201,7 @@ namespace vws.web.Controllers
         public async Task<IEnumerable<TaskResponseModel>> GetTasks()
         {
             string userEmail = User.Claims.First(claim => claim.Type == "UserEmail").Value;
-            Guid userId = await GetUserId(userEmail);
+            Guid userId = LoggedInUserId.Value;
 
             List<TaskResponseModel> response = new List<TaskResponseModel>();
 
@@ -234,7 +234,7 @@ namespace vws.web.Controllers
             var response = new ResponseModel();
 
             string userEmail = User.Claims.First(claim => claim.Type == "UserEmail").Value;
-            Guid userId = await GetUserId(userEmail);
+            Guid userId = LoggedInUserId.Value;
 
             var selectedTask = vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == taskId);
 
@@ -254,7 +254,7 @@ namespace vws.web.Controllers
             }
 
             selectedTask.IsDeleted = true;
-            
+
             vwsDbContext.Save();
 
             response.Status = "Success";
@@ -270,7 +270,7 @@ namespace vws.web.Controllers
             var response = new ResponseModel();
 
             string userEmail = User.Claims.First(claim => claim.Type == "UserEmail").Value;
-            Guid userId = await GetUserId(userEmail);
+            Guid userId = LoggedInUserId.Value;
 
             var selectedTask = vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == taskId);
 

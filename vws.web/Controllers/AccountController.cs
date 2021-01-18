@@ -22,7 +22,7 @@ namespace vws.web.Controllers
 {
     [Route("{culture:culture}/[controller]")]
     [ApiController]
-    public class AccountController : ControllerBase
+    public class AccountController : BaseController
     {
         private readonly UserManager<ApplicationUser> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
@@ -168,7 +168,8 @@ namespace vws.web.Controllers
 
                 var authClaims = new List<Claim>
                 {
-                    new Claim("UserEmail", user.Email)
+                    new Claim("UserEmail", user.Email),
+                    new Claim("UserId", user.Id)
                 };
 
                 var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]));
@@ -176,7 +177,7 @@ namespace vws.web.Controllers
                 var token = new JwtSecurityToken(
                     issuer: configuration["JWT:Issuer"],
                     audience: configuration["JWT:Audience"],
-                    expires: DateTime.Now.AddMinutes(Int16.Parse(configuration["JWT:ValidTime"])),
+                    expires: DateTime.Now.AddMinutes(Int16.Parse(configuration["JWT:ValidTimeInMinutes"])),
                     claims: authClaims,
                     signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
                     );
