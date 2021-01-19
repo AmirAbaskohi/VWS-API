@@ -11,6 +11,7 @@ namespace vws.web.Domain._team
     {
         public int Id { get; set; }
         public int TeamId { get; set; }
+        public Guid LinkGuid { get; set; }
         public Guid CreatedBy { get; set; }
         public Guid ModifiedBy { get; set; }
         public DateTime CreatedOn { get; set; }
