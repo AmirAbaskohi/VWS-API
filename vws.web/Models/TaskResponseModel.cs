@@ -7,6 +7,7 @@ namespace vws.web.Models
 {
     public class TaskResponseModel
     {
+        public long Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public DateTime CreatedOn { get; set; }

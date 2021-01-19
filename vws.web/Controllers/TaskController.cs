@@ -205,6 +205,7 @@ namespace vws.web.Controllers
 
                 response.Add(new TaskResponseModel()
                 {
+                    Id = userTask.Id,
                     Title = userTask.Title,
                     Description = userTask.Description,
                     StartDate = userTask.StartDate,
