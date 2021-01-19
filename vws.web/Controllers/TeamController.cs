@@ -139,6 +139,7 @@ namespace vws.web.Controllers
             };
 
             await vwsDbContext.AddTeamInviteLinkAsync(newInviteLink);
+            vwsDbContext.Save();
 
             response.Value = inviteLinkGuid.ToString();
             response.Message = "Invite link created successfully!";
