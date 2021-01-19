@@ -137,6 +137,7 @@ namespace vws.web.Domain
         public Task<TeamMember> AddTeamMemberAsync(TeamMember teamMember);
         public Task<TeamInviteLink> AddTeamInviteLinkAsync(TeamInviteLink teamInviteLink);
         public Task<Team> GetTeamAsync(int id);
+        public Task<TeamInviteLink> GetTeamInviteLink(Guid guid);
         public Task<TeamMember> GetTeamMemberAsync(int teamId, Guid memberId);
 
         #endregion

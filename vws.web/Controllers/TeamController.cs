@@ -26,12 +26,12 @@ namespace vws.web.Controllers
         private readonly IEmailSender emailSender;
         private readonly IConfiguration configuration;
         private readonly IPasswordHasher<ApplicationUser> passwordHasher;
-        private readonly IStringLocalizer<TaskController> localizer;
+        private readonly IStringLocalizer<TeamController> localizer;
         private readonly IVWS_DbContext vwsDbContext;
 
         public TeamController(UserManager<ApplicationUser> _userManager, RoleManager<IdentityRole> _roleManager,
             SignInManager<ApplicationUser> _signInManager, IConfiguration _configuration, IEmailSender _emailSender,
-            IPasswordHasher<ApplicationUser> _passwordHasher, IStringLocalizer<TaskController> _localizer,
+            IPasswordHasher<ApplicationUser> _passwordHasher, IStringLocalizer<TeamController> _localizer,
             IVWS_DbContext _vwsDbContext)
         {
             userManager = _userManager;
@@ -141,7 +141,49 @@ namespace vws.web.Controllers
             await vwsDbContext.AddTeamInviteLinkAsync(newInviteLink);
 
             response.Value = inviteLinkGuid.ToString();
-            response.Message = "Invite link created successfully";
+            response.Message = "Invite link created successfully!";
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("joinTeam")]
+        public async Task<IActionResult> JoinTeam(string guid)
+        {
+            var response = new ResponseModel();
+
+            Guid linkGuid = new Guid(guid);
+
+            Guid userId = LoggedInUserId.Value;
+
+            var selectedTeamLink = await vwsDbContext.GetTeamInviteLink(linkGuid);
+
+            if(selectedTeamLink == null)
+            {
+                response.Message = "Unvalid link";
+                response.AddError(localizer["Link is not valid."]);
+                return StatusCode(StatusCodes.Status406NotAcceptable, response);
+            }
+
+            if((await vwsDbContext.GetTeamMemberAsync(selectedTeamLink.TeamId, userId)) != null)
+            {
+                response.Message = "User already joined";
+                response.AddError(localizer["You are already joined the team."]);
+                return StatusCode(StatusCodes.Status208AlreadyReported, response);
+            }
+
+            var newTeamMember = new TeamMember()
+            {
+                TeamId = selectedTeamLink.TeamId,
+                CreatedOn = DateTime.Now,
+                UserProfileId = userId
+            };
+
+            await vwsDbContext.AddTeamMemberAsync(newTeamMember);
+
+            vwsDbContext.Save();
+
+            response.Message = "User added to team successfully!";
             return Ok(response);
         }
     }
