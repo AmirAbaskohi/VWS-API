@@ -84,7 +84,64 @@ namespace vws.web.Controllers
             await vwsDbContext.AddTeamAsync(newTeam);
             vwsDbContext.Save();
 
+            var newTeamMember = new TeamMember()
+            {
+                TeamId = newTeam.Id,
+                UserProfileId = userId,
+                CreatedOn = DateTime.Now
+            };
+
+            await vwsDbContext.AddTeamMemberAsync(newTeamMember);
+            vwsDbContext.Save();
+
             response.Message = "Team created successfully!";
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("createInviteLink")]
+        public async Task<IActionResult> CreateInviteLink(int teamId)
+        {
+            var response = new ResponseModel<string>();
+
+            var selectedTeam = await vwsDbContext.GetTeamAsync(teamId);
+            if(selectedTeam == null)
+            {
+                response.Message = "Team not found";
+                response.AddError(localizer["There is no team with given Id."]);
+                return StatusCode(StatusCodes.Status404NotFound, response);
+            }
+
+            Guid userId = LoggedInUserId.Value;
+
+            var teamMember = await vwsDbContext.GetTeamMemberAsync(teamId, userId);
+            if(teamMember == null)
+            {
+                response.Message = "You are not member of team";
+                response.AddError(localizer["You are not a member of team."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            DateTime creationTime = DateTime.Now;
+
+            Guid inviteLinkGuid = Guid.NewGuid();
+
+            var newInviteLink = new TeamInviteLink()
+            {
+                TeamId = teamId,
+                CreatedBy = userId,
+                ModifiedBy = userId,
+                CreatedOn = creationTime,
+                ModifiedOn = creationTime,
+                LinkGuid = inviteLinkGuid,
+                IsInvoked = false
+            };
+
+            await vwsDbContext.AddTeamInviteLinkAsync(newInviteLink);
+
+            response.Value = inviteLinkGuid.ToString();
+            response.Message = "Invite link created successfully";
             return Ok(response);
         }
     }

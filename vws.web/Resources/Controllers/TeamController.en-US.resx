@@ -123,4 +123,10 @@
   <data name="Length of title is more than 500 characters." xml:space="preserve">
     <value>Length of title is more than 500 characters.</value>
   </data>
+  <data name="There is no team with given Id." xml:space="preserve">
+    <value>There is no team with given Id.</value>
+  </data>
+  <data name="You are not a member of team." xml:space="preserve">
+    <value>You are not a member of team.</value>
+  </data>
 </root>

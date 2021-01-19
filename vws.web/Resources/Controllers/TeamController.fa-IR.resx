@@ -123,4 +123,10 @@
   <data name="Length of title is more than 500 characters." xml:space="preserve">
     <value>تعداد کاراکتر های بخش نام بیشتر از 500 کاراکتر است.</value>
   </data>
+  <data name="There is no team with given Id." xml:space="preserve">
+    <value>تیمی با این آی دی وجود ندارد.</value>
+  </data>
+  <data name="You are not a member of team." xml:space="preserve">
+    <value>شما عضوی از گروه نیستید.</value>
+  </data>
 </root>
