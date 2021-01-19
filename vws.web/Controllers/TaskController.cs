@@ -45,12 +45,6 @@ namespace vws.web.Controllers
             vwsDbContext = _vwsDbContext;
         }
 
-        //private async Task<Guid> GetUserId(string email)
-        //{
-        //    var user = await userManager.FindByEmailAsync(email);
-        //    return new Guid(user.Id);
-        //}
-
         [HttpPost]
         [Authorize]
         [Route("create")]
@@ -83,7 +77,6 @@ namespace vws.web.Controllers
             if (response.HasError)
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
 
-            //string userEmail = User.Claims.First(claim => claim.Type == "UserEmail").Value;
             Guid userId = LoggedInUserId.Value;
 
             var newTask = new GeneralTask()
@@ -98,7 +91,7 @@ namespace vws.web.Controllers
                 ModifiedOn = DateTime.Now
             };
 
-            vwsDbContext.AddTask(newTask);
+            await vwsDbContext.AddTaskAsync(newTask);
             vwsDbContext.Save();
 
             response.Status = "Success";
@@ -142,7 +135,7 @@ namespace vws.web.Controllers
             string userEmail = User.Claims.First(claim => claim.Type == "UserEmail").Value;
             Guid userId = LoggedInUserId.Value;
 
-            var selectedTask = vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == model.TaskId);
+            var selectedTask = await vwsDbContext.GetTaskAsync(model.TaskId);
 
             if (selectedTask == null)
             {
@@ -200,7 +193,6 @@ namespace vws.web.Controllers
         [Route("get")]
         public async Task<IEnumerable<TaskResponseModel>> GetTasks()
         {
-            string userEmail = User.Claims.First(claim => claim.Type == "UserEmail").Value;
             Guid userId = LoggedInUserId.Value;
 
             List<TaskResponseModel> response = new List<TaskResponseModel>();
@@ -233,10 +225,9 @@ namespace vws.web.Controllers
         {
             var response = new ResponseModel();
 
-            string userEmail = User.Claims.First(claim => claim.Type == "UserEmail").Value;
             Guid userId = LoggedInUserId.Value;
 
-            var selectedTask = vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == taskId);
+            var selectedTask = await vwsDbContext.GetTaskAsync(taskId);
 
             if (selectedTask == null)
             {
@@ -269,10 +260,9 @@ namespace vws.web.Controllers
         {
             var response = new ResponseModel();
 
-            string userEmail = User.Claims.First(claim => claim.Type == "UserEmail").Value;
             Guid userId = LoggedInUserId.Value;
 
-            var selectedTask = vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == taskId);
+            var selectedTask = await vwsDbContext.GetTaskAsync(taskId);
 
             if (selectedTask == null)
             {

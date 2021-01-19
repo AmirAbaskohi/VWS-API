@@ -7,6 +7,7 @@ using vws.web.Domain._department;
 using vws.web.Domain._task;
 using vws.web.Domain._team;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace vws.web.Domain
 {
@@ -122,9 +123,15 @@ namespace vws.web.Domain
 
         public DbSet<TaskScheduleType> TaskScheduleTypes { get; set; }
 
-        public void AddTask(GeneralTask generalTask)
+        public async Task<GeneralTask> AddTaskAsync(GeneralTask generalTask)
         {
-            GeneralTasks.Add(generalTask);
+            await GeneralTasks.AddAsync(generalTask);
+            return generalTask;
+        }
+
+        public async Task<GeneralTask> GetTaskAsync(long id)
+        {
+            return await GeneralTasks.FirstOrDefaultAsync(task => task.Id == id);
         }
 
         #endregion

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using vws.web.Domain._base;
 using vws.web.Domain._chat;
 using vws.web.Domain._department;
@@ -107,7 +108,8 @@ namespace vws.web.Domain
         #endregion
         #region methods
 
-        public void AddTask(GeneralTask generalTask);
+        public Task<GeneralTask> AddTaskAsync(GeneralTask generalTask);
+        public Task<GeneralTask> GetTaskAsync(long id);
 
         #endregion
 
