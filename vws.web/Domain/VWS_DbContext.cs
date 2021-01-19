@@ -8,6 +8,7 @@ using vws.web.Domain._task;
 using vws.web.Domain._team;
 using System.Linq;
 using System.Threading.Tasks;
+using System;
 
 namespace vws.web.Domain
 {
@@ -158,6 +159,28 @@ namespace vws.web.Domain
         {
             await Teams.AddAsync(team);
             return team;
+        }
+
+        public async Task<TeamMember> AddTeamMemberAsync(TeamMember teamMember)
+        {
+            await TeamMembers.AddAsync(teamMember);
+            return teamMember;
+        }
+
+        public async Task<TeamInviteLink> AddTeamInviteLinkAsync(TeamInviteLink teamInviteLink)
+        {
+            await TeamInviteLinks.AddAsync(teamInviteLink);
+            return teamInviteLink;
+        }
+
+        public async Task<Team> GetTeamAsync(int id)
+        {
+            return await Teams.FirstOrDefaultAsync(team => team.Id == id);
+        }
+
+        public async Task<TeamMember> GetTeamMemberAsync(int teamId, Guid memberId)
+        {
+            return await TeamMembers.FirstOrDefaultAsync(teamMember => (teamMember.TeamId == teamId && teamMember.UserProfileId == memberId));
         }
 
         #endregion

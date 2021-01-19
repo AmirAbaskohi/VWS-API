@@ -734,6 +734,9 @@ namespace vws.web.Migrations
                     b.Property<bool>("IsInvoked")
                         .HasColumnType("bit");
 
+                    b.Property<Guid>("LinkGuid")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("ModifiedBy")
                         .HasColumnType("uniqueidentifier");
 
