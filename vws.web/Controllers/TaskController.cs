@@ -54,13 +54,11 @@ namespace vws.web.Controllers
 
             if (!String.IsNullOrEmpty(model.Description) && model.Description.Length > 2000)
             {
-                response.Status = "Error";
                 response.Message = "Task model data has problem.";
                 response.AddError(localizer["Length of description is more than 2000 characters."]);
             }
             if (model.Title.Length > 500)
             {
-                response.Status = "Error";
                 response.Message = "Task model data has problem.";
                 response.AddError(localizer["Length of title is more than 500 characters."]);
             }
@@ -68,7 +66,6 @@ namespace vws.web.Controllers
             {
                 if (model.StartDate > model.EndDate)
                 {
-                    response.Status = "Error";
                     response.Message = "Task model data has problem.";
                     response.AddError(localizer["Start Date should be before End Date."]);
                 }
@@ -94,7 +91,6 @@ namespace vws.web.Controllers
             await vwsDbContext.AddTaskAsync(newTask);
             vwsDbContext.Save();
 
-            response.Status = "Success";
             response.Message = "Task created successfully!";
             return Ok(response);
 
@@ -109,13 +105,11 @@ namespace vws.web.Controllers
 
             if (model.Description.Length > 2000)
             {
-                response.Status = "Error";
                 response.Message = "Task model data has problem";
                 response.AddError(localizer["Length of description is more than 2000 characters."]);
             }
             if (model.Title.Length > 500)
             {
-                response.Status = "Error";
                 response.Message = "Task model data has problem";
                 response.AddError(localizer["Length of title is more than 500 characters."]);
             }
@@ -123,7 +117,6 @@ namespace vws.web.Controllers
             {
                 if (model.StartDate > model.EndDate)
                 {
-                    response.Status = "Error";
                     response.Message = "Task model data has problem";
                     response.AddError(localizer["Start Date should be before End Date."]);
                 }
@@ -139,14 +132,12 @@ namespace vws.web.Controllers
 
             if (selectedTask == null)
             {
-                response.Status = "Error";
                 response.Message = "Task not found";
                 response.AddError(localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status404NotFound, response);
             }
             if (selectedTask.CreatedBy != userId)
             {
-                response.Status = "Error";
                 response.Message = "Task access forbidden";
                 response.AddError(localizer["You don't have access to this task."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
@@ -156,7 +147,6 @@ namespace vws.web.Controllers
             {
                 if (model.StartDate > selectedTask.EndDate)
                 {
-                    response.Status = "Error";
                     response.Message = "Task model data has problem";
                     response.AddError(localizer["Start Date should be before End Date."]);
                     return StatusCode(StatusCodes.Status500InternalServerError, response);
@@ -166,7 +156,6 @@ namespace vws.web.Controllers
             {
                 if (model.EndDate < selectedTask.StartDate)
                 {
-                    response.Status = "Error";
                     response.Message = "Task model data has problem";
                     response.AddError(localizer["Start Date should be before End Date."]);
                     return StatusCode(StatusCodes.Status500InternalServerError, response);
@@ -182,7 +171,6 @@ namespace vws.web.Controllers
 
             vwsDbContext.Save();
 
-            response.Status = "Success";
             response.Message = "Task updated successfully!";
             return Ok(response);
 
@@ -232,14 +220,12 @@ namespace vws.web.Controllers
 
             if (selectedTask == null)
             {
-                response.Status = "Error";
                 response.Message = "Task not found";
                 response.AddError(localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status404NotFound, response);
             }
             if (selectedTask.CreatedBy != userId)
             {
-                response.Status = "Error";
                 response.Message = "Task access forbidden";
                 response.AddError(localizer["You don't have access to this task."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
@@ -249,7 +235,6 @@ namespace vws.web.Controllers
 
             vwsDbContext.Save();
 
-            response.Status = "Success";
             response.Message = "Task updated successfully!";
             return Ok(response);
         }
@@ -267,14 +252,12 @@ namespace vws.web.Controllers
 
             if (selectedTask == null)
             {
-                response.Status = "Error";
                 response.Message = "Task not found";
                 response.AddError(localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status404NotFound, response);
             }
             if (selectedTask.CreatedBy != userId)
             {
-                response.Status = "Error";
                 response.Message = "Task access forbidden";
                 response.AddError(localizer["You don't have access to this task."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
@@ -284,7 +267,6 @@ namespace vws.web.Controllers
 
             vwsDbContext.Save();
 
-            response.Status = "Success";
             response.Message = "Task updated successfully!";
             return Ok(response);
         }

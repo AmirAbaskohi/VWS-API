@@ -62,14 +62,14 @@ namespace vws.web.Controllers
             {
                 errors.Add(localizer["Username should not contain @ character."]);
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                    new ResponseModel { Status = "Error", Message = "Username has @ character.", Errors = errors });
+                    new ResponseModel { Message = "Username has @ character.", Errors = errors });
             }
 
             if(!emailChecker.IsValid(model.Email))
             {
                 errors.Add(localizer["Email is invalid."]);
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                    new ResponseModel { Status = "Error", Message = "Invalid Email.", Errors = errors });
+                    new ResponseModel { Message = "Invalid Email.", Errors = errors });
             }
 
             var userExistsWithUserName = await userManager.FindByNameAsync(model.Username);
@@ -84,7 +84,7 @@ namespace vws.web.Controllers
                     if(userExistsWithUserName != null)
                         errors.Add(localizer["There is a user with this username."]);
                     return StatusCode(StatusCodes.Status500InternalServerError,
-                        new ResponseModel { Status = "Error", Message = "User already exists!", Errors = errors });
+                        new ResponseModel { Message = "User already exists!", Errors = errors });
                 }
                 else
                 {
@@ -92,7 +92,7 @@ namespace vws.web.Controllers
                     {
                         errors.Add(localizer["There is a user with this username."]);
                         return StatusCode(StatusCodes.Status500InternalServerError,
-                            new ResponseModel { Status = "Error", Message = "User already exists!", Errors = errors });
+                            new ResponseModel { Message = "User already exists!", Errors = errors });
                     }
                     else
                     {
@@ -106,7 +106,7 @@ namespace vws.web.Controllers
                 {
                     errors.Add(localizer["There is a user with this username."]);
                     return StatusCode(StatusCodes.Status500InternalServerError,
-                        new ResponseModel { Status = "Error", Message = "User already exists!", Errors = errors });
+                        new ResponseModel { Message = "User already exists!", Errors = errors });
                 }
             }
 
@@ -124,7 +124,7 @@ namespace vws.web.Controllers
                 {
                     errors.Add(localizer[error.Description]);
                 }
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User creation failed!", Errors = errors });
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "User creation failed!", Errors = errors });
             }
 
             UserProfile userProfile = new UserProfile()
@@ -135,7 +135,7 @@ namespace vws.web.Controllers
             vwsDbContext.AddUserProfile(userProfile);
             vwsDbContext.Save();
 
-            return Ok(new ResponseModel { Status = "Success", Message = "User created successfully!"});
+            return Ok(new ResponseModel { Message = "User created successfully!"});
         }
 
         [HttpPost]
@@ -159,8 +159,7 @@ namespace vws.web.Controllers
                 {
                     var _response = new ResponseModel
                     {
-                        Message = "User login failed.",
-                        Status = "Error"
+                        Message = "User login failed."
                     };
                     _response.AddError(localizer["Email is not confirmed yet."]);
                     return StatusCode(StatusCodes.Status401Unauthorized, _response);
@@ -190,8 +189,7 @@ namespace vws.web.Controllers
             }
             var response = new ResponseModel
             {
-                Message = "User login failed.",
-                Status = "Error"
+                Message = "User login failed."
             };
             response.AddError(localizer["Password or Usernamed is wrong."]);
             return StatusCode(StatusCodes.Status401Unauthorized, response);
@@ -207,14 +205,14 @@ namespace vws.web.Controllers
             {
                 errors.Add(localizer["Email is invalid."]);
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                    new ResponseModel { Status = "Error", Message = "Invalid Email.", Errors = errors });
+                    new ResponseModel { Message = "Invalid Email.", Errors = errors });
             }
 
             var user = await userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
                 errors.Add(localizer["User does not exist."]);
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User does not exist!", Errors = errors});
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "User does not exist!", Errors = errors});
             }
 
             var timeDiff = user.EmailVerificationSendTime - DateTime.Now;
@@ -222,7 +220,7 @@ namespace vws.web.Controllers
             if (user.EmailConfirmed)
             {
                 errors.Add(localizer["Email already confirmed."]);
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Email already confirmed!", Errors = errors});
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "Email already confirmed!", Errors = errors});
             }
 
             if (user.EmailVerificationCode == model.ValidationCode &&
@@ -231,11 +229,11 @@ namespace vws.web.Controllers
                 user.EmailConfirmed = true;
                 var result = await userManager.UpdateAsync(user);
                 if(result.Succeeded)
-                    return Ok(new ResponseModel { Status = "Success", Message = "Email confirmed successfully!"});
+                    return Ok(new ResponseModel { Message = "Email confirmed successfully!"});
             }
 
             errors.Add(localizer["Emil confirmation failed."]);
-            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Email confirmation failed!", Errors = errors});
+            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "Email confirmation failed!", Errors = errors});
         }
 
         [HttpPost]
@@ -248,20 +246,20 @@ namespace vws.web.Controllers
             {
                 errors.Add(localizer["Email is invalid."]);
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                    new ResponseModel { Status = "Error", Message = "Invalid Email.", Errors = errors });
+                    new ResponseModel { Message = "Invalid Email.", Errors = errors });
             }
 
             var user = await userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
                 errors.Add(localizer["User does not exist."]);
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User does not exist!", Errors = errors });
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "User does not exist!", Errors = errors });
             }
 
             if (user.EmailConfirmed)
             {
                 errors.Add(localizer["Email already confirmed."]);
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Email already confirmed!", Errors = errors});
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "Email already confirmed!", Errors = errors});
             }
 
             var randomCode = new string(Enumerable.Repeat(configuration["EmailCode:CodeCharSet"], Int16.Parse(configuration["EmailCode:SizeOfCode"])).Select(s => s[random.Next(s.Length)]).ToArray());
@@ -274,12 +272,12 @@ namespace vws.web.Controllers
                 string emailErrorMessage;
                 await emailSender.SendEmailAsync(user.Email, "EmailConfirmation", randomCode, configuration, out emailErrorMessage);
                 if(string.IsNullOrEmpty(emailErrorMessage))
-                    return Ok(new ResponseModel { Status = "Success", Message = "Email sent successfully!"});
+                    return Ok(new ResponseModel { Message = "Email sent successfully!"});
                 errors.Add(localizer[emailErrorMessage]);
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Sending email failed!", Errors = errors});
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "Sending email failed!", Errors = errors});
             }
             errors.Add(localizer["Problem happened in sending email."]);
-            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Sending email failed!", Errors = errors});
+            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "Sending email failed!", Errors = errors});
         }
 
         [HttpPost]
@@ -292,14 +290,14 @@ namespace vws.web.Controllers
             {
                 errors.Add(localizer["Email is invalid."]);
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                    new ResponseModel { Status = "Error", Message = "Invalid Email.", Errors = errors });
+                    new ResponseModel { Message = "Invalid Email.", Errors = errors });
             }
 
             var user = await userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
                 errors.Add(localizer["User does not exist."]);
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User does not exist!", Errors = errors });
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "User does not exist!", Errors = errors });
             }
 
             var randomCode = new string(Enumerable.Repeat(configuration["EmailCode:CodeCharSet"], Int16.Parse(configuration["EmailCode:SizeOfCode"])).Select(s => s[random.Next(s.Length)]).ToArray());
@@ -314,12 +312,12 @@ namespace vws.web.Controllers
                 string emailErrorMessage;
                 await emailSender.SendEmailAsync(user.Email, "EmailConfirmation", randomCode, configuration, out emailErrorMessage);
                 if (string.IsNullOrEmpty(emailErrorMessage))
-                    return Ok(new ResponseModel { Status = "Success", Message = "Email sent successfully!"});
+                    return Ok(new ResponseModel { Message = "Email sent successfully!"});
                 errors.Add(localizer[emailErrorMessage]);
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Sending email failed!", Errors = errors});
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "Sending email failed!", Errors = errors });
             }
             errors.Add(localizer["Problem happened in sending email."]);
-            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Sending email failed!", Errors = errors});
+            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "Sending email failed!", Errors = errors });
         }
 
         [HttpPost]
@@ -332,7 +330,7 @@ namespace vws.web.Controllers
             {
                 errors.Add(localizer["Email is invalid."]);
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                    new ResponseModel { Status = "Error",Message = "Invalid Email.", Errors = errors });
+                    new ResponseModel { Message = "Invalid Email.", Errors = errors });
             }
 
             var user = await userManager.FindByEmailAsync(model.Email);
@@ -340,7 +338,7 @@ namespace vws.web.Controllers
             if (user == null)
             {
                 errors.Add(localizer["User does not exist."]);
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User does not exist!", Errors = errors });
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "User does not exist!", Errors = errors });
             }
 
             var timeDiff = user.ResetPasswordSendTime - DateTime.Now;
@@ -348,7 +346,7 @@ namespace vws.web.Controllers
             if (!user.ResetPasswordCodeIsValid)
             {
                 errors.Add(localizer["Request for reset password is not valid. Request for reset password again."]);
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Reset password is not valid!", Errors = errors });
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "Reset password is not valid!", Errors = errors });
             }
 
             if (user.ResetPasswordCode == model.ValidationCode &&
@@ -362,18 +360,18 @@ namespace vws.web.Controllers
                     user.ResetPasswordCodeIsValid = false;
                     var res = await userManager.UpdateAsync(user);
                     if(res.Succeeded == true)
-                        return Ok(new ResponseModel { Status = "Success", Message = "Password changed successfully!"});
+                        return Ok(new ResponseModel { Message = "Password changed successfully!"});
                     errors.Add("Reseting the password was unsuccessful.");
-                    return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Password changing failed!", Errors = errors });
+                    return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "Password changing failed!", Errors = errors });
                 }
                 foreach (var error in result.Errors)
                 {
                     errors.Add(localizer[error.Description]);
                 }
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "New password is not valid!", Errors = errors});
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "New password is not valid!", Errors = errors});
             }
             errors.Add(localizer["Reset password failed. Code is invalid or code validation time is paased."]);
-            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "Password changing failed!", Errors = errors});
+            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "Password changing failed!", Errors = errors});
         }
 
         [HttpPost]

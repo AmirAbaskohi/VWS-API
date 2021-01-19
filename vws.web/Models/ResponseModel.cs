@@ -12,7 +12,7 @@ namespace vws.web.Models
             Errors = new List<string>();
         }
         public void AddError(string error) => Errors.Add(error);
-        public string Status { get; set; }
+        public string Status { get => Errors.Count == 0 ? "Success" : "Error"; }
         public string Message { get; set; }
         public bool HasError { get => Errors.Count > 0;}
         public List<string> Errors { get; set; }
