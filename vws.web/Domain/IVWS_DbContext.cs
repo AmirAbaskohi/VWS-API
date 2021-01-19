@@ -129,6 +129,12 @@ namespace vws.web.Domain
 
         #endregion
 
+        #region methods
+
+        public Task<Team> AddTeamAsync(Team team);
+
+        #endregion
+
         #endregion
 
 

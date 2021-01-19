@@ -76,6 +76,8 @@ namespace vws.web.Controllers
 
             Guid userId = LoggedInUserId.Value;
 
+            DateTime creationTime = DateTime.Now;
+
             var newTask = new GeneralTask()
             {
                 Title = model.Title,
@@ -84,8 +86,8 @@ namespace vws.web.Controllers
                 EndDate = model.EndDate,
                 CreatedBy = userId,
                 ModifiedBy = userId,
-                CreatedOn = DateTime.Now,
-                ModifiedOn = DateTime.Now
+                CreatedOn = creationTime,
+                ModifiedOn = creationTime
             };
 
             await vwsDbContext.AddTaskAsync(newTask);

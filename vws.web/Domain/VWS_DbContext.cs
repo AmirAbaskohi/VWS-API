@@ -150,6 +150,11 @@ namespace vws.web.Domain
 
         public DbSet<TeamType> TeamTypes { get; set; }
 
+        public async Task<Team> AddTeamAsync(Team team)
+        {
+            await Teams.AddAsync(team);
+            return team;
+        }
 
         #endregion
 
