@@ -127,6 +127,8 @@ namespace vws.web.Domain
 
         public IQueryable<TeamType> TeamTypes { get; }
 
+        public IQueryable<TeamInviteLink> TeamInviteLinks { get; }
+
         #endregion
 
         #region methods

@@ -150,6 +150,10 @@ namespace vws.web.Domain
 
         public DbSet<TeamType> TeamTypes { get; set; }
 
+        IQueryable<TeamInviteLink> IVWS_DbContext.TeamInviteLinks { get => TeamInviteLinks; }
+        
+        public DbSet<TeamInviteLink> TeamInviteLinks { get; set; }
+
         public async Task<Team> AddTeamAsync(Team team)
         {
             await Teams.AddAsync(team);
