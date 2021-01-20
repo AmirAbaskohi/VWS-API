@@ -189,9 +189,14 @@ namespace vws.web.Domain
             return await Teams.FirstOrDefaultAsync(team => team.Id == id);
         }
 
-        public async Task<TeamInviteLink> GetTeamInviteLink(Guid guid)
+        public async Task<TeamInviteLink> GetTeamInviteLinkByLinkGuidAsync(Guid guid)
         {
             return await TeamInviteLinks.FirstOrDefaultAsync(teamInviteLink => teamInviteLink.LinkGuid == guid);
+        }
+
+        public async Task<TeamInviteLink> GetTeamInviteLinkByIdAsync(int id)
+        {
+            return await TeamInviteLinks.FirstOrDefaultAsync(teamInviteLink => teamInviteLink.Id == id);
         }
 
         public async Task<TeamMember> GetTeamMemberAsync(int teamId, Guid memberId)
