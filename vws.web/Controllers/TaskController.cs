@@ -209,6 +209,37 @@ namespace vws.web.Controllers
             return response;
         }
 
+        [HttpGet]
+        [Authorize]
+        [Route("getArchived")]
+        public async Task<IEnumerable<TaskResponseModel>> GetArchivedTasks()
+        {
+            Guid userId = LoggedInUserId.Value;
+
+            List<TaskResponseModel> response = new List<TaskResponseModel>();
+
+            var userTasks = vwsDbContext.GeneralTasks.Where(task => task.CreatedBy == userId);
+            foreach (var userTask in userTasks)
+            {
+                if (userTask.IsArchived && !userTask.IsDeleted)
+                {
+                    response.Add(new TaskResponseModel()
+                    {
+                        Id = userTask.Id,
+                        Title = userTask.Title,
+                        Description = userTask.Description,
+                        StartDate = userTask.StartDate,
+                        EndDate = userTask.EndDate,
+                        CreatedOn = userTask.CreatedOn,
+                        ModifiedOn = userTask.ModifiedOn,
+                        CreatedBy = (await userManager.FindByIdAsync(userTask.CreatedBy.ToString())).UserName,
+                        ModifiedBy = (await userManager.FindByIdAsync(userTask.ModifiedBy.ToString())).UserName
+                    });
+                }
+            }
+            return response;
+        }
+
         [HttpDelete]
         [Authorize]
         [Route("delete")]
