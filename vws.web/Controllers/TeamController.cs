@@ -263,12 +263,11 @@ namespace vws.web.Controllers
         [HttpPost]
         [Authorize]
         [Route("isNameOfGroupUsed")]
-        [ValidateAntiForgeryToken]
-        public bool IsNameOfGroupUsed(string name)
+        public bool IsNameOfGroupUsed(NameModel model)
         {
             Guid userId = LoggedInUserId.Value;
 
-            return vwsDbContext.TeamMembers.Any(teamMember => teamMember.UserProfileId == userId && teamMember.Team.Name == name);
+            return vwsDbContext.TeamMembers.Any(teamMember => teamMember.UserProfileId == userId && teamMember.Team.Name == model.Name);
         }
     }
 }
