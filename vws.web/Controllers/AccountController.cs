@@ -265,6 +265,16 @@ namespace vws.web.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "Email already confirmed!", Errors = errors });
             }
 
+            if(user.EmailVerificationSendTime != null)
+            {
+                var timeDiff = DateTime.Now - user.EmailVerificationSendTime;
+                if(timeDiff.TotalDays < 365 && timeDiff.TotalMinutes < Int16.Parse(configuration["EmailCode:EmailTimeDifferenceInMinutes"]))
+                {
+                    errors.Add(localizer["Too many requests."]);
+                    return StatusCode(StatusCodes.Status400BadRequest, new ResponseModel { Message = "Too Many Requests!", Errors = errors });
+                }
+            }
+
             var randomCode = new string(Enumerable.Repeat(configuration["EmailCode:CodeCharSet"], Int16.Parse(configuration["EmailCode:SizeOfCode"])).Select(s => s[random.Next(s.Length)]).ToArray());
 
             user.EmailVerificationSendTime = DateTime.Now;
@@ -301,6 +311,16 @@ namespace vws.web.Controllers
             {
                 errors.Add(localizer["User does not exist."]);
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "User does not exist!", Errors = errors });
+            }
+
+            if (user.ResetPasswordSendTime != null)
+            {
+                var timeDiff = DateTime.Now - user.ResetPasswordSendTime;
+                if (timeDiff.TotalDays < 365 && timeDiff.TotalMinutes < Int16.Parse(configuration["EmailCode:EmailTimeDifferenceInMinutes"]))
+                {
+                    errors.Add(localizer["Too many requests."]);
+                    return StatusCode(StatusCodes.Status400BadRequest, new ResponseModel { Message = "Too Many Requests!", Errors = errors });
+                }
             }
 
             var randomCode = new string(Enumerable.Repeat(configuration["EmailCode:CodeCharSet"], Int16.Parse(configuration["EmailCode:SizeOfCode"])).Select(s => s[random.Next(s.Length)]).ToArray());
