@@ -14,12 +14,13 @@
     "Audience": "VWS App",
     "Issuer": "https://vws.ir",
     "Secret": "ByYM000OLlMQG6VVVp1OH7Xzyr7gHuw1qvUC5dcGt3SNM",
-    "ValidTimeInMinutes":  10
+    "ValidTimeInMinutes": 10
   },
   "EmailCode": {
     "SizeOfCode": 5,
     "ValidDurationTimeInMinutes": 15,
-    "CodeCharSet": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+    "CodeCharSet": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+    "EmailTimeDifferenceInMinutes": 1
   },
   "Angular": {
     "Url": "http://localhost:4200"
