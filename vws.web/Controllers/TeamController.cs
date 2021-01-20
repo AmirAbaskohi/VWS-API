@@ -259,5 +259,16 @@ namespace vws.web.Controllers
             response.Message = "Task updated successfully!";
             return Ok(response);
         }
+
+        [HttpPost]
+        [Authorize]
+        [Route("isNameOfGroupUsed")]
+        [ValidateAntiForgeryToken]
+        public bool IsNameOfGroupUsed(string name)
+        {
+            Guid userId = LoggedInUserId.Value;
+
+            return vwsDbContext.TeamMembers.Any(teamMember => teamMember.UserProfileId == userId && teamMember.Team.Name == name);
+        }
     }
 }

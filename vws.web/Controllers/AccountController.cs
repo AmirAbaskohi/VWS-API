@@ -400,6 +400,7 @@ namespace vws.web.Controllers
 
         [HttpPost]
         [Route("isUserNameInUse")]
+        [ValidateAntiForgeryToken]
         public async Task<bool> IsUserNameInUse(UsernameModel model)
         {
             var user = await userManager.FindByNameAsync(model.Username);
@@ -409,6 +410,7 @@ namespace vws.web.Controllers
 
         [HttpPost]
         [Route("isEmailInUse")]
+        [ValidateAntiForgeryToken]
         public async Task<bool> IsEmailInUse(EmailModel model)
         {
             var user = await userManager.FindByEmailAsync(model.Email);
