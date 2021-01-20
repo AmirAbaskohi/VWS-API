@@ -200,5 +200,32 @@ namespace vws.web.Controllers
             response.Message = "User added to team successfully!";
             return Ok(response);
         }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getLinks")]
+        public async Task<IEnumerable<TeamInviteLinkResponseModel>> GetInviteLinks()
+        {
+            Guid userId = LoggedInUserId.Value;
+
+            List<TeamInviteLinkResponseModel> response = new List<TeamInviteLinkResponseModel>();
+
+            var userTeamInviteLinks = vwsDbContext.TeamInviteLinks.Where(teamInviteLink => teamInviteLink.CreatedBy == userId);
+            foreach (var userTeamInviteLink in userTeamInviteLinks)
+            {
+                response.Add(new TeamInviteLinkResponseModel()
+                {
+                    Id = userTeamInviteLink.Id,
+                    TeamName = (await vwsDbContext.GetTeamAsync(userTeamInviteLink.TeamId)).Name,
+                    IsInvoked = userTeamInviteLink.IsInvoked,
+                    LinkGuid = userTeamInviteLink.LinkGuid.ToString(),
+                    CreatedBy = (await userManager.FindByIdAsync(userTeamInviteLink.CreatedBy.ToString())).UserName,
+                    ModifiedBy = (await userManager.FindByIdAsync(userTeamInviteLink.ModifiedBy.ToString())).UserName,
+                    CreatedOn = userTeamInviteLink.CreatedOn,
+                    ModifiedOn = userTeamInviteLink.ModifiedOn
+                });
+            }
+            return response;
+        }
     }
 }
