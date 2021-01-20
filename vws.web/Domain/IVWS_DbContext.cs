@@ -26,7 +26,11 @@ namespace vws.web.Domain
 
         #region methods
 
-        public void AddUserProfile(UserProfile userProfile);
+        public Task<UserProfile> AddUserProfileAsync(UserProfile userProfile);
+
+        public Task<UserProfile> GetUserProfileAsync(Guid guid);
+
+        public void DeleteUserProfile(UserProfile userProfile);
 
         #endregion
 

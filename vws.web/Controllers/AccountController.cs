@@ -96,7 +96,9 @@ namespace vws.web.Controllers
                     }
                     else
                     {
+                        Guid userId = new Guid(userExistsWithEmail.Id);
                         await userManager.DeleteAsync(userExistsWithEmail);
+                        vwsDbContext.DeleteUserProfile(await vwsDbContext.GetUserProfileAsync(userId));
                     }
                 }
             }
@@ -132,7 +134,7 @@ namespace vws.web.Controllers
                 UserId = new Guid(user.Id),
                 ThemeColorCode = ""
             };
-            vwsDbContext.AddUserProfile(userProfile);
+            await vwsDbContext.AddUserProfileAsync(userProfile);
             vwsDbContext.Save();
 
             return Ok(new ResponseModel { Message = "User created successfully!" });

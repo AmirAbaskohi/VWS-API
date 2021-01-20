@@ -35,9 +35,20 @@ namespace vws.web.Domain
 
         public DbSet<Culture> Cultures { get; set; }
 
-        public void AddUserProfile(UserProfile userProfile)
+        public void DeleteUserProfile(UserProfile userProfile)
         {
-            UserProfiles.Add(userProfile);
+            UserProfiles.Remove(userProfile);
+        }
+
+        public async Task<UserProfile> AddUserProfileAsync(UserProfile userProfile)
+        {
+            await UserProfiles.AddAsync(userProfile);
+            return userProfile;
+        }
+
+        public async Task<UserProfile> GetUserProfileAsync(Guid guid)
+        {
+            return await UserProfiles.FirstOrDefaultAsync(userProfile => userProfile.UserId == guid);
         }
 
         #endregion
