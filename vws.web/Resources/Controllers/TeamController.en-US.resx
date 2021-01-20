@@ -126,6 +126,9 @@
   <data name="Length of title is more than 500 characters." xml:space="preserve">
     <value>Length of title is more than 500 characters.</value>
   </data>
+  <data name="Link does not exist." xml:space="preserve">
+    <value>Link does not exist.</value>
+  </data>
   <data name="Link is not valid" xml:space="preserve">
     <value>Link is not valid</value>
   </data>
@@ -140,5 +143,8 @@
   </data>
   <data name="You are not a member of team." xml:space="preserve">
     <value>You are not a member of team.</value>
+  </data>
+  <data name="You don't have access to this team." xml:space="preserve">
+    <value>You don't have access to this team.</value>
   </data>
 </root>

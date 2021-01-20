@@ -119,7 +119,7 @@ namespace vws.web.Controllers
             var response = new ResponseModel<string>();
 
             var selectedTeam = await vwsDbContext.GetTeamAsync(teamId);
-            if(selectedTeam == null)
+            if (selectedTeam == null)
             {
                 response.Message = "Team not found";
                 response.AddError(localizer["There is no team with given Id."]);
@@ -129,7 +129,7 @@ namespace vws.web.Controllers
             Guid userId = LoggedInUserId.Value;
 
             var teamMember = await vwsDbContext.GetTeamMemberAsync(teamId, userId);
-            if(teamMember == null)
+            if (teamMember == null)
             {
                 response.Message = "You are not member of team";
                 response.AddError(localizer["You are not a member of team."]);
@@ -161,7 +161,7 @@ namespace vws.web.Controllers
 
         [HttpPost]
         [Authorize]
-        [Route("joinTeam")]
+        [Route("join")]
         public async Task<IActionResult> JoinTeam(string guid)
         {
             var response = new ResponseModel();
@@ -170,16 +170,16 @@ namespace vws.web.Controllers
 
             Guid userId = LoggedInUserId.Value;
 
-            var selectedTeamLink = await vwsDbContext.GetTeamInviteLink(linkGuid);
+            var selectedTeamLink = await vwsDbContext.GetTeamInviteLinkByLinkGuidAsync(linkGuid);
 
-            if(selectedTeamLink == null)
+            if (selectedTeamLink == null || selectedTeamLink.IsInvoked == true)
             {
                 response.Message = "Unvalid link";
                 response.AddError(localizer["Link is not valid."]);
                 return StatusCode(StatusCodes.Status406NotAcceptable, response);
             }
 
-            if((await vwsDbContext.GetTeamMemberAsync(selectedTeamLink.TeamId, userId)) != null)
+            if ((await vwsDbContext.GetTeamMemberAsync(selectedTeamLink.TeamId, userId)) != null)
             {
                 response.Message = "User already joined";
                 response.AddError(localizer["You are already joined the team."]);
@@ -226,6 +226,38 @@ namespace vws.web.Controllers
                 });
             }
             return response;
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("invokeLink")]
+        public async Task<IActionResult> InvokeLink(int id)
+        {
+            var response = new ResponseModel();
+
+            Guid userId = LoggedInUserId.Value;
+
+            var selectedInviteLink = await vwsDbContext.GetTeamInviteLinkByIdAsync(id);
+
+            if (selectedInviteLink == null)
+            {
+                response.Message = "Link not found";
+                response.AddError(localizer["Link does not exist."]);
+                return StatusCode(StatusCodes.Status404NotFound, response);
+            }
+            if (selectedInviteLink.CreatedBy != userId)
+            {
+                response.Message = "Team access forbidden";
+                response.AddError(localizer["You don't have access to this team."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            selectedInviteLink.IsInvoked = true;
+
+            vwsDbContext.Save();
+
+            response.Message = "Task updated successfully!";
+            return Ok(response);
         }
     }
 }

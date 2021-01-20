@@ -126,6 +126,9 @@
   <data name="Length of title is more than 500 characters." xml:space="preserve">
     <value>تعداد کاراکتر های بخش نام بیشتر از 500 کاراکتر است.</value>
   </data>
+  <data name="Link does not exist." xml:space="preserve">
+    <value>لینک وجود ندارد.</value>
+  </data>
   <data name="Link is not valid" xml:space="preserve">
     <value>لینک معتبر نیست.</value>
   </data>
@@ -140,5 +143,8 @@
   </data>
   <data name="You are not a member of team." xml:space="preserve">
     <value>شما عضوی از تیم نیستید.</value>
+  </data>
+  <data name="You don't have access to this team." xml:space="preserve">
+    <value>شما به این تیم دسترسی ندارید.</value>
   </data>
 </root>
