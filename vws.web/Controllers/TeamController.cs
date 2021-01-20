@@ -61,18 +61,31 @@ namespace vws.web.Controllers
                 response.Message = "Team model data has problem.";
                 response.AddError(localizer["Length of title is more than 500 characters."]);
             }
+            if (model.Color.Length > 6)
+            {
+                response.Message = "Team model data has problem.";
+                response.AddError(localizer["Length of color is more than 6 characters."]);
+            }
 
             if (response.HasError)
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
 
             Guid userId = LoggedInUserId.Value;
 
+            var hasTeamWithSameName = vwsDbContext.TeamMembers.Any(teamMember => teamMember.UserProfileId == userId && teamMember.Team.Name == model.Name);
+            if (hasTeamWithSameName)
+            {
+                response.Message = "Team model data has problem.";
+                response.AddError(localizer["You are a member of a team with that name."]);
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
+
             DateTime creationTime = DateTime.Now;
 
             var newTeam = new Team()
             {
                 Name = model.Name,
-                TeamTypeId = model.TeamTypeId,
+                TeamTypeId = 1,
                 Description = model.Description,
                 Color = model.Color,
                 CreatedOn = creationTime,

@@ -8,8 +8,6 @@ namespace vws.web.Models
 {
     public class TeamModel
     {
-        public byte TeamTypeId { get; set; }
-
         [Required]
         public string Name { get; set; }
         public string Description { get; set; }

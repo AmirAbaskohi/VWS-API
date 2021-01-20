@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Length of color is more than 6 characters." xml:space="preserve">
+    <value>تعداد کاراکتر بخش رنگ بیشتر از 6 کاراکتر است.</value>
+  </data>
   <data name="Length of description is more than 2000 characters." xml:space="preserve">
     <value>تعداد کاراکتر های بخش توضیحات بیشتر از 2000 کاراکتر است.</value>
   </data>
@@ -128,6 +131,9 @@
   </data>
   <data name="There is no team with given Id." xml:space="preserve">
     <value>تیمی با این آی دی وجود ندارد.</value>
+  </data>
+  <data name="You are a member of a team with that name." xml:space="preserve">
+    <value>شما عضو تیمی با همین نام هستید.</value>
   </data>
   <data name="You are already joined the team." xml:space="preserve">
     <value>شما هم اکنون در تیم عضو هستید.</value>
