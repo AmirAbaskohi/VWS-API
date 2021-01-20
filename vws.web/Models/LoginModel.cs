@@ -14,4 +14,12 @@ namespace vws.web.Models
         public string Password { get; set; }
         public bool? RememberMe { get; set; }
     }
+
+    public class LoginResponseModel
+    {
+        public string Token { get; set; }
+        
+        public DateTime ValidTo{ get; set; }
+
+    }
 }
