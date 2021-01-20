@@ -227,5 +227,37 @@ namespace vws.web.Controllers
             }
             return response;
         }
+
+        [HttpPut]
+        [Authorize]
+        [Route("invokeLink")]
+        public async Task<IActionResult> InvokeLink(int id)
+        {
+            var response = new ResponseModel();
+
+            Guid userId = LoggedInUserId.Value;
+
+            var selectedInviteLink = await vwsDbContext.GetTeamInviteLinkByIdAsync(id);
+
+            if (selectedInviteLink == null)
+            {
+                response.Message = "Link not found";
+                response.AddError(localizer["Link does not exist."]);
+                return StatusCode(StatusCodes.Status404NotFound, response);
+            }
+            if (selectedInviteLink.CreatedBy != userId)
+            {
+                response.Message = "Team access forbidden";
+                response.AddError(localizer["You don't have access to this team."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            selectedInviteLink.IsInvoked = true;
+
+            vwsDbContext.Save();
+
+            response.Message = "Task updated successfully!";
+            return Ok(response);
+        }
     }
 }
