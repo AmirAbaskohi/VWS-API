@@ -172,7 +172,7 @@ namespace vws.web.Controllers
 
             var selectedTeamLink = await vwsDbContext.GetTeamInviteLink(linkGuid);
 
-            if(selectedTeamLink == null)
+            if(selectedTeamLink == null || selectedTeamLink.IsInvoked == true)
             {
                 response.Message = "Unvalid link";
                 response.AddError(localizer["Link is not valid."]);
