@@ -99,6 +99,7 @@ namespace vws.web.Controllers
                         Guid userId = new Guid(userExistsWithEmail.Id);
                         await userManager.DeleteAsync(userExistsWithEmail);
                         vwsDbContext.DeleteUserProfile(await vwsDbContext.GetUserProfileAsync(userId));
+                        vwsDbContext.Save();
                     }
                 }
             }
