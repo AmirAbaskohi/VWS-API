@@ -171,8 +171,8 @@ namespace vws.web.Controllers
                 var authClaims = new List<Claim>
                 {
                     new Claim("UserEmail", user.Email),
-                    new Claim("UserId", user.Id),
                     new Claim("UserName", user.UserName),
+                    new Claim("UserId", user.Id),
                 };
 
                 var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]));
