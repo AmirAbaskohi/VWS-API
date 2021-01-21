@@ -91,7 +91,8 @@ namespace vws.web.Controllers
                 CreatedOn = creationTime,
                 CreatedBy = userId,
                 ModifiedOn = creationTime,
-                ModifiedBy = userId
+                ModifiedBy = userId,
+                Guid = Guid.NewGuid()
             };
 
             await vwsDbContext.AddTeamAsync(newTeam);

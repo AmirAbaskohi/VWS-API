@@ -87,7 +87,8 @@ namespace vws.web.Controllers
                 CreatedBy = userId,
                 ModifiedBy = userId,
                 CreatedOn = creationTime,
-                ModifiedOn = creationTime
+                ModifiedOn = creationTime,
+                Guid = Guid.NewGuid()
             };
 
             await vwsDbContext.AddTaskAsync(newTask);
