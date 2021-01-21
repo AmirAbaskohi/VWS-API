@@ -17,6 +17,8 @@ namespace vws.web.Domain._team
 
         public int Id { get; set; }
 
+        public Guid Guid { get; set; }
+
         public byte TeamTypeId { get; set; }
 
         [MaxLength(500)]

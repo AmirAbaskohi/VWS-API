@@ -16,6 +16,8 @@ namespace vws.web.Domain._task
 
         public long Id { get; set; }
 
+        public Guid Guid { get; set; }
+
         [Required, MaxLength(500, ErrorMessage = "Max allowed length is 500 char")]
         public string Title { get; set; }
 

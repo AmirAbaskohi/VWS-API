@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using vws.web.Domain._team;
@@ -14,6 +15,8 @@ namespace vws.web.Domain._department
         }
 
         public int Id { get; set; }
+
+        public Guid Guid { get; set; }
 
         public int TeamId { get; set; }
 

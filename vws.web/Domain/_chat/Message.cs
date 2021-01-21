@@ -17,7 +17,7 @@ namespace vws.web.Domain._chat
 
         public byte ChannelTypeId { get; set; }
 
-        public int ChannelId { get; set; }
+        public Guid ChannelId { get; set; }
 
         [MaxLength(256)]
         public string FromUserName { get; set; }

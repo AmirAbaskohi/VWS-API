@@ -15,6 +15,8 @@ namespace vws.web.Domain._project
 
         public int Id { get; set; }
 
+        public Guid Guid { get; set; }
+
         [MaxLength(500)]
         public string Name { get; set; }
 
