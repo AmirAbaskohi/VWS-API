@@ -228,6 +228,34 @@ namespace vws.web.Controllers
             return response;
         }
 
+        [HttpGet]
+        [Authorize]
+        [Route("get")]
+        public async Task<IEnumerable<TeamResponseModel>> GetTeam()
+        {
+            Guid userId = LoggedInUserId.Value;
+
+            List<TeamResponseModel> response = new List<TeamResponseModel>();
+
+            var userTeams = vwsDbContext.GetUserTeams(userId);
+            foreach (var userTeam in userTeams)
+            {
+                response.Add(new TeamResponseModel()
+                {
+                    Id = userTeam.Id,
+                    TeamTypeId = userTeam.TeamTypeId,
+                    Name = userTeam.Name,
+                    Description = userTeam.Description,
+                    Color = userTeam.Color,
+                    CreatedBy = (await userManager.FindByIdAsync(userTeam.CreatedBy.ToString())).UserName,
+                    ModifiedBy = (await userManager.FindByIdAsync(userTeam.ModifiedBy.ToString())).UserName,
+                    CreatedOn = userTeam.CreatedOn,
+                    ModifiedOn = userTeam.ModifiedOn
+                });
+            }
+            return response;
+        }
+
         [HttpPut]
         [Authorize]
         [Route("invokeLink")]
