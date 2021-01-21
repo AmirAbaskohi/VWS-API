@@ -22,21 +22,26 @@ namespace vws.web.Hubs
 
         private string LoggedInUserName
         {
-            get { return Context.User.Identity.Name; }
+            get { return Context.User.Claims.FirstOrDefault(c => c.Type == "UserName").Value; }
         }
 
-        public async Task SendMessage(string message)
+        private Guid LoggedInUserId
         {
-            var User = LoggedInUserName;
+            get { return Guid.Parse(Context.User.Claims.FirstOrDefault(c => c.Type == "UserId").Value); }
+        }
+
+
+        public async Task SendMessage(string message, byte channelTypeId, int channelId, byte messageTypeId, long? replyTo = null)
+        {
             var m = new Domain._chat.Message
             {
                 Body = message,
                 SendOn = DateTime.Now,
-                ChannelId = 1,
-                ChannelTypeId = 1,
-                FromUserName = "masan",
-                MessageTypeId = 1,
-                //ReplyTo
+                ChannelId = channelId,
+                ChannelTypeId = channelTypeId,
+                FromUserName = LoggedInUserName,
+                MessageTypeId = messageTypeId,
+                ReplyTo = replyTo,
             };
             _db.AddMessage(m);
             _db.Save();

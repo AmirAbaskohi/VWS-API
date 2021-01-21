@@ -9,6 +9,7 @@ using vws.web.Domain._team;
 using System.Linq;
 using System.Threading.Tasks;
 using System;
+using System.Collections.Generic;
 
 namespace vws.web.Domain
 {
@@ -87,6 +88,12 @@ namespace vws.web.Domain
 
         public DbSet<DepartmentMember> DepartmentMembers { get; set; }
 
+        public IQueryable<Department> GetUserDepartments(Guid userId)
+        {
+            HashSet<int> DepartmentIds = DepartmentMembers.Where(departmentMember => departmentMember.UserProfileId == userId).Select(x => x.DepartmentId).ToHashSet<int>();
+            return Departments.Where(department=> DepartmentIds.Contains(department.Id));
+        }
+
         #endregion
 
         #region project
@@ -102,6 +109,13 @@ namespace vws.web.Domain
         IQueryable<ProjectMember> IVWS_DbContext.ProjectMembers { get => ProjectMembers; }
 
         public DbSet<ProjectMember> ProjectMembers { get; set; }
+
+        public IQueryable<Project> GetUserProjects(Guid userId)
+        {
+            HashSet<int> ProjectIds = ProjectMembers.Where(projectMember => projectMember.UserProfileId == userId).Select(x => x.ProjectId).ToHashSet<int>();
+            return Projects.Where(project => ProjectIds.Contains(project.Id));
+        }
+
 
         #endregion
 
@@ -163,7 +177,7 @@ namespace vws.web.Domain
         public DbSet<TeamType> TeamTypes { get; set; }
 
         IQueryable<TeamInviteLink> IVWS_DbContext.TeamInviteLinks { get => TeamInviteLinks; }
-        
+
         public DbSet<TeamInviteLink> TeamInviteLinks { get; set; }
 
         public async Task<Team> AddTeamAsync(Team team)
@@ -202,6 +216,12 @@ namespace vws.web.Domain
         public async Task<TeamMember> GetTeamMemberAsync(int teamId, Guid memberId)
         {
             return await TeamMembers.FirstOrDefaultAsync(teamMember => (teamMember.TeamId == teamId && teamMember.UserProfileId == memberId));
+        }
+
+        public IQueryable<Team> GetUserTeams(Guid userId)
+        {
+            HashSet<int> TeamIds = TeamMembers.Where(teamMember => teamMember.UserProfileId == userId).Select(x => x.TeamId).ToHashSet<int>();
+            return Teams.Where(team => TeamIds.Contains(team.Id));
         }
 
         #endregion

@@ -72,6 +72,12 @@ namespace vws.web.Domain
 
         #endregion
 
+        #region methods
+
+        public IQueryable<Department> GetUserDepartments(Guid userId);
+
+        #endregion
+
         #endregion
 
 
@@ -84,6 +90,12 @@ namespace vws.web.Domain
         public IQueryable<ProjectStatus> ProjectStatuses { get; }
 
         public IQueryable<ProjectMember> ProjectMembers { get; }
+
+        #endregion
+
+        #region methods
+
+        public IQueryable<Project> GetUserProjects(Guid userId);
 
         #endregion
 
@@ -144,6 +156,8 @@ namespace vws.web.Domain
         public Task<TeamInviteLink> GetTeamInviteLinkByLinkGuidAsync(Guid guid);
         public Task<TeamInviteLink> GetTeamInviteLinkByIdAsync(int id);
         public Task<TeamMember> GetTeamMemberAsync(int teamId, Guid memberId);
+        public IQueryable<Team> GetUserTeams(Guid userId);
+
 
         #endregion
 
