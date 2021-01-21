@@ -31,7 +31,7 @@ namespace vws.web.Hubs
         }
 
 
-        public async Task SendMessage(string message, byte channelTypeId, int channelId, byte messageTypeId, long? replyTo = null)
+        public async Task SendMessage(string message, byte channelTypeId, Guid channelId, byte messageTypeId, long? replyTo = null)
         {
             var m = new Domain._chat.Message
             {

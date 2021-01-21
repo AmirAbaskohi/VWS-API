@@ -4,9 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using vws.web.Domain;
+using vws.web.Domain._base;
 using vws.web.Domain._department;
 using vws.web.Domain._project;
 using vws.web.Domain._team;
@@ -19,19 +21,22 @@ namespace vws.web.Controllers.Chat
     [ApiController]
     public class ChannelController : BaseController
     {
-        private readonly IStringLocalizer<TaskController> localizer;
+        private readonly IStringLocalizer<ChannelController> localizer;
         private readonly IVWS_DbContext vwsDbContext;
-        public ChannelController(IStringLocalizer<TaskController> _localizer,
-                                 IVWS_DbContext _vwsDbContext)
+        private readonly UserManager<ApplicationUser> userManager;
+
+        public ChannelController(IStringLocalizer<ChannelController> _localizer,
+                                 IVWS_DbContext _vwsDbContext, UserManager<ApplicationUser> _userManager)
         {
-            _localizer = localizer;
-            _vwsDbContext = vwsDbContext;
+            localizer = _localizer;
+            vwsDbContext = _vwsDbContext;
+            userManager = _userManager;
         }
 
         [HttpPost]
         [Authorize]
         [Route("getAll")]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
             //todo: improve performance (user task&thread for concurrency)
             List<ChannelResponseModel> channelResponseModels = new List<ChannelResponseModel>();
@@ -39,10 +44,22 @@ namespace vws.web.Controllers.Chat
             List<Team> userTeams = vwsDbContext.GetUserTeams(LoggedInUserId.Value).ToList();
             List<Project> userProjects = vwsDbContext.GetUserProjects(LoggedInUserId.Value).ToList();
             List<Department> userDepartments = vwsDbContext.GetUserDepartments(LoggedInUserId.Value).ToList();
+            List<UserProfile> userTeamMates = vwsDbContext.TeamMembers
+                .Where(teamMember => userTeams.Select(userTeam => userTeam.Id).Contains(teamMember.TeamId))
+                .Select(teamMember => teamMember.UserProfile).Distinct().ToList();
+            userTeamMates.Remove(await vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value));
+
+            userTeamMates.ForEach(async userTeamMate => channelResponseModels.Add(new ChannelResponseModel
+            {
+                Guid = userTeamMate.UserId,
+                ChannelTypeId = 1,
+                LogoUrl = "http://app.seventask.com/assets/Images/logo.png",
+                Title = (await userManager.FindByIdAsync(userTeamMate.UserId.ToString())).UserName
+            }));
 
             channelResponseModels.AddRange(userTeams.Select(userTeam => new ChannelResponseModel
             {
-                Id = userTeam.Id,
+                Guid = userTeam.Guid,
                 ChannelTypeId = 2,
                 LogoUrl = "http://app.seventask.com/assets/Images/logo.png",
                 Title = userTeam.Name
@@ -50,7 +67,7 @@ namespace vws.web.Controllers.Chat
 
             channelResponseModels.AddRange(userProjects.Select(userProject => new ChannelResponseModel
             {
-                Id = userProject.Id,
+                Guid = userProject.Guid,
                 ChannelTypeId = 3,
                 LogoUrl = "http://app.seventask.com/assets/Images/logo.png",
                 Title = userProject.Name
@@ -58,7 +75,7 @@ namespace vws.web.Controllers.Chat
 
             channelResponseModels.AddRange(userDepartments.Select(userDepartment => new ChannelResponseModel
             {
-                Id = userDepartment.Id,
+                Guid = userDepartment.Guid,
                 ChannelTypeId = 4,
                 LogoUrl = "http://app.seventask.com/assets/Images/logo.png",
                 Title = userDepartment.Name
