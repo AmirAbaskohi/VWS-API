@@ -22,7 +22,7 @@ namespace vws.web.Domain
 
         }
 
-        public DatabaseFacade DatabaseFacade { get => this.DatabaseFacade; }
+        public DatabaseFacade DatabaseFacade { get => Database; }
 
         public void Save()
         {
