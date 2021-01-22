@@ -186,7 +186,19 @@ namespace vws.web
                 endpoints.MapHub<ChatHub>("/chatHub");
             });
 
-          
+
+            // Automatically Create database and tables and do the migrations
+            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+            {
+                var context = serviceScope.ServiceProvider.GetRequiredService<IVWS_DbContext>();
+                context.DatabaseFacade.Migrate();
+
+                //seed data:
+
+
+            }
+
+
         }
     }
 }

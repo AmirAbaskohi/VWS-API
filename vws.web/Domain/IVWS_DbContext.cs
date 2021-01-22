@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using vws.web.Domain._base;
 using vws.web.Domain._chat;
 using vws.web.Domain._department;
@@ -12,6 +13,8 @@ namespace vws.web.Domain
 {
     public interface IVWS_DbContext
     {
+        public DatabaseFacade DatabaseFacade { get; }
+
         public void Save();
 
         #region base

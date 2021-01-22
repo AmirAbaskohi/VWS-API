@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace vws.web.Domain
 {
@@ -20,6 +21,8 @@ namespace vws.web.Domain
         {
 
         }
+
+        public DatabaseFacade DatabaseFacade { get => this.DatabaseFacade; }
 
         public void Save()
         {
