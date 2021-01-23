@@ -33,7 +33,7 @@ namespace vws.web.Controllers.Chat
             userManager = _userManager;
         }
 
-        [HttpPost]
+        [HttpGet]
         [Authorize]
         [Route("getAll")]
         public async Task<IActionResult> GetAll()
