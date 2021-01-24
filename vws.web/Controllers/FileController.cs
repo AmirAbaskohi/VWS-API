@@ -62,10 +62,11 @@ namespace vws.web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UploadFiles(IFormFile file)
+        public async Task<IActionResult> UploadFiles(List<IFormFile> files)
         {
-            if (await WriteFile(file))
-                return Ok();
+            foreach (var file in files)
+                if (await WriteFile(file))
+                    return Ok();
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
     }
