@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using vws.web.Domain._file;
 
 namespace vws.web.Domain
 {
@@ -225,6 +226,20 @@ namespace vws.web.Domain
         {
             HashSet<int> TeamIds = TeamMembers.Where(teamMember => teamMember.UserProfileId == userId).Select(x => x.TeamId).ToHashSet<int>();
             return Teams.Where(team => TeamIds.Contains(team.Id));
+        }
+
+        #endregion
+
+        #region file
+
+        IQueryable<File> IVWS_DbContext.Files { get => Files; }
+
+        public DbSet<File> Files { get; set; }
+
+        public async Task<File> AddFileAsync(File file)
+        {
+            await Files.AddAsync(file);
+            return file;
         }
 
         #endregion

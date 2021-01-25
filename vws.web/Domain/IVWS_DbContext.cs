@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using vws.web.Domain._base;
 using vws.web.Domain._chat;
 using vws.web.Domain._department;
+using vws.web.Domain._file;
 using vws.web.Domain._project;
 using vws.web.Domain._task;
 using vws.web.Domain._team;
@@ -161,6 +162,22 @@ namespace vws.web.Domain
         public Task<TeamMember> GetTeamMemberAsync(int teamId, Guid memberId);
         public IQueryable<Team> GetUserTeams(Guid userId);
 
+
+        #endregion
+
+        #endregion
+
+        #region file
+
+        #region models
+
+        public IQueryable<File> Files { get; }
+
+        #endregion
+
+        #region methods
+
+        public Task<File> AddFileAsync(File file);
 
         #endregion
 
