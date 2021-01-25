@@ -40,12 +40,16 @@ namespace vws.web.Controllers.Chat
         {
             List<MessageResponseModel> MessageResponseModels = new List<MessageResponseModel>();
 
-            for (int i = 0; i < 200; i++)
+            var messages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId && message.ChannelId == channelId);
+
+            foreach (var message in messages)
             {
                 MessageResponseModels.Add(new MessageResponseModel
                 {
-                    Body = $"num: {i}, chId: {channelId}, chTypeId: {channelTypeId}, pageIndex: {pageIndex}, pageSize: {pageSize}",
-                    SendOn = DateTime.Now.AddHours(-i)
+                    Id = message.Id,
+                    Body = message.Body,
+                    SendOn = message.SendOn,
+                    FromUserName = message.FromUserName
                 }); ;
 
             }
