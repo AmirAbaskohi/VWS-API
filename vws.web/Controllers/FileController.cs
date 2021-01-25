@@ -34,7 +34,8 @@ namespace vws.web.Controllers
             try
             {
                 var extension = "." + file.FileName.Split('.')[file.FileName.Split('.').Length - 1];
-                fileName = Guid.NewGuid().ToString() + extension;
+                Guid fileGuid = Guid.NewGuid();
+                fileName = fileGuid.ToString() + extension;
 
                 var pathBuilt = Path.Combine(Directory.GetCurrentDirectory(), $"Upload{Path.DirectorySeparatorChar}files");
 
@@ -50,6 +51,16 @@ namespace vws.web.Controllers
                 {
                     await file.CopyToAsync(stream);
                 }
+
+                var newFile = new Domain._file.File()
+                {
+                    FileId = fileGuid,
+                    Address = path
+                };
+
+                await vwsDbContext.AddFileAsync(newFile);
+                vwsDbContext.Save();
+
 
                 isSaveSuccess = true;
             }
