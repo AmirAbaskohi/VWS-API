@@ -242,6 +242,11 @@ namespace vws.web.Domain
             return file;
         }
 
+        public async Task<File> GetFileAsync(Guid guid)
+        {
+            return await Files.FirstOrDefaultAsync(file => file.FileId == guid);
+        }
+
         #endregion
 
 

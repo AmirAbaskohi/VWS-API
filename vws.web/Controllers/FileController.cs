@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.WebApiCompatShim;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using vws.web.Domain;
@@ -79,6 +81,34 @@ namespace vws.web.Controllers
                 if (await WriteFile(file))
                     return Ok();
             return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+
+        [HttpGet]
+        [Route("get")]
+        public async Task<HttpResponseMessage> GetFile(string guid)
+        {
+            Guid fileId = new Guid(guid);
+            string address = (await vwsDbContext.GetFileAsync(fileId)).Address;
+            string fileName = guid + "." + address.Split('.')[address.Split('.').Length - 1];
+
+            byte[] fileBytes;
+
+            using (FileStream fileStream = new FileStream(address, FileMode.Open, FileAccess.Read))
+            {
+                fileBytes = System.IO.File.ReadAllBytes(address);
+                fileStream.Read(fileBytes, 0, Convert.ToInt32(fileStream.Length));
+                fileStream.Close();
+            }
+
+            HttpResponseMessage result = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+            var stream = new MemoryStream();
+
+            result.Content = new StreamContent(stream);
+            result.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
+            result.Content.Headers.ContentDisposition.FileName = fileName;
+            result.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+
+            return result;
         }
     }
 }

@@ -178,6 +178,7 @@ namespace vws.web.Domain
         #region methods
 
         public Task<File> AddFileAsync(File file);
+        public Task<File> GetFileAsync(Guid guid);
 
         #endregion
 
