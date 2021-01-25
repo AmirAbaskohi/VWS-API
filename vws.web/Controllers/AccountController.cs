@@ -52,6 +52,21 @@ namespace vws.web.Controllers
             vwsDbContext = _vwsDbContext;
         }
 
+        private JwtSecurityToken GenerateToken(List<Claim> claims)
+        {
+            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]));
+
+            var token = new JwtSecurityToken(
+                issuer: configuration["JWT:Issuer"],
+                audience: configuration["JWT:Audience"],
+                expires: DateTime.Now.AddMinutes(Int16.Parse(configuration["JWT:ValidTimeInMinutes"])),
+                claims: claims,
+                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
+                );
+
+            return token;
+        }
+
         [HttpPost]
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
@@ -176,15 +191,7 @@ namespace vws.web.Controllers
                     new Claim("UserId", user.Id),
                 };
 
-                var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]));
-
-                var token = new JwtSecurityToken(
-                    issuer: configuration["JWT:Issuer"],
-                    audience: configuration["JWT:Audience"],
-                    expires: DateTime.Now.AddMinutes(Int16.Parse(configuration["JWT:ValidTimeInMinutes"])),
-                    claims: authClaims,
-                    signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-                    );
+                var token = GenerateToken(authClaims);
 
                 return Ok(new ResponseModel<LoginResponseModel>(new LoginResponseModel
                 {
