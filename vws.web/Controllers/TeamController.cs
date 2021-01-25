@@ -49,7 +49,7 @@ namespace vws.web.Controllers
         [Route("create")]
         public async Task<IActionResult> CreateTeam([FromBody] TeamModel model)
         {
-            var response = new ResponseModel();
+            var response = new ResponseModel<TeamResponseModel>();
 
             if (!String.IsNullOrEmpty(model.Description) && model.Description.Length > 2000)
             {
@@ -108,6 +108,20 @@ namespace vws.web.Controllers
             await vwsDbContext.AddTeamMemberAsync(newTeamMember);
             vwsDbContext.Save();
 
+            var newTeamResponse = new TeamResponseModel()
+            {
+                Id = newTeam.Id,
+                TeamTypeId = newTeam.TeamTypeId,
+                Name = newTeam.Name,
+                Description = newTeam.Description,
+                Color = newTeam.Color,
+                CreatedBy = (await userManager.FindByIdAsync(newTeam.CreatedBy.ToString())).UserName,
+                ModifiedBy = (await userManager.FindByIdAsync(newTeam.ModifiedBy.ToString())).UserName,
+                CreatedOn = newTeam.CreatedOn,
+                ModifiedOn = newTeam.ModifiedOn
+            };
+
+            response.Value = newTeamResponse;
             response.Message = "Team created successfully!";
             return Ok(response);
         }
