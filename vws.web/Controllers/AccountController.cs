@@ -196,7 +196,7 @@ namespace vws.web.Controllers
             {
                 Message = "User login failed."
             };
-            response.AddError(localizer["Password or Usernamed is wrong."]);
+            response.AddError(localizer["Password or Username is wrong."]);
             return StatusCode(StatusCodes.Status401Unauthorized, response);
         }
 

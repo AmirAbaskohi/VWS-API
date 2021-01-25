@@ -129,8 +129,8 @@
   <data name="Emil confirmation failed." xml:space="preserve">
     <value>Emil confirmation failed.</value>
   </data>
-  <data name="Password or Usernamed is wrong." xml:space="preserve">
-    <value>Password or Usernamed is wrong.</value>
+  <data name="Password or Username is wrong." xml:space="preserve">
+    <value>Password or Username is wrong.</value>
   </data>
   <data name="Passwords must be at least 8 characters." xml:space="preserve">
     <value>Passwords must be at least 8 characters.</value>
