@@ -40,6 +40,10 @@ namespace vws.web.Domain
 
         public DbSet<Culture> Cultures { get; set; }
 
+        IQueryable<RefreshToken> IVWS_DbContext.RefreshTokens { get => RefreshTokens; }
+
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+
         public void DeleteUserProfile(UserProfile userProfile)
         {
             UserProfiles.Remove(userProfile);
@@ -54,6 +58,23 @@ namespace vws.web.Domain
         public async Task<UserProfile> GetUserProfileAsync(Guid guid)
         {
             return await UserProfiles.FirstOrDefaultAsync(userProfile => userProfile.UserId == guid);
+        }
+
+        public async Task<RefreshToken> GetRefreshTokenAsync(Guid userId, string token)
+        {
+            return await RefreshTokens.FirstOrDefaultAsync(refreshToken => refreshToken.UserId == userId && refreshToken.Token == token);
+        }
+
+        public async Task<RefreshToken> AddRefreshTokenAsync(RefreshToken refreshToken)
+        {
+            await RefreshTokens.AddAsync(refreshToken);
+            return refreshToken;
+        }
+
+        public void MakeRefreshTokenUnvalid(string token)
+        {
+            var refreshToken = RefreshTokens.FirstOrDefault(refreshToken => refreshToken.Token == token);
+            refreshToken.IsValid = false;
         }
 
         #endregion

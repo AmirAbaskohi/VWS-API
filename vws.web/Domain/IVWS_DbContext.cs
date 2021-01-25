@@ -24,6 +24,8 @@ namespace vws.web.Domain
 
         public IQueryable<UserProfile> UserProfiles { get; }
 
+        public IQueryable<RefreshToken> RefreshTokens { get; }
+
         public IQueryable<Culture> Cultures { get; }
 
         #endregion
@@ -33,6 +35,12 @@ namespace vws.web.Domain
         public Task<UserProfile> AddUserProfileAsync(UserProfile userProfile);
 
         public Task<UserProfile> GetUserProfileAsync(Guid guid);
+
+        public Task<RefreshToken> GetRefreshTokenAsync(Guid userId, string token);
+
+        public Task<RefreshToken> AddRefreshTokenAsync(RefreshToken refreshToken);
+
+        public void MakeRefreshTokenUnvalid(string token);
 
         public void DeleteUserProfile(UserProfile userProfile);
 
