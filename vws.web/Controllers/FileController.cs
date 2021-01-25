@@ -75,6 +75,7 @@ namespace vws.web.Controllers
         }
 
         [HttpPost]
+        [Route("upload")]
         public async Task<IActionResult> UploadFiles(List<IFormFile> files)
         {
             foreach (var file in files)
