@@ -160,11 +160,12 @@ namespace vws.web.Controllers
             {
                 if (user.EmailConfirmed == false)
                 {
-                    var _response = new ResponseModel
+                    var _response = new ResponseModel<string>
                     {
                         Message = "User login failed."
                     };
                     _response.AddError(localizer["Email is not confirmed yet."]);
+                    _response.Value = user.Email;
                     return StatusCode(StatusCodes.Status401Unauthorized, _response);
                 }
 
