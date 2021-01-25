@@ -204,9 +204,19 @@ namespace vws.web.Controllers
 
                 var token = GenerateToken(authClaims);
 
+                var refreshToken = new RefreshToken()
+                {
+                    IsValid = true,
+                    Token = GenerateRefreshToken(),
+                    UserId = new Guid(user.Id)
+                };
+                await vwsDbContext.AddRefreshTokenAsync(refreshToken);
+                vwsDbContext.Save();
+
                 return Ok(new ResponseModel<LoginResponseModel>(new LoginResponseModel
                 {
                     Token = new JwtSecurityTokenHandler().WriteToken(token),
+                    RefreshToken = refreshToken.Token,
                     ValidTo = token.ValidTo
                 })
               );

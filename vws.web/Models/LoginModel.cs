@@ -18,6 +18,7 @@ namespace vws.web.Models
     public class LoginResponseModel
     {
         public string Token { get; set; }
+        public string RefreshToken { get; set; }
         
         public DateTime ValidTo{ get; set; }
 
