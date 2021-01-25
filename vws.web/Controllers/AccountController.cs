@@ -426,5 +426,12 @@ namespace vws.web.Controllers
         {
             return User.Claims.First(claim => claim.Type == "UserEmail").Value;
         }
+
+        [HttpGet]
+        [Route("getEmailTimeWait")]
+        public int GetEmailTimeWait()
+        {
+            return Int16.Parse(configuration["EmailCode:EmailTimeDifferenceInMinutes"]);
+        }
     }
 }
