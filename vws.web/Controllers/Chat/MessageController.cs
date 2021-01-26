@@ -40,9 +40,13 @@ namespace vws.web.Controllers.Chat
         {
             List<MessageResponseModel> MessageResponseModels = new List<MessageResponseModel>();
 
-            var messages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId && message.ChannelId == channelId);
+            var publicMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId && message.ChannelId == channelId && channelTypeId != 1);
 
-            foreach (var message in messages)
+            var directMessageContactUser = await userManager.FindByIdAsync(channelId.ToString());
+
+            var privateMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId && (message.ChannelId == channelId || directMessageContactUser.UserName == message.FromUserName) && channelTypeId == 1);
+
+            foreach (var message in publicMessages.Union(privateMessages))
             {
                 MessageResponseModels.Add(new MessageResponseModel
                 {
@@ -52,7 +56,6 @@ namespace vws.web.Controllers.Chat
                     FromUserName = message.FromUserName,
                     SendFromMe = message.FromUserName == LoggedInUserName ? true : false
                 }); ;
-
             }
 
             return Ok(new ResponseModel<List<MessageResponseModel>>(MessageResponseModels));
