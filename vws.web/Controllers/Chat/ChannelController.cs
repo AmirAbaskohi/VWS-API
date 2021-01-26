@@ -49,13 +49,16 @@ namespace vws.web.Controllers.Chat
                 .Select(teamMember => teamMember.UserProfile).Distinct().ToList();
             userTeamMates.Remove(await vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value));
 
-            userTeamMates.ForEach(async userTeamMate => channelResponseModels.Add(new ChannelResponseModel
+            foreach(var userTeamMate in userTeamMates)
             {
-                Guid = userTeamMate.UserId,
-                ChannelTypeId = 1,
-                LogoUrl = "http://app.seventask.com/assets/Images/logo.png",
-                Title = (await userManager.FindByIdAsync(userTeamMate.UserId.ToString())).UserName
-            }));
+                channelResponseModels.Add(new ChannelResponseModel
+                {
+                    Guid = userTeamMate.UserId,
+                    ChannelTypeId = 1,
+                    LogoUrl = "http://app.seventask.com/assets/Images/logo.png",
+                    Title = (await userManager.FindByIdAsync(userTeamMate.UserId.ToString())).UserName
+                });
+            }
 
             channelResponseModels.AddRange(userTeams.Select(userTeam => new ChannelResponseModel
             {
