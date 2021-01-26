@@ -13,6 +13,8 @@ namespace vws.web.Controllers
 
         private Claim UserId { get => User.Claims.FirstOrDefault(c => c.Type == "UserId"); }
 
+        private Claim UserName { get => User.Claims.FirstOrDefault(c => c.Type == "UserName"); }
+
         public Guid? LoggedInUserId
         {
             get
@@ -22,5 +24,17 @@ namespace vws.web.Controllers
                 else return null;
             }
         }
+
+        public string LoggedInUserName
+        {
+            get
+            {
+                if (UserName != null)
+                    return UserName.Value;
+                else return string.Empty;
+            }
+        }
+
+
     }
 }

@@ -11,5 +11,7 @@ namespace vws.web.Models.Chat
 
         public DateTime SendOn { get; set; }
 
+        public bool SendFromMe { get; set; }
+
     }
 }
