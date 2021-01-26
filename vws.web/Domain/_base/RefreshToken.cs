@@ -11,6 +11,7 @@ namespace vws.web.Domain._base
     public class RefreshToken
     {
         [Key]
+        public long Id { get; set; }
         public Guid UserId { get; set; }
         public string Token { get; set; }
         public bool IsValid { get; set; }
