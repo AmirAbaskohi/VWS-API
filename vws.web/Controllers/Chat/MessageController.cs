@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using vws.web.Domain;
 using vws.web.Domain._base;
+using vws.web.Domain._chat;
 using vws.web.Domain._department;
 using vws.web.Domain._project;
 using vws.web.Domain._team;
@@ -40,13 +41,27 @@ namespace vws.web.Controllers.Chat
         {
             List<MessageResponseModel> MessageResponseModels = new List<MessageResponseModel>();
 
-            var publicMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId && message.ChannelId == channelId && channelTypeId != 1);
+            if (channelTypeId == 1)
+            {
+                var directMessageContactUser = await userManager.FindByIdAsync(channelId.ToString());
+                var privateMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId && (message.ChannelId == channelId || directMessageContactUser.UserName == message.FromUserName) && channelTypeId == 1);
+                MessageResponseModels = FillMessageResponseModel(privateMessages);
+            }
+            else
+            {
+                var publicMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId && message.ChannelId == channelId && channelTypeId != 1);
+                MessageResponseModels = FillMessageResponseModel(publicMessages);
+            }
 
-            var directMessageContactUser = await userManager.FindByIdAsync(channelId.ToString());
+            return Ok(new ResponseModel<List<MessageResponseModel>>(MessageResponseModels));
 
-            var privateMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId && (message.ChannelId == channelId || directMessageContactUser.UserName == message.FromUserName) && channelTypeId == 1);
+        }
 
-            foreach (var message in publicMessages.Union(privateMessages))
+        [Authorize]
+        private List<MessageResponseModel> FillMessageResponseModel(IQueryable<Message> messages)
+        {
+            List<MessageResponseModel> MessageResponseModels = new List<MessageResponseModel>();
+            foreach (var message in messages)
             {
                 MessageResponseModels.Add(new MessageResponseModel
                 {
@@ -57,9 +72,7 @@ namespace vws.web.Controllers.Chat
                     SendFromMe = message.FromUserName == LoggedInUserName ? true : false
                 }); ;
             }
-
-            return Ok(new ResponseModel<List<MessageResponseModel>>(MessageResponseModels));
-
+            return MessageResponseModels;
         }
 
     }
