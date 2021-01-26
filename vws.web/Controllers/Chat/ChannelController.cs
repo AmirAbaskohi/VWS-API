@@ -55,7 +55,7 @@ namespace vws.web.Controllers.Chat
                 {
                     Guid = userTeamMate.UserId,
                     ChannelTypeId = 1,
-                    LogoUrl = "http://app.seventask.com/assets/Images/logo.png",
+                    LogoUrl = "http://app.seventask.com/assets/Images/Chat/DefaultAvatars/User.jpg",
                     Title = (await userManager.FindByIdAsync(userTeamMate.UserId.ToString())).UserName
                 });
             }
@@ -64,7 +64,7 @@ namespace vws.web.Controllers.Chat
             {
                 Guid = userTeam.Guid,
                 ChannelTypeId = 2,
-                LogoUrl = "http://app.seventask.com/assets/Images/logo.png",
+                LogoUrl = "http://app.seventask.com/assets/Images/Chat/DefaultAvatars/Team.jpg",
                 Title = userTeam.Name
             }));
 
@@ -72,7 +72,7 @@ namespace vws.web.Controllers.Chat
             {
                 Guid = userProject.Guid,
                 ChannelTypeId = 3,
-                LogoUrl = "http://app.seventask.com/assets/Images/logo.png",
+                LogoUrl = "http://app.seventask.com/assets/Images/Chat/DefaultAvatars/Project.jpg",
                 Title = userProject.Name
             }));
 
@@ -80,7 +80,7 @@ namespace vws.web.Controllers.Chat
             {
                 Guid = userDepartment.Guid,
                 ChannelTypeId = 4,
-                LogoUrl = "http://app.seventask.com/assets/Images/logo.png",
+                LogoUrl = "http://app.seventask.com/assets/Images/Chat/DefaultAvatars/Department.jpg",
                 Title = userDepartment.Name
             }));
 

@@ -83,32 +83,51 @@ namespace vws.web.Controllers
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
 
+        //[HttpGet]
+        //[Route("get")]
+        //public async Task<HttpResponseMessage> GetFile(string guid)
+        //{
+        //    Guid fileId = new Guid(guid);
+        //    string address = (await vwsDbContext.GetFileAsync(fileId)).Address;
+        //    string fileName = guid + "." + address.Split('.')[address.Split('.').Length - 1];
+
+        //    byte[] fileBytes;
+
+        //    using (FileStream fileStream = new FileStream(address, FileMode.Open, FileAccess.Read))
+        //    {
+        //        fileBytes = System.IO.File.ReadAllBytes(address);
+        //        fileStream.Read(fileBytes, 0, Convert.ToInt32(fileStream.Length));
+        //        fileStream.Close();
+        //    }
+
+        //    HttpResponseMessage result = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+        //    var stream = new MemoryStream();
+
+        //    result.Content = new StreamContent(stream);
+        //    result.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
+        //    result.Content.Headers.ContentDisposition.FileName = fileName;
+        //    result.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+
+        //    return result;
+        //}
+
+
         [HttpGet]
         [Route("get")]
-        public async Task<HttpResponseMessage> GetFile(string guid)
+        public async Task<IActionResult> GetFile(string guid)
         {
             Guid fileId = new Guid(guid);
             string address = (await vwsDbContext.GetFileAsync(fileId)).Address;
             string fileName = guid + "." + address.Split('.')[address.Split('.').Length - 1];
 
-            byte[] fileBytes;
 
-            using (FileStream fileStream = new FileStream(address, FileMode.Open, FileAccess.Read))
+            var memory = new MemoryStream();
+            using (var stream = new FileStream(address, FileMode.Open))
             {
-                fileBytes = System.IO.File.ReadAllBytes(address);
-                fileStream.Read(fileBytes, 0, Convert.ToInt32(fileStream.Length));
-                fileStream.Close();
+                await stream.CopyToAsync(memory);
             }
-
-            HttpResponseMessage result = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
-            var stream = new MemoryStream();
-
-            result.Content = new StreamContent(stream);
-            result.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
-            result.Content.Headers.ContentDisposition.FileName = fileName;
-            result.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
-
-            return result;
+            memory.Position = 0;
+            return File(memory, "application/pdf", Path.GetFileName("ali.pdf"));
         }
     }
 }
