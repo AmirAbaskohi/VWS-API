@@ -9,7 +9,7 @@ namespace vws.web.Models
     {
         public int Id { get; set; }
         public string TeamName { get; set; }
-        public bool IsInvoked { get; set; }
+        public bool IsRevoked { get; set; }
         public string LinkGuid { get; set; }
         public string CreatedBy { get; set; }
         public string ModifiedBy { get; set; }

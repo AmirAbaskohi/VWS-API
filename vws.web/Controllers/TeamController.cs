@@ -163,7 +163,7 @@ namespace vws.web.Controllers
                 CreatedOn = creationTime,
                 ModifiedOn = creationTime,
                 LinkGuid = inviteLinkGuid,
-                IsInvoked = false
+                IsRevoked = false
             };
 
             await vwsDbContext.AddTeamInviteLinkAsync(newInviteLink);
@@ -187,7 +187,7 @@ namespace vws.web.Controllers
 
             var selectedTeamLink = await vwsDbContext.GetTeamInviteLinkByLinkGuidAsync(linkGuid);
 
-            if (selectedTeamLink == null || selectedTeamLink.IsInvoked == true)
+            if (selectedTeamLink == null || selectedTeamLink.IsRevoked == true)
             {
                 response.Message = "Unvalid link";
                 response.AddError(localizer["Link is not valid."]);
@@ -232,7 +232,7 @@ namespace vws.web.Controllers
                 {
                     Id = userTeamInviteLink.Id,
                     TeamName = (await vwsDbContext.GetTeamAsync(userTeamInviteLink.TeamId)).Name,
-                    IsInvoked = userTeamInviteLink.IsInvoked,
+                    IsRevoked = userTeamInviteLink.IsRevoked,
                     LinkGuid = userTeamInviteLink.LinkGuid.ToString(),
                     CreatedBy = (await userManager.FindByIdAsync(userTeamInviteLink.CreatedBy.ToString())).UserName,
                     ModifiedBy = (await userManager.FindByIdAsync(userTeamInviteLink.ModifiedBy.ToString())).UserName,
@@ -273,8 +273,8 @@ namespace vws.web.Controllers
 
         [HttpPut]
         [Authorize]
-        [Route("invokeLink")]
-        public async Task<IActionResult> InvokeLink(int id)
+        [Route("revokeLink")]
+        public async Task<IActionResult> RevokeLink(int id)
         {
             var response = new ResponseModel();
 
@@ -295,7 +295,7 @@ namespace vws.web.Controllers
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            selectedInviteLink.IsInvoked = true;
+            selectedInviteLink.IsRevoked = true;
 
             vwsDbContext.Save();
 
