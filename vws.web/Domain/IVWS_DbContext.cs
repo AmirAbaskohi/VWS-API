@@ -40,7 +40,7 @@ namespace vws.web.Domain
 
         public Task<RefreshToken> AddRefreshTokenAsync(RefreshToken refreshToken);
 
-        public void MakeRefreshTokenUnvalid(string token);
+        public void MakeRefreshTokenInvalid(string token);
 
         public void DeleteUserProfile(UserProfile userProfile);
 

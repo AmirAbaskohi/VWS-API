@@ -53,7 +53,7 @@ namespace vws.web.Controllers
             vwsDbContext = _vwsDbContext;
         }
 
-        private JwtSecurityToken GenerateToken(List<Claim> claims)
+        private JwtSecurityToken GenerateToken(IEnumerable<Claim> claims)
         {
             var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]));
 
@@ -61,7 +61,7 @@ namespace vws.web.Controllers
                 issuer: configuration["JWT:Issuer"],
                 audience: configuration["JWT:Audience"],
                 expires: DateTime.Now.AddMinutes(Int16.Parse(configuration["JWT:ValidTimeInMinutes"])),
-                claims: claims,
+                claims: claims.ToList(),
                 signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
                 );
 
@@ -482,6 +482,42 @@ namespace vws.web.Controllers
         public int GetEmailTimeWait()
         {
             return Int16.Parse(configuration["EmailCode:EmailTimeDifferenceInMinutes"]);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("refresh")]
+        public async Task<IActionResult> Refresh([FromBody] RefreshTokenModel model)
+        {
+            var response = new ResponseModel<LoginResponseModel>();
+            var principal = GetPrincipalFromExpiredToken(model.Token);
+            var varRefreshToken = await vwsDbContext.GetRefreshTokenAsync(LoggedInUserId.Value, model.RefreshToken);
+
+            if(varRefreshToken == null || varRefreshToken.IsValid == false)
+            {
+                response.Message = "Invalid refresh token";
+                response.AddError(localizer["Refresh token is invalid."]);
+                return StatusCode(StatusCodes.Status404NotFound, response);
+            }
+
+            vwsDbContext.MakeRefreshTokenInvalid(model.RefreshToken);
+            var newRefreshToken = new RefreshToken
+            {
+                IsValid = true,
+                Token = GenerateRefreshToken(),
+                UserId = LoggedInUserId.Value
+            };
+            await vwsDbContext.AddRefreshTokenAsync(newRefreshToken);
+            vwsDbContext.Save();
+
+            var newJWToken = GenerateToken(principal.Claims);
+
+            return Ok(new ResponseModel<LoginResponseModel>(new LoginResponseModel
+            {
+                Token = new JwtSecurityTokenHandler().WriteToken(newJWToken),
+                RefreshToken = newRefreshToken.Token,
+                ValidTo = newJWToken.ValidTo
+            }));
         }
     }
 }

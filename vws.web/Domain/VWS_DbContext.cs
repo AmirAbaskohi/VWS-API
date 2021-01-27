@@ -71,7 +71,7 @@ namespace vws.web.Domain
             return refreshToken;
         }
 
-        public void MakeRefreshTokenUnvalid(string token)
+        public void MakeRefreshTokenInvalid(string token)
         {
             var refreshToken = RefreshTokens.FirstOrDefault(refreshToken => refreshToken.Token == token);
             refreshToken.IsValid = false;
