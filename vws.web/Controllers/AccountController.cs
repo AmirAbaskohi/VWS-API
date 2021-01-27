@@ -485,13 +485,13 @@ namespace vws.web.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         [Route("refresh")]
         public async Task<IActionResult> Refresh([FromBody] RefreshTokenModel model)
         {
             var response = new ResponseModel<LoginResponseModel>();
             var principal = GetPrincipalFromExpiredToken(model.Token);
-            var varRefreshToken = await vwsDbContext.GetRefreshTokenAsync(LoggedInUserId.Value, model.RefreshToken);
+            Guid userId = new Guid(principal.Claims.First(claim => claim.Type == "UserId").Value);
+            var varRefreshToken = await vwsDbContext.GetRefreshTokenAsync(userId, model.RefreshToken);
 
             if(varRefreshToken == null || varRefreshToken.IsValid == false)
             {
@@ -505,7 +505,7 @@ namespace vws.web.Controllers
             {
                 IsValid = true,
                 Token = GenerateRefreshToken(),
-                UserId = LoggedInUserId.Value
+                UserId = userId
             };
             await vwsDbContext.AddRefreshTokenAsync(newRefreshToken);
             vwsDbContext.Save();
