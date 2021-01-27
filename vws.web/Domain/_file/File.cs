@@ -12,5 +12,8 @@ namespace vws.web.Domain._file
     {
         public Guid FileId { get; set; }
         public string Address { get; set; }
+        public string Name { get; set; }
+        public string Extension { get; set; }
+        public Guid UploadedBy { get; set; }
     }
 }

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -28,15 +29,15 @@ namespace vws.web.Controllers
             vwsDbContext = _vwsDbContext;
         }
 
-        private async Task<bool> WriteFile(IFormFile file)
+        private async Task<bool> WriteFile(IFormFile file, Guid userId)
         {
             bool isSaveSuccess = false;
             string fileName;
             try
             {
-                var extension = "." + file.FileName.Split('.')[file.FileName.Split('.').Length - 1];
+                var extension = file.FileName.Split('.')[file.FileName.Split('.').Length - 1];
                 Guid fileGuid = Guid.NewGuid();
-                fileName = fileGuid.ToString() + extension;
+                fileName = fileGuid.ToString() + "." + extension;
 
                 var pathBuilt = Path.Combine(Directory.GetCurrentDirectory(), $"Upload{Path.DirectorySeparatorChar}files");
 
@@ -56,7 +57,10 @@ namespace vws.web.Controllers
                 var newFile = new Domain._file.File()
                 {
                     FileId = fileGuid,
-                    Address = path
+                    Address = path,
+                    Extension = extension,
+                    Name = file.FileName,
+                    UploadedBy = userId
                 };
 
                 await vwsDbContext.AddFileAsync(newFile);
@@ -74,42 +78,15 @@ namespace vws.web.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [Route("upload")]
         public async Task<IActionResult> UploadFiles(List<IFormFile> files)
         {
             foreach (var file in files)
-                if (await WriteFile(file))
+                if (await WriteFile(file, LoggedInUserId.Value))
                     return Ok();
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
-
-        //[HttpGet]
-        //[Route("get")]
-        //public async Task<HttpResponseMessage> GetFile(string guid)
-        //{
-        //    Guid fileId = new Guid(guid);
-        //    string address = (await vwsDbContext.GetFileAsync(fileId)).Address;
-        //    string fileName = guid + "." + address.Split('.')[address.Split('.').Length - 1];
-
-        //    byte[] fileBytes;
-
-        //    using (FileStream fileStream = new FileStream(address, FileMode.Open, FileAccess.Read))
-        //    {
-        //        fileBytes = System.IO.File.ReadAllBytes(address);
-        //        fileStream.Read(fileBytes, 0, Convert.ToInt32(fileStream.Length));
-        //        fileStream.Close();
-        //    }
-
-        //    HttpResponseMessage result = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
-        //    var stream = new MemoryStream();
-
-        //    result.Content = new StreamContent(stream);
-        //    result.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
-        //    result.Content.Headers.ContentDisposition.FileName = fileName;
-        //    result.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
-
-        //    return result;
-        //}
 
 
         [HttpGet]
@@ -117,8 +94,9 @@ namespace vws.web.Controllers
         public async Task<IActionResult> GetFile(string guid)
         {
             Guid fileId = new Guid(guid);
-            string address = (await vwsDbContext.GetFileAsync(fileId)).Address;
-            string fileName = guid + "." + address.Split('.')[address.Split('.').Length - 1];
+            var selectedFile = (await vwsDbContext.GetFileAsync(fileId));
+            string address = selectedFile.Address;
+            string fileName = selectedFile.Name;
 
 
             var memory = new MemoryStream();
@@ -127,7 +105,7 @@ namespace vws.web.Controllers
                 await stream.CopyToAsync(memory);
             }
             memory.Position = 0;
-            return File(memory, "application/pdf", Path.GetFileName("ali.pdf"));
+            return File(memory, "application/" + selectedFile.Extension, Path.GetFileName(fileName));
         }
     }
 }
