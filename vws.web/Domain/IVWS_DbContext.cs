@@ -67,6 +67,12 @@ namespace vws.web.Domain
         #region methods
 
         public void AddMessage(Message message);
+        public void AddMessageType(MessageType messageType);
+        public string GetMessageType(byte id);
+        public void UpdateMessageType(byte id, string newName);
+        public void AddChannelType(ChannelType channelType);
+        public string GetChannelType(byte id);
+        public void UpdateChannelType(byte id, string newName);
 
         #endregion
 
@@ -169,6 +175,10 @@ namespace vws.web.Domain
         public Task<TeamInviteLink> GetTeamInviteLinkByIdAsync(int id);
         public Task<TeamMember> GetTeamMemberAsync(int teamId, Guid memberId);
         public IQueryable<Team> GetUserTeams(Guid userId);
+
+        public void AddTeamType(TeamType teamType);
+        public string GetTeamType(byte id);
+        public void UpdateTeamType(byte id, string newName);
 
 
         #endregion

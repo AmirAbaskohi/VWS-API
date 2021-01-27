@@ -194,8 +194,34 @@ namespace vws.web
                 context.DatabaseFacade.Migrate();
 
                 //seed data:
-
-
+                string[] messageTypes = { "Text", "Picture", "Video", "Voice", "Others" };
+                string[] teamTypes = { "Team", "Company", "Organization" };
+                string[] channelTypes = { "Private", "Team", "Project", "Department" };
+                for (byte i = 0; i < messageTypes.Length; i++)
+                {
+                    string dbMessageType = context.GetMessageType((byte)(i+1));
+                    if (dbMessageType == null)
+                        context.AddMessageType(new Domain._chat.MessageType { Id = (byte)(i + 1), Name = messageTypes[i] });
+                    else if (dbMessageType != messageTypes[i])
+                        context.UpdateMessageType((byte)(i + 1), messageTypes[i]);
+                }
+                for (byte i = 0; i < teamTypes.Length; i++)
+                {
+                    string dbTeamType = context.GetTeamType((byte)(i + 1));
+                    if (dbTeamType == null)
+                        context.AddTeamType(new Domain._team.TeamType { Id = (byte)(i + 1), NameMultiLang = teamTypes[i] });
+                    else if (dbTeamType != teamTypes[i])
+                        context.UpdateTeamType((byte)(i + 1), teamTypes[i]);
+                }
+                for (byte i = 0; i < channelTypes.Length; i++)
+                {
+                    string dbChannelType = context.GetChannelType((byte)(i + 1));
+                    if (dbChannelType == null)
+                        context.AddChannelType(new Domain._chat.ChannelType { Id = (byte)(i + 1), Name = channelTypes[i] });
+                    else if (dbChannelType != channelTypes[i])
+                        context.UpdateChannelType((byte)(i + 1), channelTypes[i]);
+                }
+                context.Save();
             }
 
 

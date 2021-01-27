@@ -102,6 +102,35 @@ namespace vws.web.Domain
             Messages.Add(m);
         }
 
+        public void AddMessageType(MessageType messageType)
+        {
+            MessageTypes.Add(messageType);
+        }
+        public string GetMessageType(byte id)
+        {
+            var selectedMessageType = MessageTypes.FirstOrDefault(messageType => messageType.Id == id);
+            return (selectedMessageType == null) ? null : selectedMessageType.Name;
+        }
+        public void UpdateMessageType(byte id, string newName)
+        {
+            var selectedMessageType = MessageTypes.FirstOrDefault(messageType => messageType.Id == id);
+            selectedMessageType.Name = newName;
+        }
+        public void AddChannelType(ChannelType channelType)
+        {
+            ChannelTypes.Add(channelType);
+        }
+        public string GetChannelType(byte id)
+        {
+            var selectedChannelType = ChannelTypes.FirstOrDefault(channelType => channelType.Id == id);
+            return (selectedChannelType == null) ? null : selectedChannelType.Name;
+        }
+        public void UpdateChannelType(byte id, string newName)
+        {
+            var selectedChannelType = ChannelTypes.FirstOrDefault(channelType => channelType.Id == id);
+            selectedChannelType.Name = newName;
+        }
+
         #endregion
 
         #region department
@@ -247,6 +276,21 @@ namespace vws.web.Domain
         {
             HashSet<int> TeamIds = TeamMembers.Where(teamMember => teamMember.UserProfileId == userId).Select(x => x.TeamId).ToHashSet<int>();
             return Teams.Where(team => TeamIds.Contains(team.Id));
+        }
+
+        public void AddTeamType(TeamType teamType)
+        {
+            TeamTypes.Add(teamType);
+        }
+        public string GetTeamType(byte id)
+        {
+            var selectedTeamType = TeamTypes.FirstOrDefault(teamType => teamType.Id == id);
+            return (selectedTeamType == null) ? null : selectedTeamType.NameMultiLang;
+        }
+        public void UpdateTeamType(byte id, string newName)
+        {
+            var selectedTeamType = TeamTypes.FirstOrDefault(teamType => teamType.Id == id);
+            selectedTeamType.NameMultiLang = newName;
         }
 
         #endregion
