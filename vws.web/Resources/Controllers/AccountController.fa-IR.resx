@@ -144,6 +144,9 @@
   <data name="Problem happened in sending email." xml:space="preserve">
     <value>در روند ارسال ایمیل مشکلی پیش آمد.</value>
   </data>
+  <data name="Refresh token is invalid." xml:space="preserve">
+    <value>توکن بازسازی داده شده معتبر نیست.</value>
+  </data>
   <data name="Request for reset password is not valid. Request for reset password again." xml:space="preserve">
     <value>درخواست برای تغییر رمز عبور معتبر نیست. دوباره درخواست بدهید.</value>
   </data>
