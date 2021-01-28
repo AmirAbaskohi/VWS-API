@@ -17,9 +17,10 @@ using Microsoft.IdentityModel.Tokens;
 using vws.web.Domain;
 using vws.web.Domain._base;
 using vws.web.Models;
+using vws.web.Models._account;
 using vws.web.Repositories;
 
-namespace vws.web.Controllers
+namespace vws.web.Controllers._account
 {
     [Route("{culture:culture}/[controller]")]
     [ApiController]
@@ -451,18 +452,18 @@ namespace vws.web.Controllers
 
         [HttpPost]
         [Route("isUserNameInUse")]
-        public async Task<bool> IsUserNameInUse(UsernameModel model)
+        public async Task<bool> IsUserNameInUse(string username)
         {
-            var user = await userManager.FindByNameAsync(model.Username);
+            var user = await userManager.FindByNameAsync(username);
             if (user == null) return false;
             return true;
         }
 
         [HttpPost]
         [Route("isEmailInUse")]
-        public async Task<bool> IsEmailInUse(EmailModel model)
+        public async Task<bool> IsEmailInUse(string email)
         {
-            var user = await userManager.FindByEmailAsync(model.Email);
+            var user = await userManager.FindByEmailAsync(email);
             if (user == null) return false;
             if (user.EmailConfirmed)
                 return true;

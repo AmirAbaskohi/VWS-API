@@ -13,9 +13,10 @@ using vws.web.Domain;
 using vws.web.Domain._base;
 using vws.web.Domain._task;
 using vws.web.Models;
+using vws.web.Models._task;
 using vws.web.Repositories;
 
-namespace vws.web.Controllers
+namespace vws.web.Controllers._task
 {
     [Route("{culture:culture}/[controller]")]
     [ApiController]

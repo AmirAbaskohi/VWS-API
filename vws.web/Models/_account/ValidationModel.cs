@@ -4,11 +4,13 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace vws.web.Models
+namespace vws.web.Models._account
 {
-    public class UsernameModel
+    public class ValidationModel
     {
         [Required]
-        public string Username { get; set; }
+        public string Email { get; set; }
+        [Required]
+        public string ValidationCode { get; set; }
     }
 }

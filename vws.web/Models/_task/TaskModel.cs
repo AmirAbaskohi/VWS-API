@@ -4,13 +4,14 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace vws.web.Models
+namespace vws.web.Models._task
 {
-    public class TeamModel
+    public class TaskModel
     {
         [Required]
-        public string Name { get; set; }
+        public string Title { get; set; }
         public string Description { get; set; }
-        public string Color { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 }

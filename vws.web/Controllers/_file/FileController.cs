@@ -11,17 +11,17 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using vws.web.Domain;
 
-namespace vws.web.Controllers
+namespace vws.web.Controllers._file
 {
     [Route("{culture:culture}/[controller]")]
     [ApiController]
     public class FileController : BaseController
     {
         private readonly IConfiguration configuration;
-        private readonly IStringLocalizer<TeamController> localizer;
+        private readonly IStringLocalizer<FileController> localizer;
         private readonly IVWS_DbContext vwsDbContext;
 
-        public FileController(IConfiguration _configuration, IStringLocalizer<TeamController> _localizer,
+        public FileController(IConfiguration _configuration, IStringLocalizer<FileController> _localizer,
             IVWS_DbContext _vwsDbContext)
         {
             configuration = _configuration;

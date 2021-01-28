@@ -11,10 +11,11 @@ using Microsoft.Extensions.Localization;
 using vws.web.Domain;
 using vws.web.Domain._base;
 using vws.web.Domain._team;
+using vws.web.Models._team;
 using vws.web.Models;
 using vws.web.Repositories;
 
-namespace vws.web.Controllers
+namespace vws.web.Controllers._team
 {
     [Route("{culture:culture}/[controller]")]
     [ApiController]
@@ -306,11 +307,11 @@ namespace vws.web.Controllers
         [HttpPost]
         [Authorize]
         [Route("isNameOfGroupUsed")]
-        public bool IsNameOfGroupUsed(NameModel model)
+        public bool IsNameOfGroupUsed(string name)
         {
             Guid userId = LoggedInUserId.Value;
 
-            return vwsDbContext.TeamMembers.Any(teamMember => teamMember.UserProfileId == userId && teamMember.Team.Name == model.Name);
+            return vwsDbContext.TeamMembers.Any(teamMember => teamMember.UserProfileId == userId && teamMember.Team.Name == name);
         }
     }
 }

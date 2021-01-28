@@ -13,9 +13,9 @@ using vws.web.Domain._department;
 using vws.web.Domain._project;
 using vws.web.Domain._team;
 using vws.web.Models;
-using vws.web.Models.Chat;
+using vws.web.Models._chat;
 
-namespace vws.web.Controllers.Chat
+namespace vws.web.Controllers._chat
 {
     [Route("{culture:culture}/[controller]")]
     [ApiController]

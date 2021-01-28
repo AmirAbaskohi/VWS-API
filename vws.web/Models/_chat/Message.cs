@@ -1,5 +1,5 @@
 ﻿using System;
-namespace vws.web.Models.Chat
+namespace vws.web.Models._chat
 {
     public class MessageResponseModel
     {
