@@ -237,7 +237,7 @@ namespace vws.web.Controllers._team
 
             List<TeamInviteLinkResponseModel> response = new List<TeamInviteLinkResponseModel>();
 
-            var userTeamInviteLinks = vwsDbContext.TeamInviteLinks.Where(teamInviteLink => teamInviteLink.CreatedBy == userId);
+            var userTeamInviteLinks = vwsDbContext.TeamInviteLinks.Where(teamInviteLink => teamInviteLink.CreatedBy == userId && teamInviteLink.IsRevoked == false);
             foreach (var userTeamInviteLink in userTeamInviteLinks)
             {
                 response.Add(new TeamInviteLinkResponseModel()
