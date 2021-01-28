@@ -62,7 +62,7 @@ namespace vws.web.Controllers._team
                 response.Message = "Team model data has problem.";
                 response.AddError(localizer["Length of title is more than 500 characters."]);
             }
-            if (model.Color.Length > 6)
+            if (!String.IsNullOrEmpty(model.Color) && model.Color.Length > 6)
             {
                 response.Message = "Team model data has problem.";
                 response.AddError(localizer["Length of color is more than 6 characters."]);
@@ -312,6 +312,74 @@ namespace vws.web.Controllers._team
             Guid userId = LoggedInUserId.Value;
 
             return vwsDbContext.TeamMembers.Any(teamMember => teamMember.UserProfileId == userId && teamMember.Team.Name == name);
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("updateTeam")]
+        public async Task<IActionResult> UpdateTeam([FromBody] UpdateTeamModel model)
+        {
+            var response = new ResponseModel<TeamResponseModel>();
+
+            if (!String.IsNullOrEmpty(model.Description) && model.Description.Length > 2000)
+            {
+                response.Message = "Team model data has problem.";
+                response.AddError(localizer["Length of description is more than 2000 characters."]);
+            }
+            if (model.Name.Length > 500)
+            {
+                response.Message = "Team model data has problem.";
+                response.AddError(localizer["Length of title is more than 500 characters."]);
+            }
+            if (!String.IsNullOrEmpty(model.Color) && model.Color.Length > 6)
+            {
+                response.Message = "Team model data has problem.";
+                response.AddError(localizer["Length of color is more than 6 characters."]);
+            }
+
+            if (response.HasError)
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+
+            Guid userId = LoggedInUserId.Value;
+
+            var selectedTeam = await vwsDbContext.GetTeamAsync(model.Id);
+            if(selectedTeam == null)
+            {
+                response.Message = "Team not found";
+                response.AddError(localizer["There is no team with given Id."]);
+                return StatusCode(StatusCodes.Status404NotFound, response);
+            }
+            var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync(model.Id, userId);
+            if(selectedTeam == null)
+            {
+                response.Message = "Team not found";
+                response.AddError(localizer["You are not a member of team."]);
+                return StatusCode(StatusCodes.Status404NotFound, response);
+            }
+
+            selectedTeam.Color = model.Color;
+            selectedTeam.Description = model.Description;
+            selectedTeam.ModifiedBy = userId;
+            selectedTeam.ModifiedOn = DateTime.Now;
+            selectedTeam.Name = model.Name;
+            vwsDbContext.Save();
+
+            var updatedTeamResponse = new TeamResponseModel()
+            {
+                Id = selectedTeam.Id,
+                TeamTypeId = selectedTeam.TeamTypeId,
+                Name = selectedTeam.Name,
+                Description = selectedTeam.Description,
+                Color = selectedTeam.Color,
+                CreatedBy = (await userManager.FindByIdAsync(selectedTeam.CreatedBy.ToString())).UserName,
+                ModifiedBy = (await userManager.FindByIdAsync(selectedTeam.ModifiedBy.ToString())).UserName,
+                CreatedOn = selectedTeam.CreatedOn,
+                ModifiedOn = selectedTeam.ModifiedOn
+            };
+
+            response.Message = "Team updated successfully";
+            response.Value = updatedTeamResponse;
+            return Ok(response);
         }
     }
 }
