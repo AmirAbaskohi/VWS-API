@@ -8,7 +8,7 @@
   },
   "AllowedHosts": "*",
   "ConnectionStrings": {
-    "SqlServer": "Server=DESKTOP-OPL4R64\\MSQLS17;Database=VWS_DB;Integrated security=True;"
+    "SqlServer": "Server=DESKTOP-OPL4R64\\MSQLS17;Database=VWS_DB;Integrated security=True;MultipleActiveResultSets=True;"
   },
   "JWT": {
     "Audience": "VWS App",
@@ -36,5 +36,8 @@
     "RequireDigit": true,
     "RequireUppercase": false,
     "RequireLowercase": true
+  },
+  "Files": {
+    "RestrictedExtensions":  "exe"
   }
 }
