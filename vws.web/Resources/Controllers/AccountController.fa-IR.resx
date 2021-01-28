@@ -129,6 +129,12 @@
   <data name="Emil confirmation failed." xml:space="preserve">
     <value>تایید ایمیل موفق نبود.</value>
   </data>
+  <data name="Error in writing files." xml:space="preserve">
+    <value>در نوشتن فایل مشکلی پیش آمد.</value>
+  </data>
+  <data name="File extension is not allowed." xml:space="preserve">
+    <value>پسوند فایل مجاز نیست.</value>
+  </data>
   <data name="Password or Username is wrong." xml:space="preserve">
     <value>نام کاربری یا رمز عبور اشتباه است.</value>
   </data>
@@ -159,6 +165,9 @@
   <data name="There is a user with this username." xml:space="preserve">
     <value>کاربری با این نام کاربری وجود دارد.</value>
   </data>
+  <data name="There is more than one file." xml:space="preserve">
+    <value>بیش از یک فایل وجود دارد.</value>
+  </data>
   <data name="Too many requests." xml:space="preserve">
     <value>باید از زمان ارسال ایمیل قبلی شما مقداری گذشته باشد.</value>
   </data>
@@ -167,5 +176,11 @@
   </data>
   <data name="Username should not contain @ character." xml:space="preserve">
     <value>نام کاربری نباید شامل @ باشد.</value>
+  </data>
+  <data name="You did not upload an image." xml:space="preserve">
+    <value>شما عکسی آپلود نکرده اید.</value>
+  </data>
+  <data name="Your file does not have extension." xml:space="preserve">
+    <value>فایل شما پسوند ندارد.</value>
   </data>
 </root>

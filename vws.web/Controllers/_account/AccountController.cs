@@ -523,11 +523,48 @@ namespace vws.web.Controllers._account
             }));
         }
 
-        //[HttpPost]
-        //[Route("uploadProfileImage")]
-        //public async Task<IActionResult> UploadProfileImage(IFormFile image)
-        //{
+        [HttpPost]
+        [Authorize]
+        [Route("uploadProfileImage")]
+        public async Task<IActionResult> UploadProfileImage(IFormFile image)
+        {
+            var response = new ResponseModel();
 
-        //}
+            string[] types = { "png", "jpg", "jpeg"};
+
+            var files = Request.Form.Files.ToList();
+
+            Guid userId = LoggedInUserId.Value;
+
+            if (files.Count > 1)
+            {
+                response.AddError(localizer["There is more than one file."]);
+                response.Message = "Too many files passed";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            if(files.Count == 0 && image == null)
+            {
+                response.AddError(localizer["You did not upload an image."]);
+                response.Message = "There is no image";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            var uploadedImage = files.Count == 0 ? image : files[0];
+            
+            var fileResponse = await fileManager.WriteFile(uploadedImage, userId, "profileImages", types.ToList());
+            if(fileResponse.HasError)
+            {
+                foreach (var error in fileResponse.Errors)
+                    response.AddError(localizer[error]);
+                response.Message = "Error in writing file";
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
+
+            var user = await vwsDbContext.GetUserProfileAsync(userId);
+            user.ProfileImageId = fileResponse.Value.FileId;
+            vwsDbContext.Save();
+
+            response.Message = "User image added successfully!";
+            return Ok(response);
+        }
     }
 }
