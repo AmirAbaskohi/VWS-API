@@ -1,40 +1,61 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using vws.web.Domain;
+using vws.web.Models;
 
 namespace vws.web.Repositories
 {
     public class FileManager : IFileManager
     {
         private IVWS_DbContext vwsDbContext;
+        private IConfiguration configuration;
 
-        public FileManager(IVWS_DbContext _vwsDbContext)
+        public FileManager(IVWS_DbContext _vwsDbContext, IConfiguration _configuration)
         {
             vwsDbContext = _vwsDbContext;
+            configuration = _configuration;
         }
-        public async Task<bool> WriteFile(IFormFile file, Guid userId, string address)
+        public async Task<ResponseModel<Domain._file.File>> WriteFile(IFormFile file, Guid userId, string address, List<string> allowedExtensions = null)
         {
-            bool isSaveSuccess = false;
+            var notAllowedExtensions = configuration["Files:RestrictedExtensions"].Split(',');
+
+            var response = new ResponseModel<Domain._file.File>();
+
             string fileName;
+
+            if (!file.FileName.Contains('.'))
+            {
+                response.AddError("Your file does not have extension.");
+                response.Message = "Invalid file name";
+                return response;
+            }
+
+            var extension = file.FileName.Split('.')[file.FileName.Split('.').Length - 1];
+
+            if (allowedExtensions != null && (!allowedExtensions.Any(ext => ext == extension) || notAllowedExtensions.Any(ext => ext == extension)))
+            {
+                response.AddError("File extension is not allowed.");
+                response.Message = "Invalid extension";
+                return response;
+            }
+
+                Guid fileGuid = Guid.NewGuid();
+            fileName = fileGuid.ToString() + "." + extension;
+
+            var pathBuilt = Path.Combine(Directory.GetCurrentDirectory(), $"Upload{Path.DirectorySeparatorChar}" + address);
+            var path = Path.Combine(Directory.GetCurrentDirectory(), $"Upload{Path.DirectorySeparatorChar}" + address,
+                   fileName);
             try
             {
-                var extension = file.FileName.Split('.')[file.FileName.Split('.').Length - 1];
-                Guid fileGuid = Guid.NewGuid();
-                fileName = fileGuid.ToString() + "." + extension;
-
-                var pathBuilt = Path.Combine(Directory.GetCurrentDirectory(), $"Upload{Path.DirectorySeparatorChar}" + address );
-
                 if (!Directory.Exists(pathBuilt))
                 {
                     Directory.CreateDirectory(pathBuilt);
                 }
-
-                var path = Path.Combine(Directory.GetCurrentDirectory(), $"Upload{Path.DirectorySeparatorChar}" + address,
-                   fileName);
 
                 using (var stream = new FileStream(path, FileMode.Create))
                 {
@@ -50,17 +71,25 @@ namespace vws.web.Repositories
                     UploadedBy = userId
                 };
 
-                isSaveSuccess = true;
-
                 await vwsDbContext.AddFileAsync(newFile);
                 vwsDbContext.Save();
+                response.Value = newFile;
+                response.Message = "File wrote successfully";
             }
             catch (Exception e)
             {
-                //log error
+                response.AddError("Error in writing files.");
+                response.Message = "Error in writing file";
+                if (File.Exists(path))
+                    File.Delete(path);
             }
 
-            return isSaveSuccess;
+            return response;
+        }
+
+        public void DeleteFile(string path)
+        {
+            File.Delete(path);
         }
     }
 }

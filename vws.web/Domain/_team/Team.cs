@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using vws.web.Domain._department;
+using vws.web.Domain._file;
 
 namespace vws.web.Domain._team
 {
@@ -39,7 +40,9 @@ namespace vws.web.Domain._team
 
         public Guid ModifiedBy { get; set; }
 
-        public bool isDeleted { get; set; }
+        public bool IsDeleted { get; set; }
+        public Guid? TeamImageId { get; set; }
+        public virtual File TeamImage { get; set; }
 
         public virtual TeamType TeamType { get; set; }
 

@@ -132,7 +132,7 @@ namespace vws.web.Controllers._team
         [Route("createInviteLink")]
         public async Task<IActionResult> CreateInviteLink(int teamId)
         {
-            var response = new ResponseModel<string>();
+            var response = new ResponseModel<TeamInviteLinkResponseModel>();
 
             var selectedTeam = await vwsDbContext.GetTeamAsync(teamId);
             if (selectedTeam == null)
@@ -170,7 +170,18 @@ namespace vws.web.Controllers._team
             await vwsDbContext.AddTeamInviteLinkAsync(newInviteLink);
             vwsDbContext.Save();
 
-            response.Value = inviteLinkGuid.ToString();
+            response.Value = new TeamInviteLinkResponseModel()
+            {
+                Id = newInviteLink.Id,
+                TeamName = (await vwsDbContext.GetTeamAsync(newInviteLink.TeamId)).Name,
+                IsRevoked = newInviteLink.IsRevoked,
+                LinkGuid = newInviteLink.LinkGuid.ToString(),
+                CreatedBy = (await userManager.FindByIdAsync(newInviteLink.CreatedBy.ToString())).UserName,
+                ModifiedBy = (await userManager.FindByIdAsync(newInviteLink.ModifiedBy.ToString())).UserName,
+                CreatedOn = newInviteLink.CreatedOn,
+                ModifiedOn = newInviteLink.ModifiedOn
+            };
+
             response.Message = "Invite link created successfully!";
             return Ok(response);
         }

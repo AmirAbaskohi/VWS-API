@@ -36,11 +36,12 @@ namespace vws.web.Controllers._account
         private readonly EmailAddressAttribute emailChecker;
         private readonly Random random;
         private readonly IVWS_DbContext vwsDbContext;
+        private readonly IFileManager fileManager;
 
         public AccountController(UserManager<ApplicationUser> _userManager, RoleManager<IdentityRole> _roleManager,
             SignInManager<ApplicationUser> _signInManager, IConfiguration _configuration, IEmailSender _emailSender,
             IPasswordHasher<ApplicationUser> _passwordHasher, IStringLocalizer<AccountController> _localizer,
-            IVWS_DbContext _vwsDbContext)
+            IVWS_DbContext _vwsDbContext, IFileManager _fileManager)
         {
             userManager = _userManager;
             roleManager = _roleManager;
@@ -52,6 +53,7 @@ namespace vws.web.Controllers._account
             emailChecker = new EmailAddressAttribute();
             random = new Random();
             vwsDbContext = _vwsDbContext;
+            fileManager = _fileManager;
         }
 
         private JwtSecurityToken GenerateToken(IEnumerable<Claim> claims)
@@ -520,5 +522,12 @@ namespace vws.web.Controllers._account
                 ValidTo = newJWToken.ValidTo
             }));
         }
+
+        //[HttpPost]
+        //[Route("uploadProfileImage")]
+        //public async Task<IActionResult> UploadProfileImage(IFormFile image)
+        //{
+
+        //}
     }
 }

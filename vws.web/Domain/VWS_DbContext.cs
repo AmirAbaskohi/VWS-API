@@ -312,6 +312,11 @@ namespace vws.web.Domain
             return await Files.FirstOrDefaultAsync(file => file.FileId == guid);
         }
 
+        public void DeleteFile(File file)
+        {
+            Files.Remove(file);
+        }
+
         #endregion
 
 
