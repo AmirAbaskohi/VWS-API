@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using vws.web.Domain;
+using vws.web.Repositories;
 
 namespace vws.web.Controllers._file
 {
@@ -20,71 +21,25 @@ namespace vws.web.Controllers._file
         private readonly IConfiguration configuration;
         private readonly IStringLocalizer<FileController> localizer;
         private readonly IVWS_DbContext vwsDbContext;
+        private readonly IFileManager fileManager;
 
         public FileController(IConfiguration _configuration, IStringLocalizer<FileController> _localizer,
-            IVWS_DbContext _vwsDbContext)
+            IVWS_DbContext _vwsDbContext, IFileManager _fileManager)
         {
             configuration = _configuration;
             localizer = _localizer;
             vwsDbContext = _vwsDbContext;
-        }
-
-        private async Task<bool> WriteFile(IFormFile file, Guid userId)
-        {
-            bool isSaveSuccess = false;
-            string fileName;
-            try
-            {
-                var extension = file.FileName.Split('.')[file.FileName.Split('.').Length - 1];
-                Guid fileGuid = Guid.NewGuid();
-                fileName = fileGuid.ToString() + "." + extension;
-
-                var pathBuilt = Path.Combine(Directory.GetCurrentDirectory(), $"Upload{Path.DirectorySeparatorChar}files");
-
-                if (!Directory.Exists(pathBuilt))
-                {
-                    Directory.CreateDirectory(pathBuilt);
-                }
-
-                var path = Path.Combine(Directory.GetCurrentDirectory(), $"Upload{Path.DirectorySeparatorChar}files",
-                   fileName);
-
-                using (var stream = new FileStream(path, FileMode.Create))
-                {
-                    await file.CopyToAsync(stream);
-                }
-
-                var newFile = new Domain._file.File()
-                {
-                    FileId = fileGuid,
-                    Address = path,
-                    Extension = extension,
-                    Name = file.FileName,
-                    UploadedBy = userId
-                };
-
-                await vwsDbContext.AddFileAsync(newFile);
-                vwsDbContext.Save();
-
-
-                isSaveSuccess = true;
-            }
-            catch (Exception e)
-            {
-                //log error
-            }
-
-            return isSaveSuccess;
+            fileManager = _fileManager;
         }
 
         [HttpPost]
         [Authorize]
         [Route("upload")]
-        public async Task<IActionResult> UploadFiles()
+        public async Task<IActionResult> UploadFiles(List<IFormFile> formFiles)
         {
-            var files = Request.Form.Files;
+            var files = Request.Form.Files.Union(formFiles);
             foreach (var file in files)
-                if (await WriteFile(file, LoggedInUserId.Value))
+                if (await fileManager.WriteFile(file, LoggedInUserId.Value, "files"))
                     return Ok();
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
