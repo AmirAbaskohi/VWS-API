@@ -114,6 +114,8 @@ namespace vws.web
             });
 
             services.AddScoped<IEmailSender, EmailSender>();
+            
+            services.AddScoped<IFileManager, FileManager>();
 
             services.AddAuthentication(option =>
             {

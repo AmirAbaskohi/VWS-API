@@ -39,6 +39,8 @@ namespace vws.web.Domain._team
 
         public Guid ModifiedBy { get; set; }
 
+        public bool isDeleted { get; set; }
+
         public virtual TeamType TeamType { get; set; }
 
         public virtual ICollection<Department> Departments { get; set; }
