@@ -80,8 +80,9 @@ namespace vws.web.Controllers._file
         [HttpPost]
         [Authorize]
         [Route("upload")]
-        public async Task<IActionResult> UploadFiles(List<IFormFile> files)
+        public async Task<IActionResult> UploadFiles()
         {
+            var files = Request.Form.Files;
             foreach (var file in files)
                 if (await WriteFile(file, LoggedInUserId.Value))
                     return Ok();
