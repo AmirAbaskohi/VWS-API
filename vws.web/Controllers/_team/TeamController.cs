@@ -453,5 +453,37 @@ namespace vws.web.Controllers._team
             response.Message = "Team image added successfully!";
             return Ok(response);
         }
+
+        [HttpDelete]
+        [Authorize]
+        [Route("delete")]
+        public async Task<IActionResult> DeleteTeam(int teamId)
+        {
+            var response = new ResponseModel();
+
+            Guid userId = LoggedInUserId.Value;
+
+            var selectedTeam = await vwsDbContext.GetTeamAsync(teamId);
+            if (selectedTeam == null || selectedTeam.IsDeleted)
+            {
+                response.AddError(localizer["There is no team with given Id."]);
+                response.Message = "Team not found";
+                return StatusCode(StatusCodes.Status404NotFound, response);
+            }
+
+            var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync(teamId, userId);
+            if (selectedTeamMember == null || selectedTeamMember.HasUserLeft)
+            {
+                response.AddError(localizer["You are not a member of team."]);
+                response.Message = "Not member of team";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            selectedTeam.IsDeleted = true;
+            vwsDbContext.Save();
+
+            response.Message = "Team deleted successfully!";
+            return Ok(response);
+        }
     }
 }
