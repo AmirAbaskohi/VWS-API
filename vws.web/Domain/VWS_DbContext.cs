@@ -269,13 +269,13 @@ namespace vws.web.Domain
 
         public async Task<TeamMember> GetTeamMemberAsync(int teamId, Guid memberId)
         {
-            return await TeamMembers.FirstOrDefaultAsync(teamMember => (teamMember.TeamId == teamId && teamMember.UserProfileId == memberId));
+            return await TeamMembers.FirstOrDefaultAsync(teamMember => teamMember.TeamId == teamId && teamMember.UserProfileId == memberId && teamMember.HasUserLeft == false);
         }
 
         public IQueryable<Team> GetUserTeams(Guid userId)
         {
-            HashSet<int> TeamIds = TeamMembers.Where(teamMember => teamMember.UserProfileId == userId).Select(x => x.TeamId).ToHashSet<int>();
-            return Teams.Where(team => TeamIds.Contains(team.Id));
+            HashSet<int> TeamIds = TeamMembers.Where(teamMember => teamMember.UserProfileId == userId && teamMember.HasUserLeft == false).Select(x => x.TeamId).ToHashSet<int>();
+            return Teams.Where(team => TeamIds.Contains(team.Id) && team.IsDeleted == false);
         }
 
         public void AddTeamType(TeamType teamType)

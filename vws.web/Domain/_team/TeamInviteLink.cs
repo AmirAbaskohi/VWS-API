@@ -16,6 +16,7 @@ namespace vws.web.Domain._team
         public Guid ModifiedBy { get; set; }
         public DateTime CreatedOn { get; set; }
         public DateTime ModifiedOn { get; set; }
-        public bool IsRevoked { get; set; } 
+        public bool IsRevoked { get; set; }
+        public virtual Team Team { get; set; }
     }
 }
