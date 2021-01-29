@@ -29,11 +29,12 @@ namespace vws.web.Controllers._team
         private readonly IPasswordHasher<ApplicationUser> passwordHasher;
         private readonly IStringLocalizer<TeamController> localizer;
         private readonly IVWS_DbContext vwsDbContext;
+        private readonly IFileManager fileManager;
 
         public TeamController(UserManager<ApplicationUser> _userManager, RoleManager<IdentityRole> _roleManager,
             SignInManager<ApplicationUser> _signInManager, IConfiguration _configuration, IEmailSender _emailSender,
             IPasswordHasher<ApplicationUser> _passwordHasher, IStringLocalizer<TeamController> _localizer,
-            IVWS_DbContext _vwsDbContext)
+            IVWS_DbContext _vwsDbContext, IFileManager _fileManager)
         {
             userManager = _userManager;
             roleManager = _roleManager;
@@ -43,6 +44,7 @@ namespace vws.web.Controllers._team
             passwordHasher = _passwordHasher;
             localizer = _localizer;
             vwsDbContext = _vwsDbContext;
+            fileManager = _fileManager;
         }
 
         [HttpPost]
@@ -390,6 +392,65 @@ namespace vws.web.Controllers._team
 
             response.Message = "Team updated successfully";
             response.Value = updatedTeamResponse;
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("uploadTeamImage")]
+        public async Task<IActionResult> UploadTeamImage(IFormFile image, int teamId)
+        {
+            var response = new ResponseModel();
+
+            string[] types = { "png", "jpg", "jpeg" };
+
+            var files = Request.Form.Files.ToList();
+
+            Guid userId = LoggedInUserId.Value;
+
+            if (files.Count > 1)
+            {
+                response.AddError(localizer["There is more than one file."]);
+                response.Message = "Too many files passed";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            if (files.Count == 0 && image == null)
+            {
+                response.AddError(localizer["You did not upload an image."]);
+                response.Message = "There is no image";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            var uploadedImage = files.Count == 0 ? image : files[0];
+
+            var selectedTeam = await vwsDbContext.GetTeamAsync(teamId);
+            if(selectedTeam == null || selectedTeam.IsDeleted)
+            {
+                response.AddError(localizer["There is no team with given Id."]);
+                response.Message = "Team not found";
+                return StatusCode(StatusCodes.Status404NotFound, response);
+            }
+
+            var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync(teamId, userId);
+            if(selectedTeamMember == null || selectedTeamMember.HasUserLeft)
+            {
+                response.AddError(localizer["You are not a member of team."]);
+                response.Message = "Not member of team";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            var fileResponse = await fileManager.WriteFile(uploadedImage, userId, "teamImages", types.ToList());
+            if (fileResponse.HasError)
+            {
+                foreach (var error in fileResponse.Errors)
+                    response.AddError(localizer[error]);
+                response.Message = "Error in writing file";
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
+
+            selectedTeam.TeamImageId = fileResponse.Value.FileId;
+            vwsDbContext.Save();
+
+            response.Message = "Team image added successfully!";
             return Ok(response);
         }
     }
