@@ -189,4 +189,7 @@
   <data name="Your file does not have extension." xml:space="preserve">
     <value>فایل شما پسوند ندارد.</value>
   </data>
+  <data name="Your password changed successfully!" xml:space="preserve">
+    <value>پسورد شما با موفقیت تغییر کرد!</value>
+  </data>
 </root>

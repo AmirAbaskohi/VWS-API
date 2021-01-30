@@ -587,7 +587,7 @@ namespace vws.web.Controllers._account
                     if (res.Succeeded == true)
                     {
                         string emailError;
-                        await emailSender.SendEmailAsync(user.Email, "Email Changed", "Your password changed successfully!", configuration, out emailError);
+                        await emailSender.SendEmailAsync(user.Email, "Email Changed", localizer["Your password changed successfully!"], configuration, out emailError);
                         return Ok(new ResponseModel { Message = "Password changed successfully!" });
                     }
                     errors.Add("Changing the password was unsuccessful.");
@@ -602,6 +602,30 @@ namespace vws.web.Controllers._account
 
             errors.Add(localizer["Last password is not true."]);
             return StatusCode(StatusCodes.Status401Unauthorized, new ResponseModel { Message = "Unauthorized", Errors = errors });
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("logOut")]
+        public async Task<IActionResult> LogOut([FromBody] TokenModel model)
+        {
+            var userId = LoggedInUserId.Value;
+            var response = new ResponseModel();
+
+            var refreshToken = await vwsDbContext.GetRefreshTokenAsync(userId, model.Token);
+
+            if (refreshToken == null || refreshToken.IsValid == false)
+            {
+                response.Message = "Invalid refresh token";
+                response.AddError(localizer["Refresh token is invalid."]);
+                return StatusCode(StatusCodes.Status404NotFound, response);
+            }
+
+            refreshToken.IsValid = false;
+            vwsDbContext.Save();
+
+            response.Message = "Logged out successfully!";
+            return Ok(response);
         }
     }
 }

@@ -189,4 +189,7 @@
   <data name="Your file does not have extension." xml:space="preserve">
     <value>Your file does not have extension.</value>
   </data>
+  <data name="Your password changed successfully!" xml:space="preserve">
+    <value>Your password changed successfully!</value>
+  </data>
 </root>

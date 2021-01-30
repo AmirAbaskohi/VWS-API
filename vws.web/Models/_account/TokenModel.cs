@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 
 namespace vws.web.Models._account
 {
-    public class RefreshTokenModel
+    public class TokenModel
     {
         [Required]
         public string Token { get; set; }
-        [Required]
-        public string RefreshToken { get; set; }
     }
 }
