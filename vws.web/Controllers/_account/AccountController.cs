@@ -566,5 +566,42 @@ namespace vws.web.Controllers._account
             response.Message = "User image added successfully!";
             return Ok(response);
         }
+
+        [HttpPut]
+        [Authorize]
+        [Route("changePassword")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordModel model)
+        {
+            var errors = new List<string>();
+            string userId = LoggedInUserId.Value.ToString();
+            var user = await userManager.FindByIdAsync(userId);
+
+            if(await userManager.CheckPasswordAsync(user, model.LastPassword))
+            {
+                var passwordValidator = new PasswordValidator<ApplicationUser>();
+                var result = await passwordValidator.ValidateAsync(userManager, user, model.NewPassword);
+                if (result.Succeeded)
+                {
+                    user.PasswordHash = passwordHasher.HashPassword(user, model.NewPassword);
+                    var res = await userManager.UpdateAsync(user);
+                    if (res.Succeeded == true)
+                    {
+                        string emailError;
+                        await emailSender.SendEmailAsync(user.Email, "Email Changed", "Your password changed successfully!", configuration, out emailError);
+                        return Ok(new ResponseModel { Message = "Password changed successfully!" });
+                    }
+                    errors.Add("Changing the password was unsuccessful.");
+                    return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "Password changing failed!", Errors = errors });
+                }
+                foreach (var error in result.Errors)
+                {
+                    errors.Add(localizer[error.Description]);
+                }
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "New password is not valid!", Errors = errors });
+            }
+
+            errors.Add(localizer["Last password is not true."]);
+            return StatusCode(StatusCodes.Status401Unauthorized, new ResponseModel { Message = "Unauthorized", Errors = errors });
+        }
     }
 }

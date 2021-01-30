@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Changing the password was unsuccessful." xml:space="preserve">
+    <value>Changing the password was unsuccessful.</value>
+  </data>
   <data name="Email already confirmed." xml:space="preserve">
     <value>Email already confirmed.</value>
   </data>
@@ -134,6 +137,9 @@
   </data>
   <data name="File extension is not allowed." xml:space="preserve">
     <value>File extension is not allowed.</value>
+  </data>
+  <data name="Last password is not true." xml:space="preserve">
+    <value>Last password is not true.</value>
   </data>
   <data name="Password or Username is wrong." xml:space="preserve">
     <value>Password or Username is wrong.</value>
