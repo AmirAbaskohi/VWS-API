@@ -114,6 +114,11 @@ namespace vws.web.Domain
         #region methods
 
         public IQueryable<Project> GetUserProjects(Guid userId);
+        public void AddStatus(ProjectStatus projectStatus);
+        public string GetStatus(byte id);
+        public void UpdateStatus(byte id, string newName);
+        public Task<Project> AddProjectAsync(Project project);
+        public Task<ProjectMember> AddProjectMemberAsync(ProjectMember projectMember);
 
         #endregion
 

@@ -170,6 +170,32 @@ namespace vws.web.Domain
             return Projects.Where(project => ProjectIds.Contains(project.Id));
         }
 
+        public void AddStatus(ProjectStatus projectStatus)
+        {
+            ProjectStatuses.Add(projectStatus);
+        }
+        public string GetStatus(byte id)
+        {
+            return ProjectStatuses.FirstOrDefault(status => status.Id == id).NameMultiLang;
+        }
+        public void UpdateStatus(byte id, string newName)
+        {
+            var selected = ProjectStatuses.FirstOrDefault(status => status.Id == id);
+            selected.NameMultiLang = newName;
+        }
+
+        public async Task<Project> AddProjectAsync(Project project)
+        {
+            await Projects.AddAsync(project);
+            return project;
+        }
+
+        public async Task<ProjectMember> AddProjectMemberAsync(ProjectMember projectMember)
+        {
+            await ProjectMembers.AddAsync(projectMember);
+            return projectMember;
+        }
+
 
         #endregion
 

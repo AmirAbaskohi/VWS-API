@@ -31,6 +31,7 @@ namespace vws.web.Domain._project
 
         [MaxLength(6)]
         public string Color { get; set; }
+        public bool IsDelete { get; set;}
 
         public virtual ProjectStatus Status { get; set; }
 
