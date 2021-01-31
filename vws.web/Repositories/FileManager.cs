@@ -36,6 +36,7 @@ namespace vws.web.Repositories
             }
 
             var extension = file.FileName.Split('.')[file.FileName.Split('.').Length - 1];
+            extension = extension.ToLower();
 
             if (allowedExtensions != null && (!allowedExtensions.Any(ext => ext == extension) || notAllowedExtensions.Any(ext => ext == extension)))
             {
