@@ -301,6 +301,10 @@ namespace vws.web.Domain
 
         public DbSet<File> Files { get; set; }
 
+        IQueryable<FileContainer> IVWS_DbContext.FileContainers { get => FileContainers; }
+
+        public DbSet<FileContainer> FileContainers { get; set; }
+
         public async Task<File> AddFileAsync(File file)
         {
             await Files.AddAsync(file);
@@ -309,12 +313,27 @@ namespace vws.web.Domain
 
         public async Task<File> GetFileAsync(Guid guid)
         {
-            return await Files.FirstOrDefaultAsync(file => file.FileId == guid);
+            return await Files.FirstOrDefaultAsync(file => file.Id == guid);
+        }
+
+        public async Task<FileContainer> AddFileContainerAsync(FileContainer fileContainer)
+        {
+            await FileContainers.AddAsync(fileContainer);
+            return fileContainer;
+        }
+        public async Task<FileContainer> GetFileContainerAsync(int id)
+        {
+            return await FileContainers.FirstOrDefaultAsync(fileContainer => fileContainer.Id == id);
         }
 
         public void DeleteFile(File file)
         {
             Files.Remove(file);
+        }
+
+        public void DeleteFileContainer(FileContainer fileContainer)
+        {
+            FileContainers.Remove(fileContainer);
         }
 
         #endregion

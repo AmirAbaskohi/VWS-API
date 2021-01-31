@@ -15,10 +15,10 @@ namespace vws.web.Domain._base
 
         [MaxLength(6)]
         public string ThemeColorCode { get; set; }
-
-        public Guid? ProfileImageId { get; set; }
+        [ForeignKey("ProfileImage")]
+        public int? ProfileImageId { get; set; }
 
         public virtual Culture Culture { get; set; }
-        public virtual File ProfileImage { get; set; }
+        public virtual FileContainer ProfileImage { get; set; }
     }
 }

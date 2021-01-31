@@ -41,10 +41,23 @@ namespace vws.web.Controllers._file
             var files = Request.Form.Files.Union(formFiles);
             var response = new ResponseModel();
             List<Domain._file.File> successfullyUploadedFiles = new List<Domain._file.File>();
+            List<Domain._file.FileContainer> successfullyUploadedFileContainers = new List<Domain._file.FileContainer>();
             bool hasError = false;
+            var time = DateTime.Now;
             foreach (var file in files)
             {
-                var result = await fileManager.WriteFile(file, LoggedInUserId.Value, "files");
+                var newFileContainer = new Domain._file.FileContainer()
+                {
+                    ModifiedBy = LoggedInUserId.Value,
+                    CreatedBy = LoggedInUserId.Value,
+                    CreatedOn = time,
+                    ModifiedOn = time,
+                    Guid = Guid.NewGuid()
+                };
+                await vwsDbContext.AddFileContainerAsync(newFileContainer);
+                vwsDbContext.Save();
+                successfullyUploadedFileContainers.Add(newFileContainer);
+                var result = await fileManager.WriteFile(file, LoggedInUserId.Value, "files", newFileContainer.Id);
                 if (result.HasError)
                 {
                     foreach (var error in result.Errors)
@@ -53,14 +66,23 @@ namespace vws.web.Controllers._file
                     break;
                 }
                 else
+                {
                     successfullyUploadedFiles.Add(result.Value);
+                    newFileContainer.RecentFileId = result.Value.Id;
+                    vwsDbContext.Save();
+                }
             }
+            vwsDbContext.Save();
             if (hasError)
             {
-                foreach (var successfile in successfullyUploadedFiles)
+                foreach (var successFile in successfullyUploadedFiles)
                 {
-                    fileManager.DeleteFile(successfile.Address);
-                    vwsDbContext.DeleteFile(successfile);
+                    fileManager.DeleteFile(successFile.Address);
+                    vwsDbContext.DeleteFile(successFile);
+                }
+                foreach (var successfileContainer in successfullyUploadedFileContainers)
+                {
+                    vwsDbContext.DeleteFileContainer(successfileContainer);
                 }
                 vwsDbContext.Save();
                 response.Message = "Unsuccessful writing";
@@ -73,10 +95,17 @@ namespace vws.web.Controllers._file
 
         [HttpGet]
         [Route("get")]
-        public async Task<IActionResult> GetFile(string guid)
+        public async Task<IActionResult> GetFile(int id)
         {
-            Guid fileId = new Guid(guid);
-            var selectedFile = (await vwsDbContext.GetFileAsync(fileId));
+            var response = new ResponseModel();
+            var fileContainer = await vwsDbContext.GetFileContainerAsync(id);
+            if (fileContainer == null)
+            {
+                response.AddError(localizer["There is no such file."]);
+                response.Message = "File not found";
+                return StatusCode(StatusCodes.Status404NotFound, response);
+            }
+            var selectedFile = (await vwsDbContext.GetFileAsync(fileContainer.RecentFileId));
             string address = selectedFile.Address;
             string fileName = selectedFile.Name;
 

@@ -20,7 +20,7 @@ namespace vws.web.Repositories
             vwsDbContext = _vwsDbContext;
             configuration = _configuration;
         }
-        public async Task<ResponseModel<Domain._file.File>> WriteFile(IFormFile file, Guid userId, string address, List<string> allowedExtensions = null)
+        public async Task<ResponseModel<Domain._file.File>> WriteFile(IFormFile file, Guid userId, string address, int fileContainerId, List<string> allowedExtensions = null)
         {
             var notAllowedExtensions = configuration["Files:RestrictedExtensions"].Split(',');
 
@@ -44,7 +44,7 @@ namespace vws.web.Repositories
                 return response;
             }
 
-                Guid fileGuid = Guid.NewGuid();
+            Guid fileGuid = Guid.NewGuid();
             fileName = fileGuid.ToString() + "." + extension;
 
             var pathBuilt = Path.Combine(Directory.GetCurrentDirectory(), $"Upload{Path.DirectorySeparatorChar}" + address);
@@ -64,11 +64,12 @@ namespace vws.web.Repositories
 
                 var newFile = new Domain._file.File()
                 {
-                    FileId = fileGuid,
+                    Id = fileGuid,
                     Address = path,
                     Extension = extension,
                     Name = file.FileName,
-                    UploadedBy = userId
+                    UploadedBy = userId,
+                    FileContainerId = fileContainerId
                 };
 
                 await vwsDbContext.AddFileAsync(newFile);

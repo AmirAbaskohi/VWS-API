@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using vws.web.Domain;
 
 namespace vws.web.Migrations
 {
     [DbContext(typeof(VWS_DbContext))]
-    partial class VWS_DbContextModelSnapshot : ModelSnapshot
+    [Migration("20210131145734_AddTeamImage")]
+    partial class AddTeamImage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -273,9 +275,6 @@ namespace vws.web.Migrations
                     b.Property<byte?>("CultureId")
                         .HasColumnType("tinyint");
 
-                    b.Property<int?>("ProfileImageId")
-                        .HasColumnType("int");
-
                     b.Property<string>("ThemeColorCode")
                         .HasMaxLength(6)
                         .HasColumnType("nvarchar(6)");
@@ -283,8 +282,6 @@ namespace vws.web.Migrations
                     b.HasKey("UserId");
 
                     b.HasIndex("CultureId");
-
-                    b.HasIndex("ProfileImageId");
 
                     b.ToTable("Base_UserProfile");
                 });
@@ -959,13 +956,7 @@ namespace vws.web.Migrations
                         .WithMany()
                         .HasForeignKey("CultureId");
 
-                    b.HasOne("vws.web.Domain._file.FileContainer", "ProfileImage")
-                        .WithMany()
-                        .HasForeignKey("ProfileImageId");
-
                     b.Navigation("Culture");
-
-                    b.Navigation("ProfileImage");
                 });
 
             modelBuilder.Entity("vws.web.Domain._chat.Message", b =>

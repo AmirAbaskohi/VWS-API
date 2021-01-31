@@ -190,6 +190,7 @@ namespace vws.web.Domain
         #region models
 
         public IQueryable<File> Files { get; }
+        public IQueryable<FileContainer> FileContainers { get; }
 
         #endregion
 
@@ -197,7 +198,10 @@ namespace vws.web.Domain
 
         public Task<File> AddFileAsync(File file);
         public Task<File> GetFileAsync(Guid guid);
+        public Task<FileContainer> AddFileContainerAsync(FileContainer fileContainer);
+        public Task<FileContainer> GetFileContainerAsync(int id);
         public void DeleteFile(File file);
+        public void DeleteFileContainer(FileContainer fileContainer);
 
         #endregion
 

@@ -16,6 +16,7 @@ using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
 using vws.web.Domain;
 using vws.web.Domain._base;
+using vws.web.Domain._file;
 using vws.web.Models;
 using vws.web.Models._account;
 using vws.web.Repositories;
@@ -530,11 +531,12 @@ namespace vws.web.Controllers._account
         {
             var response = new ResponseModel();
 
-            string[] types = { "png", "jpg", "jpeg"};
+            string[] types = { "png", "jpg", "jpeg" };
 
             var files = Request.Form.Files.ToList();
 
             Guid userId = LoggedInUserId.Value;
+            var userProfile = await vwsDbContext.GetUserProfileAsync(userId);
 
             if (files.Count > 1)
             {
@@ -542,27 +544,56 @@ namespace vws.web.Controllers._account
                 response.Message = "Too many files passed";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
-            if(files.Count == 0 && image == null)
+            if (files.Count == 0 && image == null)
             {
                 response.AddError(localizer["You did not upload an image."]);
                 response.Message = "There is no image";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
             var uploadedImage = files.Count == 0 ? image : files[0];
-            
-            var fileResponse = await fileManager.WriteFile(uploadedImage, userId, "profileImages", types.ToList());
-            if(fileResponse.HasError)
+
+            ResponseModel<File> fileResponse;
+
+            if (userProfile.ProfileImage != null)
             {
-                foreach (var error in fileResponse.Errors)
-                    response.AddError(localizer[error]);
-                response.Message = "Error in writing file";
-                return StatusCode(StatusCodes.Status500InternalServerError, response);
+                fileResponse = await fileManager.WriteFile(uploadedImage, userId, "profileImages", (int)userProfile.ProfileImageId, types.ToList());
+                if (fileResponse.HasError)
+                {
+                    foreach (var error in fileResponse.Errors)
+                        response.AddError(localizer[error]);
+                    response.Message = "Error in writing file";
+                    return StatusCode(StatusCodes.Status500InternalServerError, response);
+                }
+                userProfile.ProfileImage.RecentFileId = fileResponse.Value.Id;
+                vwsDbContext.Save();
             }
-
-            var user = await vwsDbContext.GetUserProfileAsync(userId);
-            user.ProfileImageId = fileResponse.Value.FileId;
-            vwsDbContext.Save();
-
+            else
+            {
+                var time = DateTime.Now;
+                var newFileContainer = new FileContainer
+                {
+                    ModifiedOn = time,
+                    CreatedOn = time,
+                    CreatedBy = userId,
+                    ModifiedBy = userId,
+                    Guid = Guid.NewGuid()
+                };
+                await vwsDbContext.AddFileContainerAsync(newFileContainer);
+                vwsDbContext.Save();
+                fileResponse = await fileManager.WriteFile(uploadedImage, userId, "profileImages", newFileContainer.Id, types.ToList());
+                if (fileResponse.HasError)
+                {
+                    foreach (var error in fileResponse.Errors)
+                        response.AddError(localizer[error]);
+                    response.Message = "Error in writing file";
+                    vwsDbContext.DeleteFileContainer(newFileContainer);
+                    vwsDbContext.Save();
+                    return StatusCode(StatusCodes.Status500InternalServerError, response);
+                }
+                newFileContainer.RecentFileId = fileResponse.Value.Id;
+                userProfile.ProfileImageId = newFileContainer.Id;
+                vwsDbContext.Save();
+            }
             response.Message = "User image added successfully!";
             return Ok(response);
         }

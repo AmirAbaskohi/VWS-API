@@ -41,8 +41,9 @@ namespace vws.web.Domain._team
         public Guid ModifiedBy { get; set; }
 
         public bool IsDeleted { get; set; }
-        public Guid? TeamImageId { get; set; }
-        public virtual File TeamImage { get; set; }
+        [ForeignKey("TeamImage")]
+        public int? TeamImageId { get; set; }
+        public virtual FileContainer TeamImage { get; set; }
 
         public virtual TeamType TeamType { get; set; }
 

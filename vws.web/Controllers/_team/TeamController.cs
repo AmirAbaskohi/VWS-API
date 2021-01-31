@@ -14,6 +14,7 @@ using vws.web.Domain._team;
 using vws.web.Models._team;
 using vws.web.Models;
 using vws.web.Repositories;
+using vws.web.Domain._file;
 
 namespace vws.web.Controllers._team
 {
@@ -437,7 +438,7 @@ namespace vws.web.Controllers._team
             var uploadedImage = files.Count == 0 ? image : files[0];
 
             var selectedTeam = await vwsDbContext.GetTeamAsync(teamId);
-            if(selectedTeam == null || selectedTeam.IsDeleted)
+            if (selectedTeam == null || selectedTeam.IsDeleted)
             {
                 response.AddError(localizer["There is no team with given Id."]);
                 response.Message = "Team not found";
@@ -445,26 +446,56 @@ namespace vws.web.Controllers._team
             }
 
             var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync(teamId, userId);
-            if(selectedTeamMember == null)
+            if (selectedTeamMember == null)
             {
                 response.AddError(localizer["You are not a member of team."]);
                 response.Message = "Not member of team";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            var fileResponse = await fileManager.WriteFile(uploadedImage, userId, "teamImages", types.ToList());
-            if (fileResponse.HasError)
+            ResponseModel<File> fileResponse;
+
+            if (selectedTeam.TeamImage != null)
             {
-                foreach (var error in fileResponse.Errors)
-                    response.AddError(localizer[error]);
-                response.Message = "Error in writing file";
-                return StatusCode(StatusCodes.Status500InternalServerError, response);
+                fileResponse = await fileManager.WriteFile(uploadedImage, userId, "profileImages", (int)selectedTeam.TeamImageId, types.ToList());
+                if (fileResponse.HasError)
+                {
+                    foreach (var error in fileResponse.Errors)
+                        response.AddError(localizer[error]);
+                    response.Message = "Error in writing file";
+                    return StatusCode(StatusCodes.Status500InternalServerError, response);
+                }
+                selectedTeam.TeamImage.RecentFileId = fileResponse.Value.Id;
+                vwsDbContext.Save();
             }
-
-            selectedTeam.TeamImageId = fileResponse.Value.FileId;
-            vwsDbContext.Save();
-
-            response.Message = "Team image added successfully!";
+            else
+            {
+                var time = DateTime.Now;
+                var newFileContainer = new FileContainer
+                {
+                    ModifiedOn = time,
+                    CreatedOn = time,
+                    CreatedBy = userId,
+                    ModifiedBy = userId,
+                    Guid = Guid.NewGuid()
+                };
+                await vwsDbContext.AddFileContainerAsync(newFileContainer);
+                vwsDbContext.Save();
+                fileResponse = await fileManager.WriteFile(uploadedImage, userId, "profileImages", newFileContainer.Id, types.ToList());
+                if (fileResponse.HasError)
+                {
+                    foreach (var error in fileResponse.Errors)
+                        response.AddError(localizer[error]);
+                    response.Message = "Error in writing file";
+                    vwsDbContext.DeleteFileContainer(newFileContainer);
+                    vwsDbContext.Save();
+                    return StatusCode(StatusCodes.Status500InternalServerError, response);
+                }
+                newFileContainer.RecentFileId = fileResponse.Value.Id;
+                selectedTeam.TeamImageId = newFileContainer.Id;
+                vwsDbContext.Save();
+            }
+            response.Message = "User image added successfully!";
             return Ok(response);
         }
 

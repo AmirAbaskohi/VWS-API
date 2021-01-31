@@ -10,7 +10,7 @@ namespace vws.web.Repositories
 {
    public interface IFileManager
     {
-        public Task<ResponseModel<Domain._file.File>> WriteFile(IFormFile file, Guid userId, string address, List<string> allowedExtensions = null);
+        public Task<ResponseModel<Domain._file.File>> WriteFile(IFormFile file, Guid userId, string address, int fileContainerId, List<string> allowedExtensions = null);
         public void DeleteFile(string path);
     }
 }
