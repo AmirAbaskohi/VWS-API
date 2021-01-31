@@ -199,6 +199,7 @@ namespace vws.web
                 string[] messageTypes = { "Text", "Picture", "Video", "Voice", "Others" };
                 string[] teamTypes = { "Team", "Company", "Organization" };
                 string[] channelTypes = { "Private", "Team", "Project", "Department" };
+                string[] statuses = { "Active", "Hold", "Done/Archived" };
                 for (byte i = 0; i < messageTypes.Length; i++)
                 {
                     string dbMessageType = context.GetMessageType((byte)(i+1));
@@ -222,6 +223,14 @@ namespace vws.web
                         context.AddChannelType(new Domain._chat.ChannelType { Id = (byte)(i + 1), Name = channelTypes[i] });
                     else if (dbChannelType != channelTypes[i])
                         context.UpdateChannelType((byte)(i + 1), channelTypes[i]);
+                }
+                for (byte i = 0; i < statuses.Length; i++)
+                {
+                    string dbStatus = context.GetChannelType((byte)(i + 1));
+                    if (dbStatus == null)
+                        context.AddStatus(new Domain._project.ProjectStatus { Id = (byte)(i + 1), NameMultiLang = statuses[i] });
+                    else if (dbStatus != statuses[i])
+                        context.UpdateStatus((byte)(i + 1), statuses[i]);
                 }
                 context.Save();
             }
