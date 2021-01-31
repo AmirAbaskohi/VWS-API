@@ -495,7 +495,7 @@ namespace vws.web.Controllers._team
                 selectedTeam.TeamImageId = newFileContainer.Id;
                 vwsDbContext.Save();
             }
-            response.Message = "User image added successfully!";
+            response.Message = "Team image added successfully!";
             return Ok(response);
         }
 
