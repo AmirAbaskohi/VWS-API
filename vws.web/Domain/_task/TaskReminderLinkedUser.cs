@@ -13,7 +13,7 @@ namespace vws.web.Domain._task
 
         public Guid RemindUserId { get; set; }
 
-        public TaskReminder TaskReminder { get; set; }
+        public virtual TaskReminder TaskReminder { get; set; }
 
         public virtual UserProfile RemindUser { get; set; }
     }
