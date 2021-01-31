@@ -97,7 +97,7 @@ namespace vws.web
 
             services.AddDbContextPool<VWS_DbContext>(options =>
             {
-                options.UseSqlServer(Configuration.GetConnectionString("SqlServer"));
+                options.UseSqlServer(Configuration.GetConnectionString("SqlServer")).UseLazyLoadingProxies();
             });
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
