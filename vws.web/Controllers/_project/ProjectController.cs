@@ -85,7 +85,7 @@ namespace vws.web.Controllers._project
                 StartDate = model.StartDate,
                 EndDate = model.EndDate,
                 Guid = Guid.NewGuid(),
-                IsDelete = false
+                IsDeleted = false
             };
 
             await vwsDbContext.AddProjectAsync(newProject);
@@ -112,7 +112,7 @@ namespace vws.web.Controllers._project
                 StartDate = newProject.StartDate,
                 EndDate = newProject.EndDate,
                 Guid = newProject.Guid,
-                IsDelete = newProject.IsDelete
+                IsDelete = newProject.IsDeleted
             };
 
             response.Value = newProjectResponse;
@@ -156,7 +156,7 @@ namespace vws.web.Controllers._project
             Guid userId = LoggedInUserId.Value;
 
             var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Id == model.Id);
-            if (selectedProject == null || selectedProject.IsDelete)
+            if (selectedProject == null || selectedProject.IsDeleted)
             {
                 response.Message = "Project not found";
                 response.AddError(localizer["There is no project with given Id."]);
@@ -201,6 +201,41 @@ namespace vws.web.Controllers._project
             vwsDbContext.Save();
 
             response.Message = "Project updated successfully!";
+            return Ok(response);
+        }
+
+        [HttpDelete]
+        [Authorize]
+        [Route("delete")]
+        public IActionResult DeleteProject(int id)
+        {
+            var response = new ResponseModel();
+
+            Guid userId = LoggedInUserId.Value;
+
+            var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Id == id);
+            if (selectedProject == null || selectedProject.IsDeleted)
+            {
+                response.AddError(localizer["There is no project with given Id."]);
+                response.Message = "Projet not found";
+                return StatusCode(StatusCodes.Status404NotFound, response);
+            }
+
+            var selectedProjectMember = vwsDbContext.ProjectMembers.FirstOrDefault(projectMember =>
+                                                                    projectMember.UserProfileId == userId &&
+                                                                    projectMember.IsDeleted == false &&
+                                                                    projectMember.ProjectId == id);
+            if (selectedProjectMember == null)
+            {
+                response.AddError(localizer["You are not a memeber of project."]);
+                response.Message = "Project access denied";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            selectedProject.IsDeleted = true;
+            vwsDbContext.Save();
+
+            response.Message = "Project deleted successfully!";
             return Ok(response);
         }
     }
