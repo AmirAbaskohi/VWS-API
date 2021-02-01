@@ -134,7 +134,7 @@ namespace vws.web.Controllers._task
 
             var selectedTask = await vwsDbContext.GetTaskAsync(model.TaskId);
 
-            if (selectedTask == null)
+            if (selectedTask == null || selectedTask.IsDeleted)
             {
                 response.Message = "Task not found";
                 response.AddError(localizer["Task does not exist."]);
@@ -253,7 +253,7 @@ namespace vws.web.Controllers._task
 
             var selectedTask = await vwsDbContext.GetTaskAsync(taskId);
 
-            if (selectedTask == null)
+            if (selectedTask == null || selectedTask.IsDeleted)
             {
                 response.Message = "Task not found";
                 response.AddError(localizer["Task does not exist."]);
@@ -285,7 +285,7 @@ namespace vws.web.Controllers._task
 
             var selectedTask = await vwsDbContext.GetTaskAsync(taskId);
 
-            if (selectedTask == null)
+            if (selectedTask == null || selectedTask.IsDeleted)
             {
                 response.Message = "Task not found";
                 response.AddError(localizer["Task does not exist."]);
