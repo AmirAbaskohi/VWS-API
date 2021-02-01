@@ -123,7 +123,7 @@ namespace vws.web.Controllers._project
         [HttpPut]
         [Authorize]
         [Route("update")]
-        public async Task<IActionResult> UpdateProject([FromBody] UpdateProjectModel model)
+        public IActionResult UpdateProject([FromBody] UpdateProjectModel model)
         {
             var response = new ResponseModel<ProjectResponseModel>();
 
@@ -156,7 +156,7 @@ namespace vws.web.Controllers._project
             Guid userId = LoggedInUserId.Value;
 
             var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Id == model.Id);
-            if (selectedProject == null)
+            if (selectedProject == null || selectedProject.IsDelete)
             {
                 response.Message = "Project not found";
                 response.AddError(localizer["There is no project with given Id."]);
