@@ -226,7 +226,7 @@ namespace vws.web
                 }
                 for (byte i = 0; i < statuses.Length; i++)
                 {
-                    string dbStatus = context.GetChannelType((byte)(i + 1));
+                    string dbStatus = context.GetStatus((byte)(i + 1));
                     if (dbStatus == null)
                         context.AddStatus(new Domain._project.ProjectStatus { Id = (byte)(i + 1), NameMultiLang = statuses[i] });
                     else if (dbStatus != statuses[i])
