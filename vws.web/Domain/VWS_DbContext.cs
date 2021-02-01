@@ -176,7 +176,8 @@ namespace vws.web.Domain
         }
         public string GetStatus(byte id)
         {
-            return ProjectStatuses.FirstOrDefault(status => status.Id == id).NameMultiLang;
+            var selectedStatus = ProjectStatuses.FirstOrDefault(status => status.Id == id);
+            return selectedStatus == null ? null : selectedStatus.NameMultiLang;
         }
         public void UpdateStatus(byte id, string newName)
         {

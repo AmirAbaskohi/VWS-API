@@ -129,4 +129,10 @@
   <data name="Start Date should be before End Date." xml:space="preserve">
     <value>Start Date should be before End Date.</value>
   </data>
+  <data name="There is no project with given Id." xml:space="preserve">
+    <value>There is no project with given Id.</value>
+  </data>
+  <data name="You are not a memeber of project." xml:space="preserve">
+    <value>You are not a memeber of project.</value>
+  </data>
 </root>

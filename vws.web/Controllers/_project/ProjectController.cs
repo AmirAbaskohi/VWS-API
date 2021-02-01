@@ -95,7 +95,8 @@ namespace vws.web.Controllers._project
             {
                 CreatedOn = creationTime,
                 ProjectId = newProject.Id,
-                UserProfileId = userId
+                UserProfileId = userId,
+                IsDeleted = false
             };
 
             await vwsDbContext.AddProjectMemberAsync(newProjectMember);
@@ -116,6 +117,90 @@ namespace vws.web.Controllers._project
 
             response.Value = newProjectResponse;
             response.Message = "Project created successfully!";
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("update")]
+        public async Task<IActionResult> UpdateProject([FromBody] UpdateProjectModel model)
+        {
+            var response = new ResponseModel<ProjectResponseModel>();
+
+            if (!String.IsNullOrEmpty(model.Description) && model.Description.Length > 2000)
+            {
+                response.Message = "Project model data has problem.";
+                response.AddError(localizer["Length of description is more than 2000 characters."]);
+            }
+            if (model.Name.Length > 500)
+            {
+                response.Message = "Project model data has problem.";
+                response.AddError(localizer["Length of title is more than 500 characters."]);
+            }
+            if (!String.IsNullOrEmpty(model.Color) && model.Color.Length > 6)
+            {
+                response.Message = "Project model data has problem.";
+                response.AddError(localizer["Length of color is more than 6 characters."]);
+            }
+            if (model.StartDate.HasValue && model.EndDate.HasValue)
+            {
+                if (model.StartDate > model.EndDate)
+                {
+                    response.Message = "Project model data has problem.";
+                    response.AddError(localizer["Start Date should be before End Date."]);
+                }
+            }
+            if (response.HasError)
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+
+            Guid userId = LoggedInUserId.Value;
+
+            var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Id == model.Id);
+            if (selectedProject == null)
+            {
+                response.Message = "Project not found";
+                response.AddError(localizer["There is no project with given Id."]);
+                return StatusCode(StatusCodes.Status404NotFound, response);
+            }
+
+            var selectedProjectMember = vwsDbContext.ProjectMembers.FirstOrDefault(projectMember =>
+                                                                    projectMember.UserProfileId == userId &&
+                                                                    projectMember.IsDeleted == false &&
+                                                                    projectMember.ProjectId == model.Id);
+            if (selectedProject == null)
+            {
+                response.Message = "Project access denied";
+                response.AddError(localizer["You are not a memeber of project."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            if (model.StartDate.HasValue && !(model.EndDate.HasValue) && selectedProject.EndDate.HasValue)
+            {
+                if (model.StartDate > selectedProject.EndDate)
+                {
+                    response.Message = "Project model data has problem";
+                    response.AddError(localizer["Start Date should be before End Date."]);
+                    return StatusCode(StatusCodes.Status500InternalServerError, response);
+                }
+            }
+            if (model.EndDate.HasValue && !(model.StartDate.HasValue) && selectedProject.StartDate.HasValue)
+            {
+                if (model.EndDate < selectedProject.StartDate)
+                {
+                    response.Message = "Project model data has problem";
+                    response.AddError(localizer["Start Date should be before End Date."]);
+                    return StatusCode(StatusCodes.Status500InternalServerError, response);
+                }
+            }
+
+            selectedProject.Name = model.Name;
+            selectedProject.Description = model.Description;
+            selectedProject.EndDate = model.EndDate;
+            selectedProject.StartDate = model.StartDate;
+            selectedProject.Color = model.Color;
+            vwsDbContext.Save();
+
+            response.Message = "Project updated successfully!";
             return Ok(response);
         }
     }
