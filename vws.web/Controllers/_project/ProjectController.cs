@@ -48,18 +48,26 @@ namespace vws.web.Controllers._project
 
             if (!String.IsNullOrEmpty(model.Description) && model.Description.Length > 2000)
             {
-                response.Message = "Team model data has problem.";
+                response.Message = "Project model data has problem.";
                 response.AddError(localizer["Length of description is more than 2000 characters."]);
             }
             if (model.Name.Length > 500)
             {
-                response.Message = "Team model data has problem.";
+                response.Message = "Project model data has problem.";
                 response.AddError(localizer["Length of title is more than 500 characters."]);
             }
             if (!String.IsNullOrEmpty(model.Color) && model.Color.Length > 6)
             {
-                response.Message = "Team model data has problem.";
+                response.Message = "Project model data has problem.";
                 response.AddError(localizer["Length of color is more than 6 characters."]);
+            }
+            if (model.StartDate.HasValue && model.EndDate.HasValue)
+            {
+                if (model.StartDate > model.EndDate)
+                {
+                    response.Message = "Project model data has problem.";
+                    response.AddError(localizer["Start Date should be before End Date."]);
+                }
             }
             if (response.HasError)
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
