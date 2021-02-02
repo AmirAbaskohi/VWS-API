@@ -21,6 +21,7 @@ using vws.web.Hubs;
 using vws.web.Repositories;
 using vws.web.Domain;
 using vws.web.Domain._base;
+using vws.web.Enums;
 
 namespace vws.web
 {
@@ -196,41 +197,46 @@ namespace vws.web
                 context.DatabaseFacade.Migrate();
 
                 //seed data:
-                string[] messageTypes = { "Text", "Picture", "Video", "Voice", "Others" };
-                string[] teamTypes = { "Team", "Company", "Organization" };
-                string[] channelTypes = { "Private", "Team", "Project", "Department" };
                 string[] statuses = { "Active", "Hold", "Done/Archived" };
-                for (byte i = 0; i < messageTypes.Length; i++)
+                foreach (var messageType in Enum.GetValues(typeof(SeedDataEnum.MessageTypes)))
                 {
-                    string dbMessageType = context.GetMessageType((byte)(i+1));
+                    string dbMessageType = context.GetMessageType((byte)messageType);
                     if (dbMessageType == null)
-                        context.AddMessageType(new Domain._chat.MessageType { Id = (byte)(i + 1), Name = messageTypes[i] });
-                    else if (dbMessageType != messageTypes[i])
-                        context.UpdateMessageType((byte)(i + 1), messageTypes[i]);
+                        context.AddMessageType(new Domain._chat.MessageType { Id = (byte)messageType, Name = messageType.ToString() });
+                    else if (dbMessageType != messageType.ToString())
+                        context.UpdateMessageType((byte)messageType, messageType.ToString());
                 }
-                for (byte i = 0; i < teamTypes.Length; i++)
+                foreach (var teamType in Enum.GetValues(typeof(SeedDataEnum.TeamTypes)))
                 {
-                    string dbTeamType = context.GetTeamType((byte)(i + 1));
+                    string dbTeamType = context.GetTeamType((byte)teamType);
                     if (dbTeamType == null)
-                        context.AddTeamType(new Domain._team.TeamType { Id = (byte)(i + 1), NameMultiLang = teamTypes[i] });
-                    else if (dbTeamType != teamTypes[i])
-                        context.UpdateTeamType((byte)(i + 1), teamTypes[i]);
+                        context.AddTeamType(new Domain._team.TeamType { Id = (byte)teamType, NameMultiLang = teamType.ToString() });
+                    else if (dbTeamType != teamType.ToString())
+                        context.UpdateTeamType((byte)teamType, teamType.ToString());
                 }
-                for (byte i = 0; i < channelTypes.Length; i++)
+                foreach (var teamType in Enum.GetValues(typeof(SeedDataEnum.TeamTypes)))
                 {
-                    string dbChannelType = context.GetChannelType((byte)(i + 1));
+                    string dbTeamType = context.GetTeamType((byte)teamType);
+                    if (dbTeamType == null)
+                        context.AddTeamType(new Domain._team.TeamType { Id = (byte)teamType, NameMultiLang = teamType.ToString() });
+                    else if (dbTeamType != teamType.ToString())
+                        context.UpdateTeamType((byte)teamType, teamType.ToString());
+                }
+                foreach (var channelType in Enum.GetValues(typeof(SeedDataEnum.ChannelTypes)))
+                {
+                    string dbChannelType = context.GetChannelType((byte)channelType);
                     if (dbChannelType == null)
-                        context.AddChannelType(new Domain._chat.ChannelType { Id = (byte)(i + 1), Name = channelTypes[i] });
-                    else if (dbChannelType != channelTypes[i])
-                        context.UpdateChannelType((byte)(i + 1), channelTypes[i]);
+                        context.AddChannelType(new Domain._chat.ChannelType { Id = (byte)channelType, Name = channelType.ToString() });
+                    else if (dbChannelType != channelType.ToString())
+                        context.UpdateChannelType((byte)channelType, channelType.ToString());
                 }
-                for (byte i = 0; i < statuses.Length; i++)
+                foreach (var status in Enum.GetValues(typeof(SeedDataEnum.ProjectStatuses)))
                 {
-                    string dbStatus = context.GetStatus((byte)(i + 1));
-                    if (dbStatus == null)
-                        context.AddStatus(new Domain._project.ProjectStatus { Id = (byte)(i + 1), NameMultiLang = statuses[i] });
-                    else if (dbStatus != statuses[i])
-                        context.UpdateStatus((byte)(i + 1), statuses[i]);
+                    string dbStatusType = context.GetStatus((byte)status);
+                    if (dbStatusType == null)
+                        context.AddStatus(new Domain._project.ProjectStatus { Id = (byte)status, NameMultiLang = status.ToString() });
+                    else if (dbStatusType != status.ToString())
+                        context.UpdateStatus((byte)status, status.ToString());
                 }
                 context.Save();
             }
