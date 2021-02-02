@@ -57,7 +57,7 @@ namespace vws.web.Domain
 
         public async Task<UserProfile> GetUserProfileAsync(Guid guid)
         {
-            return await UserProfiles.FirstOrDefaultAsync(userProfile => userProfile.UserId == guid);
+            return await UserProfiles.Include(profile => profile.ProfileImage).FirstOrDefaultAsync(userProfile => userProfile.UserId == guid);
         }
 
         public async Task<RefreshToken> GetRefreshTokenAsync(Guid userId, string token)
@@ -281,17 +281,17 @@ namespace vws.web.Domain
 
         public async Task<Team> GetTeamAsync(int id)
         {
-            return await Teams.FirstOrDefaultAsync(team => team.Id == id);
+            return await Teams.Include(team => team.TeamImage).FirstOrDefaultAsync(team => team.Id == id);
         }
 
         public async Task<TeamInviteLink> GetTeamInviteLinkByLinkGuidAsync(Guid guid)
         {
-            return await TeamInviteLinks.FirstOrDefaultAsync(teamInviteLink => teamInviteLink.LinkGuid == guid);
+            return await TeamInviteLinks.Include(teamInviteLink => teamInviteLink.Team).FirstOrDefaultAsync(teamInviteLink => teamInviteLink.LinkGuid == guid);
         }
 
         public async Task<TeamInviteLink> GetTeamInviteLinkByIdAsync(int id)
         {
-            return await TeamInviteLinks.FirstOrDefaultAsync(teamInviteLink => teamInviteLink.Id == id);
+            return await TeamInviteLinks.Include(teamInviteLink => teamInviteLink.Team).FirstOrDefaultAsync(teamInviteLink => teamInviteLink.Id == id);
         }
 
         public async Task<TeamMember> GetTeamMemberAsync(int teamId, Guid memberId)

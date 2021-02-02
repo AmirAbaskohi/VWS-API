@@ -15,6 +15,7 @@ using vws.web.Models._team;
 using vws.web.Models;
 using vws.web.Repositories;
 using vws.web.Domain._file;
+using Microsoft.EntityFrameworkCore;
 
 namespace vws.web.Controllers._team
 {
@@ -243,7 +244,8 @@ namespace vws.web.Controllers._team
 
             List<TeamInviteLinkResponseModel> response = new List<TeamInviteLinkResponseModel>();
 
-            var userTeamInviteLinks = vwsDbContext.TeamInviteLinks.Where(teamInviteLink => teamInviteLink.CreatedBy == userId &&
+            var userTeamInviteLinks = vwsDbContext.TeamInviteLinks.Include(teamInviteLink => teamInviteLink.Team)
+                                                                  .Where(teamInviteLink => teamInviteLink.CreatedBy == userId &&
                                                                             teamInviteLink.IsRevoked == false && 
                                                                             teamInviteLink.Team.IsDeleted == false);
 
@@ -466,7 +468,6 @@ namespace vws.web.Controllers._team
                     return StatusCode(StatusCodes.Status500InternalServerError, response);
                 }
                 selectedTeam.TeamImage.RecentFileId = fileResponse.Value.Id;
-                vwsDbContext.Save();
             }
             else
             {
@@ -493,8 +494,10 @@ namespace vws.web.Controllers._team
                 }
                 newFileContainer.RecentFileId = fileResponse.Value.Id;
                 selectedTeam.TeamImageId = newFileContainer.Id;
-                vwsDbContext.Save();
             }
+            selectedTeam.ModifiedBy = LoggedInUserId.Value;
+            selectedTeam.ModifiedOn = DateTime.Now;
+            vwsDbContext.Save();
             response.Message = "Team image added successfully!";
             return Ok(response);
         }

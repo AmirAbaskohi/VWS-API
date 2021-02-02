@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using vws.web.Domain;
 using vws.web.Domain._base;
@@ -44,7 +45,9 @@ namespace vws.web.Controllers._chat
             List<Team> userTeams = vwsDbContext.GetUserTeams(LoggedInUserId.Value).ToList();
             List<Project> userProjects = vwsDbContext.GetUserProjects(LoggedInUserId.Value).ToList();
             List<Department> userDepartments = vwsDbContext.GetUserDepartments(LoggedInUserId.Value).ToList();
+
             List<UserProfile> userTeamMates = vwsDbContext.TeamMembers
+                .Include(teamMember => teamMember.UserProfile)
                 .Where(teamMember => userTeams.Select(userTeam => userTeam.Id).Contains(teamMember.TeamId))
                 .Select(teamMember => teamMember.UserProfile).Distinct().ToList();
             userTeamMates.Remove(await vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value));
