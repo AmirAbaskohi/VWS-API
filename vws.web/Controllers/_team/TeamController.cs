@@ -535,5 +535,52 @@ namespace vws.web.Controllers._team
             response.Message = "Team deleted successfully!";
             return Ok(response);
         }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getTeammates")]
+        public async Task<IActionResult> GetTeammates(int teamId)
+        {
+            var response = new ResponseModel<List<UserModel>>();
+            var teammatesList = new List<UserModel>();
+
+            var selectedTeam = await vwsDbContext.GetTeamAsync(teamId);
+            var userId = LoggedInUserId.Value;
+
+            if(selectedTeam == null || selectedTeam.IsDeleted)
+            {
+                response.Message = "Team not found";
+                response.AddError(localizer["There is no team with given Id."]);
+                return StatusCode(StatusCodes.Status404NotFound, response);
+            }
+
+            var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync(teamId, userId);
+            if (selectedTeamMember == null)
+            {
+                response.Message = "Access team is forbidden";
+                response.AddError(localizer["You are not a member of team."]);
+                return StatusCode(StatusCodes.Status404NotFound, response);
+            }
+
+            List<UserProfile> userTeamMates = vwsDbContext.TeamMembers
+                .Include(teamMember => teamMember.UserProfile)
+                .Where(teamMember => teamMember.TeamId == teamId && teamMember.HasUserLeft == false)
+                .Select(teamMember => teamMember.UserProfile).Distinct().ToList();
+
+            foreach(var teamMate in userTeamMates)
+            {
+                var userName = (await userManager.FindByIdAsync(teamMate.UserId.ToString())).UserName;
+                teammatesList.Add(new UserModel()
+                {
+                    UserName = userName,
+                    UserId = teamMate.UserId,
+                    ProfileImageId = teamMate.ProfileImageId
+                });
+            }
+
+            response.Message = "Team mates are given successfully!";
+            response.Value = teammatesList;
+            return Ok(response);
+        }
     }
 }
