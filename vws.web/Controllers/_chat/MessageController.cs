@@ -13,6 +13,7 @@ using vws.web.Domain._chat;
 using vws.web.Domain._department;
 using vws.web.Domain._project;
 using vws.web.Domain._team;
+using vws.web.Enums;
 using vws.web.Models;
 using vws.web.Models._chat;
 
@@ -41,7 +42,7 @@ namespace vws.web.Controllers._chat
         {
             List<MessageResponseModel> MessageResponseModels = new List<MessageResponseModel>();
 
-            if (channelTypeId == 1)
+            if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
             {
                 var directMessageContactUser = await userManager.FindByIdAsync(channelId.ToString());
                 var privateMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId && (message.ChannelId == channelId || directMessageContactUser.UserName == message.FromUserName) && channelTypeId == 1);
@@ -49,7 +50,7 @@ namespace vws.web.Controllers._chat
             }
             else
             {
-                var publicMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId && message.ChannelId == channelId && channelTypeId != 1);
+                var publicMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId && message.ChannelId == channelId && channelTypeId != (byte)SeedDataEnum.ChannelTypes.Private);
                 MessageResponseModels = FillMessageResponseModel(publicMessages);
             }
 

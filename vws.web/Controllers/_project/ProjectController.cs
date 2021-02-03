@@ -80,7 +80,7 @@ namespace vws.web.Controllers._project
             var newProject = new Project()
             {
                 Name = model.Name,
-                StatusId = 1,
+                StatusId = (byte) SeedDataEnum.ProjectStatuses.Active,
                 Description = model.Description,
                 Color = model.Color,
                 StartDate = model.StartDate,

@@ -16,6 +16,7 @@ using vws.web.Models;
 using vws.web.Repositories;
 using vws.web.Domain._file;
 using Microsoft.EntityFrameworkCore;
+using vws.web.Enums;
 
 namespace vws.web.Controllers._team
 {
@@ -93,7 +94,7 @@ namespace vws.web.Controllers._team
             var newTeam = new Team()
             {
                 Name = model.Name,
-                TeamTypeId = 1,
+                TeamTypeId = (byte)SeedDataEnum.TeamTypes.Team,
                 Description = model.Description,
                 Color = model.Color,
                 CreatedOn = creationTime,

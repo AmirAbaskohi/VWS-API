@@ -82,7 +82,7 @@ namespace vws.web.Controllers._task
             var newTask = new GeneralTask()
             {
                 Title = model.Title,
-                Description = model.Description ?? String.Empty,
+                Description = model.Description,
                 StartDate = model.StartDate,
                 EndDate = model.EndDate,
                 CreatedBy = userId,

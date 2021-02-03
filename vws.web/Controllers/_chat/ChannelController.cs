@@ -13,6 +13,7 @@ using vws.web.Domain._base;
 using vws.web.Domain._department;
 using vws.web.Domain._project;
 using vws.web.Domain._team;
+using vws.web.Enums;
 using vws.web.Models;
 using vws.web.Models._chat;
 
@@ -57,7 +58,7 @@ namespace vws.web.Controllers._chat
                 channelResponseModels.Add(new ChannelResponseModel
                 {
                     Guid = userTeamMate.UserId,
-                    ChannelTypeId = 1,
+                    ChannelTypeId = (byte)SeedDataEnum.ChannelTypes.Private,
                     LogoUrl = "http://app.seventask.com/assets/Images/Chat/DefaultAvatars/User.jpg",
                     Title = (await userManager.FindByIdAsync(userTeamMate.UserId.ToString())).UserName
                 });
@@ -66,7 +67,7 @@ namespace vws.web.Controllers._chat
             channelResponseModels.AddRange(userTeams.Select(userTeam => new ChannelResponseModel
             {
                 Guid = userTeam.Guid,
-                ChannelTypeId = 2,
+                ChannelTypeId = (byte)SeedDataEnum.ChannelTypes.Team,
                 LogoUrl = "http://app.seventask.com/assets/Images/Chat/DefaultAvatars/Team.jpg",
                 Title = userTeam.Name
             }));
@@ -74,7 +75,7 @@ namespace vws.web.Controllers._chat
             channelResponseModels.AddRange(userProjects.Select(userProject => new ChannelResponseModel
             {
                 Guid = userProject.Guid,
-                ChannelTypeId = 3,
+                ChannelTypeId = (byte)SeedDataEnum.ChannelTypes.Project,
                 LogoUrl = "http://app.seventask.com/assets/Images/Chat/DefaultAvatars/Project.jpg",
                 Title = userProject.Name
             }));
@@ -82,7 +83,7 @@ namespace vws.web.Controllers._chat
             channelResponseModels.AddRange(userDepartments.Select(userDepartment => new ChannelResponseModel
             {
                 Guid = userDepartment.Guid,
-                ChannelTypeId = 4,
+                ChannelTypeId = (byte)SeedDataEnum.ChannelTypes.Department,
                 LogoUrl = "http://app.seventask.com/assets/Images/Chat/DefaultAvatars/Department.jpg",
                 Title = userDepartment.Name
             }));
