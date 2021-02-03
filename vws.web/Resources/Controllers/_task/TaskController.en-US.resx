@@ -129,6 +129,12 @@
   <data name="Task does not exist." xml:space="preserve">
     <value>Task does not exist.</value>
   </data>
+  <data name="Task is assigned to user before." xml:space="preserve">
+    <value>Task is assigned to user before.</value>
+  </data>
+  <data name="User does not exist." xml:space="preserve">
+    <value>User does not exist.</value>
+  </data>
   <data name="You don't have access to this task." xml:space="preserve">
     <value>You don't have access to this task.</value>
   </data>

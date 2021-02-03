@@ -151,6 +151,7 @@ namespace vws.web.Domain
 
         public Task<GeneralTask> AddTaskAsync(GeneralTask generalTask);
         public Task<GeneralTask> GetTaskAsync(long id);
+        public Task<TaskAssign> AddTaskAssignAsync(TaskAssign taskAssign);
 
         #endregion
 

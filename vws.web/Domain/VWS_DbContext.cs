@@ -245,6 +245,12 @@ namespace vws.web.Domain
             return await GeneralTasks.FirstOrDefaultAsync(task => task.Id == id);
         }
 
+        public async Task<TaskAssign> AddTaskAssignAsync(TaskAssign taskAssign)
+        {
+            await TaskAssigns.AddAsync(taskAssign);
+            return taskAssign;
+        }
+
         #endregion
 
         #region team

@@ -305,5 +305,62 @@ namespace vws.web.Controllers._task
             response.Message = "Task updated successfully!";
             return Ok(response);
         }
+
+        [HttpPost]
+        [Authorize]
+        [Route("assignTask")]
+        public async Task<IActionResult> AssignTask([FromBody] AssignTaskModel model)
+        {
+            var userId = LoggedInUserId.Value;
+            var response = new ResponseModel();
+            var selectedUserId = new Guid(model.UserId);
+
+            var selectedTask = await vwsDbContext.GetTaskAsync(model.TaskId);
+            if(selectedTask == null || selectedTask.IsDeleted)
+            {
+                response.AddError(localizer["Task does not exist."]);
+                response.Message = "Task not found";
+                return StatusCode(StatusCodes.Status404NotFound, response);
+            }
+
+            if(selectedTask.CreatedBy != userId)
+            {
+                response.AddError(localizer["You don't have access to this task."]);
+                response.Message = "Task access forbidden";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            if(!vwsDbContext.UserProfiles.Any(profile => profile.UserId == selectedUserId))
+            {
+                response.AddError(localizer["User does not exist."]);
+                response.Message = "User not found";
+                return StatusCode(StatusCodes.Status404NotFound, response);
+            }
+
+            if(vwsDbContext.TaskAssigns.Any(taskAssign => taskAssign.UserProfileId == selectedUserId &&
+                                             taskAssign.GeneralTaskId == model.TaskId &&
+                                             taskAssign.IsDeleted == false))
+            {
+                response.AddError(localizer["Task is assigned to user before."]);
+                response.Message = "Task assigned before";
+                return StatusCode(StatusCodes.Status208AlreadyReported, response);
+            }
+
+            var newTaskAssign = new TaskAssign()
+            {
+                Guid = Guid.NewGuid(),
+                GeneralTaskId = model.TaskId,
+                UserProfileId = selectedUserId,
+                IsDeleted = false,
+                CreatedBy = userId,
+                CreatedOn = DateTime.Now
+            };
+
+            await vwsDbContext.AddTaskAssignAsync(newTaskAssign);
+            vwsDbContext.Save();
+
+            response.Message = "Task assigned successfully!";
+            return Ok(response);
+        }
     }
 }
