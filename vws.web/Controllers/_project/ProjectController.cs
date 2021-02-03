@@ -11,6 +11,7 @@ using Microsoft.Extensions.Localization;
 using vws.web.Domain;
 using vws.web.Domain._base;
 using vws.web.Domain._project;
+using vws.web.Enums;
 using vws.web.Models;
 using vws.web.Models._project;
 
@@ -237,6 +238,105 @@ namespace vws.web.Controllers._project
 
             response.Message = "Project deleted successfully!";
             return Ok(response);
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getActive")]
+        public IEnumerable<ProjectResponseModel> GetActiveProject()
+        {
+            var response = new List<ProjectResponseModel>();
+            Guid userId = LoggedInUserId.Value;
+
+            HashSet<int> projectIds = vwsDbContext.ProjectMembers
+                                      .Where(projectMember => projectMember.UserProfileId == userId && projectMember.IsDeleted == false)
+                                      .Select(projectMember => projectMember.ProjectId).ToHashSet<int>();
+
+            var userProjects = vwsDbContext.Projects.Where(project => projectIds.Contains(project.Id) && project.IsDeleted == false && project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Active);
+
+            foreach(var project in userProjects)
+            {
+                response.Add(new ProjectResponseModel()
+                {
+                    Id = project.Id,
+                    Description = project.Description,
+                    Color = project.Color,
+                    EndDate = project.EndDate,
+                    Guid = project.Guid,
+                    IsDelete = project.IsDeleted,
+                    Name = project.Name,
+                    StartDate = project.StartDate,
+                    StatusId = project.StatusId
+                });
+            }
+
+            return response;
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getHold")]
+        public IEnumerable<ProjectResponseModel> GetHoldProject()
+        {
+            var response = new List<ProjectResponseModel>();
+            Guid userId = LoggedInUserId.Value;
+
+            HashSet<int> projectIds = vwsDbContext.ProjectMembers
+                                      .Where(projectMember => projectMember.UserProfileId == userId && projectMember.IsDeleted == false)
+                                      .Select(projectMember => projectMember.ProjectId).ToHashSet<int>();
+
+            var userProjects = vwsDbContext.Projects.Where(project => projectIds.Contains(project.Id) && project.IsDeleted == false && project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Hold);
+
+            foreach (var project in userProjects)
+            {
+                response.Add(new ProjectResponseModel()
+                {
+                    Id = project.Id,
+                    Description = project.Description,
+                    Color = project.Color,
+                    EndDate = project.EndDate,
+                    Guid = project.Guid,
+                    IsDelete = project.IsDeleted,
+                    Name = project.Name,
+                    StartDate = project.StartDate,
+                    StatusId = project.StatusId
+                });
+            }
+
+            return response;
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getDoneOrArchived")]
+        public IEnumerable<ProjectResponseModel> GetDoneOrArchivedProject()
+        {
+            var response = new List<ProjectResponseModel>();
+            Guid userId = LoggedInUserId.Value;
+
+            HashSet<int> projectIds = vwsDbContext.ProjectMembers
+                                      .Where(projectMember => projectMember.UserProfileId == userId && projectMember.IsDeleted == false)
+                                      .Select(projectMember => projectMember.ProjectId).ToHashSet<int>();
+
+            var userProjects = vwsDbContext.Projects.Where(project => projectIds.Contains(project.Id) && project.IsDeleted == false && project.StatusId == (byte)SeedDataEnum.ProjectStatuses.DoneOrArchived);
+
+            foreach (var project in userProjects)
+            {
+                response.Add(new ProjectResponseModel()
+                {
+                    Id = project.Id,
+                    Description = project.Description,
+                    Color = project.Color,
+                    EndDate = project.EndDate,
+                    Guid = project.Guid,
+                    IsDelete = project.IsDeleted,
+                    Name = project.Name,
+                    StartDate = project.StartDate,
+                    StatusId = project.StatusId
+                });
+            }
+
+            return response;
         }
     }
 }

@@ -281,6 +281,7 @@ namespace vws.web.Controllers._team
             List<TeamResponseModel> response = new List<TeamResponseModel>();
 
             var userTeams = vwsDbContext.GetUserTeams(userId);
+
             foreach (var userTeam in userTeams)
             {
                 response.Add(new TeamResponseModel()
