@@ -72,7 +72,7 @@ namespace vws.web.Controllers._project
             }
             if (response.HasError)
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
-            
+
             Guid userId = LoggedInUserId.Value;
 
             DateTime creationTime = DateTime.Now;
@@ -80,7 +80,7 @@ namespace vws.web.Controllers._project
             var newProject = new Project()
             {
                 Name = model.Name,
-                StatusId = (byte) SeedDataEnum.ProjectStatuses.Active,
+                StatusId = (byte)SeedDataEnum.ProjectStatuses.Active,
                 Description = model.Description,
                 Color = model.Color,
                 StartDate = model.StartDate,
@@ -254,7 +254,7 @@ namespace vws.web.Controllers._project
 
             var userProjects = vwsDbContext.Projects.Where(project => projectIds.Contains(project.Id) && project.IsDeleted == false && project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Active);
 
-            foreach(var project in userProjects)
+            foreach (var project in userProjects)
             {
                 response.Add(new ProjectResponseModel()
                 {
@@ -337,6 +337,84 @@ namespace vws.web.Controllers._project
             }
 
             return response;
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("addTeammateToProject")]
+        public async Task<IActionResult> AddTeamMateToProject([FromBody] AddTeamMateToProjectModel model)
+        {
+            var response = new ResponseModel();
+            var userId = LoggedInUserId.Value;
+            var selectedUserId = new Guid(model.UserId);
+
+            var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Id == model.ProjectId);
+
+            if (selectedProject == null || selectedProject.IsDeleted)
+            {
+                response.AddError(localizer["There is no project with given Id."]);
+                response.Message = "Projet not found";
+                return StatusCode(StatusCodes.Status404NotFound, response);
+            }
+
+            var selectedTeam = await vwsDbContext.GetTeamAsync(model.TeamId);
+
+            if (selectedTeam == null || selectedTeam.IsDeleted)
+            {
+                response.AddError(localizer["There is no team with given Id."]);
+                response.Message = "Team not found";
+                return StatusCode(StatusCodes.Status404NotFound, response);
+            }
+
+            if (!vwsDbContext.UserProfiles.Any(profile => profile.UserId == selectedUserId))
+            {
+                response.AddError(localizer["There is no user with given Id."]);
+                response.Message = "User not found";
+                return StatusCode(StatusCodes.Status404NotFound, response);
+            }
+
+            var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync(model.TeamId, userId);
+            if(selectedTeamMember == null)
+            {
+                response.AddError(localizer["You are not a member of team."]);
+                response.Message = "Not member of team";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            selectedTeamMember = await vwsDbContext.GetTeamMemberAsync(model.TeamId, selectedUserId);
+            if(selectedTeamMember == null)
+            {
+                response.AddError(localizer["User you want to to add, is not a member of selected team."]);
+                response.Message = "Not member of team";
+                return StatusCode(StatusCodes.Status406NotAcceptable, response);
+            }
+
+            if(!vwsDbContext.ProjectMembers.Any(projectMember => projectMember.UserProfileId == userId && projectMember.ProjectId == model.ProjectId && projectMember.IsDeleted == false))
+            {
+                response.AddError(localizer["You are not a memeber of project."]);
+                response.Message = "Project access denied";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            if (vwsDbContext.ProjectMembers.Any(projectMember => projectMember.UserProfileId == selectedUserId && projectMember.ProjectId == model.ProjectId && projectMember.IsDeleted == false))
+            {
+                response.AddError(localizer["User you want to add, is already a member of selected project."]);
+                response.Message = "User added before";
+                return StatusCode(StatusCodes.Status208AlreadyReported, response);
+            }
+
+            var newProjectMember = new ProjectMember()
+            {
+                CreatedOn = DateTime.Now,
+                IsDeleted = false,
+                ProjectId = model.ProjectId,
+                UserProfileId = selectedUserId
+            };
+
+            await vwsDbContext.AddProjectMemberAsync(newProjectMember);
+
+            response.Message = "User added to project successfully!";
+            return Ok(response);
         }
     }
 }
