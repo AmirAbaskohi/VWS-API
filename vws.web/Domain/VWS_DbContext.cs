@@ -230,6 +230,10 @@ namespace vws.web.Domain
 
         public DbSet<TaskScheduleType> TaskScheduleTypes { get; set; }
 
+        IQueryable<TaskAssign> IVWS_DbContext.TaskAssigns { get => TaskAssigns; }
+
+        public DbSet<TaskAssign> TaskAssigns { get; set; }
+
         public async Task<GeneralTask> AddTaskAsync(GeneralTask generalTask)
         {
             await GeneralTasks.AddAsync(generalTask);

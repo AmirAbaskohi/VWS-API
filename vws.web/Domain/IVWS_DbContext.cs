@@ -144,6 +144,8 @@ namespace vws.web.Domain
 
         public IQueryable<TaskScheduleType> TaskScheduleTypes { get; }
 
+        public IQueryable<TaskAssign> TaskAssigns { get; }
+
         #endregion
         #region methods
 
