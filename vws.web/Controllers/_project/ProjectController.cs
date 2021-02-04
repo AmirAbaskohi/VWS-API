@@ -165,7 +165,7 @@ namespace vws.web.Controllers._project
             {
                 response.Message = "Project not found";
                 response.AddError(localizer["There is no project with given Id."]);
-                return StatusCode(StatusCodes.Status404NotFound, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             var selectedProjectMember = vwsDbContext.ProjectMembers.FirstOrDefault(projectMember =>
@@ -225,7 +225,7 @@ namespace vws.web.Controllers._project
             {
                 response.AddError(localizer["There is no project with given Id."]);
                 response.Message = "Projet not found";
-                return StatusCode(StatusCodes.Status404NotFound, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             var selectedProjectMember = vwsDbContext.ProjectMembers.FirstOrDefault(projectMember =>
@@ -362,7 +362,7 @@ namespace vws.web.Controllers._project
             {
                 response.AddError(localizer["There is no project with given Id."]);
                 response.Message = "Projet not found";
-                return StatusCode(StatusCodes.Status404NotFound, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             var selectedTeam = await vwsDbContext.GetTeamAsync(model.TeamId);
@@ -371,14 +371,14 @@ namespace vws.web.Controllers._project
             {
                 response.AddError(localizer["There is no team with given Id."]);
                 response.Message = "Team not found";
-                return StatusCode(StatusCodes.Status404NotFound, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             if (!vwsDbContext.UserProfiles.Any(profile => profile.UserId == selectedUserId))
             {
                 response.AddError(localizer["There is no user with given Id."]);
                 response.Message = "User not found";
-                return StatusCode(StatusCodes.Status404NotFound, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync(model.TeamId, userId);

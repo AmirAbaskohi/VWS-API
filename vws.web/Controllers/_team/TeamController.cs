@@ -147,7 +147,7 @@ namespace vws.web.Controllers._team
             {
                 response.Message = "Team not found";
                 response.AddError(localizer["There is no team with given Id."]);
-                return StatusCode(StatusCodes.Status404NotFound, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             Guid userId = LoggedInUserId.Value;
@@ -316,7 +316,7 @@ namespace vws.web.Controllers._team
             {
                 response.Message = "Link not found";
                 response.AddError(localizer["Link does not exist."]);
-                return StatusCode(StatusCodes.Status404NotFound, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
             if (selectedInviteLink.CreatedBy != userId || !vwsDbContext.TeamMembers.Any(teamMember => teamMember.UserProfileId == userId && teamMember.HasUserLeft == false))
             {
@@ -379,14 +379,14 @@ namespace vws.web.Controllers._team
             {
                 response.Message = "Team not found";
                 response.AddError(localizer["There is no team with given Id."]);
-                return StatusCode(StatusCodes.Status404NotFound, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
             var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync(model.Id, userId);
             if(selectedTeamMember == null)
             {
                 response.Message = "Access team is forbidden";
                 response.AddError(localizer["You are not a member of team."]);
-                return StatusCode(StatusCodes.Status404NotFound, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             selectedTeam.Color = model.Color;
@@ -446,7 +446,7 @@ namespace vws.web.Controllers._team
             {
                 response.AddError(localizer["There is no team with given Id."]);
                 response.Message = "Team not found";
-                return StatusCode(StatusCodes.Status404NotFound, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync(teamId, userId);
@@ -518,7 +518,7 @@ namespace vws.web.Controllers._team
             {
                 response.AddError(localizer["There is no team with given Id."]);
                 response.Message = "Team not found";
-                return StatusCode(StatusCodes.Status404NotFound, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync(teamId, userId);
@@ -553,7 +553,7 @@ namespace vws.web.Controllers._team
             {
                 response.Message = "Team not found";
                 response.AddError(localizer["There is no team with given Id."]);
-                return StatusCode(StatusCodes.Status404NotFound, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync(teamId, userId);
@@ -561,7 +561,7 @@ namespace vws.web.Controllers._team
             {
                 response.Message = "Access team is forbidden";
                 response.AddError(localizer["You are not a member of team."]);
-                return StatusCode(StatusCodes.Status404NotFound, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             List<UserProfile> userTeamMates = vwsDbContext.TeamMembers

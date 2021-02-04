@@ -501,7 +501,7 @@ namespace vws.web.Controllers._account
             {
                 response.Message = "Invalid refresh token";
                 response.AddError(localizer["Refresh token is invalid."]);
-                return StatusCode(StatusCodes.Status404NotFound, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             vwsDbContext.MakeRefreshTokenInvalid(model.RefreshToken);
@@ -649,7 +649,7 @@ namespace vws.web.Controllers._account
             {
                 response.Message = "Invalid refresh token";
                 response.AddError(localizer["Refresh token is invalid."]);
-                return StatusCode(StatusCodes.Status404NotFound, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             refreshToken.IsValid = false;

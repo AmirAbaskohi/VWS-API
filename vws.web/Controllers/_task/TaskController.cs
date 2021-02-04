@@ -138,7 +138,7 @@ namespace vws.web.Controllers._task
             {
                 response.Message = "Task not found";
                 response.AddError(localizer["Task does not exist."]);
-                return StatusCode(StatusCodes.Status404NotFound, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
             if (selectedTask.CreatedBy != userId)
             {
@@ -257,7 +257,7 @@ namespace vws.web.Controllers._task
             {
                 response.Message = "Task not found";
                 response.AddError(localizer["Task does not exist."]);
-                return StatusCode(StatusCodes.Status404NotFound, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
             if (selectedTask.CreatedBy != userId)
             {
@@ -291,7 +291,7 @@ namespace vws.web.Controllers._task
             {
                 response.Message = "Task not found";
                 response.AddError(localizer["Task does not exist."]);
-                return StatusCode(StatusCodes.Status404NotFound, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
             if (selectedTask.CreatedBy != userId)
             {
@@ -322,7 +322,7 @@ namespace vws.web.Controllers._task
             {
                 response.AddError(localizer["Task does not exist."]);
                 response.Message = "Task not found";
-                return StatusCode(StatusCodes.Status404NotFound, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             if(selectedTask.CreatedBy != userId)
@@ -336,7 +336,7 @@ namespace vws.web.Controllers._task
             {
                 response.AddError(localizer["User does not exist."]);
                 response.Message = "User not found";
-                return StatusCode(StatusCodes.Status404NotFound, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             if(vwsDbContext.TaskAssigns.Any(taskAssign => taskAssign.UserProfileId == selectedUserId &&

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using vws.web.Domain;
 using vws.web.Domain._base;
@@ -124,7 +125,6 @@ namespace vws.web.Controllers._department
 
             var departmentResponse = new DepartmentResponseModel()
             {
-                IsDeleted = newDepartment.IsDeleted,
                 Id = newDepartment.Id,
                 Color = newDepartment.Color,
                 Name = newDepartment.Name,
@@ -218,7 +218,6 @@ namespace vws.web.Controllers._department
 
             var departmentResponse = new DepartmentResponseModel()
             {
-                IsDeleted = false,
                 Color = selectedDepartment.Color,
                 Id = selectedDepartment.Id,
                 Name = selectedDepartment.Name,
@@ -264,6 +263,31 @@ namespace vws.web.Controllers._department
 
             response.Message = "Department deleted successfully!";
             return Ok(response);
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("get")]
+        public IEnumerable<DepartmentResponseModel> GetDepartment()
+        {
+            List<DepartmentResponseModel> response = new List<DepartmentResponseModel>();
+
+            var userId = LoggedInUserId.Value;
+
+            var userDepartments = vwsDbContext.GetUserDepartments(userId).ToList();
+
+            foreach(var userDepartment in userDepartments)
+            {
+                response.Add(new DepartmentResponseModel()
+                {
+                    Color = userDepartment.Color,
+                    Id = userDepartment.Id,
+                    Name = userDepartment.Name,
+                    TeamId = userDepartment.TeamId
+                });
+            }
+
+            return response;
         }
     }
 }

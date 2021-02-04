@@ -160,6 +160,15 @@ namespace vws.web.Domain
             return departmentMember;
         }
 
+        public IQueryable<Department> GetUserDepartment(Guid userId)
+        {
+            return DepartmentMembers.Include(departmentMember => departmentMember.Department)
+                                    .Where(departmentMember => departmentMember.IsDeleted == false &&
+                                                                departmentMember.UserProfileId == userId &&
+                                                                departmentMember.Department.IsDeleted == false)
+                                    .Select(departmentMember => departmentMember.Department);
+        }
+
         #endregion
 
         #region project
