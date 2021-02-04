@@ -181,8 +181,9 @@ namespace vws.web.Domain
 
         public IQueryable<Project> GetUserProjects(Guid userId)
         {
-            HashSet<int> ProjectIds = ProjectMembers.Where(projectMember => projectMember.UserProfileId == userId).Select(x => x.ProjectId).ToHashSet<int>();
-            return Projects.Where(project => ProjectIds.Contains(project.Id));
+            return ProjectMembers.Include(projectMember => projectMember.Project)
+                .Where(projectMember => projectMember.UserProfileId == userId && projectMember.Project.IsDeleted == false && projectMember.IsDeleted == false)
+                .Select(projectMember => projectMember.Project);
         }
 
         public void AddStatus(ProjectStatus projectStatus)
@@ -326,8 +327,9 @@ namespace vws.web.Domain
 
         public IQueryable<Team> GetUserTeams(Guid userId)
         {
-            HashSet<int> TeamIds = TeamMembers.Where(teamMember => teamMember.UserProfileId == userId && teamMember.HasUserLeft == false).Select(x => x.TeamId).ToHashSet<int>();
-            return Teams.Where(team => TeamIds.Contains(team.Id) && team.IsDeleted == false);
+            return TeamMembers.Include(teamMember => teamMember.Team)
+                              .Where(teamMember => teamMember.UserProfileId == userId && teamMember.HasUserLeft == false && teamMember.Team.IsDeleted == false)
+                              .Select(teamMember => teamMember.Team);
         }
 
         public void AddTeamType(TeamType teamType)

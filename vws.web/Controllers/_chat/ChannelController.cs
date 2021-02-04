@@ -49,7 +49,7 @@ namespace vws.web.Controllers._chat
 
             List<UserProfile> userTeamMates = vwsDbContext.TeamMembers
                 .Include(teamMember => teamMember.UserProfile)
-                .Where(teamMember => userTeams.Select(userTeam => userTeam.Id).Contains(teamMember.TeamId))
+                .Where(teamMember => userTeams.Select(userTeam => userTeam.Id).Contains(teamMember.TeamId) && !teamMember.HasUserLeft)
                 .Select(teamMember => teamMember.UserProfile).Distinct().ToList();
             userTeamMates.Remove(await vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value));
 
