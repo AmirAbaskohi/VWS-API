@@ -218,7 +218,7 @@ namespace vws.web.Controllers._team
             {
                 response.Message = "User already joined";
                 response.AddError(localizer["You are already joined the team."]);
-                return StatusCode(StatusCodes.Status208AlreadyReported, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             var newTeamMember = new TeamMember()

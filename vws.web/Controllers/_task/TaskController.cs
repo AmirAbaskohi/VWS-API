@@ -267,6 +267,8 @@ namespace vws.web.Controllers._task
             }
 
             selectedTask.IsDeleted = true;
+            selectedTask.ModifiedBy = userId;
+            selectedTask.ModifiedOn = DateTime.Now;
 
             vwsDbContext.Save();
 
@@ -343,7 +345,7 @@ namespace vws.web.Controllers._task
             {
                 response.AddError(localizer["Task is assigned to user before."]);
                 response.Message = "Task assigned before";
-                return StatusCode(StatusCodes.Status208AlreadyReported, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             var newTaskAssign = new TaskAssign()

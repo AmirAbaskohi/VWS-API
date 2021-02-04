@@ -86,7 +86,11 @@ namespace vws.web.Controllers._project
                 StartDate = model.StartDate,
                 EndDate = model.EndDate,
                 Guid = Guid.NewGuid(),
-                IsDeleted = false
+                IsDeleted = false,
+                CreateBy = userId,
+                ModifiedBy = userId,
+                CreatedOn = creationTime,
+                ModifiedOn = creationTime
             };
 
             await vwsDbContext.AddProjectAsync(newProject);
@@ -199,6 +203,8 @@ namespace vws.web.Controllers._project
             selectedProject.EndDate = model.EndDate;
             selectedProject.StartDate = model.StartDate;
             selectedProject.Color = model.Color;
+            selectedProject.ModifiedOn = DateTime.Now;
+            selectedProject.ModifiedBy = userId;
             vwsDbContext.Save();
 
             response.Message = "Project updated successfully!";
@@ -234,6 +240,8 @@ namespace vws.web.Controllers._project
             }
 
             selectedProject.IsDeleted = true;
+            selectedProject.ModifiedBy = userId;
+            selectedProject.ModifiedOn = DateTime.Now;
             vwsDbContext.Save();
 
             response.Message = "Project deleted successfully!";
@@ -400,7 +408,7 @@ namespace vws.web.Controllers._project
             {
                 response.AddError(localizer["User you want to add, is already a member of selected project."]);
                 response.Message = "User added before";
-                return StatusCode(StatusCodes.Status208AlreadyReported, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             var newProjectMember = new ProjectMember()

@@ -103,7 +103,7 @@ namespace vws.web.Controllers._file
             {
                 response.AddError(localizer["There is no such file."]);
                 response.Message = "File not found";
-                return StatusCode(StatusCodes.Status404NotFound, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
             var selectedFile = (await vwsDbContext.GetFileAsync(fileContainer.RecentFileId));
             string address = selectedFile.Address;

@@ -33,6 +33,11 @@ namespace vws.web.Domain._project
         public string Color { get; set; }
         public bool IsDeleted { get; set;}
 
+        public Guid CreateBy { get; set; }
+        public Guid ModifiedBy { get; set; }
+        public DateTime CreatedOn { get; set; }
+        public DateTime ModifiedOn { get; set; }
+
         public virtual ProjectStatus Status { get; set; }
 
         public virtual ICollection<ProjectMember> ProjectMembers { get; set; }

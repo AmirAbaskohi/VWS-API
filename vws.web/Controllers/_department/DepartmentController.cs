@@ -70,7 +70,7 @@ namespace vws.web.Controllers._department
             {
                 response.AddError(localizer["There is no team with such id."]);
                 response.Message = "Team not found";
-                return StatusCode(StatusCodes.Status404NotFound, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             var userId = LoggedInUserId.Value;
@@ -89,7 +89,7 @@ namespace vws.web.Controllers._department
             {
                 response.AddError(localizer["There is already a department with given name, in given team."]);
                 response.Message = "Name of department is used";
-                return StatusCode(StatusCodes.Status208AlreadyReported, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             var time = DateTime.Now;
@@ -166,7 +166,7 @@ namespace vws.web.Controllers._department
             {
                 response.AddError(localizer["There is no team with such id."]);
                 response.Message = "Team not found";
-                return StatusCode(StatusCodes.Status404NotFound, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             var userId = LoggedInUserId.Value;
@@ -184,7 +184,7 @@ namespace vws.web.Controllers._department
             {
                 response.AddError(localizer["There is no department with such id."]);
                 response.Message = "Department not found";
-                return StatusCode(StatusCodes.Status404NotFound, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             if (!vwsDbContext.DepartmentMembers.Any(departmentMember => departmentMember.Id == model.Id &&
@@ -195,7 +195,7 @@ namespace vws.web.Controllers._department
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            if(selectedDepartment.TeamId != model.TeamId)
+            if (selectedDepartment.TeamId != model.TeamId)
             {
                 var departmentNames = vwsDbContext.Departments.Where(department => department.TeamId == model.TeamId && department.IsDeleted == false).Select(department => department.Name);
 
@@ -203,7 +203,7 @@ namespace vws.web.Controllers._department
                 {
                     response.AddError(localizer["There is already a department with given name, in given team."]);
                     response.Message = "Name of department is used";
-                    return StatusCode(StatusCodes.Status208AlreadyReported, response);
+                    return StatusCode(StatusCodes.Status400BadRequest, response);
                 }
             }
 
@@ -227,6 +227,42 @@ namespace vws.web.Controllers._department
 
             response.Message = "Department updated successfully!";
             response.Value = departmentResponse;
+            return Ok(response);
+        }
+
+        [HttpDelete]
+        [Authorize]
+        [Route("delete")]
+        public IActionResult DeleteDepartment(int id)
+        {
+            var response = new ResponseModel();
+
+            var userId = LoggedInUserId.Value;
+
+            var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Id == id);
+
+            if (selectedDepartment == null || selectedDepartment.IsDeleted)
+            {
+                response.AddError(localizer["There is no department with such id."]);
+                response.Message = "Department not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!vwsDbContext.DepartmentMembers.Any(departmentMember => departmentMember.Id == id &&
+                                                   departmentMember.UserProfileId == userId && departmentMember.IsDeleted == false))
+            {
+                response.AddError(localizer["You are not member of given department."]);
+                response.Message = "Department access denied";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            selectedDepartment.IsDeleted = true;
+            selectedDepartment.ModifiedBy = userId;
+            selectedDepartment.ModifiedOn = DateTime.Now;
+
+            vwsDbContext.Save();
+
+            response.Message = "Department deleted successfully!";
             return Ok(response);
         }
     }
