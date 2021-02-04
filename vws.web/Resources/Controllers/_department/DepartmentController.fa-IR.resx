@@ -129,8 +129,14 @@
   <data name="There is already a department with given name, in given team." xml:space="preserve">
     <value>در حال حاضر دپارتمانی با این نام در تیم داده شده وجود دارد.</value>
   </data>
+  <data name="There is no department with such id." xml:space="preserve">
+    <value>دپارتمانی با آی دی داده شده وجود ندارد.</value>
+  </data>
   <data name="There is no team with such id." xml:space="preserve">
     <value>تیمی با این آی دی وجود ندارد.</value>
+  </data>
+  <data name="You are not member of given department." xml:space="preserve">
+    <value>شما عضوی از دپارتمان داده شده نیستید.</value>
   </data>
   <data name="You are not member of team." xml:space="preserve">
     <value>شما عضوی از تیم نیستید.</value>

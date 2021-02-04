@@ -31,6 +31,11 @@ namespace vws.web.Domain._department
 
         public bool IsDeleted { get; set; }
 
+        public Guid CreatedBy { get; set; }
+        public Guid ModifiedBy { get; set; }
+        public DateTime CreatedOn { get; set; }
+        public DateTime ModifiedOn { get; set; }
+
         public virtual Team Team { get; set; }
 
         public virtual ICollection<DepartmentMember> DepartmentMembers { get; set; }

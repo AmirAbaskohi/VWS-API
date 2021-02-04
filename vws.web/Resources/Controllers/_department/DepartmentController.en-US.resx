@@ -129,8 +129,14 @@
   <data name="There is already a department with given name, in given team." xml:space="preserve">
     <value>There is already a department with given name, in given team.</value>
   </data>
+  <data name="There is no department with such id." xml:space="preserve">
+    <value>There is no department with such id.</value>
+  </data>
   <data name="There is no team with such id." xml:space="preserve">
     <value>There is no team with such id.</value>
+  </data>
+  <data name="You are not member of given department." xml:space="preserve">
+    <value>You are not member of given department.</value>
   </data>
   <data name="You are not member of team." xml:space="preserve">
     <value>You are not member of team.</value>
