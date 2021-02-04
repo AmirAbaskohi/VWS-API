@@ -94,6 +94,9 @@ namespace vws.web.Domain
 
         public IQueryable<Department> GetUserDepartments(Guid userId);
 
+        public Task<Department> AddDepartmentAsync(Department department);
+        public Task<DepartmentMember> AddDepartmentMemberAsync(DepartmentMember departmentMember);
+
         #endregion
 
         #endregion

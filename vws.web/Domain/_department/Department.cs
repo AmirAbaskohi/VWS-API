@@ -29,6 +29,8 @@ namespace vws.web.Domain._department
         [MaxLength(6)]
         public string Color { get; set; }
 
+        public bool IsDeleted { get; set; }
+
         public virtual Team Team { get; set; }
 
         public virtual ICollection<DepartmentMember> DepartmentMembers { get; set; }

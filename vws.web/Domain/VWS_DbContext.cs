@@ -148,6 +148,18 @@ namespace vws.web.Domain
             return Departments.Where(department=> DepartmentIds.Contains(department.Id));
         }
 
+        public async Task<Department> AddDepartmentAsync(Department department)
+        {
+            await Departments.AddAsync(department);
+            return department;
+        }
+
+        public async Task<DepartmentMember> AddDepartmentMemberAsync(DepartmentMember departmentMember)
+        {
+            await DepartmentMembers.AddAsync(departmentMember);
+            return departmentMember;
+        }
+
         #endregion
 
         #region project
