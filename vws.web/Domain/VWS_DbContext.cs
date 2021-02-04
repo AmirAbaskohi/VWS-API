@@ -142,12 +142,6 @@ namespace vws.web.Domain
 
         public DbSet<DepartmentMember> DepartmentMembers { get; set; }
 
-        public IQueryable<Department> GetUserDepartments(Guid userId)
-        {
-            HashSet<int> DepartmentIds = DepartmentMembers.Where(departmentMember => departmentMember.UserProfileId == userId).Select(x => x.DepartmentId).ToHashSet<int>();
-            return Departments.Where(department=> DepartmentIds.Contains(department.Id));
-        }
-
         public async Task<Department> AddDepartmentAsync(Department department)
         {
             await Departments.AddAsync(department);
@@ -160,7 +154,7 @@ namespace vws.web.Domain
             return departmentMember;
         }
 
-        public IQueryable<Department> GetUserDepartment(Guid userId)
+        public IQueryable<Department> GetUserDepartments(Guid userId)
         {
             return DepartmentMembers.Include(departmentMember => departmentMember.Department)
                                     .Where(departmentMember => departmentMember.IsDeleted == false &&

@@ -1,20 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Castle.Core.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using vws.web.Domain;
 using vws.web.Domain._base;
-using vws.web.Domain._department;
-using vws.web.Domain._project;
 using vws.web.Models;
+using vws.web.Repositories;
+using Microsoft.EntityFrameworkCore;
 using vws.web.Models._department;
+using vws.web.Domain._department;
+using System.Collections.Generic;
 
 namespace vws.web.Controllers._department
 {
@@ -22,23 +22,16 @@ namespace vws.web.Controllers._department
     [ApiController]
     public class DepartmentController : BaseController
     {
-        private readonly UserManager<ApplicationUser> userManager;
-        private readonly RoleManager<IdentityRole> roleManager;
-        private readonly SignInManager<ApplicationUser> signInManager;
-        private readonly IConfiguration configuration;
         private readonly IStringLocalizer<DepartmentController> localizer;
         private readonly IVWS_DbContext vwsDbContext;
+        private readonly IConfiguration configuration;
 
-        public DepartmentController(UserManager<ApplicationUser> _userManager, RoleManager<IdentityRole> _roleManager,
-            SignInManager<ApplicationUser> _signInManager, IStringLocalizer<DepartmentController> _localizer,
-            IVWS_DbContext _vwsDbContext, IConfiguration _configuration)
+        public DepartmentController(IConfiguration _configuration,
+            IStringLocalizer<DepartmentController> _localizer, IVWS_DbContext _vwsDbContext)
         {
-            userManager = _userManager;
-            roleManager = _roleManager;
-            signInManager = _signInManager;
-            configuration = _configuration;
             localizer = _localizer;
             vwsDbContext = _vwsDbContext;
+            configuration = _configuration;
         }
 
         [HttpPost]
@@ -135,6 +128,7 @@ namespace vws.web.Controllers._department
             response.Message = "Department added successfully";
             return Ok(response);
         }
+
 
         [HttpPut]
         [Authorize]
@@ -276,7 +270,7 @@ namespace vws.web.Controllers._department
 
             var userDepartments = vwsDbContext.GetUserDepartments(userId).ToList();
 
-            foreach(var userDepartment in userDepartments)
+            foreach (var userDepartment in userDepartments)
             {
                 response.Add(new DepartmentResponseModel()
                 {
