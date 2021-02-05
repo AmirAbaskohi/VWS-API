@@ -36,5 +36,19 @@ namespace vws.web.Enums
             Hold = 2,
             DoneOrArchived = 3
         };
+
+        public enum Cultures : byte
+        {
+            en_US = 1,
+            fr_FR = 2,
+            ru_RU = 3,
+            es_SP = 4,
+            pt_PG = 5,
+            fa_IR = 6,
+            ar_SB = 7,
+            de_GE = 8,
+            it_IT = 9,
+            tr_TU = 10
+        };
     }
 }

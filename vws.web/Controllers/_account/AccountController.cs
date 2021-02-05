@@ -11,12 +11,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
 using vws.web.Domain;
 using vws.web.Domain._base;
 using vws.web.Domain._file;
+using vws.web.Enums;
 using vws.web.Models;
 using vws.web.Models._account;
 using vws.web.Repositories;
@@ -657,6 +659,18 @@ namespace vws.web.Controllers._account
 
             response.Message = "Logged out successfully!";
             return Ok(response);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("getCulture")]
+        public string GetCulture()
+        {
+            var userId = LoggedInUserId.Value;
+
+            var userProfile = vwsDbContext.UserProfiles.Include(profile => profile.Culture).FirstOrDefault(profile => profile.UserId == userId);
+
+            return userProfile.CultureId == null ? SeedDataEnum.Cultures.en_US.ToString().Replace('_', '-') : userProfile.Culture.ToString().Replace('_','-');
         }
     }
 }
