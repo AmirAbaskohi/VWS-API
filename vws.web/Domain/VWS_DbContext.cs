@@ -77,6 +77,23 @@ namespace vws.web.Domain
             refreshToken.IsValid = false;
         }
 
+        public void AddCulture(Culture culture)
+        {
+            Cultures.Add(culture);
+        }
+
+        public string GetCulture(byte id)
+        {
+            var item = Cultures.FirstOrDefault(culture => culture.Id == id);
+            return item == null ? null : item.CultureAbbreviation;
+        }
+
+        public void UpdateCulture(byte id, string name)
+        {
+            var item = Cultures.FirstOrDefault(culture => culture.Id == id);
+            item.CultureAbbreviation = name;
+        }
+
         #endregion
 
         #region chat

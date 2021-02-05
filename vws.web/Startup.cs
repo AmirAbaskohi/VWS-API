@@ -197,7 +197,6 @@ namespace vws.web
                 context.DatabaseFacade.Migrate();
 
                 //seed data:
-                string[] statuses = { "Active", "Hold", "Done/Archived" };
                 foreach (var messageType in Enum.GetValues(typeof(SeedDataEnum.MessageTypes)))
                 {
                     string dbMessageType = context.GetMessageType((byte)messageType);
@@ -237,6 +236,14 @@ namespace vws.web
                         context.AddStatus(new Domain._project.ProjectStatus { Id = (byte)status, NameMultiLang = status.ToString() });
                     else if (dbStatusType != status.ToString())
                         context.UpdateStatus((byte)status, status.ToString());
+                }
+                foreach (var culture in Enum.GetValues(typeof(SeedDataEnum.Cultures)))
+                {
+                    string dbCulture = context.GetCulture((byte)culture);
+                    if (dbCulture == null)
+                        context.AddCulture(new Domain._base.Culture { Id = (byte)culture, CultureAbbreviation = culture.ToString().Replace('_', '-') });
+                    else if (dbCulture != culture.ToString())
+                        context.UpdateCulture((byte)culture, culture.ToString().Replace('_','-'));
                 }
                 context.Save();
             }

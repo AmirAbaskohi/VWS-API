@@ -43,6 +43,11 @@ namespace vws.web.Domain
         public void MakeRefreshTokenInvalid(string token);
 
         public void DeleteUserProfile(UserProfile userProfile);
+        public void AddCulture(Culture culture);
+
+        public string GetCulture(byte id);
+
+        public void UpdateCulture(byte id, string name);
 
         #endregion
 
