@@ -283,5 +283,84 @@ namespace vws.web.Controllers._department
 
             return response;
         }
+
+        [HttpPost]
+        [Authorize]
+        [Route("addTeammateToDepartment")]
+        public async Task<IActionResult> AddTeamMateToDepartment([FromBody] AddTeammateToDepartmentModel model)
+        {
+            var response = new ResponseModel();
+            var userId = LoggedInUserId.Value;
+            var selectedUserId = new Guid(model.UserId);
+
+            var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Id == model.DepartmentId);
+
+            if (selectedDepartment == null || selectedDepartment.IsDeleted)
+            {
+                response.AddError(localizer["There is no department with such id."]);
+                response.Message = "Department not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var selectedTeam = await vwsDbContext.GetTeamAsync(model.TeamId);
+
+            if (selectedTeam == null || selectedTeam.IsDeleted)
+            {
+                response.AddError(localizer["There is no team with given Id."]);
+                response.Message = "Team not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!vwsDbContext.UserProfiles.Any(profile => profile.UserId == selectedUserId))
+            {
+                response.AddError(localizer["There is no user with given Id."]);
+                response.Message = "User not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync(model.TeamId, userId);
+            if(selectedTeamMember == null)
+            {
+                response.AddError(localizer["You are not member of team."]);
+                response.Message = "Not member of team";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            selectedTeamMember = await vwsDbContext.GetTeamMemberAsync(model.TeamId, selectedUserId);
+            if(selectedTeamMember == null)
+            {
+                response.AddError(localizer["User you want to to add, is not a member of selected team."]);
+                response.Message = "Not member of team";
+                return StatusCode(StatusCodes.Status406NotAcceptable, response);
+            }
+
+            if(!vwsDbContext.DepartmentMembers.Any(departmentMember => departmentMember.UserProfileId == userId && departmentMember.DepartmentId == model.DepartmentId && !departmentMember.IsDeleted))
+            {
+                response.AddError(localizer["You are not member of given department."]);
+                response.Message = "Department access denied";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            if (vwsDbContext.DepartmentMembers.Any(departmentMember => departmentMember.UserProfileId == selectedUserId && departmentMember.DepartmentId == model.DepartmentId && !departmentMember.IsDeleted))
+            {
+                response.AddError(localizer["User you want to add, is already a member of selected department."]);
+                response.Message = "User added before";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var newDepartmentMember = new DepartmentMember()
+            {
+                CreatedOn = DateTime.Now,
+                IsDeleted = false,
+                DepartmentId = model.DepartmentId,
+                UserProfileId = selectedUserId
+            };
+
+            await vwsDbContext.AddDepartmentMemberAsync(newDepartmentMember);
+            vwsDbContext.Save();
+
+            response.Message = "User added to department successfully!";
+            return Ok(response);
+        }
     }
 }

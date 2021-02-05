@@ -135,6 +135,15 @@
   <data name="There is no team with such id." xml:space="preserve">
     <value>تیمی با این آی دی وجود ندارد.</value>
   </data>
+  <data name="There is no user with given Id." xml:space="preserve">
+    <value>کاربری با آی دی داده شده وجود ندارد.</value>
+  </data>
+  <data name="User you want to add, is already a member of selected department." xml:space="preserve">
+    <value>کاربری که میخواهید به دپارتمان اضافه کنید، هم اکنون عضو دپارتمان است.</value>
+  </data>
+  <data name="User you want to to add, is not a member of selected team." xml:space="preserve">
+    <value>عضوی که می خواهید اضافه کنید، عضوی از تیم مشخص شده نیست.</value>
+  </data>
   <data name="You are not member of given department." xml:space="preserve">
     <value>شما عضوی از دپارتمان داده شده نیستید.</value>
   </data>

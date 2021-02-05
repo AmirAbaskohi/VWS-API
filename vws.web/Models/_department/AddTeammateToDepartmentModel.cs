@@ -4,12 +4,12 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace vws.web.Models._project
+namespace vws.web.Models._department
 {
-    public class AddTeamMateToProjectModel
+    public class AddTeammateToDepartmentModel
     {
         [Required]
-        public int ProjectId { get; set; }
+        public int DepartmentId { get; set; }
         [Required]
         public int TeamId { get; set; }
         [Required]

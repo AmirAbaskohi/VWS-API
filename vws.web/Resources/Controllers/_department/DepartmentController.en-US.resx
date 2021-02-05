@@ -135,6 +135,15 @@
   <data name="There is no team with such id." xml:space="preserve">
     <value>There is no team with such id.</value>
   </data>
+  <data name="There is no user with given Id." xml:space="preserve">
+    <value>There is no user with given Id.</value>
+  </data>
+  <data name="User you want to add, is already a member of selected department." xml:space="preserve">
+    <value>User you want to add, is already a member of selected department.</value>
+  </data>
+  <data name="User you want to to add, is not a member of selected team." xml:space="preserve">
+    <value>User you want to to add, is not a member of selected team.</value>
+  </data>
   <data name="You are not member of given department." xml:space="preserve">
     <value>You are not member of given department.</value>
   </data>

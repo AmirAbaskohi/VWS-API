@@ -420,6 +420,7 @@ namespace vws.web.Controllers._project
             };
 
             await vwsDbContext.AddProjectMemberAsync(newProjectMember);
+            vwsDbContext.Save();
 
             response.Message = "User added to project successfully!";
             return Ok(response);
