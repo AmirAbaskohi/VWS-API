@@ -123,6 +123,9 @@
   <data name="File extension is not allowed." xml:space="preserve">
     <value>پسوند فایل مجاز نیست.</value>
   </data>
+  <data name="File size is not allowed." xml:space="preserve">
+    <value>حجم فایل معتبر نیست.</value>
+  </data>
   <data name="There is no such file." xml:space="preserve">
     <value>فایل وجود ندارد.</value>
   </data>

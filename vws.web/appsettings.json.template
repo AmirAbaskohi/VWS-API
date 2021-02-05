@@ -38,6 +38,7 @@
     "RequireLowercase": true
   },
   "Files": {
-    "RestrictedExtensions":  "exe"
+    "RestrictedExtensions": "exe",
+    "FileMaxSizeInBytes":  "20000000"
   }
 }

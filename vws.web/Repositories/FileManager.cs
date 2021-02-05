@@ -45,6 +45,13 @@ namespace vws.web.Repositories
                 return response;
             }
 
+            if (file.Length > Int64.Parse(configuration["Files:FileMaxSizeInBytes"]))
+            {
+                response.AddError("File size is not allowed.");
+                response.Message = "Invalid file size";
+                return response;
+            }
+
             Guid fileGuid = Guid.NewGuid();
             fileName = fileGuid.ToString() + "." + extension;
 

@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="File size is not allowed." xml:space="preserve">
+    <value>File size is not allowed.</value>
+  </data>
   <data name="Length of description is more than 2000 characters." xml:space="preserve">
     <value>Length of description is more than 2000 characters.</value>
   </data>
@@ -134,8 +137,5 @@
   </data>
   <data name="User does not exist." xml:space="preserve">
     <value>User does not exist.</value>
-  </data>
-  <data name="You don't have access to this task." xml:space="preserve">
-    <value>You don't have access to this task.</value>
   </data>
 </root>
