@@ -661,7 +661,7 @@ namespace vws.web.Controllers._account
             return Ok(response);
         }
 
-        [HttpPost]
+        [HttpGet]
         [Authorize]
         [Route("getCulture")]
         public string GetCulture()
@@ -671,6 +671,29 @@ namespace vws.web.Controllers._account
             var userProfile = vwsDbContext.UserProfiles.Include(profile => profile.Culture).FirstOrDefault(profile => profile.UserId == userId);
 
             return userProfile.CultureId == null ? SeedDataEnum.Cultures.en_US.ToString().Replace('_', '-') : userProfile.Culture.ToString().Replace('_','-');
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("setCulture")]
+        public IActionResult SetCulture(byte cultureId)
+        {
+            var userId = LoggedInUserId.Value;
+            var response = new ResponseModel();
+
+            if(cultureId <= 0 || cultureId > 10)
+            {
+                response.AddError(localizer["There is no culture with given Id."]);
+                response.Message = "Culture not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var userProfile = vwsDbContext.UserProfiles.FirstOrDefault(profile => profile.UserId == userId);
+            userProfile.CultureId = cultureId;
+            vwsDbContext.Save();
+
+            response.Message = "Culture set successfully!";
+            return Ok(response);
         }
     }
 }
