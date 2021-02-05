@@ -670,7 +670,7 @@ namespace vws.web.Controllers._account
 
             var userProfile = vwsDbContext.UserProfiles.Include(profile => profile.Culture).FirstOrDefault(profile => profile.UserId == userId);
 
-            return userProfile.CultureId == null ? SeedDataEnum.Cultures.en_US.ToString().Replace('_', '-') : userProfile.Culture.ToString().Replace('_','-');
+            return userProfile.CultureId == null ? SeedDataEnum.Cultures.en_US.ToString().Replace('_', '-') : userProfile.Culture.CultureAbbreviation;
         }
 
         [HttpPost]
