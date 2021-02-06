@@ -141,6 +141,12 @@
   <data name="Link is not valid" xml:space="preserve">
     <value>لینک معتبر نیست.</value>
   </data>
+  <data name="There is more than one file." xml:space="preserve">
+    <value>بیشتر از یک فایل وجود دارد.</value>
+  </data>
+  <data name="There is no such file." xml:space="preserve">
+    <value>فایل وجود ندارد.</value>
+  </data>
   <data name="There is no team with given Id." xml:space="preserve">
     <value>تیمی با این آی دی وجود ندارد.</value>
   </data>
@@ -152,6 +158,9 @@
   </data>
   <data name="You are not a member of team." xml:space="preserve">
     <value>شما عضوی از تیم نیستید.</value>
+  </data>
+  <data name="You did not upload an image." xml:space="preserve">
+    <value>شما عکسی آپلود نکردید.</value>
   </data>
   <data name="You don't have access to this team." xml:space="preserve">
     <value>شما به این تیم دسترسی ندارید.</value>

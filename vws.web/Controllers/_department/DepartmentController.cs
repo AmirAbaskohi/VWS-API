@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using vws.web.Models._department;
 using vws.web.Domain._department;
 using System.Collections.Generic;
+using vws.web.Domain._file;
 
 namespace vws.web.Controllers._department
 {
@@ -25,13 +26,15 @@ namespace vws.web.Controllers._department
         private readonly IStringLocalizer<DepartmentController> localizer;
         private readonly IVWS_DbContext vwsDbContext;
         private readonly IConfiguration configuration;
+        private readonly IFileManager fileManager;
 
         public DepartmentController(IConfiguration _configuration,
-            IStringLocalizer<DepartmentController> _localizer, IVWS_DbContext _vwsDbContext)
+            IStringLocalizer<DepartmentController> _localizer, IVWS_DbContext _vwsDbContext, IFileManager _fileManager)
         {
             localizer = _localizer;
             vwsDbContext = _vwsDbContext;
             configuration = _configuration;
+            fileManager = _fileManager;
         }
 
         [HttpPost]
@@ -360,6 +363,98 @@ namespace vws.web.Controllers._department
             vwsDbContext.Save();
 
             response.Message = "User added to department successfully!";
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("uploadDepartmentImage")]
+        public async Task<IActionResult> UploadDepartmentImage(IFormFile image, int departmentId)
+        {
+            var response = new ResponseModel();
+
+            string[] types = { "png", "jpg", "jpeg" };
+
+            var files = Request.Form.Files.ToList();
+
+            Guid userId = LoggedInUserId.Value;
+
+            if (files.Count > 1)
+            {
+                response.AddError(localizer["There is more than one file."]);
+                response.Message = "Too many files passed";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            if (files.Count == 0 && image == null)
+            {
+                response.AddError(localizer["You did not upload an image."]);
+                response.Message = "There is no image";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            var uploadedImage = files.Count == 0 ? image : files[0];
+
+            var selectedDepartment = vwsDbContext.Departments.Include(department => department.DepartmentImage).FirstOrDefault(department => department.Id == departmentId);
+            if (selectedDepartment == null || selectedDepartment.IsDeleted)
+            {
+                response.AddError(localizer["There is no department with such id."]);
+                response.Message = "Department not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var selectedDepartmentMember = vwsDbContext.DepartmentMembers.FirstOrDefault(departmentMember => departmentMember.UserProfileId == userId &&
+                                                                                                    departmentMember.DepartmentId == departmentId &&
+                                                                                                    !departmentMember.IsDeleted);
+            if (selectedDepartmentMember == null)
+            {
+                response.AddError(localizer["You are not member of given department."]);
+                response.Message = "Not member of department";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            ResponseModel<File> fileResponse;
+
+            if (selectedDepartment.DepartmentImage != null)
+            {
+                fileResponse = await fileManager.WriteFile(uploadedImage, userId, "profileImages", (int)selectedDepartment.DepartmentImageId, types.ToList());
+                if (fileResponse.HasError)
+                {
+                    foreach (var error in fileResponse.Errors)
+                        response.AddError(localizer[error]);
+                    response.Message = "Error in writing file";
+                    return StatusCode(StatusCodes.Status500InternalServerError, response);
+                }
+                selectedDepartment.DepartmentImage.RecentFileId = fileResponse.Value.Id;
+            }
+            else
+            {
+                var time = DateTime.Now;
+                var newFileContainer = new FileContainer
+                {
+                    ModifiedOn = time,
+                    CreatedOn = time,
+                    CreatedBy = userId,
+                    ModifiedBy = userId,
+                    Guid = Guid.NewGuid()
+                };
+                await vwsDbContext.AddFileContainerAsync(newFileContainer);
+                vwsDbContext.Save();
+                fileResponse = await fileManager.WriteFile(uploadedImage, userId, "profileImages", newFileContainer.Id, types.ToList());
+                if (fileResponse.HasError)
+                {
+                    foreach (var error in fileResponse.Errors)
+                        response.AddError(localizer[error]);
+                    response.Message = "Error in writing file";
+                    vwsDbContext.DeleteFileContainer(newFileContainer);
+                    vwsDbContext.Save();
+                    return StatusCode(StatusCodes.Status500InternalServerError, response);
+                }
+                newFileContainer.RecentFileId = fileResponse.Value.Id;
+                selectedDepartment.DepartmentImageId = newFileContainer.Id;
+            }
+            selectedDepartment.ModifiedBy = LoggedInUserId.Value;
+            selectedDepartment.ModifiedOn = DateTime.Now;
+            vwsDbContext.Save();
+            response.Message = "Department image added successfully!";
             return Ok(response);
         }
     }

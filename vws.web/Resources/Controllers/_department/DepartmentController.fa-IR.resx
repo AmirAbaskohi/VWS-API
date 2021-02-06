@@ -117,6 +117,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Error in writing files." xml:space="preserve">
+    <value>در نوشتن فایل مشکلی پیش آمد.</value>
+  </data>
+  <data name="File extension is not allowed." xml:space="preserve">
+    <value>پسوند فایل مجاز نیست.</value>
+  </data>
+  <data name="File size is not allowed." xml:space="preserve">
+    <value>حجم فایل معتبر نیست.</value>
+  </data>
   <data name="Length of color is more than 6 characters." xml:space="preserve">
     <value>تعداد کاراکتر های بخش رنگ بیشتر از 6 کاراکتر است.</value>
   </data>
@@ -129,8 +138,14 @@
   <data name="There is already a department with given name, in given team." xml:space="preserve">
     <value>در حال حاضر دپارتمانی با این نام در تیم داده شده وجود دارد.</value>
   </data>
+  <data name="There is more than one file." xml:space="preserve">
+    <value>بیشتر از یک فایل وجود دارد.</value>
+  </data>
   <data name="There is no department with such id." xml:space="preserve">
     <value>دپارتمانی با آی دی داده شده وجود ندارد.</value>
+  </data>
+  <data name="There is no such file." xml:space="preserve">
+    <value>فایل وجود ندارد.</value>
   </data>
   <data name="There is no team with such id." xml:space="preserve">
     <value>تیمی با این آی دی وجود ندارد.</value>
@@ -149,5 +164,11 @@
   </data>
   <data name="You are not member of team." xml:space="preserve">
     <value>شما عضوی از تیم نیستید.</value>
+  </data>
+  <data name="You did not upload an image." xml:space="preserve">
+    <value>شما عکسی آپلود نکردید.</value>
+  </data>
+  <data name="Your file does not have extension." xml:space="preserve">
+    <value>فایل شما پسوند ندارد.</value>
   </data>
 </root>

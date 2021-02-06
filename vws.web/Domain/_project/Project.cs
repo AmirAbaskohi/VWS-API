@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using vws.web.Domain._file;
 
 namespace vws.web.Domain._project
 {
@@ -37,6 +38,9 @@ namespace vws.web.Domain._project
         public Guid ModifiedBy { get; set; }
         public DateTime CreatedOn { get; set; }
         public DateTime ModifiedOn { get; set; }
+        [ForeignKey("ProjectImage")]
+        public int? ProjectImageId { get; set; }
+        public virtual FileContainer ProjectImage { get; set; }
 
         public virtual ProjectStatus Status { get; set; }
 

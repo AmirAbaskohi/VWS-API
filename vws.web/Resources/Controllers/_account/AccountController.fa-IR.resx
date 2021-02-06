@@ -177,6 +177,9 @@
   <data name="There is more than one file." xml:space="preserve">
     <value>بیش از یک فایل وجود دارد.</value>
   </data>
+  <data name="There is no such file." xml:space="preserve">
+    <value>فایل وجود ندارد.</value>
+  </data>
   <data name="Too many requests." xml:space="preserve">
     <value>باید از زمان ارسال ایمیل قبلی شما مقداری گذشته باشد.</value>
   </data>

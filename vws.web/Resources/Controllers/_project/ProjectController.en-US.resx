@@ -117,6 +117,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Error in writing files." xml:space="preserve">
+    <value>Error in writing files.</value>
+  </data>
+  <data name="File extension is not allowed." xml:space="preserve">
+    <value>File extension is not allowed.</value>
+  </data>
+  <data name="File size is not allowed." xml:space="preserve">
+    <value>File size is not allowed.</value>
+  </data>
   <data name="Length of color is more than 6 characters." xml:space="preserve">
     <value>Length of color is more than 6 characters.</value>
   </data>
@@ -129,8 +138,14 @@
   <data name="Start Date should be before End Date." xml:space="preserve">
     <value>Start Date should be before End Date.</value>
   </data>
+  <data name="There is more than one file." xml:space="preserve">
+    <value>There is more than one file.</value>
+  </data>
   <data name="There is no project with given Id." xml:space="preserve">
     <value>There is no project with given Id.</value>
+  </data>
+  <data name="There is no such file." xml:space="preserve">
+    <value>There is no such file.</value>
   </data>
   <data name="There is no team with given Id." xml:space="preserve">
     <value>There is no team with given Id.</value>
@@ -149,5 +164,11 @@
   </data>
   <data name="You are not a memeber of project." xml:space="preserve">
     <value>You are not a memeber of project.</value>
+  </data>
+  <data name="You did not upload an image." xml:space="preserve">
+    <value>You did not upload an image.</value>
+  </data>
+  <data name="Your file does not have extension." xml:space="preserve">
+    <value>Your file does not have extension.</value>
   </data>
 </root>

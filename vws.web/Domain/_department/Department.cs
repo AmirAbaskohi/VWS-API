@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using vws.web.Domain._file;
 using vws.web.Domain._team;
 
 namespace vws.web.Domain._department
@@ -35,7 +36,9 @@ namespace vws.web.Domain._department
         public Guid ModifiedBy { get; set; }
         public DateTime CreatedOn { get; set; }
         public DateTime ModifiedOn { get; set; }
-
+        [ForeignKey("DepartmentImage")]
+        public int? DepartmentImageId { get; set; }
+        public virtual FileContainer DepartmentImage { get; set; }
         public virtual Team Team { get; set; }
 
         public virtual ICollection<DepartmentMember> DepartmentMembers { get; set; }

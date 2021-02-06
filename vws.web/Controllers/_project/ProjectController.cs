@@ -6,14 +6,17 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using vws.web.Domain;
 using vws.web.Domain._base;
+using vws.web.Domain._file;
 using vws.web.Domain._project;
 using vws.web.Enums;
 using vws.web.Models;
 using vws.web.Models._project;
+using vws.web.Repositories;
 
 namespace vws.web.Controllers._project
 {
@@ -27,10 +30,11 @@ namespace vws.web.Controllers._project
         private readonly IConfiguration configuration;
         private readonly IStringLocalizer<ProjectController> localizer;
         private readonly IVWS_DbContext vwsDbContext;
+        private readonly IFileManager fileManager;
 
         public ProjectController(UserManager<ApplicationUser> _userManager, RoleManager<IdentityRole> _roleManager,
             SignInManager<ApplicationUser> _signInManager, IStringLocalizer<ProjectController> _localizer,
-            IVWS_DbContext _vwsDbContext, IConfiguration _configuration)
+            IVWS_DbContext _vwsDbContext, IConfiguration _configuration, IFileManager _fileManager)
         {
             userManager = _userManager;
             roleManager = _roleManager;
@@ -38,6 +42,7 @@ namespace vws.web.Controllers._project
             configuration = _configuration;
             localizer = _localizer;
             vwsDbContext = _vwsDbContext;
+            fileManager = _fileManager;
         }
 
         [HttpPost]
@@ -423,6 +428,98 @@ namespace vws.web.Controllers._project
             vwsDbContext.Save();
 
             response.Message = "User added to project successfully!";
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("uploadProjectImage")]
+        public async Task<IActionResult> UploadProjectImage(IFormFile image, int projectId)
+        {
+            var response = new ResponseModel();
+
+            string[] types = { "png", "jpg", "jpeg" };
+
+            var files = Request.Form.Files.ToList();
+
+            Guid userId = LoggedInUserId.Value;
+
+            if (files.Count > 1)
+            {
+                response.AddError(localizer["There is more than one file."]);
+                response.Message = "Too many files passed";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            if (files.Count == 0 && image == null)
+            {
+                response.AddError(localizer["You did not upload an image."]);
+                response.Message = "There is no image";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            var uploadedImage = files.Count == 0 ? image : files[0];
+
+            var selectedProject = vwsDbContext.Projects.Include(project => project.ProjectImage).FirstOrDefault(project => project.Id == projectId);
+            if (selectedProject == null || selectedProject.IsDeleted)
+            {
+                response.AddError(localizer["There is no project with given Id."]);
+                response.Message = "Project not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var selectedProjectMember = vwsDbContext.ProjectMembers.FirstOrDefault(projectMember => projectMember.UserProfileId == userId &&
+                                                                                                    projectMember.ProjectId == projectId &&
+                                                                                                    !projectMember.IsDeleted);
+            if (selectedProjectMember == null)
+            {
+                response.AddError(localizer["You are not a memeber of project."]);
+                response.Message = "Not member of project";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            ResponseModel<File> fileResponse;
+
+            if (selectedProject.ProjectImage != null)
+            {
+                fileResponse = await fileManager.WriteFile(uploadedImage, userId, "profileImages", (int)selectedProject.ProjectImageId, types.ToList());
+                if (fileResponse.HasError)
+                {
+                    foreach (var error in fileResponse.Errors)
+                        response.AddError(localizer[error]);
+                    response.Message = "Error in writing file";
+                    return StatusCode(StatusCodes.Status500InternalServerError, response);
+                }
+                selectedProject.ProjectImage.RecentFileId = fileResponse.Value.Id;
+            }
+            else
+            {
+                var time = DateTime.Now;
+                var newFileContainer = new FileContainer
+                {
+                    ModifiedOn = time,
+                    CreatedOn = time,
+                    CreatedBy = userId,
+                    ModifiedBy = userId,
+                    Guid = Guid.NewGuid()
+                };
+                await vwsDbContext.AddFileContainerAsync(newFileContainer);
+                vwsDbContext.Save();
+                fileResponse = await fileManager.WriteFile(uploadedImage, userId, "profileImages", newFileContainer.Id, types.ToList());
+                if (fileResponse.HasError)
+                {
+                    foreach (var error in fileResponse.Errors)
+                        response.AddError(localizer[error]);
+                    response.Message = "Error in writing file";
+                    vwsDbContext.DeleteFileContainer(newFileContainer);
+                    vwsDbContext.Save();
+                    return StatusCode(StatusCodes.Status500InternalServerError, response);
+                }
+                newFileContainer.RecentFileId = fileResponse.Value.Id;
+                selectedProject.ProjectImageId = newFileContainer.Id;
+            }
+            selectedProject.ModifiedBy = LoggedInUserId.Value;
+            selectedProject.ModifiedOn = DateTime.Now;
+            vwsDbContext.Save();
+            response.Message = "Project image added successfully!";
             return Ok(response);
         }
     }
