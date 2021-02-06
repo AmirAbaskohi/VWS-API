@@ -16,5 +16,7 @@ namespace vws.web.Domain._project
         public DateTime? EndDate { get; set; }
         public string Color { get; set; }
         public bool IsDelete { get; set; }
+        public int? TeamId { get; set; }
+        public int? DepartmentId { get; set; }
     }
 }

@@ -15,5 +15,7 @@ namespace vws.web.Models._project
         public DateTime? EndDate { get; set; }
         [MaxLength(6)]
         public string Color { get; set; }
+        public int? TeamId { get; set; }
+        public int? DepartmentId { get; set; }
     }
 }

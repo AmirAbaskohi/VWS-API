@@ -80,6 +80,53 @@ namespace vws.web.Controllers._project
 
             Guid userId = LoggedInUserId.Value;
 
+            if (model.TeamId != null)
+            {
+                var selectedTeam = await vwsDbContext.GetTeamAsync((int)model.TeamId);
+                if(selectedTeam == null || selectedTeam.IsDeleted)
+                {
+                    response.AddError(localizer["There is no team with given Id."]);
+                    response.Message = "Team not found";
+                    return StatusCode(StatusCodes.Status400BadRequest, response);
+                }
+                var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync((int)model.TeamId, userId);
+                if(selectedTeamMember == null)
+                {
+                    response.AddError(localizer["You are not a member of team."]);
+                    response.Message = "Not member of team";
+                    return StatusCode(StatusCodes.Status403Forbidden, response);
+                }
+            }
+
+            if (model.DepartmentId != null)
+            {
+                var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Id == (int)model.DepartmentId);
+                if (selectedDepartment == null || selectedDepartment.IsDeleted)
+                {
+                    response.AddError(localizer["There is no department with given Id."]);
+                    response.Message = "Department not found";
+                    return StatusCode(StatusCodes.Status400BadRequest, response);
+                }
+                var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync((int)model.TeamId, userId);
+                if (selectedTeamMember == null)
+                {
+                    response.AddError(localizer["You are not member of selected department."]);
+                    response.Message = "Not member of department";
+                    return StatusCode(StatusCodes.Status403Forbidden, response);
+                }
+            }
+
+            if(model.DepartmentId != null && model.TeamId != null)
+            {
+                var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Id == (int)model.DepartmentId);
+                if(selectedDepartment.TeamId != (int)model.TeamId)
+                {
+                    response.AddError(localizer["The department is not a subset of the team."]);
+                    response.Message = "Department not subset of team";
+                    return StatusCode(StatusCodes.Status400BadRequest, response);
+                }
+            }
+
             DateTime creationTime = DateTime.Now;
 
             var newProject = new Project()
@@ -95,7 +142,9 @@ namespace vws.web.Controllers._project
                 CreateBy = userId,
                 ModifiedBy = userId,
                 CreatedOn = creationTime,
-                ModifiedOn = creationTime
+                ModifiedOn = creationTime,
+                TeamId = model.TeamId,
+                DepartmentId = model.DepartmentId
             };
 
             await vwsDbContext.AddProjectAsync(newProject);
@@ -122,7 +171,9 @@ namespace vws.web.Controllers._project
                 StartDate = newProject.StartDate,
                 EndDate = newProject.EndDate,
                 Guid = newProject.Guid,
-                IsDelete = newProject.IsDeleted
+                IsDelete = newProject.IsDeleted,
+                DepartmentId = newProject.DepartmentId,
+                TeamId = newProject.TeamId
             };
 
             response.Value = newProjectResponse;
@@ -133,7 +184,7 @@ namespace vws.web.Controllers._project
         [HttpPut]
         [Authorize]
         [Route("update")]
-        public IActionResult UpdateProject([FromBody] UpdateProjectModel model)
+        public async Task<IActionResult> UpdateProject([FromBody] UpdateProjectModel model)
         {
             var response = new ResponseModel<ProjectResponseModel>();
 
@@ -164,6 +215,53 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
 
             Guid userId = LoggedInUserId.Value;
+
+            if (model.TeamId != null)
+            {
+                var selectedTeam = await vwsDbContext.GetTeamAsync((int)model.TeamId);
+                if (selectedTeam == null || selectedTeam.IsDeleted)
+                {
+                    response.AddError(localizer["There is no team with given Id."]);
+                    response.Message = "Team not found";
+                    return StatusCode(StatusCodes.Status400BadRequest, response);
+                }
+                var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync((int)model.TeamId, userId);
+                if (selectedTeamMember == null)
+                {
+                    response.AddError(localizer["You are not a member of team."]);
+                    response.Message = "Not member of team";
+                    return StatusCode(StatusCodes.Status403Forbidden, response);
+                }
+            }
+
+            if (model.DepartmentId != null)
+            {
+                var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Id == (int)model.DepartmentId);
+                if (selectedDepartment == null || selectedDepartment.IsDeleted)
+                {
+                    response.AddError(localizer["There is no department with given Id."]);
+                    response.Message = "Department not found";
+                    return StatusCode(StatusCodes.Status400BadRequest, response);
+                }
+                var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync((int)model.TeamId, userId);
+                if (selectedTeamMember == null)
+                {
+                    response.AddError(localizer["You are not member of selected department."]);
+                    response.Message = "Not member of department";
+                    return StatusCode(StatusCodes.Status403Forbidden, response);
+                }
+            }
+
+            if (model.DepartmentId != null && model.TeamId != null)
+            {
+                var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Id == (int)model.DepartmentId);
+                if (selectedDepartment.TeamId != (int)model.TeamId)
+                {
+                    response.AddError(localizer["The department is not a subset of the team."]);
+                    response.Message = "Department not subset of team";
+                    return StatusCode(StatusCodes.Status400BadRequest, response);
+                }
+            }
 
             var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Id == model.Id);
             if (selectedProject == null || selectedProject.IsDeleted)
@@ -210,8 +308,26 @@ namespace vws.web.Controllers._project
             selectedProject.Color = model.Color;
             selectedProject.ModifiedOn = DateTime.Now;
             selectedProject.ModifiedBy = userId;
+            selectedProject.TeamId = model.TeamId;
+            selectedProject.DepartmentId = model.DepartmentId;
             vwsDbContext.Save();
 
+            var newProjectResponse = new ProjectResponseModel()
+            {
+                Id = selectedProject.Id,
+                StatusId = selectedProject.StatusId,
+                Name = selectedProject.Name,
+                Description = selectedProject.Description,
+                Color = selectedProject.Color,
+                StartDate = selectedProject.StartDate,
+                EndDate = selectedProject.EndDate,
+                Guid = selectedProject.Guid,
+                IsDelete = selectedProject.IsDeleted,
+                DepartmentId = selectedProject.DepartmentId,
+                TeamId = selectedProject.TeamId
+            };
+
+            response.Value = newProjectResponse;
             response.Message = "Project updated successfully!";
             return Ok(response);
         }
@@ -279,7 +395,9 @@ namespace vws.web.Controllers._project
                     IsDelete = project.IsDeleted,
                     Name = project.Name,
                     StartDate = project.StartDate,
-                    StatusId = project.StatusId
+                    StatusId = project.StatusId,
+                    TeamId = project.TeamId,
+                    DepartmentId = project.DepartmentId
                 });
             }
 
@@ -312,7 +430,9 @@ namespace vws.web.Controllers._project
                     IsDelete = project.IsDeleted,
                     Name = project.Name,
                     StartDate = project.StartDate,
-                    StatusId = project.StatusId
+                    StatusId = project.StatusId,
+                    TeamId = project.TeamId,
+                    DepartmentId = project.DepartmentId
                 });
             }
 
@@ -345,7 +465,9 @@ namespace vws.web.Controllers._project
                     IsDelete = project.IsDeleted,
                     Name = project.Name,
                     StartDate = project.StartDate,
-                    StatusId = project.StatusId
+                    StatusId = project.StatusId,
+                    TeamId = project.TeamId,
+                    DepartmentId = project.DepartmentId
                 });
             }
 
