@@ -102,6 +102,10 @@ namespace vws.web.Domain
 
         public DbSet<ChannelType> ChannelTypes { get; set; }
 
+        IQueryable<MutedChannel> IVWS_DbContext.MutedChannels { get => MutedChannels; }
+
+        public DbSet<MutedChannel> MutedChannels { get; set; }
+
         public DbSet<Message> Messages { get; set; }
 
         IQueryable<Message> IVWS_DbContext.Messages { get => Messages; }
