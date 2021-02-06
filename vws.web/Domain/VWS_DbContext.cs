@@ -152,6 +152,12 @@ namespace vws.web.Domain
             selectedChannelType.Name = newName;
         }
 
+        public async Task<MutedChannel> AddMutedChannelAsync(MutedChannel mutedChannel)
+        {
+            await MutedChannels.AddAsync(mutedChannel);
+            return mutedChannel;
+        }
+
         #endregion
 
         #region department

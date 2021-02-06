@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using vws.web.Domain;
 using vws.web.Domain._base;
+using vws.web.Domain._chat;
 using vws.web.Domain._department;
 using vws.web.Domain._project;
 using vws.web.Domain._team;
@@ -93,5 +94,92 @@ namespace vws.web.Controllers._chat
 
         }
 
+        [HttpPost]
+        [Authorize]
+        [Route("muteChannel")]
+        public async Task<IActionResult> MuteChannel([FromBody] MuteChannelModel model)
+        {
+            var response = new ResponseModel();
+            var userId = LoggedInUserId.Value;
+
+            var muteUntil = DateTime.Now.AddMinutes(model.MuteMinutes);
+            
+            if(model.ChannelTypeId < 1 || model.ChannelTypeId > 4)
+            {
+                response.AddError(localizer["Channel type Id is not valid."]);
+                response.Message = "Invalid channel type id";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            switch(model.ChannelTypeId)
+            {
+                case (byte)SeedDataEnum.ChannelTypes.Private:
+                    var user = await vwsDbContext.GetUserProfileAsync(model.ChannelId);
+                    if(user == null)
+                    {
+                        response.AddError(localizer["There is no user with such Id."]);
+                        response.Message = "User not found";
+                        return StatusCode(StatusCodes.Status400BadRequest, response);
+                    }
+                    break;
+                case (byte)SeedDataEnum.ChannelTypes.Team:
+                    var selectedTeam = vwsDbContext.Teams.FirstOrDefault(team => team.Guid == model.ChannelId);
+                    if (selectedTeam == null || selectedTeam.IsDeleted)
+                    {
+                        response.AddError(localizer["There is no team with such Id."]);
+                        response.Message = "Team not found";
+                        return StatusCode(StatusCodes.Status400BadRequest, response);
+                    }
+                    break;
+                case (byte)SeedDataEnum.ChannelTypes.Project:
+                    var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Guid == model.ChannelId);
+                    if (selectedProject == null || selectedProject.IsDeleted)
+                    {
+                        response.AddError(localizer["There is no project with such Id."]);
+                        response.Message = "Project not found";
+                        return StatusCode(StatusCodes.Status400BadRequest, response);
+                    }
+                    break;
+                case (byte)SeedDataEnum.ChannelTypes.Department:
+                    var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Guid == model.ChannelId);
+                    if (selectedDepartment == null || selectedDepartment.IsDeleted)
+                    {
+                        response.AddError(localizer["There is no department with such Id."]);
+                        response.Message = "Department not found";
+                        return StatusCode(StatusCodes.Status400BadRequest, response);
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            var selectedMutedChannel = vwsDbContext.MutedChannels.FirstOrDefault(mutedChannels => mutedChannels.ChannelId == model.ChannelId &&
+                                                                                                  mutedChannels.UserId == userId &&
+                                                                                                  mutedChannels.ChannelTypeId == model.ChannelTypeId);
+
+            if(selectedMutedChannel == null)
+            {
+                selectedMutedChannel.ForEver = model.ForEver;
+                selectedMutedChannel.IsMuted = true;
+                selectedMutedChannel.MuteUntil = muteUntil;
+            }
+            else
+            {
+                var newMutedChannel = new MutedChannel()
+                {
+                    ChannelId = model.ChannelId,
+                    ChannelTypeId = model.ChannelTypeId,
+                    ForEver = model.ForEver,
+                    IsMuted = true,
+                    UserId = userId,
+                    MuteUntil = muteUntil
+                };
+                await vwsDbContext.AddMutedChannelAsync(newMutedChannel);
+            }
+            vwsDbContext.Save();
+
+            response.Message = "Channel muted successfully!";
+            return Ok(response);
+        }
     }
 }

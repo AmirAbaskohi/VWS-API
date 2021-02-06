@@ -15,5 +15,6 @@ namespace vws.web.Domain._chat
         public DateTime MuteUntil { get; set; }
         public byte ChannelTypeId { get; set; }
         public bool IsMuted { get; set; }
+        public bool ForEver { get; set; }
     }
 }

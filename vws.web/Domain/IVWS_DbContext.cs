@@ -79,6 +79,7 @@ namespace vws.web.Domain
         public void AddChannelType(ChannelType channelType);
         public string GetChannelType(byte id);
         public void UpdateChannelType(byte id, string newName);
+        public Task<MutedChannel> AddMutedChannelAsync(MutedChannel mutedChannel);
 
         #endregion
 
