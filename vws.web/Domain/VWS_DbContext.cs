@@ -158,6 +158,13 @@ namespace vws.web.Domain
             return mutedChannel;
         }
 
+        public async Task<MutedChannel> GetMutedChannelAsync(Guid channelId, Guid userId, byte channelTypeId)
+        {
+            return await MutedChannels.FirstOrDefaultAsync(mChannel => mChannel.ChannelTypeId == channelTypeId &&
+                                                                 mChannel.ChannelId == channelId &&
+                                                                 mChannel.UserId == userId);
+        }
+
         #endregion
 
         #region department
