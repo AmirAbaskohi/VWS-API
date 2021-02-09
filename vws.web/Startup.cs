@@ -45,8 +45,16 @@ namespace vws.web
             {
                 var supportedCultures = new List<CultureInfo>
                 {
-                    new CultureInfo("en-US"),
-                    new CultureInfo("fa-IR")
+                    new CultureInfo(SeedDataEnum.Cultures.en_US.ToString().Replace("_", "-")),
+                    new CultureInfo(SeedDataEnum.Cultures.fr_FR.ToString().Replace("_", "-")),
+                    new CultureInfo(SeedDataEnum.Cultures.ru_RU.ToString().Replace("_", "-")),
+                    new CultureInfo(SeedDataEnum.Cultures.es_SP.ToString().Replace("_", "-")),
+                    new CultureInfo(SeedDataEnum.Cultures.pt_PG.ToString().Replace("_", "-")),
+                    new CultureInfo(SeedDataEnum.Cultures.fa_IR.ToString().Replace("_", "-")),
+                    new CultureInfo(SeedDataEnum.Cultures.ar_SB.ToString().Replace("_", "-")),
+                    new CultureInfo(SeedDataEnum.Cultures.de_GE.ToString().Replace("_", "-")),
+                    new CultureInfo(SeedDataEnum.Cultures.it_IT.ToString().Replace("_", "-")),
+                    new CultureInfo(SeedDataEnum.Cultures.tr_TU.ToString().Replace("_", "-")),
                 };
 
                 options.DefaultRequestCulture = new RequestCulture(culture: "en-US", uiCulture: "en-US");
