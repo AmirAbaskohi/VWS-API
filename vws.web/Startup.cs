@@ -205,6 +205,7 @@ namespace vws.web
                     else if (dbMessageType != messageType.ToString())
                         context.UpdateMessageType((byte)messageType, messageType.ToString());
                 }
+                context.Save();
                 foreach (var teamType in Enum.GetValues(typeof(SeedDataEnum.TeamTypes)))
                 {
                     string dbTeamType = context.GetTeamType((byte)teamType);
@@ -213,6 +214,7 @@ namespace vws.web
                     else if (dbTeamType != teamType.ToString())
                         context.UpdateTeamType((byte)teamType, teamType.ToString());
                 }
+                context.Save();
                 foreach (var teamType in Enum.GetValues(typeof(SeedDataEnum.TeamTypes)))
                 {
                     string dbTeamType = context.GetTeamType((byte)teamType);
@@ -221,6 +223,7 @@ namespace vws.web
                     else if (dbTeamType != teamType.ToString())
                         context.UpdateTeamType((byte)teamType, teamType.ToString());
                 }
+                context.Save();
                 foreach (var channelType in Enum.GetValues(typeof(SeedDataEnum.ChannelTypes)))
                 {
                     string dbChannelType = context.GetChannelType((byte)channelType);
@@ -229,6 +232,7 @@ namespace vws.web
                     else if (dbChannelType != channelType.ToString())
                         context.UpdateChannelType((byte)channelType, channelType.ToString());
                 }
+                context.Save();
                 foreach (var status in Enum.GetValues(typeof(SeedDataEnum.ProjectStatuses)))
                 {
                     string dbStatusType = context.GetStatus((byte)status);
@@ -237,6 +241,7 @@ namespace vws.web
                     else if (dbStatusType != status.ToString())
                         context.UpdateStatus((byte)status, status.ToString());
                 }
+                context.Save();
                 foreach (var culture in Enum.GetValues(typeof(SeedDataEnum.Cultures)))
                 {
                     string dbCulture = context.GetCulture((byte)culture);
