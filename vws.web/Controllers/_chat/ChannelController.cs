@@ -289,5 +289,171 @@ namespace vws.web.Controllers._chat
             response.Message = "Channel unmuted successfully!";
             return Ok(response);
         }
+
+        [HttpPost]
+        [Authorize]
+        [Route("pinChannel")]
+        public async Task<IActionResult> PinChannel([FromBody] PinChannelModel model)
+        {
+            var userId = LoggedInUserId.Value;
+            var response = new ResponseModel();
+
+            if (model.ChannelTypeId < 1 || model.ChannelTypeId > 4)
+            {
+                response.AddError(localizer["Channel type Id is not valid."]);
+                response.Message = "Invalid channel type id";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            switch (model.ChannelTypeId)
+            {
+                case (byte)SeedDataEnum.ChannelTypes.Private:
+                    var user = await vwsDbContext.GetUserProfileAsync(model.ChannelId);
+                    if (user == null)
+                    {
+                        response.AddError(localizer["There is no user with such Id."]);
+                        response.Message = "User not found";
+                        return StatusCode(StatusCodes.Status400BadRequest, response);
+                    }
+                    break;
+                case (byte)SeedDataEnum.ChannelTypes.Team:
+                    var selectedTeam = vwsDbContext.Teams.FirstOrDefault(team => team.Guid == model.ChannelId);
+                    if (selectedTeam == null || selectedTeam.IsDeleted)
+                    {
+                        response.AddError(localizer["There is no team with such Id."]);
+                        response.Message = "Team not found";
+                        return StatusCode(StatusCodes.Status400BadRequest, response);
+                    }
+                    break;
+                case (byte)SeedDataEnum.ChannelTypes.Project:
+                    var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Guid == model.ChannelId);
+                    if (selectedProject == null || selectedProject.IsDeleted)
+                    {
+                        response.AddError(localizer["There is no project with such Id."]);
+                        response.Message = "Project not found";
+                        return StatusCode(StatusCodes.Status400BadRequest, response);
+                    }
+                    break;
+                case (byte)SeedDataEnum.ChannelTypes.Department:
+                    var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Guid == model.ChannelId);
+                    if (selectedDepartment == null || selectedDepartment.IsDeleted)
+                    {
+                        response.AddError(localizer["There is no department with such Id."]);
+                        response.Message = "Department not found";
+                        return StatusCode(StatusCodes.Status400BadRequest, response);
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            var selectedPinnedChannel = vwsDbContext.PinnedChannels.FirstOrDefault(pinnedChannel => pinnedChannel.ChannelId == model.ChannelId &&
+                                                                                                    pinnedChannel.ChannelTypeId == model.ChannelTypeId &&
+                                                                                                    pinnedChannel.UserId == userId);
+
+            if(selectedPinnedChannel != null)
+            {
+                response.AddError(localizer["Channel is already pinned."]);
+                response.Message = "Channel is already pinned";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var userPinnedChannels = vwsDbContext.PinnedChannels.Where(pinnedChannel => pinnedChannel.UserId == userId)
+                                                                .OrderByDescending(userPinnedChannel => userPinnedChannel.EvenOrder).
+                                                                ToList();
+
+            int last = 0;
+            if (userPinnedChannels.Count != 0)
+                last = userPinnedChannels[0].EvenOrder;
+
+            var newPinnedChannel = new PinnedChannel()
+            {
+                ChannelId = model.ChannelId,
+                ChannelTypeId = model.ChannelTypeId,
+                EvenOrder = last + 2,
+                UserId = userId
+            };
+
+            vwsDbContext.AddPinnedChannel(newPinnedChannel);
+            vwsDbContext.Save();
+
+            response.Message = "Channel pinned successfully!";
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("unpinChannel")]
+        public async Task<IActionResult> UnpinChannel([FromBody] PinChannelModel model)
+        {
+            var userId = LoggedInUserId.Value;
+            var response = new ResponseModel();
+
+            if (model.ChannelTypeId < 1 || model.ChannelTypeId > 4)
+            {
+                response.AddError(localizer["Channel type Id is not valid."]);
+                response.Message = "Invalid channel type id";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            switch (model.ChannelTypeId)
+            {
+                case (byte)SeedDataEnum.ChannelTypes.Private:
+                    var user = await vwsDbContext.GetUserProfileAsync(model.ChannelId);
+                    if (user == null)
+                    {
+                        response.AddError(localizer["There is no user with such Id."]);
+                        response.Message = "User not found";
+                        return StatusCode(StatusCodes.Status400BadRequest, response);
+                    }
+                    break;
+                case (byte)SeedDataEnum.ChannelTypes.Team:
+                    var selectedTeam = vwsDbContext.Teams.FirstOrDefault(team => team.Guid == model.ChannelId);
+                    if (selectedTeam == null || selectedTeam.IsDeleted)
+                    {
+                        response.AddError(localizer["There is no team with such Id."]);
+                        response.Message = "Team not found";
+                        return StatusCode(StatusCodes.Status400BadRequest, response);
+                    }
+                    break;
+                case (byte)SeedDataEnum.ChannelTypes.Project:
+                    var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Guid == model.ChannelId);
+                    if (selectedProject == null || selectedProject.IsDeleted)
+                    {
+                        response.AddError(localizer["There is no project with such Id."]);
+                        response.Message = "Project not found";
+                        return StatusCode(StatusCodes.Status400BadRequest, response);
+                    }
+                    break;
+                case (byte)SeedDataEnum.ChannelTypes.Department:
+                    var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Guid == model.ChannelId);
+                    if (selectedDepartment == null || selectedDepartment.IsDeleted)
+                    {
+                        response.AddError(localizer["There is no department with such Id."]);
+                        response.Message = "Department not found";
+                        return StatusCode(StatusCodes.Status400BadRequest, response);
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            var selectedPinnedChannel = vwsDbContext.PinnedChannels.FirstOrDefault(pinnedChannel => pinnedChannel.ChannelId == model.ChannelId &&
+                                                                                                    pinnedChannel.ChannelTypeId == model.ChannelTypeId &&
+                                                                                                    pinnedChannel.UserId == userId);
+
+            if (selectedPinnedChannel == null)
+            {
+                response.AddError(localizer["Channel have not been pinned."]);
+                response.Message = "Channel have not been pinned.";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            vwsDbContext.DeletePinnedChannel(selectedPinnedChannel);
+            vwsDbContext.Save();
+
+            response.Message = "Channel unpinned successfully!";
+            return Ok(response);
+        }
     }
 }

@@ -106,6 +106,10 @@ namespace vws.web.Domain
 
         public DbSet<MutedChannel> MutedChannels { get; set; }
 
+        IQueryable<PinnedChannel> IVWS_DbContext.PinnedChannels { get => PinnedChannels; }
+
+        public DbSet<PinnedChannel> PinnedChannels { get; set; }
+
         public DbSet<Message> Messages { get; set; }
 
         IQueryable<Message> IVWS_DbContext.Messages { get => Messages; }
@@ -163,6 +167,18 @@ namespace vws.web.Domain
             return await MutedChannels.FirstOrDefaultAsync(mChannel => mChannel.ChannelTypeId == channelTypeId &&
                                                                  mChannel.ChannelId == channelId &&
                                                                  mChannel.UserId == userId);
+        }
+
+        public PinnedChannel AddPinnedChannel(PinnedChannel pinnedChannel)
+        {
+            PinnedChannels.Add(pinnedChannel);
+            return pinnedChannel;
+        }
+
+        public PinnedChannel DeletePinnedChannel(PinnedChannel pinnedChannel)
+        {
+            PinnedChannels.Remove(pinnedChannel);
+            return pinnedChannel;
         }
 
         #endregion
