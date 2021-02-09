@@ -27,14 +27,17 @@ namespace vws.web.Controllers._department
         private readonly IVWS_DbContext vwsDbContext;
         private readonly IConfiguration configuration;
         private readonly IFileManager fileManager;
+        private readonly UserManager<ApplicationUser> userManager;
 
         public DepartmentController(IConfiguration _configuration,
-            IStringLocalizer<DepartmentController> _localizer, IVWS_DbContext _vwsDbContext, IFileManager _fileManager)
+            IStringLocalizer<DepartmentController> _localizer, IVWS_DbContext _vwsDbContext,
+            IFileManager _fileManager, UserManager<ApplicationUser> _userManager)
         {
             localizer = _localizer;
             vwsDbContext = _vwsDbContext;
             configuration = _configuration;
             fileManager = _fileManager;
+            userManager = _userManager;
         }
 
         [HttpPost]
@@ -458,6 +461,56 @@ namespace vws.web.Controllers._department
             selectedDepartment.ModifiedOn = DateTime.Now;
             vwsDbContext.Save();
             response.Message = "Department image added successfully!";
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getCoDepartments")]
+        public async Task<IActionResult> GetCoDepartments(int departnmentId)
+        {
+            var response = new ResponseModel<List<UserModel>>();
+            var coDepartmentsList = new List<UserModel>();
+
+            var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Id == departnmentId);
+            var userId = LoggedInUserId.Value;
+
+            if (selectedDepartment == null || selectedDepartment.IsDeleted)
+            {
+                response.Message = "Department not found";
+                response.AddError(localizer["There is no department with such id."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var selectedDepartmentMember = vwsDbContext.DepartmentMembers.FirstOrDefault(departmentMember => departmentMember.UserProfileId == userId &&
+                                                                                                             departmentMember.IsDeleted == false &&
+                                                                                                             departmentMember.DepartmentId == departnmentId);
+
+            if (selectedDepartmentMember == null)
+            {
+                response.Message = "Not member of department";
+                response.AddError(localizer["You are not member of given department."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            List<UserProfile> userCoDepartments = vwsDbContext.DepartmentMembers
+                .Include(departmentMember => departmentMember.UserProfile)
+                .Where(departmentMember => departmentMember.DepartmentId == departnmentId && departmentMember.IsDeleted == false)
+                .Select(departmentMember => departmentMember.UserProfile).Distinct().ToList();
+
+            foreach (var userCoDepartment in userCoDepartments)
+            {
+                var userName = (await userManager.FindByIdAsync(userCoDepartment.UserId.ToString())).UserName;
+                coDepartmentsList.Add(new UserModel()
+                {
+                    UserName = userName,
+                    UserId = userCoDepartment.UserId,
+                    ProfileImageId = userCoDepartment.ProfileImageId
+                });
+            }
+
+            response.Message = "Co-departments are given successfully!";
+            response.Value = coDepartmentsList;
             return Ok(response);
         }
     }
