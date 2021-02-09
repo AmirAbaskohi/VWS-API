@@ -664,13 +664,13 @@ namespace vws.web.Controllers._account
         [HttpGet]
         [Authorize]
         [Route("getCulture")]
-        public string GetCulture()
+        public Object GetCulture()
         {
             var userId = LoggedInUserId.Value;
 
             var userProfile = vwsDbContext.UserProfiles.Include(profile => profile.Culture).FirstOrDefault(profile => profile.UserId == userId);
 
-            return userProfile.CultureId == null ? SeedDataEnum.Cultures.en_US.ToString().Replace('_', '-') : userProfile.Culture.CultureAbbreviation;
+            return userProfile.CultureId == null ? new { CultureAbbriviation = SeedDataEnum.Cultures.en_US.ToString().Replace('_', '-') } : new { CultureAbbriviation = userProfile.Culture.CultureAbbreviation } ;
         }
 
         [HttpPost]
