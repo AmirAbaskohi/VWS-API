@@ -247,8 +247,6 @@ namespace vws.web
                 }
                 context.Save();
             }
-
-
         }
     }
 }
