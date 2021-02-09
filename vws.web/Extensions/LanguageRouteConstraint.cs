@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using System;
 using vws.web.Enums;
 
 namespace vws.web.Extensions
@@ -13,17 +14,12 @@ namespace vws.web.Extensions
                 return false;
 
             var culture = values["culture"].ToString();
-            return ( culture == SeedDataEnum.Cultures.en_US.ToString().Replace("_", "-") ||
-                     culture == SeedDataEnum.Cultures.fr_FR.ToString().Replace("_", "-") ||
-                     culture == SeedDataEnum.Cultures.ru_RU.ToString().Replace("_", "-") ||
-                     culture == SeedDataEnum.Cultures.es_SP.ToString().Replace("_", "-") ||
-                     culture == SeedDataEnum.Cultures.pt_PG.ToString().Replace("_", "-") ||
-                     culture == SeedDataEnum.Cultures.fa_IR.ToString().Replace("_", "-") ||
-                     culture == SeedDataEnum.Cultures.ar_SB.ToString().Replace("_", "-") ||
-                     culture == SeedDataEnum.Cultures.de_GE.ToString().Replace("_", "-") ||
-                     culture == SeedDataEnum.Cultures.it_IT.ToString().Replace("_", "-") ||
-                     culture == SeedDataEnum.Cultures.tr_TU.ToString().Replace("_", "-")
-                );            
+
+            foreach (var seedCulture in Enum.GetValues(typeof(SeedDataEnum.Cultures)))
+                if (culture == seedCulture.ToString().Replace("_", "-"))
+                    return true;
+
+            return false;         
         }
     }
 }
