@@ -127,7 +127,8 @@ namespace vws.web.Controllers._team
                 CreatedBy = (await userManager.FindByIdAsync(newTeam.CreatedBy.ToString())).UserName,
                 ModifiedBy = (await userManager.FindByIdAsync(newTeam.ModifiedBy.ToString())).UserName,
                 CreatedOn = newTeam.CreatedOn,
-                ModifiedOn = newTeam.ModifiedOn
+                ModifiedOn = newTeam.ModifiedOn,
+                Guid = newTeam.Guid
             };
 
             response.Value = newTeamResponse;
@@ -295,7 +296,8 @@ namespace vws.web.Controllers._team
                     CreatedBy = (await userManager.FindByIdAsync(userTeam.CreatedBy.ToString())).UserName,
                     ModifiedBy = (await userManager.FindByIdAsync(userTeam.ModifiedBy.ToString())).UserName,
                     CreatedOn = userTeam.CreatedOn,
-                    ModifiedOn = userTeam.ModifiedOn
+                    ModifiedOn = userTeam.ModifiedOn,
+                    Guid = userTeam.Guid
                 });
             }
             return response;
@@ -406,7 +408,8 @@ namespace vws.web.Controllers._team
                 CreatedBy = (await userManager.FindByIdAsync(selectedTeam.CreatedBy.ToString())).UserName,
                 ModifiedBy = (await userManager.FindByIdAsync(selectedTeam.ModifiedBy.ToString())).UserName,
                 CreatedOn = selectedTeam.CreatedOn,
-                ModifiedOn = selectedTeam.ModifiedOn
+                ModifiedOn = selectedTeam.ModifiedOn,
+                Guid = selectedTeam.Guid
             };
 
             response.Message = "Team updated successfully";

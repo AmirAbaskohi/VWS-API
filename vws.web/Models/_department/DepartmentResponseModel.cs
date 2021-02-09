@@ -11,5 +11,6 @@ namespace vws.web.Models._department
         public int TeamId { get; set; }
         public string Name { get; set; }
         public string Color { get; set; }
+        public Guid Guid { get; set; }
     }
 }

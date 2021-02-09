@@ -16,5 +16,6 @@ namespace vws.web.Models._team
         public string ModifiedBy { get; set; }
         public DateTime CreatedOn { get; set; }
         public DateTime ModifiedOn { get; set; }
+        public Guid Guid { get; set; }
     }
 }

@@ -51,7 +51,7 @@ namespace vws.web.Controllers._task
         [Route("create")]
         public async Task<IActionResult> CreateTask([FromBody] TaskModel model)
         {
-            var response = new ResponseModel();
+            var response = new ResponseModel<TaskResponseModel>();
 
             if (!String.IsNullOrEmpty(model.Description) && model.Description.Length > 2000)
             {
@@ -95,6 +95,20 @@ namespace vws.web.Controllers._task
             await vwsDbContext.AddTaskAsync(newTask);
             vwsDbContext.Save();
 
+            var newTaskResponseModel = new TaskResponseModel()
+            {
+                Title = newTask.Title,
+                CreatedOn = newTask.CreatedOn,
+                Description = newTask.Description,
+                EndDate = newTask.EndDate,
+                StartDate = newTask.StartDate,
+                Guid = newTask.Guid,
+                ModifiedOn = newTask.ModifiedOn,
+                ModifiedBy = (await userManager.FindByIdAsync(newTask.ModifiedBy.ToString())).UserName,
+                CreatedBy = (await userManager.FindByIdAsync(newTask.CreatedBy.ToString())).UserName
+            };
+
+            response.Value = newTaskResponseModel;
             response.Message = "Task created successfully!";
             return Ok(response);
 
@@ -105,7 +119,7 @@ namespace vws.web.Controllers._task
         [Route("update")]
         public async Task<IActionResult> UpdateTask([FromBody] UpdateTaskModel model)
         {
-            var response = new ResponseModel();
+            var response = new ResponseModel<TaskResponseModel>();
 
             if (model.Description.Length > 2000)
             {
@@ -175,6 +189,20 @@ namespace vws.web.Controllers._task
 
             vwsDbContext.Save();
 
+            var updatedTaskResponseModel = new TaskResponseModel()
+            {
+                Title = selectedTask.Title,
+                CreatedOn = selectedTask.CreatedOn,
+                Description = selectedTask.Description,
+                EndDate = selectedTask.EndDate,
+                StartDate = selectedTask.StartDate,
+                Guid = selectedTask.Guid,
+                ModifiedOn = selectedTask.ModifiedOn,
+                ModifiedBy = (await userManager.FindByIdAsync(selectedTask.ModifiedBy.ToString())).UserName,
+                CreatedBy = (await userManager.FindByIdAsync(selectedTask.CreatedBy.ToString())).UserName
+            };
+
+            response.Value = updatedTaskResponseModel;
             response.Message = "Task updated successfully!";
             return Ok(response);
 
@@ -205,7 +233,8 @@ namespace vws.web.Controllers._task
                     CreatedOn = userTask.CreatedOn,
                     ModifiedOn = userTask.ModifiedOn,
                     CreatedBy = (await userManager.FindByIdAsync(userTask.CreatedBy.ToString())).UserName,
-                    ModifiedBy = (await userManager.FindByIdAsync(userTask.ModifiedBy.ToString())).UserName
+                    ModifiedBy = (await userManager.FindByIdAsync(userTask.ModifiedBy.ToString())).UserName,
+                    Guid = userTask.Guid
                 });
             }
             return response;
@@ -235,7 +264,8 @@ namespace vws.web.Controllers._task
                         CreatedOn = userTask.CreatedOn,
                         ModifiedOn = userTask.ModifiedOn,
                         CreatedBy = (await userManager.FindByIdAsync(userTask.CreatedBy.ToString())).UserName,
-                        ModifiedBy = (await userManager.FindByIdAsync(userTask.ModifiedBy.ToString())).UserName
+                        ModifiedBy = (await userManager.FindByIdAsync(userTask.ModifiedBy.ToString())).UserName,
+                        Guid = userTask.Guid
                     });
                 }
             }

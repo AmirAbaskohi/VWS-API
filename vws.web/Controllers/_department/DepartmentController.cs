@@ -124,7 +124,8 @@ namespace vws.web.Controllers._department
                 Id = newDepartment.Id,
                 Color = newDepartment.Color,
                 Name = newDepartment.Name,
-                TeamId = newDepartment.TeamId
+                TeamId = newDepartment.TeamId,
+                Guid = newDepartment.Guid
             };
 
             response.Value = departmentResponse;
@@ -218,7 +219,8 @@ namespace vws.web.Controllers._department
                 Color = selectedDepartment.Color,
                 Id = selectedDepartment.Id,
                 Name = selectedDepartment.Name,
-                TeamId = selectedDepartment.TeamId
+                TeamId = selectedDepartment.TeamId,
+                Guid = selectedDepartment.Guid
             };
 
             response.Message = "Department updated successfully!";
@@ -280,7 +282,8 @@ namespace vws.web.Controllers._department
                     Color = userDepartment.Color,
                     Id = userDepartment.Id,
                     Name = userDepartment.Name,
-                    TeamId = userDepartment.TeamId
+                    TeamId = userDepartment.TeamId,
+                    Guid = userDepartment.Guid
                 });
             }
 
