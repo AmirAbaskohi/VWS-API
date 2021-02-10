@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
+    <!-- 
     Microsoft ResX Schema 
     
     Version 2.0
@@ -59,140 +59,143 @@
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
-    <xsd:element name="root" msdata:IsDataSet="true">
-      <xsd:complexType>
-        <xsd:choice maxOccurs="unbounded">
-          <xsd:element name="metadata">
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+        <xsd:element name="root" msdata:IsDataSet="true">
             <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-              </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
+                <xsd:choice maxOccurs="unbounded">
+                    <xsd:element name="metadata">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+                            </xsd:sequence>
+                            <xsd:attribute name="name" use="required" type="xsd:string" />
+                            <xsd:attribute name="type" type="xsd:string" />
+                            <xsd:attribute name="mimetype" type="xsd:string" />
+                            <xsd:attribute ref="xml:space" />
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="assembly">
+                        <xsd:complexType>
+                            <xsd:attribute name="alias" type="xsd:string" />
+                            <xsd:attribute name="name" type="xsd:string" />
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="data">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+                            <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+                            <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+                            <xsd:attribute ref="xml:space" />
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="resheader">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required" />
+                        </xsd:complexType>
+                    </xsd:element>
+                </xsd:choice>
             </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="assembly">
-            <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="data">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
-              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
-              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="resheader">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" />
-            </xsd:complexType>
-          </xsd:element>
-        </xsd:choice>
-      </xsd:complexType>
-    </xsd:element>
-  </xsd:schema>
-  <resheader name="resmimetype">
-    <value>text/microsoft-resx</value>
-  </resheader>
-  <resheader name="version">
-    <value>2.0</value>
-  </resheader>
-  <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <data name="Changing the password was unsuccessful." xml:space="preserve">
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>2.0</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="Changing the password was unsuccessful." xml:space="preserve">
     <value>Changing the password was unsuccessful.</value>
   </data>
-  <data name="Email already confirmed." xml:space="preserve">
+    <data name="Email already confirmed." xml:space="preserve">
     <value>Email already confirmed.</value>
   </data>
-  <data name="Email is invalid." xml:space="preserve">
+    <data name="Email is invalid." xml:space="preserve">
     <value>Email is invalid.</value>
   </data>
-  <data name="Email is not confirmed yet." xml:space="preserve">
+    <data name="Email is not confirmed yet." xml:space="preserve">
     <value>Email is not confirmed yet.</value>
   </data>
-  <data name="Emil confirmation failed." xml:space="preserve">
+    <data name="Emil confirmation failed." xml:space="preserve">
     <value>Emil confirmation failed.</value>
   </data>
-  <data name="Error in writing files." xml:space="preserve">
+    <data name="Error in writing files." xml:space="preserve">
     <value>Error in writing files.</value>
   </data>
-  <data name="File extension is not allowed." xml:space="preserve">
+    <data name="File extension is not allowed." xml:space="preserve">
     <value>File extension is not allowed.</value>
   </data>
-  <data name="File size is not allowed." xml:space="preserve">
+    <data name="File size is not allowed." xml:space="preserve">
     <value>File size is not allowed.</value>
   </data>
-  <data name="Last password is not true." xml:space="preserve">
+    <data name="Last password is not true." xml:space="preserve">
     <value>Last password is not true.</value>
   </data>
-  <data name="Password or Username is wrong." xml:space="preserve">
+    <data name="Password or Username is wrong." xml:space="preserve">
     <value>Password or Username is wrong.</value>
   </data>
-  <data name="Passwords must be at least 8 characters." xml:space="preserve">
+    <data name="Passwords must be at least 8 characters." xml:space="preserve">
     <value>Passwords must be at least 8 characters.</value>
   </data>
-  <data name="Passwords must have at least one digit ('0'-'9')." xml:space="preserve">
+    <data name="Passwords must have at least one digit ('0'-'9')." xml:space="preserve">
     <value>Passwords must have at least one digit ('0'-'9').</value>
   </data>
-  <data name="Passwords must have at least one lowercase ('a'-'z')." xml:space="preserve">
+    <data name="Passwords must have at least one lowercase ('a'-'z')." xml:space="preserve">
     <value>Passwords must have at least one lowercase ('a'-'z').</value>
   </data>
-  <data name="Problem happened in sending email." xml:space="preserve">
+    <data name="Problem happened in sending email." xml:space="preserve">
     <value>Problem happened in sending email.</value>
   </data>
-  <data name="Refresh token is invalid." xml:space="preserve">
+    <data name="Refresh token is invalid." xml:space="preserve">
     <value>Refresh token is invalid.</value>
   </data>
-  <data name="Request for reset password is not valid. Request for reset password again." xml:space="preserve">
+    <data name="Request for reset password is not valid. Request for reset password again." xml:space="preserve">
     <value>Request for reset password is not valid. Request for reset password again.</value>
   </data>
-  <data name="Reseting the password was unsuccessful." xml:space="preserve">
+    <data name="Reseting the password was unsuccessful." xml:space="preserve">
     <value>Reseting the password was unsuccessful.</value>
   </data>
-  <data name="There is a user with this email." xml:space="preserve">
+    <data name="There is a user with this email." xml:space="preserve">
     <value>There is a user with this email.</value>
   </data>
-  <data name="There is a user with this username." xml:space="preserve">
+    <data name="There is a user with this username." xml:space="preserve">
     <value>There is a user with this username.</value>
   </data>
-  <data name="There is more than one file." xml:space="preserve">
+    <data name="There is more than one file." xml:space="preserve">
     <value>There is more than one file.</value>
   </data>
-  <data name="Too many requests." xml:space="preserve">
+    <data name="Too many requests." xml:space="preserve">
     <value>It should be passed some time of your last sending email request.</value>
   </data>
-  <data name="User does not exist." xml:space="preserve">
+    <data name="User does not exist." xml:space="preserve">
     <value>User does not exist.</value>
   </data>
-  <data name="Username should not contain @ character." xml:space="preserve">
+    <data name="Username should not contain @ character." xml:space="preserve">
     <value>Username should not contain @ character.</value>
   </data>
-  <data name="You did not upload an image." xml:space="preserve">
+    <data name="You did not upload an image." xml:space="preserve">
     <value>You did not upload an image.</value>
   </data>
-  <data name="Your file does not have extension." xml:space="preserve">
+    <data name="Your file does not have extension." xml:space="preserve">
     <value>Your file does not have extension.</value>
   </data>
-  <data name="Your password changed successfully!" xml:space="preserve">
+    <data name="Your password changed successfully!" xml:space="preserve">
     <value>Your password changed successfully!</value>
+  </data>
+  <data name="Email not verified." xml:space="preserve">
+    <value>Email not verified.</value>
   </data>
 </root>

@@ -198,4 +198,7 @@
   <data name="Your password changed successfully!" xml:space="preserve">
     <value>پسورد شما با موفقیت تغییر کرد!</value>
   </data>
+  <data name="Email not verified." xml:space="preserve">
+    <value>ایمیل نامعتبر است.</value>
+  </data>
 </root>

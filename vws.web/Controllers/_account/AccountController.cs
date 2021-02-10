@@ -7,6 +7,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -77,11 +78,48 @@ namespace vws.web.Controllers._account
         private string GenerateRefreshToken()
         {
             var randomNumber = new byte[32];
-            using(var rng = RandomNumberGenerator.Create())
+            using (var rng = RandomNumberGenerator.Create())
             {
                 rng.GetBytes(randomNumber);
                 return Convert.ToBase64String(randomNumber);
             }
+        }
+
+        private async Task<LoginResponseModel> GenerateJWT(IdentityUser user)
+        {
+            var authClaims = new List<Claim>
+                {
+                    new Claim("UserEmail", user.Email),
+                    new Claim("UserName", user.UserName),
+                    new Claim("UserId", user.Id),
+                };
+
+            var token = GenerateToken(authClaims);
+
+            var refreshToken = new RefreshToken()
+            {
+                IsValid = true,
+                Token = GenerateRefreshToken(),
+                UserId = new Guid(user.Id)
+            };
+            await vwsDbContext.AddRefreshTokenAsync(refreshToken);
+            vwsDbContext.Save();
+
+            return new LoginResponseModel
+            {
+                Token = new JwtSecurityTokenHandler().WriteToken(token),
+                RefreshToken = refreshToken.Token,
+                ValidTo = token.ValidTo
+            };
+        }
+
+        private async Task<GoogleJsonWebSignature.Payload> ValidateGoogleToken(string googleTokenId)
+        {
+            GoogleJsonWebSignature.ValidationSettings settings = new GoogleJsonWebSignature.ValidationSettings();
+            settings.Audience = new List<string>() { configuration["Google:ClientId"] };
+            var g = await GoogleJsonWebSignature.ValidateAsync(googleTokenId, settings);
+            GoogleJsonWebSignature.Payload payload = g;
+            return payload;
         }
 
         private ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
@@ -103,6 +141,17 @@ namespace vws.web.Controllers._account
                 throw new SecurityTokenException("Invalid token");
 
             return principal;
+        }
+
+        private async Task CreateUserProfile(Guid userId)
+        {
+            UserProfile userProfile = new UserProfile()
+            {
+                UserId = userId,
+                ThemeColorCode = ""
+            };
+            await vwsDbContext.AddUserProfileAsync(userProfile);
+            vwsDbContext.Save();
         }
 
         [HttpPost]
@@ -183,15 +232,55 @@ namespace vws.web.Controllers._account
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "User creation failed!", Errors = errors });
             }
 
-            UserProfile userProfile = new UserProfile()
-            {
-                UserId = new Guid(user.Id),
-                ThemeColorCode = ""
-            };
-            await vwsDbContext.AddUserProfileAsync(userProfile);
-            vwsDbContext.Save();
+            await CreateUserProfile(Guid.Parse(user.Id));
 
             return Ok(new ResponseModel { Message = "User created successfully!" });
+        }
+
+        [HttpPost]
+        [Route("sso")]
+        public async Task<IActionResult> SSO([FromBody] ExternalLoginModel model)
+        {
+            var _response = new ResponseModel();
+            switch (model.ProviderName)
+            {
+                case "Google":
+                    var payload = await ValidateGoogleToken(model.Token);
+                    if (!payload.EmailVerified)
+                    {
+                        _response.AddError(localizer["Email not verified."]);
+                        return BadRequest(_response);
+                    }
+                    var existedUser = await userManager.FindByEmailAsync(payload.Email);
+                    if (existedUser == null)
+                    {
+                        ApplicationUser user = new ApplicationUser()
+                        {
+                            Email = payload.Email,
+                            SecurityStamp = Guid.NewGuid().ToString(),
+                            UserName = payload.Email
+                        };
+                        IdentityResult identityResult = await userManager.CreateAsync(user);
+                        if (identityResult.Succeeded)
+                        {
+                            identityResult = await userManager.AddLoginAsync(user, new UserLoginInfo(model.ProviderName, payload.Subject, model.ProviderName));
+                            if (identityResult.Succeeded)
+                            {
+                                await signInManager.SignInAsync(user, false);
+                                await CreateUserProfile(Guid.Parse(user.Id));
+                                return Ok(GenerateJWT(user));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        return Ok(GenerateJWT(existedUser));
+                    }
+                    break;
+                default:
+                    return BadRequest();
+            }
+            return Forbid();
         }
 
         [HttpPost]
@@ -222,31 +311,7 @@ namespace vws.web.Controllers._account
                     return StatusCode(StatusCodes.Status401Unauthorized, _response);
                 }
 
-                var authClaims = new List<Claim>
-                {
-                    new Claim("UserEmail", user.Email),
-                    new Claim("UserName", user.UserName),
-                    new Claim("UserId", user.Id),
-                };
-
-                var token = GenerateToken(authClaims);
-
-                var refreshToken = new RefreshToken()
-                {
-                    IsValid = true,
-                    Token = GenerateRefreshToken(),
-                    UserId = new Guid(user.Id)
-                };
-                await vwsDbContext.AddRefreshTokenAsync(refreshToken);
-                vwsDbContext.Save();
-
-                return Ok(new ResponseModel<LoginResponseModel>(new LoginResponseModel
-                {
-                    Token = new JwtSecurityTokenHandler().WriteToken(token),
-                    RefreshToken = refreshToken.Token,
-                    ValidTo = token.ValidTo
-                })
-              );
+                return Ok(GenerateJWT(user));
             }
             var response = new ResponseModel
             {
@@ -323,10 +388,10 @@ namespace vws.web.Controllers._account
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "Email already confirmed!", Errors = errors });
             }
 
-            if(user.EmailVerificationSendTime != null)
+            if (user.EmailVerificationSendTime != null)
             {
                 var timeDiff = DateTime.Now - user.EmailVerificationSendTime;
-                if(timeDiff.TotalDays < 365 && timeDiff.TotalMinutes < Int16.Parse(configuration["EmailCode:EmailTimeDifferenceInMinutes"]))
+                if (timeDiff.TotalDays < 365 && timeDiff.TotalMinutes < Int16.Parse(configuration["EmailCode:EmailTimeDifferenceInMinutes"]))
                 {
                     errors.Add(localizer["Too many requests."]);
                     return StatusCode(StatusCodes.Status400BadRequest, new ResponseModel { Message = "Too Many Requests!", Errors = errors });
@@ -499,7 +564,7 @@ namespace vws.web.Controllers._account
             Guid userId = new Guid(principal.Claims.First(claim => claim.Type == "UserId").Value);
             var varRefreshToken = await vwsDbContext.GetRefreshTokenAsync(userId, model.RefreshToken);
 
-            if(varRefreshToken == null || varRefreshToken.IsValid == false)
+            if (varRefreshToken == null || varRefreshToken.IsValid == false)
             {
                 response.Message = "Invalid refresh token";
                 response.AddError(localizer["Refresh token is invalid."]);
@@ -609,7 +674,7 @@ namespace vws.web.Controllers._account
             string userId = LoggedInUserId.Value.ToString();
             var user = await userManager.FindByIdAsync(userId);
 
-            if(await userManager.CheckPasswordAsync(user, model.LastPassword))
+            if (await userManager.CheckPasswordAsync(user, model.LastPassword))
             {
                 var passwordValidator = new PasswordValidator<ApplicationUser>();
                 var result = await passwordValidator.ValidateAsync(userManager, user, model.NewPassword);
@@ -670,7 +735,7 @@ namespace vws.web.Controllers._account
 
             var userProfile = vwsDbContext.UserProfiles.Include(profile => profile.Culture).FirstOrDefault(profile => profile.UserId == userId);
 
-            return userProfile.CultureId == null ? new { CultureAbbriviation = SeedDataEnum.Cultures.en_US.ToString().Replace('_', '-') } : new { CultureAbbriviation = userProfile.Culture.CultureAbbreviation } ;
+            return userProfile.CultureId == null ? new { CultureAbbriviation = SeedDataEnum.Cultures.en_US.ToString().Replace('_', '-') } : new { CultureAbbriviation = userProfile.Culture.CultureAbbreviation };
         }
 
         [HttpPost]
@@ -681,7 +746,7 @@ namespace vws.web.Controllers._account
             var userId = LoggedInUserId.Value;
             var response = new ResponseModel();
 
-            if(cultureId <= 0 || cultureId > 10)
+            if (cultureId <= 0 || cultureId > 10)
             {
                 response.AddError(localizer["There is no culture with given Id."]);
                 response.Message = "Culture not found";
@@ -695,5 +760,6 @@ namespace vws.web.Controllers._account
             response.Message = "Culture set successfully!";
             return Ok(response);
         }
+     
     }
 }

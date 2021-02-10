@@ -117,12 +117,14 @@ namespace vws.web
             
             services.AddScoped<IFileManager, FileManager>();
 
-            services.AddAuthentication(option =>
+            services
+            .AddAuthentication(option =>
             {
                 option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 
-            }).AddJwtBearer(options =>
+            })
+            .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -135,6 +137,12 @@ namespace vws.web
                     ValidAudience = Configuration["Jwt:Audience"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Secret"]))
                 };
+            })
+            .AddGoogle(option =>
+            {
+                option.ClientId = "592198124436-24rg7bm3850gk8q14h5o6anrmuhtmojp.apps.googleusercontent.com";
+                option.ClientSecret = "R5THzn3N6YEGUXrbcSD_iVUm";
+                option.SignInScheme = IdentityConstants.ExternalScheme;
             });
 
         }
@@ -251,6 +259,8 @@ namespace vws.web
                 }
                 context.Save();
             }
+
+
         }
     }
 }
