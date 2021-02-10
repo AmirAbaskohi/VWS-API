@@ -22,6 +22,7 @@ using vws.web.Repositories;
 using vws.web.Domain;
 using vws.web.Domain._base;
 using vws.web.Enums;
+using ActionFilters.ActionFilters;
 
 namespace vws.web
 {
@@ -116,6 +117,8 @@ namespace vws.web
             services.AddScoped<IEmailSender, EmailSender>();
             
             services.AddScoped<IFileManager, FileManager>();
+
+            services.AddScoped<TokenValidationFilterAttribute>();
 
             services
             .AddAuthentication(option =>
