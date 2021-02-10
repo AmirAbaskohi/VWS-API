@@ -268,13 +268,13 @@ namespace vws.web.Controllers._account
                             {
                                 await signInManager.SignInAsync(user, false);
                                 await CreateUserProfile(Guid.Parse(user.Id));
-                                return Ok(GenerateJWT(user));
+                                return Ok(new ResponseModel<LoginResponseModel>(GenerateJWT(user).Result));
                             }
                         }
                     }
                     else
                     {
-                        return Ok(GenerateJWT(existedUser));
+                        return Ok(new ResponseModel<LoginResponseModel>(GenerateJWT(existedUser).Result));
                     }
                     break;
                 default:
@@ -311,7 +311,7 @@ namespace vws.web.Controllers._account
                     return StatusCode(StatusCodes.Status401Unauthorized, _response);
                 }
 
-                return Ok(GenerateJWT(user));
+                return Ok(new ResponseModel<LoginResponseModel>(GenerateJWT(user).Result));
             }
             var response = new ResponseModel
             {

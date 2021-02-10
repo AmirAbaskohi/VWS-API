@@ -33,4 +33,7 @@
     <Folder Include="Domain\_calendar\" />
     <Folder Include="Services\" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="appsettings.json.template" />
+  </ItemGroup>
 </Project>
