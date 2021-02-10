@@ -1,14 +1,35 @@
 {
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft": "Warning",
-      "Microsoft.Hosting.Lifetime": "Information"
-    }
-  },
   "AllowedHosts": "*",
+  "Serilog": {
+    "Using": [],
+    "MinimumLevel": {
+      "Default": "Information",
+      "Override": {
+        "Microsoft": "Warning",
+        "System": "Warning"
+      }
+    },
+    "Enrich": [ "FromLogContext", "WithMachineName", "WithProcessId", "WithThreadId" ],
+    "WriteTo": [
+      { "Name": "Console" },
+      {
+        "Name": "File",
+        "Args": {
+          "path": "D:\\SevenTaskLogs\\log.txt",
+          "outputTemplate": "{Timestamp:G} {Message}{NewLine:1}{Exception:1}"
+        }
+      },
+      {
+        "Name": "File",
+        "Args": {
+          "path": "D:\\SevenTaskLogs\\log.json",
+          "formatter": "Serilog.Formatting.Json.JsonFormatter, Serilog"
+        }
+      }
+    ]
+  },
   "ConnectionStrings": {
-    "SqlServer": "Server=DESKTOP-OPL4R64\\MSQLS17;Database=VWS_DB;Integrated security=True;MultipleActiveResultSets=True;"
+    "SqlServer": "Server=DESKTOP-PJ47C24;Database=VWS_DB;Integrated security=True;MultipleActiveResultSets=True;"
   },
   "JWT": {
     "Audience": "VWS App",
@@ -43,6 +64,6 @@
   },
   "Files": {
     "RestrictedExtensions": "exe",
-    "FileMaxSizeInBytes":  "20000000"
+    "FileMaxSizeInBytes": "20000000"
   }
 }

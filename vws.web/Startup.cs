@@ -23,6 +23,7 @@ using vws.web.Domain;
 using vws.web.Domain._base;
 using vws.web.Enums;
 using ActionFilters.ActionFilters;
+using Serilog;
 
 namespace vws.web
 {
@@ -180,6 +181,8 @@ namespace vws.web
             app.UseHttpsRedirection();
 
             app.UseStaticFiles();
+
+            app.UseSerilogRequestLogging();
            
             var localizeOptions = app.ApplicationServices.GetService<IOptions<RequestLocalizationOptions>>();
 
