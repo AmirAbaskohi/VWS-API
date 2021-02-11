@@ -7,7 +7,11 @@ namespace vws.web.Hubs
 {
     public interface IChatHub
     {
-        Task ReciveMessage(string message);
+        Task ReciveMessage(long messageId, string message, byte messageTypeId,
+                           bool isSentFromMe, byte channelTypeId, Guid channelId,
+                           DateTime sentOn, string senderUserName, long? replyTo);
         Task InformUserIsOnline(Guid userId);
+
+        Task UnmuteChannel(Guid channelId, byte channelTypeId);
     }
 }

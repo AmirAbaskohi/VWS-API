@@ -25,6 +25,7 @@ using vws.web.Enums;
 using ActionFilters.ActionFilters;
 using Serilog;
 using vws.web.Services._chat;
+using vws.web.ServiceEngine;
 
 namespace vws.web
 {
@@ -205,6 +206,8 @@ namespace vws.web
                 endpoints.MapHub<ChatHub>("/chatHub");
             });
 
+            // Run engineService
+            ChannelEngine.CheckAndSetMutedChannels(app);
 
             // Automatically Create database and tables and do the migrations
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
@@ -212,7 +215,7 @@ namespace vws.web
                 var context = serviceScope.ServiceProvider.GetRequiredService<IVWS_DbContext>();
                 context.DatabaseFacade.Migrate();
 
-                //seed data:
+                // Seed data:
                 foreach (var messageType in Enum.GetValues(typeof(SeedDataEnum.MessageTypes)))
                 {
                     string dbMessageType = context.GetMessageType((byte)messageType);

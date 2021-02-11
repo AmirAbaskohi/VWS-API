@@ -19,7 +19,7 @@ namespace vws.web.Hubs
         public static Dictionary<string, SignalRUser> ConnectedIds = new Dictionary<string, SignalRUser>();
     }
 
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize]
     public class ChatHub : Hub<IChatHub>
     {
         private readonly IVWS_DbContext vwsDbContext;
@@ -42,6 +42,11 @@ namespace vws.web.Hubs
         private Guid LoggedInUserId
         {
             get { return Guid.Parse(Context.User.Claims.FirstOrDefault(c => c.Type == "UserId").Value); }
+        }
+
+        public void UnmuteChannel(string connectionId)
+        {
+            Clients.All.UnmuteChannel(Guid.NewGuid(), 2);
         }
 
         public override async Task OnConnectedAsync()
@@ -91,7 +96,7 @@ namespace vws.web.Hubs
         }
         public async Task SendMessage(string message, byte channelTypeId, Guid channelId, byte messageTypeId, long? replyTo = null)
         {
-            var m = new Domain._chat.Message
+            var newMessage = new Domain._chat.Message
             {
                 Body = message,
                 SendOn = DateTime.Now,
@@ -101,19 +106,16 @@ namespace vws.web.Hubs
                 MessageTypeId = messageTypeId,
                 ReplyTo = replyTo,
             };
-            vwsDbContext.AddMessage(m);
+            vwsDbContext.AddMessage(newMessage);
             vwsDbContext.Save();
-            await Clients.OthersInGroup(channelId.ToString()).ReciveMessage(message);
-        }
 
-        public async Task DeleteMessage(int messageId)
-        {
-            await Clients.Others.ReciveMessage(String.Format("Message with Id {0} Deleted.", messageId));
-        }
+            await Clients.OthersInGroup(channelId.ToString()).ReciveMessage(newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
+                                                                            false, newMessage.ChannelTypeId, newMessage.ChannelId,
+                                                                            newMessage.SendOn, newMessage.FromUserName, newMessage.ReplyTo);
 
-        public async Task MakeMessageSeen(int messageId)
-        {
-            await Clients.Others.ReciveMessage(String.Format("Message with Id {0} have been saw.", messageId));
+            await Clients.Caller.ReciveMessage(newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
+                                               true, newMessage.ChannelTypeId, newMessage.ChannelId,
+                                               newMessage.SendOn, newMessage.FromUserName, newMessage.ReplyTo);
         }
     }
 }
