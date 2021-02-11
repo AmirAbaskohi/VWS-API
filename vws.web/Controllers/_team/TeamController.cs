@@ -275,8 +275,8 @@ namespace vws.web.Controllers._team
 
         [HttpGet]
         [Authorize]
-        [Route("get")]
-        public async Task<IEnumerable<TeamResponseModel>> GetTeam()
+        [Route("getAll")]
+        public async Task<IEnumerable<TeamResponseModel>> GetAllTeams()
         {
             Guid userId = LoggedInUserId.Value;
 
@@ -585,6 +585,49 @@ namespace vws.web.Controllers._team
 
             response.Message = "Team mates are given successfully!";
             response.Value = teammatesList;
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("get")]
+        public async Task<IActionResult> GetTeam(int id)
+        {
+            Guid userId = LoggedInUserId.Value;
+
+            var response = new ResponseModel<TeamResponseModel>();
+
+            var selectedTeam = await vwsDbContext.GetTeamAsync(id);
+
+            if(selectedTeam == null || selectedTeam.IsDeleted)
+            {
+                response.AddError(localizer["There is no team with given Id."]);
+                response.Message = "Team not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var teamMember = vwsDbContext.GetTeamMemberAsync(id, userId);
+            if(teamMember == null)
+            {
+                response.AddError(localizer["You are not a member of team."]);
+                response.Message = "Team access denied";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            response.Value = new TeamResponseModel()
+            {
+                Id = selectedTeam.Id,
+                TeamTypeId = selectedTeam.TeamTypeId,
+                Name = selectedTeam.Name,
+                Description = selectedTeam.Description,
+                Color = selectedTeam.Color,
+                CreatedBy = (await userManager.FindByIdAsync(selectedTeam.CreatedBy.ToString())).UserName,
+                Guid = selectedTeam.Guid,
+                ModifiedBy = (await userManager.FindByIdAsync(selectedTeam.ModifiedBy.ToString())).UserName,
+                CreatedOn = selectedTeam.CreatedOn,
+                ModifiedOn = selectedTeam.ModifiedOn,
+            };
+            response.Message = "Team retured successfully!";
             return Ok(response);
         }
     }
