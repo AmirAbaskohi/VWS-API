@@ -24,6 +24,7 @@ using vws.web.Domain._base;
 using vws.web.Enums;
 using ActionFilters.ActionFilters;
 using Serilog;
+using vws.web.Services._chat;
 
 namespace vws.web
 {
@@ -118,6 +119,8 @@ namespace vws.web
             services.AddScoped<IEmailSender, EmailSender>();
             
             services.AddScoped<IFileManager, FileManager>();
+
+            services.AddScoped<IChannelService, ChannelService>();
 
             services.AddScoped<TokenValidationFilterAttribute>();
 

@@ -8,5 +8,6 @@ namespace vws.web.Hubs
     public interface IChatHub
     {
         Task ReciveMessage(string message);
+        Task InformUserIsOnline(Guid userId);
     }
 }

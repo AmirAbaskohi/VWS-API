@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -9,6 +10,7 @@ using vws.web.Domain._file;
 using vws.web.Domain._project;
 using vws.web.Domain._task;
 using vws.web.Domain._team;
+using vws.web.Models._chat;
 
 namespace vws.web.Domain
 {

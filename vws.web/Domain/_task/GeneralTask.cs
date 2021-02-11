@@ -22,7 +22,7 @@ namespace vws.web.Domain._task
         [Required, MaxLength(500, ErrorMessage = "Max allowed length is 500 char")]
         public string Title { get; set; }
 
-        [MaxLength(2000, ErrorMessage = "Max allowed length is 2000 char")]
+        [MaxLength(2000, ErrorMessage = "Max allowed length is 2000 char")] // TODO: Get and Localize
         public string Description { get; set; }
 
         public bool IsArchived { get; set; }

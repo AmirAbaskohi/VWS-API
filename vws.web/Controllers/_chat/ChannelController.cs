@@ -17,6 +17,7 @@ using vws.web.Domain._team;
 using vws.web.Enums;
 using vws.web.Models;
 using vws.web.Models._chat;
+using vws.web.Services._chat;
 
 namespace vws.web.Controllers._chat
 {
@@ -27,13 +28,16 @@ namespace vws.web.Controllers._chat
         private readonly IStringLocalizer<ChannelController> localizer;
         private readonly IVWS_DbContext vwsDbContext;
         private readonly UserManager<ApplicationUser> userManager;
+        private readonly IChannelService channelService;
 
         public ChannelController(IStringLocalizer<ChannelController> _localizer,
-                                 IVWS_DbContext _vwsDbContext, UserManager<ApplicationUser> _userManager)
+                                 IVWS_DbContext _vwsDbContext, UserManager<ApplicationUser> _userManager,
+                                 IChannelService _channelService)
         {
             localizer = _localizer;
             vwsDbContext = _vwsDbContext;
             userManager = _userManager;
+            channelService = _channelService;
         }
 
         private void SetChannelsIsMuted(ref List<ChannelResponseModel> channelResponseModels)
@@ -64,61 +68,11 @@ namespace vws.web.Controllers._chat
         [Route("getAll")]
         public async Task<IActionResult> GetAll()
         {
-            //todo: improve performance (user task&thread for concurrency)
             List<ChannelResponseModel> channelResponseModels = new List<ChannelResponseModel>();
 
             var userId = LoggedInUserId.Value;
 
-            List<Team> userTeams = vwsDbContext.GetUserTeams(userId).ToList();
-            List<Project> userProjects = vwsDbContext.GetUserProjects(userId).ToList();
-            List<Department> userDepartments = vwsDbContext.GetUserDepartments(userId).ToList();
-
-            List<UserProfile> userTeamMates = vwsDbContext.TeamMembers
-                .Include(teamMember => teamMember.UserProfile)
-                .Where(teamMember => userTeams.Select(userTeam => userTeam.Id).Contains(teamMember.TeamId) && !teamMember.HasUserLeft)
-                .Select(teamMember => teamMember.UserProfile).Distinct().ToList();
-            userTeamMates.Remove(await vwsDbContext.GetUserProfileAsync(userId));
-
-            MutedChannel mutedChannel = new MutedChannel();
-
-            foreach (var userTeamMate in userTeamMates)
-            {
-                channelResponseModels.Add(new ChannelResponseModel
-                {
-                    Guid = userTeamMate.UserId,
-                    ChannelTypeId = (byte)SeedDataEnum.ChannelTypes.Private,
-                    LogoUrl = "http://app.seventask.com/assets/Images/Chat/DefaultAvatars/User.jpg",
-                    Title = (await userManager.FindByIdAsync(userTeamMate.UserId.ToString())).UserName,
-                    IsMuted = false
-                });
-            }
-
-            channelResponseModels.AddRange(userTeams.Select(userTeam => new ChannelResponseModel
-            {
-                Guid = userTeam.Guid,
-                ChannelTypeId = (byte)SeedDataEnum.ChannelTypes.Team,
-                LogoUrl = "http://app.seventask.com/assets/Images/Chat/DefaultAvatars/Team.jpg",
-                Title = userTeam.Name,
-                IsMuted = false
-            }));
-
-            channelResponseModels.AddRange(userProjects.Select(userProject => new ChannelResponseModel
-            {
-                Guid = userProject.Guid,
-                ChannelTypeId = (byte)SeedDataEnum.ChannelTypes.Project,
-                LogoUrl = "http://app.seventask.com/assets/Images/Chat/DefaultAvatars/Project.jpg",
-                Title = userProject.Name,
-                IsMuted = false
-            }));
-
-            channelResponseModels.AddRange(userDepartments.Select(userDepartment => new ChannelResponseModel
-            {
-                Guid = userDepartment.Guid,
-                ChannelTypeId = (byte)SeedDataEnum.ChannelTypes.Department,
-                LogoUrl = "http://app.seventask.com/assets/Images/Chat/DefaultAvatars/Department.jpg",
-                Title = userDepartment.Name,
-                IsMuted = false
-            }));
+            channelResponseModels = await channelService.GetUserChannels(userId);
 
             SetChannelsIsMuted(ref channelResponseModels);
 
