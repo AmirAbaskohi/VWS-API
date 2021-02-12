@@ -122,6 +122,10 @@ namespace vws.web.Domain
 
         IQueryable<MessageType> IVWS_DbContext.MessageTypes { get => MessageTypes; }
 
+        public DbSet<ChannelTransaction> ChannelTransactions { get; set; }
+
+        IQueryable<ChannelTransaction> IVWS_DbContext.ChannelTransactions { get => ChannelTransactions; }
+
         public void AddMessage(Message m)
         {
             Messages.Add(m);

@@ -68,8 +68,12 @@ namespace vws.web.Domain
         public IQueryable<MessageRead> MessageReads { get; }
 
         public IQueryable<MessageType> MessageTypes { get; }
+
         public IQueryable<MutedChannel> MutedChannels { get; }
+
         public IQueryable<PinnedChannel> PinnedChannels { get; }
+
+        public IQueryable<ChannelTransaction> ChannelTransactions { get; }
 
         #endregion
 
