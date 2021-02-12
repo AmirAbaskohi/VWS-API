@@ -644,5 +644,46 @@ namespace vws.web.Controllers._project
             response.Message = "Project image added successfully!";
             return Ok(response);
         }
+
+        [HttpPut]
+        [Authorize]
+        [Route("changeStatus")]
+        public IActionResult ChangeProjectStatus(int id, byte statusId)
+        {
+            var response = new ResponseModel();
+
+            var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Id == id);
+            if(selectedProject == null || selectedProject.IsDeleted)
+            {
+                response.Message = "Project not found";
+                response.AddError(localizer["There is no project with given Id."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if(statusId < 1 || statusId > 3)
+            {
+                response.Message = "Invalid tatus id";
+                response.AddError(localizer["Status id is not valid."]);
+            }
+
+            var userId = LoggedInUserId.Value;
+
+            var selectedProjectMember = vwsDbContext.ProjectMembers.FirstOrDefault(projectMember => projectMember.UserProfileId == userId &&
+                                                                                                    projectMember.IsDeleted == false &&
+                                                                                                    projectMember.ProjectId == id);
+
+            if(selectedProjectMember == null)
+            {
+                response.AddError(localizer["You are not a memeber of project."]);
+                response.Message = "Not member of project";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            selectedProject.StatusId = statusId;
+            vwsDbContext.Save();
+
+            response.Message = "Project status updated successfully!";
+            return Ok(response);
+        }
     }
 }
