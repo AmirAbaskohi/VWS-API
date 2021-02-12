@@ -17,5 +17,6 @@ namespace vws.web.Models._team
         public DateTime CreatedOn { get; set; }
         public DateTime ModifiedOn { get; set; }
         public Guid Guid { get; set; }
+        public int? TeamImageId { get; set; }
     }
 }

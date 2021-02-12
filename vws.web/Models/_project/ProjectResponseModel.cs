@@ -18,5 +18,6 @@ namespace vws.web.Models._project
         public bool IsDelete { get; set; }
         public int? TeamId { get; set; }
         public int? DepartmentId { get; set; }
+        public int? ProjectImageId { get; set; }
     }
 }

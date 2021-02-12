@@ -128,7 +128,8 @@ namespace vws.web.Controllers._team
                 ModifiedBy = (await userManager.FindByIdAsync(newTeam.ModifiedBy.ToString())).UserName,
                 CreatedOn = newTeam.CreatedOn,
                 ModifiedOn = newTeam.ModifiedOn,
-                Guid = newTeam.Guid
+                Guid = newTeam.Guid,
+                TeamImageId = newTeam.TeamImageId
             };
 
             response.Value = newTeamResponse;
@@ -297,7 +298,8 @@ namespace vws.web.Controllers._team
                     ModifiedBy = (await userManager.FindByIdAsync(userTeam.ModifiedBy.ToString())).UserName,
                     CreatedOn = userTeam.CreatedOn,
                     ModifiedOn = userTeam.ModifiedOn,
-                    Guid = userTeam.Guid
+                    Guid = userTeam.Guid,
+                    TeamImageId = userTeam.TeamImageId
                 });
             }
             return response;
@@ -409,7 +411,8 @@ namespace vws.web.Controllers._team
                 ModifiedBy = (await userManager.FindByIdAsync(selectedTeam.ModifiedBy.ToString())).UserName,
                 CreatedOn = selectedTeam.CreatedOn,
                 ModifiedOn = selectedTeam.ModifiedOn,
-                Guid = selectedTeam.Guid
+                Guid = selectedTeam.Guid,
+                TeamImageId = selectedTeam.TeamImageId
             };
 
             response.Message = "Team updated successfully";
@@ -626,6 +629,7 @@ namespace vws.web.Controllers._team
                 ModifiedBy = (await userManager.FindByIdAsync(selectedTeam.ModifiedBy.ToString())).UserName,
                 CreatedOn = selectedTeam.CreatedOn,
                 ModifiedOn = selectedTeam.ModifiedOn,
+                TeamImageId = selectedTeam.TeamImageId
             };
             response.Message = "Team retured successfully!";
             return Ok(response);

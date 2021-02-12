@@ -133,7 +133,8 @@ namespace vws.web.Controllers._department
                 CreatedBy = (await userManager.FindByIdAsync(newDepartment.CreatedBy.ToString())).UserName,
                 ModifiedBy = (await userManager.FindByIdAsync(newDepartment.ModifiedBy.ToString())).UserName,
                 CreatedOn = newDepartment.CreatedOn,
-                ModifiedOn = newDepartment.ModifiedOn
+                ModifiedOn = newDepartment.ModifiedOn,
+                DepartmentImageId = newDepartment.DepartmentImageId
             };
 
             response.Value = departmentResponse;
@@ -233,7 +234,8 @@ namespace vws.web.Controllers._department
                 CreatedBy = (await userManager.FindByIdAsync(selectedDepartment.CreatedBy.ToString())).UserName,
                 ModifiedBy = (await userManager.FindByIdAsync(selectedDepartment.ModifiedBy.ToString())).UserName,
                 CreatedOn = selectedDepartment.CreatedOn,
-                ModifiedOn = selectedDepartment.ModifiedOn
+                ModifiedOn = selectedDepartment.ModifiedOn,
+                DepartmentImageId = selectedDepartment.DepartmentImageId
             };
 
             response.Message = "Department updated successfully!";
@@ -301,7 +303,8 @@ namespace vws.web.Controllers._department
                     CreatedBy = (await userManager.FindByIdAsync(userDepartment.CreatedBy.ToString())).UserName,
                     ModifiedBy = (await userManager.FindByIdAsync(userDepartment.ModifiedBy.ToString())).UserName,
                     CreatedOn = userDepartment.CreatedOn,
-                    ModifiedOn = userDepartment.ModifiedOn
+                    ModifiedOn = userDepartment.ModifiedOn,
+                    DepartmentImageId = userDepartment.DepartmentImageId
                 });
             }
 
@@ -568,7 +571,8 @@ namespace vws.web.Controllers._department
                 CreatedBy = (await userManager.FindByIdAsync(selectedDepartment.CreatedBy.ToString())).UserName,
                 ModifiedBy = (await userManager.FindByIdAsync(selectedDepartment.ModifiedBy.ToString())).UserName,
                 CreatedOn = selectedDepartment.CreatedOn,
-                ModifiedOn = selectedDepartment.ModifiedOn
+                ModifiedOn = selectedDepartment.ModifiedOn,
+                DepartmentImageId = selectedDepartment.DepartmentImageId
             };
             response.Message = "Department retured successfully!";
             return Ok(response);

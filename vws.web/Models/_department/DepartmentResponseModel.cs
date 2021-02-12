@@ -17,5 +17,6 @@ namespace vws.web.Models._department
         public string ModifiedBy { get; set; }
         public DateTime CreatedOn { get; set; }
         public DateTime ModifiedOn { get; set; }
+        public int? DepartmentImageId { get; set; }
     }
 }

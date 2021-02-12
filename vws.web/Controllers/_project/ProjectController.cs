@@ -173,7 +173,8 @@ namespace vws.web.Controllers._project
                 Guid = newProject.Guid,
                 IsDelete = newProject.IsDeleted,
                 DepartmentId = newProject.DepartmentId,
-                TeamId = newProject.TeamId
+                TeamId = newProject.TeamId,
+                ProjectImageId = newProject.ProjectImageId
             };
 
             response.Value = newProjectResponse;
@@ -324,7 +325,8 @@ namespace vws.web.Controllers._project
                 Guid = selectedProject.Guid,
                 IsDelete = selectedProject.IsDeleted,
                 DepartmentId = selectedProject.DepartmentId,
-                TeamId = selectedProject.TeamId
+                TeamId = selectedProject.TeamId,
+                ProjectImageId = selectedProject.ProjectImageId
             };
 
             response.Value = newProjectResponse;
@@ -397,7 +399,8 @@ namespace vws.web.Controllers._project
                     StartDate = project.StartDate,
                     StatusId = project.StatusId,
                     TeamId = project.TeamId,
-                    DepartmentId = project.DepartmentId
+                    DepartmentId = project.DepartmentId,
+                    ProjectImageId = project.ProjectImageId
                 });
             }
 
@@ -432,7 +435,8 @@ namespace vws.web.Controllers._project
                     StartDate = project.StartDate,
                     StatusId = project.StatusId,
                     TeamId = project.TeamId,
-                    DepartmentId = project.DepartmentId
+                    DepartmentId = project.DepartmentId,
+                    ProjectImageId = project.ProjectImageId
                 });
             }
 
@@ -467,7 +471,8 @@ namespace vws.web.Controllers._project
                     StartDate = project.StartDate,
                     StatusId = project.StatusId,
                     TeamId = project.TeamId,
-                    DepartmentId = project.DepartmentId
+                    DepartmentId = project.DepartmentId,
+                    ProjectImageId = project.ProjectImageId
                 });
             }
 
