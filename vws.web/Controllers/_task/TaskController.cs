@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using vws.web.Domain;
@@ -392,6 +393,58 @@ namespace vws.web.Controllers._task
             vwsDbContext.Save();
 
             response.Message = "Task assigned successfully!";
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getUsersAssignedTo")]
+        public async Task<IActionResult> GetUsersAssignedTo(long id)
+        {
+            var response = new ResponseModel<List<UserModel>>();
+            var assignedUsersList = new List<UserModel>();
+
+            var userId = LoggedInUserId.Value;
+
+            var selectedTask = await vwsDbContext.GetTaskAsync(id);
+
+            if(selectedTask == null || selectedTask.IsDeleted)
+            {
+                response.Message = "Task not found";
+                response.AddError(localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if(selectedTask.CreatedBy != userId)
+            {
+                var assignedTask = vwsDbContext.TaskAssigns.FirstOrDefault(taskAssign => taskAssign.UserProfileId == userId &&
+                                                                                         taskAssign.GeneralTaskId == id &&
+                                                                                         taskAssign.IsDeleted == false);
+
+                if (assignedTask == null)
+                {
+                    response.Message = "Task access forbidden";
+                    response.AddError(localizer["You don't have access to this task."]);
+                    return StatusCode(StatusCodes.Status403Forbidden, response);
+                }
+            }
+
+            var assignedUsers = vwsDbContext.TaskAssigns.Include(taskAssign => taskAssign.UserProfile)
+                                                        .Where(taskAssign => taskAssign.GeneralTaskId == id && !taskAssign.IsDeleted)
+                                                        .Select(taskAssign => taskAssign.UserProfile);
+
+            foreach(var user in assignedUsers)
+            {
+                assignedUsersList.Add(new UserModel()
+                {
+                    ProfileImageId = user.ProfileImageId,
+                    UserId = user.UserId,
+                    UserName = (await userManager.FindByIdAsync(user.UserId.ToString())).UserName
+                });
+            }
+
+            response.Message = "Users returned successfully!";
+            response.Value = assignedUsersList;
             return Ok(response);
         }
     }
