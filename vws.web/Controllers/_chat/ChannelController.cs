@@ -76,6 +76,8 @@ namespace vws.web.Controllers._chat
 
             SetChannelsIsMuted(ref channelResponseModels);
 
+
+
             return Ok(new ResponseModel<List<ChannelResponseModel>>(channelResponseModels));
 
         }

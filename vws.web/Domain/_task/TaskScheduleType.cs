@@ -16,7 +16,7 @@ namespace vws.web.Domain._task
         public byte Id { get; set; }
 
         [MaxLength(1000)]
-        public string NameMultiLang { get; set; }
+        public string Name { get; set; }
 
         public virtual ICollection<GeneralTask> GeneralTasks { get; set; }
 

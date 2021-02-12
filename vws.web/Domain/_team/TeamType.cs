@@ -15,7 +15,7 @@ namespace vws.web.Domain._team
         public byte Id { get; set; }
 
         [MaxLength(1000)]
-        public string NameMultiLang { get; set; }
+        public string Name { get; set; }
 
         public virtual ICollection<Team> Teams { get; set; }
     }

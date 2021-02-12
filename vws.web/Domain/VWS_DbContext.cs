@@ -243,12 +243,12 @@ namespace vws.web.Domain
         public string GetStatus(byte id)
         {
             var selectedStatus = ProjectStatuses.FirstOrDefault(status => status.Id == id);
-            return selectedStatus == null ? null : selectedStatus.NameMultiLang;
+            return selectedStatus == null ? null : selectedStatus.Name;
         }
         public void UpdateStatus(byte id, string newName)
         {
             var selected = ProjectStatuses.FirstOrDefault(status => status.Id == id);
-            selected.NameMultiLang = newName;
+            selected.Name = newName;
         }
 
         public async Task<Project> AddProjectAsync(Project project)
@@ -389,12 +389,12 @@ namespace vws.web.Domain
         public string GetTeamType(byte id)
         {
             var selectedTeamType = TeamTypes.FirstOrDefault(teamType => teamType.Id == id);
-            return (selectedTeamType == null) ? null : selectedTeamType.NameMultiLang;
+            return (selectedTeamType == null) ? null : selectedTeamType.Name;
         }
         public void UpdateTeamType(byte id, string newName)
         {
             var selectedTeamType = TeamTypes.FirstOrDefault(teamType => teamType.Id == id);
-            selectedTeamType.NameMultiLang = newName;
+            selectedTeamType.Name = newName;
         }
 
         #endregion

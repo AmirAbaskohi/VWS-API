@@ -11,6 +11,6 @@ namespace vws.web.Domain._task
         public int Id { get; set; }
 
         [MaxLength(2000)]
-        public string NameMultiLang { get; set; }
+        public string Name { get; set; }
     }
 }

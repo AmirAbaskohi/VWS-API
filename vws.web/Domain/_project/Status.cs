@@ -15,7 +15,7 @@ namespace vws.web.Domain._project
         public byte Id { get; set; }
 
         [MaxLength(1000)]
-        public string NameMultiLang { get; set; }
+        public string Name { get; set; }
 
         public virtual ICollection<Project> Projects { get; set; }
     }

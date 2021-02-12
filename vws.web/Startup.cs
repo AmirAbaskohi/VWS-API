@@ -229,7 +229,7 @@ namespace vws.web
                 {
                     string dbTeamType = context.GetTeamType((byte)teamType);
                     if (dbTeamType == null)
-                        context.AddTeamType(new Domain._team.TeamType { Id = (byte)teamType, NameMultiLang = teamType.ToString() });
+                        context.AddTeamType(new Domain._team.TeamType { Id = (byte)teamType, Name = teamType.ToString() });
                     else if (dbTeamType != teamType.ToString())
                         context.UpdateTeamType((byte)teamType, teamType.ToString());
                 }
@@ -238,7 +238,7 @@ namespace vws.web
                 {
                     string dbTeamType = context.GetTeamType((byte)teamType);
                     if (dbTeamType == null)
-                        context.AddTeamType(new Domain._team.TeamType { Id = (byte)teamType, NameMultiLang = teamType.ToString() });
+                        context.AddTeamType(new Domain._team.TeamType { Id = (byte)teamType, Name = teamType.ToString() });
                     else if (dbTeamType != teamType.ToString())
                         context.UpdateTeamType((byte)teamType, teamType.ToString());
                 }
@@ -256,7 +256,7 @@ namespace vws.web
                 {
                     string dbStatusType = context.GetStatus((byte)status);
                     if (dbStatusType == null)
-                        context.AddStatus(new Domain._project.ProjectStatus { Id = (byte)status, NameMultiLang = status.ToString() });
+                        context.AddStatus(new Domain._project.ProjectStatus { Id = (byte)status, Name = status.ToString() });
                     else if (dbStatusType != status.ToString())
                         context.UpdateStatus((byte)status, status.ToString());
                 }
