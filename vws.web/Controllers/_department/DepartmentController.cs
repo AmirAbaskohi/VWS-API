@@ -128,7 +128,12 @@ namespace vws.web.Controllers._department
                 Color = newDepartment.Color,
                 Name = newDepartment.Name,
                 TeamId = newDepartment.TeamId,
-                Guid = newDepartment.Guid
+                Guid = newDepartment.Guid,
+                Description = newDepartment.Description,
+                CreatedBy = (await userManager.FindByIdAsync(newDepartment.CreatedBy.ToString())).UserName,
+                ModifiedBy = (await userManager.FindByIdAsync(newDepartment.ModifiedBy.ToString())).UserName,
+                CreatedOn = newDepartment.CreatedOn,
+                ModifiedOn = newDepartment.ModifiedOn
             };
 
             response.Value = departmentResponse;
@@ -223,7 +228,12 @@ namespace vws.web.Controllers._department
                 Id = selectedDepartment.Id,
                 Name = selectedDepartment.Name,
                 TeamId = selectedDepartment.TeamId,
-                Guid = selectedDepartment.Guid
+                Guid = selectedDepartment.Guid,
+                Description = selectedDepartment.Description,
+                CreatedBy = (await userManager.FindByIdAsync(selectedDepartment.CreatedBy.ToString())).UserName,
+                ModifiedBy = (await userManager.FindByIdAsync(selectedDepartment.ModifiedBy.ToString())).UserName,
+                CreatedOn = selectedDepartment.CreatedOn,
+                ModifiedOn = selectedDepartment.ModifiedOn
             };
 
             response.Message = "Department updated successfully!";
@@ -269,8 +279,8 @@ namespace vws.web.Controllers._department
 
         [HttpGet]
         [Authorize]
-        [Route("get")]
-        public IEnumerable<DepartmentResponseModel> GetDepartment()
+        [Route("getAll")]
+        public async Task<IEnumerable<DepartmentResponseModel>> GetAllDepartments()
         {
             List<DepartmentResponseModel> response = new List<DepartmentResponseModel>();
 
@@ -286,7 +296,12 @@ namespace vws.web.Controllers._department
                     Id = userDepartment.Id,
                     Name = userDepartment.Name,
                     TeamId = userDepartment.TeamId,
-                    Guid = userDepartment.Guid
+                    Guid = userDepartment.Guid,
+                    Description = userDepartment.Description,
+                    CreatedBy = (await userManager.FindByIdAsync(userDepartment.CreatedBy.ToString())).UserName,
+                    ModifiedBy = (await userManager.FindByIdAsync(userDepartment.ModifiedBy.ToString())).UserName,
+                    CreatedOn = userDepartment.CreatedOn,
+                    ModifiedOn = userDepartment.ModifiedOn
                 });
             }
 
@@ -511,6 +526,51 @@ namespace vws.web.Controllers._department
 
             response.Message = "Co-departments are given successfully!";
             response.Value = coDepartmentsList;
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("get")]
+        public async Task<IActionResult> GetTeam(int id)
+        {
+            Guid userId = LoggedInUserId.Value;
+
+            var response = new ResponseModel<DepartmentResponseModel>();
+
+            var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Id == id);
+
+            if (selectedDepartment == null || selectedDepartment.IsDeleted)
+            {
+                response.AddError(localizer["There is no department with such id."]);
+                response.Message = "Department not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var departmentMember = vwsDbContext.DepartmentMembers.FirstOrDefault(departmentMember => departmentMember.Id == id &&
+                                                                                 departmentMember.UserProfileId == userId &&
+                                                                                 departmentMember.IsDeleted == false);
+
+            if (departmentMember == null)
+            {
+                response.AddError(localizer["You are not member of given department."]);
+                response.Message = "Not member of department";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            response.Value = new DepartmentResponseModel()
+            {
+                Id = selectedDepartment.Id,
+                Name = selectedDepartment.Name,
+                Color = selectedDepartment.Color,
+                Guid = selectedDepartment.Guid,
+                Description = selectedDepartment.Description,
+                CreatedBy = (await userManager.FindByIdAsync(selectedDepartment.CreatedBy.ToString())).UserName,
+                ModifiedBy = (await userManager.FindByIdAsync(selectedDepartment.ModifiedBy.ToString())).UserName,
+                CreatedOn = selectedDepartment.CreatedOn,
+                ModifiedOn = selectedDepartment.ModifiedOn
+            };
+            response.Message = "Department retured successfully!";
             return Ok(response);
         }
     }

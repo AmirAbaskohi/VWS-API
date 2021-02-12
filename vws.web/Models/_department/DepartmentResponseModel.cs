@@ -11,6 +11,11 @@ namespace vws.web.Models._department
         public int TeamId { get; set; }
         public string Name { get; set; }
         public string Color { get; set; }
+        public string Description { get; set; }
         public Guid Guid { get; set; }
+        public string CreatedBy { get; set; }
+        public string ModifiedBy { get; set; }
+        public DateTime CreatedOn { get; set; }
+        public DateTime ModifiedOn { get; set; }
     }
 }
