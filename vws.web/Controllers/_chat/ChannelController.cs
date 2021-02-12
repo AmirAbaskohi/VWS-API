@@ -63,6 +63,48 @@ namespace vws.web.Controllers._chat
             vwsDbContext.Save();
         }
 
+        private void SetChannelIsPinned(ref List<ChannelResponseModel> channelResponseModels)
+        {
+            // TODO
+            var userId = LoggedInUserId.Value;
+
+            foreach (var channelResponseModel in channelResponseModels)
+            {
+                var pinnedChannel = vwsDbContext.PinnedChannels.FirstOrDefault(pChannel => pChannel.ChannelTypeId == channelResponseModel.ChannelTypeId &&
+                                                                                           pChannel.ChannelId == channelResponseModel.Guid &&
+                                                                                           pChannel.UserId == userId);
+
+                if (pinnedChannel != null)
+                {
+                    channelResponseModel.EvenOrder = pinnedChannel.EvenOrder;
+                    channelResponseModel.IsPinned = true;
+                }
+            }
+        }
+
+        private void SetChannelLastTransactionDateTime(ref List<ChannelResponseModel> channelResponseModels)
+        {
+            // TODO
+            var userId = LoggedInUserId.Value;
+
+            foreach (var channelResponseModel in channelResponseModels)
+            {
+                ChannelTransaction channelTransaction;
+
+                if (channelResponseModel.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+                    channelTransaction = vwsDbContext.ChannelTransactions.FirstOrDefault(transaction => transaction.ChannelTypeId == transaction.ChannelTypeId &&
+                                                                                                        transaction.ChannelId == transaction.ChannelId &&
+                                                                                                        transaction.UserProfileId == userId);
+
+                else
+                    channelTransaction = vwsDbContext.ChannelTransactions.FirstOrDefault(transaction => transaction.ChannelTypeId == transaction.ChannelTypeId &&
+                                                                                                        transaction.ChannelId == transaction.ChannelId);
+
+                if (channelTransaction != null)
+                    channelTransaction.LastTransactionDateTime = channelTransaction.LastTransactionDateTime;
+            }
+        }
+
         [HttpGet]
         [Authorize]
         [Route("getAll")]
@@ -76,7 +118,12 @@ namespace vws.web.Controllers._chat
 
             SetChannelsIsMuted(ref channelResponseModels);
 
+            SetChannelIsPinned(ref channelResponseModels);
 
+            SetChannelLastTransactionDateTime(ref channelResponseModels);
+
+            channelResponseModels.OrderByDescending(channelResponseModel => channelResponseModel.LastTransactionDateTime);
+            channelResponseModels.OrderByDescending(channelResponseModel => channelResponseModel.EvenOrder);
 
             return Ok(new ResponseModel<List<ChannelResponseModel>>(channelResponseModels));
 

@@ -10,12 +10,12 @@ namespace vws.web.Domain._chat
     public class ChannelTransaction
     {
         public int Id { get; set; }
+        
+        public byte ChannelTypeId { get; set; }
 
         public Guid ChannelId { get; set; }
 
-        public byte ChannelTypeId { get; set; }
-
-        public DateTime LastTransaction { get; set; }
+        public DateTime LastTransactionDateTime { get; set; }
 
         public Guid? UserProfileId { get; set; }
     }

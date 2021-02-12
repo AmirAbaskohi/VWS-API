@@ -46,7 +46,10 @@ namespace vws.web.Services._chat
                     ChannelTypeId = (byte)SeedDataEnum.ChannelTypes.Private,
                     LogoUrl = "http://app.seventask.com/assets/Images/Chat/DefaultAvatars/User.jpg",
                     Title = (await userManager.FindByIdAsync(userTeamMate.UserId.ToString())).UserName,
-                    IsMuted = false
+                    IsMuted = false,
+                    IsPinned = false,
+                    EvenOrder = 0,
+                    LastTransactionDateTime = new DateTime()
                 });
             }
 
@@ -56,7 +59,10 @@ namespace vws.web.Services._chat
                 ChannelTypeId = (byte)SeedDataEnum.ChannelTypes.Team,
                 LogoUrl = "http://app.seventask.com/assets/Images/Chat/DefaultAvatars/Team.jpg",
                 Title = userTeam.Name,
-                IsMuted = false
+                IsMuted = false,
+                IsPinned = false,
+                EvenOrder = 0,
+                LastTransactionDateTime = new DateTime()
             }));
 
             channelResponseModels.AddRange(userProjects.Select(userProject => new ChannelResponseModel
@@ -65,7 +71,9 @@ namespace vws.web.Services._chat
                 ChannelTypeId = (byte)SeedDataEnum.ChannelTypes.Project,
                 LogoUrl = "http://app.seventask.com/assets/Images/Chat/DefaultAvatars/Project.jpg",
                 Title = userProject.Name,
-                IsMuted = false
+                IsMuted = false,
+                EvenOrder = 0,
+                LastTransactionDateTime = new DateTime()
             }));
 
             channelResponseModels.AddRange(userDepartments.Select(userDepartment => new ChannelResponseModel
@@ -74,7 +82,9 @@ namespace vws.web.Services._chat
                 ChannelTypeId = (byte)SeedDataEnum.ChannelTypes.Department,
                 LogoUrl = "http://app.seventask.com/assets/Images/Chat/DefaultAvatars/Department.jpg",
                 Title = userDepartment.Name,
-                IsMuted = false
+                IsMuted = false,
+                EvenOrder = 0,
+                LastTransactionDateTime = new DateTime()
             }));
 
             return channelResponseModels;

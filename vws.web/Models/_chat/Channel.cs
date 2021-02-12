@@ -10,7 +10,13 @@ namespace vws.web.Models._chat
         public string LogoUrl { get; set; }
 
         public byte ChannelTypeId { get; set; }
+
         public bool IsMuted { get; set; }
 
+        public bool IsPinned { get; set; }
+
+        public int EvenOrder { get; set; }
+
+        public DateTime LastTransactionDateTime { get; set; }
     }
 }
