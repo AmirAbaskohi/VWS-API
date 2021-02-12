@@ -92,13 +92,13 @@ namespace vws.web.Controllers._chat
                 ChannelTransaction channelTransaction;
 
                 if (channelResponseModel.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
-                    channelTransaction = vwsDbContext.ChannelTransactions.FirstOrDefault(transaction => transaction.ChannelTypeId == transaction.ChannelTypeId &&
-                                                                                                        transaction.ChannelId == transaction.ChannelId &&
+                    channelTransaction = vwsDbContext.ChannelTransactions.FirstOrDefault(transaction => transaction.ChannelTypeId == channelResponseModel.ChannelTypeId &&
+                                                                                                        transaction.ChannelId == channelResponseModel.Guid &&
                                                                                                         transaction.UserProfileId == userId);
 
                 else
-                    channelTransaction = vwsDbContext.ChannelTransactions.FirstOrDefault(transaction => transaction.ChannelTypeId == transaction.ChannelTypeId &&
-                                                                                                        transaction.ChannelId == transaction.ChannelId);
+                    channelTransaction = vwsDbContext.ChannelTransactions.FirstOrDefault(transaction => transaction.ChannelTypeId == channelResponseModel.ChannelTypeId &&
+                                                                                                        transaction.ChannelId == channelResponseModel.Guid);
 
                 if (channelTransaction != null)
                     channelTransaction.LastTransactionDateTime = channelTransaction.LastTransactionDateTime;
