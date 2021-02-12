@@ -8,6 +8,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using vws.web.Core;
 using vws.web.Domain;
+using vws.web.Domain._chat;
+using vws.web.Enums;
 using vws.web.Extensions;
 using vws.web.Models._chat;
 using vws.web.Services._chat;
@@ -94,6 +96,36 @@ namespace vws.web.Hubs
             foreach (Guid userChannel in userChannels)
                 await Groups.AddToGroupAsync(Context.ConnectionId, userChannel.ToString());
         }
+
+        private void UpdateChannelTransaction(Guid channelId, byte channelTypeId, Guid userId, DateTime transactionTime)
+        {
+            ChannelTransaction channelTransaction;
+
+            if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+                channelTransaction = vwsDbContext.ChannelTransactions.FirstOrDefault(transaction => transaction.ChannelTypeId == channelTypeId &&
+                                                                                                    transaction.ChannelId == channelId &&
+                                                                                                    transaction.UserProfileId == userId);
+
+            else
+                channelTransaction = vwsDbContext.ChannelTransactions.FirstOrDefault(transaction => transaction.ChannelTypeId == channelTypeId &&
+                                                                                                    transaction.ChannelId == channelId);
+
+            if(channelTransaction == null)
+            {
+                var newChannelTransaction = new ChannelTransaction()
+                {
+                    ChannelId = channelId,
+                    ChannelTypeId = channelTypeId,
+                    UserProfileId = (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private) ? null : (Guid?)userId,
+                    LastTransactionDateTime = transactionTime
+                };
+            }
+            else
+                channelTransaction.LastTransactionDateTime = transactionTime;
+
+            vwsDbContext.Save();
+        }
+
         public async Task SendMessage(string message, byte channelTypeId, Guid channelId, byte messageTypeId, long? replyTo = null)
         {
             var newMessage = new Domain._chat.Message
@@ -108,6 +140,8 @@ namespace vws.web.Hubs
             };
             vwsDbContext.AddMessage(newMessage);
             vwsDbContext.Save();
+
+            UpdateChannelTransaction(channelId, channelTypeId, LoggedInUserId, newMessage.SendOn);
 
             await Clients.OthersInGroup(channelId.ToString()).ReciveMessage(newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
                                                                             false, newMessage.ChannelTypeId, newMessage.ChannelId,
