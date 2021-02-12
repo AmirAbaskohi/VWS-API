@@ -26,6 +26,7 @@ using ActionFilters.ActionFilters;
 using Serilog;
 using vws.web.Services._chat;
 using vws.web.ServiceEngine;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace vws.web
 {
@@ -151,6 +152,11 @@ namespace vws.web
                 option.ClientId = "592198124436-24rg7bm3850gk8q14h5o6anrmuhtmojp.apps.googleusercontent.com";
                 option.ClientSecret = "R5THzn3N6YEGUXrbcSD_iVUm";
                 option.SignInScheme = IdentityConstants.ExternalScheme;
+            });
+
+            services.Configure<FormOptions>(x =>
+            {
+                x.MultipartBodyLengthLimit = 209715200;
             });
 
         }
