@@ -138,4 +138,7 @@
   <data name="User does not exist." xml:space="preserve">
     <value>User does not exist.</value>
   </data>
+  <data name="User you selected does not have access to task already." xml:space="preserve">
+    <value>User you selected does not have access to task already.</value>
+  </data>
 </root>

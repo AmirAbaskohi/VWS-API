@@ -135,6 +135,9 @@
   <data name="User does not exist." xml:space="preserve">
     <value>کاربر وجود ندارد.</value>
   </data>
+  <data name="User you selected does not have access to task already." xml:space="preserve">
+    <value>کاربر انتخاب شده، در حال حاضر به تسک دسترسی ندارد.</value>
+  </data>
   <data name="You don't have access to this task." xml:space="preserve">
     <value>شما به این تسک دسترسی ندارید.</value>
   </data>

@@ -447,5 +447,56 @@ namespace vws.web.Controllers._task
             response.Value = assignedUsersList;
             return Ok(response);
         }
+
+        [HttpDelete]
+        [Authorize]
+        [Route("deleteUserAssignedTo")]
+        public async Task<IActionResult> DeleteUserAssignedTo(long taskId, Guid userId)
+        {
+            var response = new ResponseModel();
+
+            var selectedTask = await vwsDbContext.GetTaskAsync(taskId);
+
+            if (selectedTask == null || selectedTask.IsDeleted)
+            {
+                response.Message = "Task not found";
+                response.AddError(localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (selectedTask.CreatedBy != LoggedInUserId.Value)
+            {
+                var assignedTask = vwsDbContext.TaskAssigns.FirstOrDefault(taskAssign => taskAssign.UserProfileId == LoggedInUserId.Value &&
+                                                                                         taskAssign.GeneralTaskId == taskId &&
+                                                                                         taskAssign.IsDeleted == false);
+
+                if (assignedTask == null)
+                {
+                    response.Message = "Task access forbidden";
+                    response.AddError(localizer["You don't have access to this task."]);
+                    return StatusCode(StatusCodes.Status403Forbidden, response);
+                }
+            }
+
+            var selectedUserAssignedTask = vwsDbContext.TaskAssigns.FirstOrDefault(taskAssign => taskAssign.UserProfileId == userId &&
+                                                                                   taskAssign.GeneralTaskId == taskId &&
+                                                                                   taskAssign.IsDeleted == false);
+
+            if (selectedUserAssignedTask == null)
+            {
+                response.Message = "User does not have access already!";
+                response.AddError(localizer["User you selected does not have access to task already."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            selectedUserAssignedTask.IsDeleted = true;
+            selectedUserAssignedTask.DeletedBy = LoggedInUserId.Value;
+            selectedUserAssignedTask.DeletedOn = DateTime.Now;
+
+            vwsDbContext.Save();
+
+            response.Message = "User unassigned from task successfully!";
+            return Ok(response);
+        }
     }
 }
