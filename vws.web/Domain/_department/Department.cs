@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using vws.web.Domain._file;
+using vws.web.Domain._project;
 using vws.web.Domain._team;
 
 namespace vws.web.Domain._department
@@ -13,6 +14,7 @@ namespace vws.web.Domain._department
         public Department()
         {
             DepartmentMembers = new HashSet<DepartmentMember>();
+            ProjectDepartments = new HashSet<ProjectDepartment>();
         }
 
         public int Id { get; set; }
@@ -49,5 +51,6 @@ namespace vws.web.Domain._department
 
         public virtual ICollection<DepartmentMember> DepartmentMembers { get; set; }
 
+        public virtual ICollection<ProjectDepartment> ProjectDepartments { get; set; }
     }
 }

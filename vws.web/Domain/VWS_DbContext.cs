@@ -233,6 +233,10 @@ namespace vws.web.Domain
 
         public DbSet<ProjectMember> ProjectMembers { get; set; }
 
+        IQueryable<ProjectDepartment> IVWS_DbContext.ProjectDepartments { get => ProjectDepartments; }
+
+        public DbSet<ProjectDepartment> ProjectDepartments { get; set; }
+
         public IQueryable<Project> GetUserProjects(Guid userId)
         {
             return ProjectMembers.Include(projectMember => projectMember.Project)
@@ -450,6 +454,17 @@ namespace vws.web.Domain
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<ProjectDepartment>()
+                .HasKey(pd => new { pd.ProjectId, pd.DepartmentId });
+            builder.Entity<ProjectDepartment>()
+                .HasOne(pd => pd.Project)
+                .WithMany(p => p.ProjectDepartments)
+                .HasForeignKey(pd => pd.ProjectId);
+            builder.Entity<ProjectDepartment>()
+                .HasOne(pd => pd.Department)
+                .WithMany(d => d.ProjectDepartments)
+                .HasForeignKey(pd => pd.DepartmentId);
         }
     }
 }

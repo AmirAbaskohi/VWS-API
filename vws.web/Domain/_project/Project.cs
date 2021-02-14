@@ -14,6 +14,7 @@ namespace vws.web.Domain._project
         public Project()
         {
             ProjectMembers = new HashSet<ProjectMember>();
+            ProjectDepartments = new HashSet<ProjectDepartment>();
         }
 
         public int Id { get; set; }
@@ -34,27 +35,32 @@ namespace vws.web.Domain._project
 
         [MaxLength(6)]
         public string Color { get; set; }
+
         public bool IsDeleted { get; set;}
 
         public Guid CreateBy { get; set; }
+
         public Guid ModifiedBy { get; set; }
+
         public DateTime CreatedOn { get; set; }
+
         public DateTime ModifiedOn { get; set; }
-        [ForeignKey("Department")]
-        public int? DepartmentId { get; set; }
+
         [ForeignKey("Team")]
         public int? TeamId { get; set; }
+
         [ForeignKey("ProjectImage")]
         public int? ProjectImageId { get; set; }
-        public virtual FileContainer ProjectImage { get; set; }
 
-        public virtual Department Department { get; set; }
+        public virtual FileContainer ProjectImage { get; set; }
 
         public virtual Team Team { get; set; }
 
         public virtual ProjectStatus Status { get; set; }
 
         public virtual ICollection<ProjectMember> ProjectMembers { get; set; }
+
+        public virtual ICollection<ProjectDepartment> ProjectDepartments { get; set; }
 
     }
 }

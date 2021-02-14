@@ -128,6 +128,8 @@ namespace vws.web.Domain
 
         public IQueryable<ProjectMember> ProjectMembers { get; }
 
+        public IQueryable<ProjectDepartment> ProjectDepartments { get; }
+
         #endregion
 
         #region methods
@@ -211,6 +213,8 @@ namespace vws.web.Domain
         #endregion
 
         #endregion
+
+
 
         #region file
 
