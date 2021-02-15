@@ -129,6 +129,9 @@
   <data name="File size is not allowed." xml:space="preserve">
     <value>حجم فایل معتبر نیست.</value>
   </data>
+  <data name="If your project is under department, you should specify the team." xml:space="preserve">
+    <value>در صورتی که پروژه تحت دپارتمان است، باید تیم مشخص شود.</value>
+  </data>
   <data name="Length of color is more than 6 characters." xml:space="preserve">
     <value>تعداد کاراکتر بخش رنگ بیشتر از 6 کاراکتر است.</value>
   </data>

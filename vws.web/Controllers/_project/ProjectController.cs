@@ -73,7 +73,7 @@ namespace vws.web.Controllers._project
                 var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Id == departmentId);
 
                 if (selectedDepartment.TeamId != teamId)
-                    result.Add(String.Format(localizer["Department with name {0} is not for selected team"], selectedDepartment.Name));
+                    result.Add(String.Format(localizer["Department with name {0} is not for selected team."], selectedDepartment.Name));
             }
 
             return result;
@@ -146,32 +146,38 @@ namespace vws.web.Controllers._project
                     response.Message = "Not member of team";
                     return StatusCode(StatusCodes.Status403Forbidden, response);
                 }
+
+                var checkDepartmentExistencytResult = CheckDepartmentExistency(model.DepartmentIds);
+
+                if (checkDepartmentExistencytResult.Count != 0)
+                {
+                    response.AddErrors(checkDepartmentExistencytResult);
+                    response.Message = "Department not found";
+                    return StatusCode(StatusCodes.Status400BadRequest, response);
+                }
+
+                var checkBeingMemberOfDepartmentsResult = CheckBegingAMemberOfDepartment(userId, model.DepartmentIds);
+
+                if (checkBeingMemberOfDepartmentsResult.Count != 0)
+                {
+                    response.AddErrors(checkBeingMemberOfDepartmentsResult);
+                    response.Message = "Department access denied";
+                    return StatusCode(StatusCodes.Status403Forbidden, response);
+                }
+
+                var checkDepartmentAreForTeamResult = CheckAreDepartmentsForTeam((int)model.TeamId, model.DepartmentIds);
+
+                if (checkDepartmentAreForTeamResult.Count != 0)
+                {
+                    response.AddErrors(checkDepartmentAreForTeamResult);
+                    response.Message = "Department not for team";
+                    return StatusCode(StatusCodes.Status400BadRequest, response);
+                }
             }
-
-            var checkDepartmentExistencytResult = CheckDepartmentExistency(model.DepartmentIds);
-
-            if(checkDepartmentExistencytResult.Count != 0)
+            else if(model.DepartmentIds.Count != 0)
             {
-                response.AddErrors(checkDepartmentExistencytResult);
-                response.Message = "Department not found";
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-
-            var checkBeingMemberOfDepartmentsResult = CheckBegingAMemberOfDepartment(userId, model.DepartmentIds);
-
-            if (checkBeingMemberOfDepartmentsResult.Count != 0)
-            {
-                response.AddErrors(checkBeingMemberOfDepartmentsResult);
-                response.Message = "Department access denied";
-                return StatusCode(StatusCodes.Status403Forbidden, response);
-            }
-
-            var checkDepartmentAreForTeamResult = CheckAreDepartmentsForTeam((int)model.TeamId, model.DepartmentIds);
-
-            if (checkDepartmentAreForTeamResult.Count != 0)
-            {
-                response.AddErrors(checkDepartmentAreForTeamResult);
-                response.Message = "Department not for team";
+                response.AddError(localizer["If your project is under department, you should specify the team."]);
+                response.Message = "Invalid projectmodel";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
@@ -240,31 +246,14 @@ namespace vws.web.Controllers._project
         //{
         //    var response = new ResponseModel<ProjectResponseModel>();
 
-        //    if (!String.IsNullOrEmpty(model.Description) && model.Description.Length > 2000)
+        //    var checkModelResult = CheckProjectModel(model);
+
+        //    if (checkModelResult.Count != 0)
         //    {
-        //        response.Message = "Project model data has problem.";
-        //        response.AddError(localizer["Length of description is more than 2000 characters."]);
-        //    }
-        //    if (model.Name.Length > 500)
-        //    {
-        //        response.Message = "Project model data has problem.";
-        //        response.AddError(localizer["Length of title is more than 500 characters."]);
-        //    }
-        //    if (!String.IsNullOrEmpty(model.Color) && model.Color.Length > 6)
-        //    {
-        //        response.Message = "Project model data has problem.";
-        //        response.AddError(localizer["Length of color is more than 6 characters."]);
-        //    }
-        //    if (model.StartDate.HasValue && model.EndDate.HasValue)
-        //    {
-        //        if (model.StartDate > model.EndDate)
-        //        {
-        //            response.Message = "Project model data has problem.";
-        //            response.AddError(localizer["Start Date should be before End Date."]);
-        //        }
-        //    }
-        //    if (response.HasError)
+        //        response.Message = "Invalid project model";
+        //        response.AddErrors(checkModelResult);
         //        return StatusCode(StatusCodes.Status500InternalServerError, response);
+        //    }
 
         //    Guid userId = LoggedInUserId.Value;
 
@@ -282,24 +271,6 @@ namespace vws.web.Controllers._project
         //        {
         //            response.AddError(localizer["You are not a member of team."]);
         //            response.Message = "Not member of team";
-        //            return StatusCode(StatusCodes.Status403Forbidden, response);
-        //        }
-        //    }
-
-        //    if (model.DepartmentId != null)
-        //    {
-        //        var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Id == (int)model.DepartmentId);
-        //        if (selectedDepartment == null || selectedDepartment.IsDeleted)
-        //        {
-        //            response.AddError(localizer["There is no department with given Id."]);
-        //            response.Message = "Department not found";
-        //            return StatusCode(StatusCodes.Status400BadRequest, response);
-        //        }
-        //        var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync((int)model.TeamId, userId);
-        //        if (selectedTeamMember == null)
-        //        {
-        //            response.AddError(localizer["You are not member of selected department."]);
-        //            response.Message = "Not member of department";
         //            return StatusCode(StatusCodes.Status403Forbidden, response);
         //        }
         //    }
