@@ -45,142 +45,193 @@ namespace vws.web.Controllers._project
             fileManager = _fileManager;
         }
 
-        //[HttpPost]
-        //[Authorize]
-        //[Route("create")]
-        //public async Task<IActionResult> CreateProject([FromBody] ProjectModel model)
-        //{
-        //    var response = new ResponseModel<ProjectResponseModel>();
+        private List<string> CheckProjectModel(ProjectModel model)
+        {
+            var result = new List<string>();
 
-        //    if (!String.IsNullOrEmpty(model.Description) && model.Description.Length > 2000)
-        //    {
-        //        response.Message = "Project model data has problem.";
-        //        response.AddError(localizer["Length of description is more than 2000 characters."]);
-        //    }
-        //    if (model.Name.Length > 500)
-        //    {
-        //        response.Message = "Project model data has problem.";
-        //        response.AddError(localizer["Length of title is more than 500 characters."]);
-        //    }
-        //    if (!String.IsNullOrEmpty(model.Color) && model.Color.Length > 6)
-        //    {
-        //        response.Message = "Project model data has problem.";
-        //        response.AddError(localizer["Length of color is more than 6 characters."]);
-        //    }
-        //    if (model.StartDate.HasValue && model.EndDate.HasValue)
-        //    {
-        //        if (model.StartDate > model.EndDate)
-        //        {
-        //            response.Message = "Project model data has problem.";
-        //            response.AddError(localizer["Start Date should be before End Date."]);
-        //        }
-        //    }
-        //    if (response.HasError)
-        //        return StatusCode(StatusCodes.Status500InternalServerError, response);
+            if (!String.IsNullOrEmpty(model.Description) && model.Description.Length > 2000)
+                result.Add(localizer["Length of description is more than 2000 characters."]);
 
-        //    Guid userId = LoggedInUserId.Value;
+            if (model.Name.Length > 500)
+                result.Add(localizer["Length of title is more than 500 characters."]);
 
-        //    if (model.TeamId != null)
-        //    {
-        //        var selectedTeam = await vwsDbContext.GetTeamAsync((int)model.TeamId);
-        //        if(selectedTeam == null || selectedTeam.IsDeleted)
-        //        {
-        //            response.AddError(localizer["There is no team with given Id."]);
-        //            response.Message = "Team not found";
-        //            return StatusCode(StatusCodes.Status400BadRequest, response);
-        //        }
-        //        var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync((int)model.TeamId, userId);
-        //        if(selectedTeamMember == null)
-        //        {
-        //            response.AddError(localizer["You are not a member of team."]);
-        //            response.Message = "Not member of team";
-        //            return StatusCode(StatusCodes.Status403Forbidden, response);
-        //        }
-        //    }
+            if (!String.IsNullOrEmpty(model.Color) && model.Color.Length > 6)
+                result.Add(localizer["Length of color is more than 6 characters."]);
 
-        //    if (model.DepartmentId != null)
-        //    {
-        //        var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Id == (int)model.DepartmentId);
-        //        if (selectedDepartment == null || selectedDepartment.IsDeleted)
-        //        {
-        //            response.AddError(localizer["There is no department with given Id."]);
-        //            response.Message = "Department not found";
-        //            return StatusCode(StatusCodes.Status400BadRequest, response);
-        //        }
-        //        var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync((int)model.TeamId, userId);
-        //        if (selectedTeamMember == null)
-        //        {
-        //            response.AddError(localizer["You are not member of selected department."]);
-        //            response.Message = "Not member of department";
-        //            return StatusCode(StatusCodes.Status403Forbidden, response);
-        //        }
-        //    }
+            if (model.StartDate.HasValue && model.EndDate.HasValue && model.StartDate > model.EndDate)
+                    result.Add(localizer["Start Date should be before End Date."]);
 
-        //    if(model.DepartmentId != null && model.TeamId != null)
-        //    {
-        //        var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Id == (int)model.DepartmentId);
-        //        if(selectedDepartment.TeamId != (int)model.TeamId)
-        //        {
-        //            response.AddError(localizer["The department is not a subset of the team."]);
-        //            response.Message = "Department not subset of team";
-        //            return StatusCode(StatusCodes.Status400BadRequest, response);
-        //        }
-        //    }
+            return result;
+        }
 
-        //    DateTime creationTime = DateTime.Now;
+        private List<string> CheckAreDepartmentsForTeam(int teamId, List<int> departmentIds)
+        {
+            var result = new List<string>();
 
-        //    var newProject = new Project()
-        //    {
-        //        Name = model.Name,
-        //        StatusId = (byte)SeedDataEnum.ProjectStatuses.Active,
-        //        Description = model.Description,
-        //        Color = model.Color,
-        //        StartDate = model.StartDate,
-        //        EndDate = model.EndDate,
-        //        Guid = Guid.NewGuid(),
-        //        IsDeleted = false,
-        //        CreateBy = userId,
-        //        ModifiedBy = userId,
-        //        CreatedOn = creationTime,
-        //        ModifiedOn = creationTime,
-        //        TeamId = model.TeamId,
-        //        DepartmentId = model.DepartmentId
-        //    };
+            foreach(var departmentId in departmentIds)
+            {
+                var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Id == departmentId);
 
-        //    await vwsDbContext.AddProjectAsync(newProject);
-        //    vwsDbContext.Save();
+                if (selectedDepartment.TeamId != teamId)
+                    result.Add(String.Format(localizer["Department with name {0} is not for selected team"], selectedDepartment.Name));
+            }
 
-        //    var newProjectMember = new ProjectMember()
-        //    {
-        //        CreatedOn = creationTime,
-        //        ProjectId = newProject.Id,
-        //        UserProfileId = userId,
-        //        IsDeleted = false
-        //    };
+            return result;
+        }
 
-        //    await vwsDbContext.AddProjectMemberAsync(newProjectMember);
-        //    vwsDbContext.Save();
+        private List<string> CheckDepartmentExistency(List<int> departmentIds)
+        {
+            var result = new List<string>();
 
-        //    var newProjectResponse = new ProjectResponseModel()
-        //    {
-        //        Id = newProject.Id,
-        //        StatusId = newProject.StatusId,
-        //        Name = newProject.Name,
-        //        Description = newProject.Description,
-        //        Color = newProject.Color,
-        //        StartDate = newProject.StartDate,
-        //        EndDate = newProject.EndDate,
-        //        Guid = newProject.Guid,
-        //        IsDelete = newProject.IsDeleted,
-        //        DepartmentId = newProject.DepartmentId,
-        //        TeamId = newProject.TeamId,
-        //        ProjectImageId = newProject.ProjectImageId
-        //    };
+            foreach (var departmentId in departmentIds)
+            {
+                var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Id == departmentId);
+                if (selectedDepartment == null || selectedDepartment.IsDeleted)
+                    result.Add(String.Format(localizer["There is no department with id {0}."], departmentId));
+            }
 
-        //    response.Value = newProjectResponse;
-        //    response.Message = "Project created successfully!";
-        //    return Ok(response);
-        //}
+            return result;
+        }
+
+        private List<string> CheckBegingAMemberOfDepartment(Guid userId, List<int> departmentIds)
+        {
+            var result = new List<string>();
+
+            foreach (var departmentId in departmentIds)
+            {
+                var selectedDepartmentMember = vwsDbContext.DepartmentMembers.FirstOrDefault(departmentMember => departmentMember.UserProfileId == userId &&
+                                                                                                                 departmentMember.DepartmentId == departmentId &&
+                                                                                                                 departmentMember.IsDeleted == false);
+
+                var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Id == departmentId);
+
+                if (selectedDepartmentMember == null)
+                    result.Add(String.Format(localizer["You are not member of department with name {0}."], selectedDepartment.Name));
+            }
+
+            return result;
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("create")]
+        public async Task<IActionResult> CreateProject([FromBody] ProjectModel model)
+        {
+            var response = new ResponseModel<ProjectResponseModel>();
+
+            var checkModelResult = CheckProjectModel(model);
+            
+            if (checkModelResult.Count != 0)
+            {
+                response.Message = "Invalid project model";
+                response.AddErrors(checkModelResult);
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
+
+            Guid userId = LoggedInUserId.Value;
+
+            if (model.TeamId != null)
+            {
+                var selectedTeam = await vwsDbContext.GetTeamAsync((int)model.TeamId);
+                if (selectedTeam == null || selectedTeam.IsDeleted)
+                {
+                    response.AddError(localizer["There is no team with given Id."]);
+                    response.Message = "Team not found";
+                    return StatusCode(StatusCodes.Status400BadRequest, response);
+                }
+                var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync((int)model.TeamId, userId);
+                if (selectedTeamMember == null)
+                {
+                    response.AddError(localizer["You are not a member of team."]);
+                    response.Message = "Not member of team";
+                    return StatusCode(StatusCodes.Status403Forbidden, response);
+                }
+            }
+
+            var checkDepartmentExistencytResult = CheckDepartmentExistency(model.DepartmentIds);
+
+            if(checkDepartmentExistencytResult.Count != 0)
+            {
+                response.AddErrors(checkDepartmentExistencytResult);
+                response.Message = "Department not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var checkBeingMemberOfDepartmentsResult = CheckBegingAMemberOfDepartment(userId, model.DepartmentIds);
+
+            if (checkBeingMemberOfDepartmentsResult.Count != 0)
+            {
+                response.AddErrors(checkBeingMemberOfDepartmentsResult);
+                response.Message = "Department access denied";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            var checkDepartmentAreForTeamResult = CheckAreDepartmentsForTeam((int)model.TeamId, model.DepartmentIds);
+
+            if (checkDepartmentAreForTeamResult.Count != 0)
+            {
+                response.AddErrors(checkDepartmentAreForTeamResult);
+                response.Message = "Department not for team";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            DateTime creationTime = DateTime.Now;
+
+            var newProject = new Project()
+            {
+                Name = model.Name,
+                StatusId = (byte)SeedDataEnum.ProjectStatuses.Active,
+                Description = model.Description,
+                Color = model.Color,
+                StartDate = model.StartDate,
+                EndDate = model.EndDate,
+                Guid = Guid.NewGuid(),
+                IsDeleted = false,
+                CreateBy = userId,
+                ModifiedBy = userId,
+                CreatedOn = creationTime,
+                ModifiedOn = creationTime,
+                TeamId = model.TeamId
+            };
+
+            await vwsDbContext.AddProjectAsync(newProject);
+
+            vwsDbContext.Save();
+
+            foreach (var departmentId in model.DepartmentIds)
+                vwsDbContext.AddProjectDepartment(new ProjectDepartment { DepartmentId = departmentId, ProjectId = newProject.Id });
+
+            var newProjectMember = new ProjectMember()
+            {
+                CreatedOn = creationTime,
+                ProjectId = newProject.Id,
+                UserProfileId = userId,
+                IsDeleted = false
+            };
+
+            await vwsDbContext.AddProjectMemberAsync(newProjectMember);
+            vwsDbContext.Save();
+
+            var newProjectResponse = new ProjectResponseModel()
+            {
+                Id = newProject.Id,
+                StatusId = newProject.StatusId,
+                Name = newProject.Name,
+                Description = newProject.Description,
+                Color = newProject.Color,
+                StartDate = newProject.StartDate,
+                EndDate = newProject.EndDate,
+                Guid = newProject.Guid,
+                IsDelete = newProject.IsDeleted,
+                TeamId = newProject.TeamId,
+                ProjectImageId = newProject.ProjectImageId,
+                DepartmentIds = model.DepartmentIds
+            };
+
+            response.Value = newProjectResponse;
+            response.Message = "Project created successfully!";
+            return Ok(response);
+        }
 
         //[HttpPut]
         //[Authorize]

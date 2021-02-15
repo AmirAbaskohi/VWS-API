@@ -140,6 +140,7 @@ namespace vws.web.Domain
         public void UpdateStatus(byte id, string newName);
         public Task<Project> AddProjectAsync(Project project);
         public Task<ProjectMember> AddProjectMemberAsync(ProjectMember projectMember);
+        public ProjectDepartment AddProjectDepartment(ProjectDepartment projectDepartment);
 
         #endregion
 

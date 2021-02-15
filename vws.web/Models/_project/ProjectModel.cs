@@ -16,6 +16,7 @@ namespace vws.web.Models._project
         [MaxLength(6)]
         public string Color { get; set; }
         public int? TeamId { get; set; }
-        public int? DepartmentId { get; set; }
+        [Required]
+        public List<int> DepartmentIds { get; set; }
     }
 }

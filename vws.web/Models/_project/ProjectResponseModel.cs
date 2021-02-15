@@ -17,7 +17,7 @@ namespace vws.web.Models._project
         public string Color { get; set; }
         public bool IsDelete { get; set; }
         public int? TeamId { get; set; }
-        public int? DepartmentId { get; set; }
+        public List<int> DepartmentIds { get; set; }
         public int? ProjectImageId { get; set; }
     }
 }

@@ -271,6 +271,11 @@ namespace vws.web.Domain
             return projectMember;
         }
 
+        public ProjectDepartment AddProjectDepartment(ProjectDepartment projectDepartment)
+        {
+            ProjectDepartments.Add(projectDepartment);
+            return projectDepartment;
+        }
 
         #endregion
 
