@@ -142,6 +142,8 @@ namespace vws.web.Domain
         public Task<ProjectMember> AddProjectMemberAsync(ProjectMember projectMember);
         public ProjectDepartment AddProjectDepartment(ProjectDepartment projectDepartment);
 
+        public void DeleteProjectDepartment(ProjectDepartment projectDepartment);
+
         #endregion
 
         #endregion

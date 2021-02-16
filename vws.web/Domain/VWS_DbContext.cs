@@ -277,6 +277,11 @@ namespace vws.web.Domain
             return projectDepartment;
         }
 
+        public void DeleteProjectDepartment(ProjectDepartment projectDepartment)
+        {
+            ProjectDepartments.Remove(projectDepartment);
+        }
+
         #endregion
 
         #region task

@@ -6,17 +6,9 @@ using System.Threading.Tasks;
 
 namespace vws.web.Models._project
 {
-    public class UpdateProjectModel
+    public class UpdateProjectModel : ProjectModel
     {
         [Required]
         public int Id { get; set; }
-        [Required]
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
-        public string Color { get; set; }
-        public int? TeamId { get; set; }
-        public int? DepartmentId { get; set; }
     }
 }
