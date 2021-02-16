@@ -396,78 +396,78 @@ namespace vws.web.Controllers._project
             return Ok(response);
         }
 
-        //[HttpDelete]
-        //[Authorize]
-        //[Route("delete")]
-        //public IActionResult DeleteProject(int id)
-        //{
-        //    var response = new ResponseModel();
+        [HttpDelete]
+        [Authorize]
+        [Route("delete")]
+        public IActionResult DeleteProject(int id)
+        {
+            var response = new ResponseModel();
 
-        //    Guid userId = LoggedInUserId.Value;
+            Guid userId = LoggedInUserId.Value;
 
-        //    var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Id == id);
-        //    if (selectedProject == null || selectedProject.IsDeleted)
-        //    {
-        //        response.AddError(localizer["There is no project with given Id."]);
-        //        response.Message = "Projet not found";
-        //        return StatusCode(StatusCodes.Status400BadRequest, response);
-        //    }
+            var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Id == id);
+            if (selectedProject == null || selectedProject.IsDeleted)
+            {
+                response.AddError(localizer["There is no project with given Id."]);
+                response.Message = "Projet not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
 
-        //    var selectedProjectMember = vwsDbContext.ProjectMembers.FirstOrDefault(projectMember =>
-        //                                                            projectMember.UserProfileId == userId &&
-        //                                                            projectMember.IsDeleted == false &&
-        //                                                            projectMember.ProjectId == id);
-        //    if (selectedProjectMember == null)
-        //    {
-        //        response.AddError(localizer["You are not a memeber of project."]);
-        //        response.Message = "Project access denied";
-        //        return StatusCode(StatusCodes.Status403Forbidden, response);
-        //    }
+            var selectedProjectMember = vwsDbContext.ProjectMembers.FirstOrDefault(projectMember =>
+                                                                    projectMember.UserProfileId == userId &&
+                                                                    projectMember.IsDeleted == false &&
+                                                                    projectMember.ProjectId == id);
+            if (selectedProjectMember == null)
+            {
+                response.AddError(localizer["You are not a memeber of project."]);
+                response.Message = "Project access denied";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
 
-        //    selectedProject.IsDeleted = true;
-        //    selectedProject.ModifiedBy = userId;
-        //    selectedProject.ModifiedOn = DateTime.Now;
-        //    vwsDbContext.Save();
+            selectedProject.IsDeleted = true;
+            selectedProject.ModifiedBy = userId;
+            selectedProject.ModifiedOn = DateTime.Now;
+            vwsDbContext.Save();
 
-        //    response.Message = "Project deleted successfully!";
-        //    return Ok(response);
-        //}
+            response.Message = "Project deleted successfully!";
+            return Ok(response);
+        }
 
-        //[HttpGet]
-        //[Authorize]
-        //[Route("getActive")]
-        //public IEnumerable<ProjectResponseModel> GetActiveProject()
-        //{
-        //    var response = new List<ProjectResponseModel>();
-        //    Guid userId = LoggedInUserId.Value;
+        [HttpGet]
+        [Authorize]
+        [Route("getActive")]
+        public IEnumerable<ProjectResponseModel> GetActiveProject()
+        {
+            var response = new List<ProjectResponseModel>();
+            Guid userId = LoggedInUserId.Value;
 
-        //    HashSet<int> projectIds = vwsDbContext.ProjectMembers
-        //                              .Where(projectMember => projectMember.UserProfileId == userId && projectMember.IsDeleted == false)
-        //                              .Select(projectMember => projectMember.ProjectId).ToHashSet<int>();
+            HashSet<int> projectIds = vwsDbContext.ProjectMembers
+                                      .Where(projectMember => projectMember.UserProfileId == userId && projectMember.IsDeleted == false)
+                                      .Select(projectMember => projectMember.ProjectId).ToHashSet<int>();
 
-        //    var userProjects = vwsDbContext.Projects.Where(project => projectIds.Contains(project.Id) && project.IsDeleted == false && project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Active);
+            var userProjects = vwsDbContext.Projects.Where(project => projectIds.Contains(project.Id) && project.IsDeleted == false && project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Active);
 
-        //    foreach (var project in userProjects)
-        //    {
-        //        response.Add(new ProjectResponseModel()
-        //        {
-        //            Id = project.Id,
-        //            Description = project.Description,
-        //            Color = project.Color,
-        //            EndDate = project.EndDate,
-        //            Guid = project.Guid,
-        //            IsDelete = project.IsDeleted,
-        //            Name = project.Name,
-        //            StartDate = project.StartDate,
-        //            StatusId = project.StatusId,
-        //            TeamId = project.TeamId,
-        //            DepartmentId = project.DepartmentId,
-        //            ProjectImageId = project.ProjectImageId
-        //        });
-        //    }
+            foreach (var project in userProjects)
+            {
+                response.Add(new ProjectResponseModel()
+                {
+                    Id = project.Id,
+                    Description = project.Description,
+                    Color = project.Color,
+                    EndDate = project.EndDate,
+                    Guid = project.Guid,
+                    IsDelete = project.IsDeleted,
+                    Name = project.Name,
+                    StartDate = project.StartDate,
+                    StatusId = project.StatusId,
+                    TeamId = project.TeamId,
+                    DepartmentId = project.DepartmentId,
+                    ProjectImageId = project.ProjectImageId
+                });
+            }
 
-        //    return response;
-        //}
+            return response;
+        }
 
         //[HttpGet]
         //[Authorize]
