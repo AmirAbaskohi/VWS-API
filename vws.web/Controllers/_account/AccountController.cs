@@ -761,6 +761,16 @@ namespace vws.web.Controllers._account
             response.Message = "Culture set successfully!";
             return Ok(response);
         }
-     
+
+        [HttpGet]
+        [Authorize]
+        [Route("getUserProfileImage")]
+        public async Task<int?> GetUserProfileImage()
+        {
+            var userId = LoggedInUserId.Value;
+
+            var selectedProfile = await vwsDbContext.GetUserProfileAsync(userId);
+            return selectedProfile.ProfileImageId;
+        }
     }
 }
