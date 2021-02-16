@@ -6,13 +6,11 @@ using System.Threading.Tasks;
 
 namespace vws.web.Models._project
 {
-    public class AddTeamMateToProjectModel
+    public class AddUserToProjectModel
     {
         [Required]
+        public Guid UserId { get; set; }
+        [Required]
         public int ProjectId { get; set; }
-        [Required]
-        public int TeamId { get; set; }
-        [Required]
-        public string UserId { get; set; }
     }
 }

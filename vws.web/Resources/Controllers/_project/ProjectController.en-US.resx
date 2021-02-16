@@ -171,6 +171,9 @@
   <data name="There is no user with given Id." xml:space="preserve">
     <value>There is no user with given Id.</value>
   </data>
+  <data name="This user can not be added to project." xml:space="preserve">
+    <value>This user can not be added to project.</value>
+  </data>
   <data name="User you want to add, is already a member of selected project." xml:space="preserve">
     <value>User you want to add, is already a member of selected project.</value>
   </data>
