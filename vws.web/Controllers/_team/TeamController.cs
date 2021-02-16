@@ -685,11 +685,12 @@ namespace vws.web.Controllers._team
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var teamDepartments = vwsDbContext.Departments.Where(department => department.TeamId == id && department.IsDeleted);
+            var teamDepartments = vwsDbContext.Departments.Where(department => department.TeamId == id && !department.IsDeleted);
 
             foreach(var teamDepartment in teamDepartments)
                 departments.Add(new DepartmentResponseModel()
                 {
+                    Id = teamDepartment.Id,
                     Name = teamDepartment.Name,
                     DepartmentImageId = teamDepartment.DepartmentImageId,
                     Description = teamDepartment.Description,
