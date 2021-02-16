@@ -445,7 +445,8 @@ namespace vws.web.Controllers._project
                                       .Where(projectMember => projectMember.UserProfileId == userId && projectMember.IsDeleted == false)
                                       .Select(projectMember => projectMember.ProjectId).ToHashSet<int>();
 
-            var userProjects = vwsDbContext.Projects.Where(project => projectIds.Contains(project.Id) && project.IsDeleted == false && project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Active);
+            var userProjects = vwsDbContext.Projects.Include(project => project.ProjectDepartments)
+                                                    .Where(project => projectIds.Contains(project.Id) && project.IsDeleted == false && project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Active);
 
             foreach (var project in userProjects)
             {
@@ -461,85 +462,87 @@ namespace vws.web.Controllers._project
                     StartDate = project.StartDate,
                     StatusId = project.StatusId,
                     TeamId = project.TeamId,
-                    DepartmentId = project.DepartmentId,
-                    ProjectImageId = project.ProjectImageId
+                    ProjectImageId = project.ProjectImageId,
+                    DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList()
                 });
             }
 
             return response;
         }
 
-        //[HttpGet]
-        //[Authorize]
-        //[Route("getHold")]
-        //public IEnumerable<ProjectResponseModel> GetHoldProject()
-        //{
-        //    var response = new List<ProjectResponseModel>();
-        //    Guid userId = LoggedInUserId.Value;
+        [HttpGet]
+        [Authorize]
+        [Route("getHold")]
+        public IEnumerable<ProjectResponseModel> GetHoldProject()
+        {
+            var response = new List<ProjectResponseModel>();
+            Guid userId = LoggedInUserId.Value;
 
-        //    HashSet<int> projectIds = vwsDbContext.ProjectMembers
-        //                              .Where(projectMember => projectMember.UserProfileId == userId && projectMember.IsDeleted == false)
-        //                              .Select(projectMember => projectMember.ProjectId).ToHashSet<int>();
+            HashSet<int> projectIds = vwsDbContext.ProjectMembers
+                                      .Where(projectMember => projectMember.UserProfileId == userId && projectMember.IsDeleted == false)
+                                      .Select(projectMember => projectMember.ProjectId).ToHashSet<int>();
 
-        //    var userProjects = vwsDbContext.Projects.Where(project => projectIds.Contains(project.Id) && project.IsDeleted == false && project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Hold);
+            var userProjects = vwsDbContext.Projects.Include(project => project.ProjectDepartments)
+                                                    .Where(project => projectIds.Contains(project.Id) && project.IsDeleted == false && project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Hold);
 
-        //    foreach (var project in userProjects)
-        //    {
-        //        response.Add(new ProjectResponseModel()
-        //        {
-        //            Id = project.Id,
-        //            Description = project.Description,
-        //            Color = project.Color,
-        //            EndDate = project.EndDate,
-        //            Guid = project.Guid,
-        //            IsDelete = project.IsDeleted,
-        //            Name = project.Name,
-        //            StartDate = project.StartDate,
-        //            StatusId = project.StatusId,
-        //            TeamId = project.TeamId,
-        //            DepartmentId = project.DepartmentId,
-        //            ProjectImageId = project.ProjectImageId
-        //        });
-        //    }
+            foreach (var project in userProjects)
+            {
+                response.Add(new ProjectResponseModel()
+                {
+                    Id = project.Id,
+                    Description = project.Description,
+                    Color = project.Color,
+                    EndDate = project.EndDate,
+                    Guid = project.Guid,
+                    IsDelete = project.IsDeleted,
+                    Name = project.Name,
+                    StartDate = project.StartDate,
+                    StatusId = project.StatusId,
+                    TeamId = project.TeamId,
+                    ProjectImageId = project.ProjectImageId,
+                    DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList()
+                });
+            }
 
-        //    return response;
-        //}
+            return response;
+        }
 
-        //[HttpGet]
-        //[Authorize]
-        //[Route("getDoneOrArchived")]
-        //public IEnumerable<ProjectResponseModel> GetDoneOrArchivedProject()
-        //{
-        //    var response = new List<ProjectResponseModel>();
-        //    Guid userId = LoggedInUserId.Value;
+        [HttpGet]
+        [Authorize]
+        [Route("getDoneOrArchived")]
+        public IEnumerable<ProjectResponseModel> GetDoneOrArchivedProject()
+        {
+            var response = new List<ProjectResponseModel>();
+            Guid userId = LoggedInUserId.Value;
 
-        //    HashSet<int> projectIds = vwsDbContext.ProjectMembers
-        //                              .Where(projectMember => projectMember.UserProfileId == userId && projectMember.IsDeleted == false)
-        //                              .Select(projectMember => projectMember.ProjectId).ToHashSet<int>();
+            HashSet<int> projectIds = vwsDbContext.ProjectMembers
+                                      .Where(projectMember => projectMember.UserProfileId == userId && projectMember.IsDeleted == false)
+                                      .Select(projectMember => projectMember.ProjectId).ToHashSet<int>();
 
-        //    var userProjects = vwsDbContext.Projects.Where(project => projectIds.Contains(project.Id) && project.IsDeleted == false && project.StatusId == (byte)SeedDataEnum.ProjectStatuses.DoneOrArchived);
+            var userProjects = vwsDbContext.Projects.Include(project => project.ProjectDepartments)
+                                                    .Where(project => projectIds.Contains(project.Id) && project.IsDeleted == false && project.StatusId == (byte)SeedDataEnum.ProjectStatuses.DoneOrArchived);
 
-        //    foreach (var project in userProjects)
-        //    {
-        //        response.Add(new ProjectResponseModel()
-        //        {
-        //            Id = project.Id,
-        //            Description = project.Description,
-        //            Color = project.Color,
-        //            EndDate = project.EndDate,
-        //            Guid = project.Guid,
-        //            IsDelete = project.IsDeleted,
-        //            Name = project.Name,
-        //            StartDate = project.StartDate,
-        //            StatusId = project.StatusId,
-        //            TeamId = project.TeamId,
-        //            DepartmentId = project.DepartmentId,
-        //            ProjectImageId = project.ProjectImageId
-        //        });
-        //    }
+            foreach (var project in userProjects)
+            {
+                response.Add(new ProjectResponseModel()
+                {
+                    Id = project.Id,
+                    Description = project.Description,
+                    Color = project.Color,
+                    EndDate = project.EndDate,
+                    Guid = project.Guid,
+                    IsDelete = project.IsDeleted,
+                    Name = project.Name,
+                    StartDate = project.StartDate,
+                    StatusId = project.StatusId,
+                    TeamId = project.TeamId,
+                    ProjectImageId = project.ProjectImageId,
+                    DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList()
+                });
+            }
 
-        //    return response;
-        //}
+            return response;
+        }
 
         [HttpPost]
         [Authorize]
