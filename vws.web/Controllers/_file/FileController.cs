@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using vws.web.Domain;
 using vws.web.Models;
+using vws.web.Models._file;
 using vws.web.Repositories;
 
 namespace vws.web.Controllers._file
@@ -41,11 +42,16 @@ namespace vws.web.Controllers._file
         public async Task<IActionResult> UploadFiles(List<IFormFile> formFiles)
         {
             var files = Request.Form.Files.Union(formFiles);
-            var response = new ResponseModel();
+            var response = new ResponseModel<FileUploadResponseModel>();
+
+            List<string> fileNames = files.Select(file => file.FileName).ToList();
+
             List<Domain._file.File> successfullyUploadedFiles = new List<Domain._file.File>();
-            List<Domain._file.FileContainer> successfullyUploadedFileContainers = new List<Domain._file.FileContainer>();
+            Domain._file.FileContainer tempFileContainer = null;
+
             bool hasError = false;
             var time = DateTime.Now;
+
             foreach (var file in files)
             {
                 var newFileContainer = new Domain._file.FileContainer()
@@ -58,7 +64,7 @@ namespace vws.web.Controllers._file
                 };
                 await vwsDbContext.AddFileContainerAsync(newFileContainer);
                 vwsDbContext.Save();
-                successfullyUploadedFileContainers.Add(newFileContainer);
+                tempFileContainer = newFileContainer;
                 var result = await fileManager.WriteFile(file, LoggedInUserId.Value, "files", newFileContainer.Id);
                 if (result.HasError)
                 {
@@ -74,22 +80,29 @@ namespace vws.web.Controllers._file
                     vwsDbContext.Save();
                 }
             }
-            vwsDbContext.Save();
+
+            var successfulFileNames = successfullyUploadedFiles.Select(file => file.Name).ToList();
+
             if (hasError)
             {
-                foreach (var successFile in successfullyUploadedFiles)
+                var successFileNames = successfullyUploadedFiles.Select(file => file.Name).ToList();
+
+                vwsDbContext.DeleteFileContainer(tempFileContainer);
+
+                vwsDbContext.Save();          
+
+                var fileUploadResponseModel = new FileUploadResponseModel()
                 {
-                    fileManager.DeleteFile(successFile.Address);
-                    vwsDbContext.DeleteFile(successFile);
-                }
-                foreach (var successfileContainer in successfullyUploadedFileContainers)
-                {
-                    vwsDbContext.DeleteFileContainer(successfileContainer);
-                }
-                vwsDbContext.Save();
+                    SuccessfulFileUpload = successfulFileNames,
+                    UnsuccessfulFileUpload = fileNames.Except(successfulFileNames).ToList()
+                };
+
+                response.Value = fileUploadResponseModel;
                 response.Message = "Unsuccessful writing";
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
             }
+
+            response.Value = new FileUploadResponseModel() { SuccessfulFileUpload = successfulFileNames };
             response.Message = "Successful writing";
             return Ok(response);
         }
