@@ -17,6 +17,7 @@ using vws.web.Repositories;
 using vws.web.Domain._file;
 using Microsoft.EntityFrameworkCore;
 using vws.web.Enums;
+using vws.web.Models._department;
 
 namespace vws.web.Controllers._team
 {
@@ -570,12 +571,12 @@ namespace vws.web.Controllers._team
         [HttpGet]
         [Authorize]
         [Route("getTeammates")]
-        public async Task<IActionResult> GetTeammates(int teamId)
+        public async Task<IActionResult> GetTeammates(int id)
         {
             var response = new ResponseModel<List<UserModel>>();
             var teammatesList = new List<UserModel>();
 
-            var selectedTeam = await vwsDbContext.GetTeamAsync(teamId);
+            var selectedTeam = await vwsDbContext.GetTeamAsync(id);
             var userId = LoggedInUserId.Value;
 
             if(selectedTeam == null || selectedTeam.IsDeleted)
@@ -585,7 +586,7 @@ namespace vws.web.Controllers._team
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync(teamId, userId);
+            var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync(id, userId);
             if (selectedTeamMember == null)
             {
                 response.Message = "Access team is forbidden";
@@ -595,7 +596,7 @@ namespace vws.web.Controllers._team
 
             List<UserProfile> userTeamMates = vwsDbContext.TeamMembers
                 .Include(teamMember => teamMember.UserProfile)
-                .Where(teamMember => teamMember.TeamId == teamId && teamMember.HasUserLeft == false)
+                .Where(teamMember => teamMember.TeamId == id && teamMember.HasUserLeft == false)
                 .Select(teamMember => teamMember.UserProfile).Distinct().ToList();
 
             foreach(var teamMate in userTeamMates)
@@ -655,6 +656,54 @@ namespace vws.web.Controllers._team
                 TeamImageId = selectedTeam.TeamImageId
             };
             response.Message = "Team retured successfully!";
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getDepartments")]
+        public async Task<IActionResult> GetTeamDepartments(int id)
+        {
+            var response = new ResponseModel<List<DepartmentResponseModel>>();
+            var departments = new List<DepartmentResponseModel>();
+            var userId = LoggedInUserId.Value;
+
+            var selectedTeam = await vwsDbContext.GetTeamAsync(id);
+
+            if (selectedTeam == null || selectedTeam.IsDeleted)
+            {
+                response.Message = "Team not found";
+                response.AddError(localizer["There is no team with given Id."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync(id, userId);
+            if (selectedTeamMember == null)
+            {
+                response.Message = "Access team is forbidden";
+                response.AddError(localizer["You are not a member of team."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var teamDepartments = vwsDbContext.Departments.Where(department => department.TeamId == id && department.IsDeleted);
+
+            foreach(var teamDepartment in teamDepartments)
+                departments.Add(new DepartmentResponseModel()
+                {
+                    Name = teamDepartment.Name,
+                    DepartmentImageId = teamDepartment.DepartmentImageId,
+                    Description = teamDepartment.Description,
+                    Color = teamDepartment.Color,
+                    CreatedBy = (await userManager.FindByIdAsync(teamDepartment.CreatedBy.ToString())).UserName,
+                    CreatedOn = teamDepartment.CreatedOn,
+                    Guid = teamDepartment.Guid,
+                    ModifiedBy = (await userManager.FindByIdAsync(teamDepartment.ModifiedBy.ToString())).UserName,
+                    ModifiedOn = teamDepartment.ModifiedOn,
+                    TeamId = teamDepartment.TeamId
+                });
+
+            response.Value = departments;
+            response.Message = "Team departments returned successfully!";
             return Ok(response);
         }
     }
