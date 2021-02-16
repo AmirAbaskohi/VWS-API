@@ -194,7 +194,7 @@ namespace vws.web.Controllers._department
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!vwsDbContext.DepartmentMembers.Any(departmentMember => departmentMember.Id == model.Id &&
+            if (!vwsDbContext.DepartmentMembers.Any(departmentMember => departmentMember.DepartmentId == model.Id &&
                                                    departmentMember.UserProfileId == userId && departmentMember.IsDeleted == false))
             {
                 response.AddError(localizer["You are not member of given department."]);
@@ -261,13 +261,17 @@ namespace vws.web.Controllers._department
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!vwsDbContext.DepartmentMembers.Any(departmentMember => departmentMember.Id == id &&
+            if (!vwsDbContext.DepartmentMembers.Any(departmentMember => departmentMember.DepartmentId == id &&
                                                    departmentMember.UserProfileId == userId && departmentMember.IsDeleted == false))
             {
                 response.AddError(localizer["You are not member of given department."]);
                 response.Message = "Department access denied";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
+
+            var departmentProjects = vwsDbContext.ProjectDepartments.Where(projectDepartment => projectDepartment.DepartmentId == id);
+            foreach (var departmentProject in departmentProjects)
+                vwsDbContext.DeleteProjectDepartment(departmentProject);
 
             selectedDepartment.IsDeleted = true;
             selectedDepartment.ModifiedBy = userId;
@@ -535,7 +539,7 @@ namespace vws.web.Controllers._department
         [HttpGet]
         [Authorize]
         [Route("get")]
-        public async Task<IActionResult> GetTeam(int id)
+        public async Task<IActionResult> GetDepartment(int id)
         {
             Guid userId = LoggedInUserId.Value;
 
@@ -550,7 +554,7 @@ namespace vws.web.Controllers._department
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var departmentMember = vwsDbContext.DepartmentMembers.FirstOrDefault(departmentMember => departmentMember.Id == id &&
+            var departmentMember = vwsDbContext.DepartmentMembers.FirstOrDefault(departmentMember => departmentMember.DepartmentId == id &&
                                                                                  departmentMember.UserProfileId == userId &&
                                                                                  departmentMember.IsDeleted == false);
 

@@ -535,9 +535,32 @@ namespace vws.web.Controllers._team
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
+            var deletionTime = DateTime.Now;
+
             selectedTeam.IsDeleted = true;
             selectedTeam.ModifiedBy = userId;
-            selectedTeam.ModifiedOn = DateTime.Now;
+            selectedTeam.ModifiedOn = deletionTime;
+
+            var teamProjects = vwsDbContext.Projects.Where(project => project.TeamId == teamId &&
+                                                                      !project.IsDeleted);
+
+            var teamDepartments = vwsDbContext.Departments.Where(department => department.TeamId == teamId &&
+                                                                               !department.IsDeleted);
+
+            foreach (var teamProject in teamProjects)
+            {
+                teamProject.IsDeleted = true;
+                teamProject.ModifiedBy = userId;
+                teamProject.ModifiedOn = deletionTime;
+            }
+
+            foreach (var teamDepartment in teamDepartments)
+            {
+                teamDepartment.IsDeleted = true;
+                teamDepartment.ModifiedBy = userId;
+                teamDepartment.ModifiedOn = deletionTime;
+            }
+
             vwsDbContext.Save();
 
             response.Message = "Team deleted successfully!";
