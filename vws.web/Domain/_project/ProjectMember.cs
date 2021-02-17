@@ -15,8 +15,13 @@ namespace vws.web.Domain._project
 
         public DateTime CreatedOn { get; set; }
 
+        public DateTime PermittedOn { get; set; }
+
         public DateTime? DeletedOn { get; set; }
+
         public bool IsDeleted { get; set; }
+
+        public bool? IsPermittedByCreator { get; set; }
 
         public virtual Project Project { get; set; }
 

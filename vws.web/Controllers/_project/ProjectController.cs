@@ -13,6 +13,7 @@ using vws.web.Domain;
 using vws.web.Domain._base;
 using vws.web.Domain._file;
 using vws.web.Domain._project;
+using vws.web.Domain._team;
 using vws.web.Enums;
 using vws.web.Models;
 using vws.web.Models._project;
@@ -112,7 +113,7 @@ namespace vws.web.Controllers._project
             return result;
         }
 
-        private List<Guid> GetAvailableUsersToAddProject(Project project)
+        private List<Guid> GetAvailableUsersToAddProject(Project project, Guid userId)
         {
             var availableUsers = new List<Guid>();
 
@@ -120,32 +121,93 @@ namespace vws.web.Controllers._project
                                                                                   !projectMember.IsDeleted)
                                                           .Select(projectMember => projectMember.UserProfileId);
 
-            if (project.ProjectDepartments.Count != 0)
-            {
-                List<Guid> departmentsUsers = new List<Guid>();
+            List<Team> userTeams = vwsDbContext.GetUserTeams(userId).ToList();
+            List<Guid> userTeamMates = vwsDbContext.TeamMembers
+                .Where(teamMember => userTeams.Select(userTeam => userTeam.Id).Contains(teamMember.TeamId) && !teamMember.HasUserLeft)
+                .Select(teamMember => teamMember.UserProfileId).Distinct().ToList();
 
-                foreach(var departemtnId in project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId))
-                {
-                    var departmentMembers = vwsDbContext.DepartmentMembers.Where(departmentMember => departmentMember.DepartmentId == departemtnId &&
-                                                                                                     !departmentMember.IsDeleted)
-                                                                          .Select(departmentMember => departmentMember.UserProfileId);
-
-                    departmentsUsers.AddRange(departmentMembers.ToList());
-                }
-
-                availableUsers = departmentsUsers.Except(projectUsers).ToList();
-            }
-            else if (project.TeamId != null)
-            {
-                var selectedTeam = project.Team;
-                var teamUsers = vwsDbContext.TeamMembers.Where(teamMember => teamMember.TeamId == project.TeamId &&
-                                                                             !teamMember.HasUserLeft)
-                                                        .Select(teamMember => teamMember.UserProfileId);
-
-                availableUsers = teamUsers.Except(projectUsers).ToList();
-            }
+            availableUsers = userTeamMates.Except(projectUsers).ToList();
 
             return availableUsers;
+        }
+
+        private bool HasAccessToProject(Guid userId, int projectId)
+        {
+            var selectedProject = vwsDbContext.Projects.Include(project => project.ProjectDepartments)
+                                                       .FirstOrDefault(project => project.Id == projectId);
+
+            if(selectedProject.TeamId != null)
+            {
+                List<Guid> projectUsers = new List<Guid>();
+
+                if (selectedProject.ProjectDepartments.Count == 0)
+                {
+                    projectUsers = vwsDbContext.TeamMembers.Where(teamMember => teamMember.TeamId == (int)selectedProject.TeamId &&
+                                                                                                     !teamMember.HasUserLeft)
+                                                           .Select(teamMember => teamMember.UserProfileId)
+                                                           .ToList();
+                }
+
+                else
+                {
+                    foreach(var departmentId in selectedProject.ProjectDepartments.Select(pd => pd.DepartmentId))
+                    {
+                        projectUsers.AddRange(vwsDbContext.DepartmentMembers.Where(departmentMember => departmentMember.DepartmentId == departmentId &&
+                                                                                                       !departmentMember.IsDeleted)
+                                                                            .Select(departmentMember => departmentMember.UserProfileId)
+                                                                            .ToList());
+                    }
+                }
+
+                return projectUsers.Contains(userId);
+            }
+
+            var selectedProjectMember = vwsDbContext.ProjectMembers.FirstOrDefault(projectMember => !projectMember.IsDeleted &&
+                                                                                                    projectMember.IsPermittedByCreator == true &&
+                                                                                                    projectMember.ProjectId == projectId &&
+                                                                                                    projectMember.UserProfileId == userId);
+
+            return selectedProjectMember != null; 
+        }
+
+        private List<Project> GetAllUserProjects(Guid userId)
+        {
+            List<Project> userProjects = new List<Project>();
+
+            List<int> userTeams = vwsDbContext.GetUserTeams(userId).Select(team => team.Id).ToList();
+            List<int> userDepartments = vwsDbContext.DepartmentMembers.Include(departmentMember => departmentMember.Department)
+                                                                      .Where(departmentMember => !departmentMember.IsDeleted &&
+                                                                                                 departmentMember.UserProfileId == userId &&
+                                                                                                 !departmentMember.Department.IsDeleted)
+                                                                      .Select(departmentMember => departmentMember.DepartmentId)
+                                                                      .ToList();
+
+            userProjects.AddRange(vwsDbContext.Projects.Include(project => project.ProjectDepartments)
+                                                       .Where(project => project.IsDeleted == false &&
+                                                                         project.TeamId != null &&
+                                                                         project.ProjectDepartments.Count == 0 &&
+                                                                         userTeams.Contains((int)project.TeamId))
+                                                       .ToList());
+
+            foreach(var project in vwsDbContext.Projects.Include(project => project.ProjectDepartments))
+            {
+                if(project.IsDeleted == false && project.TeamId != null &&
+                   project.ProjectDepartments.Count != 0 &&
+                   userTeams.Contains((int)project.TeamId) &&
+                   project.ProjectDepartments.Select(pd => pd.DepartmentId).Intersect(userDepartments).Any())
+                {
+                    userProjects.Add(project);
+                }
+            }
+
+            userProjects.AddRange(vwsDbContext.ProjectMembers.Include(projectMember => projectMember.Project)
+                                                             .Where(projectMember => projectMember.UserProfileId == userId &&
+                                                                                     !projectMember.IsDeleted &&
+                                                                                     projectMember.IsPermittedByCreator == true &&
+                                                                                     !projectMember.Project.IsDeleted)
+                                                             .Select(projectMember => projectMember.Project));
+
+            return userProjects;
         }
 
         [HttpPost]
@@ -243,16 +305,20 @@ namespace vws.web.Controllers._project
             foreach (var departmentId in model.DepartmentIds)
                 vwsDbContext.AddProjectDepartment(new ProjectDepartment { DepartmentId = departmentId, ProjectId = newProject.Id });
 
-            var newProjectMember = new ProjectMember()
+            if(newProject.TeamId == null)
             {
-                CreatedOn = creationTime,
-                ProjectId = newProject.Id,
-                UserProfileId = userId,
-                IsDeleted = false
-            };
-
-            await vwsDbContext.AddProjectMemberAsync(newProjectMember);
-            vwsDbContext.Save();
+                var newProjectMember = new ProjectMember()
+                {
+                    CreatedOn = creationTime,
+                    ProjectId = newProject.Id,
+                    UserProfileId = userId,
+                    IsDeleted = false,
+                    IsPermittedByCreator = true,
+                    PermittedOn = creationTime
+                };
+                await vwsDbContext.AddProjectMemberAsync(newProjectMember);
+                vwsDbContext.Save();
+            }
 
             var newProjectResponse = new ProjectResponseModel()
             {
@@ -352,11 +418,7 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var selectedProjectMember = vwsDbContext.ProjectMembers.FirstOrDefault(projectMember =>
-                                                                    projectMember.UserProfileId == userId &&
-                                                                    projectMember.IsDeleted == false &&
-                                                                    projectMember.ProjectId == model.Id);
-            if (selectedProject == null)
+            if (!HasAccessToProject(userId, model.Id))
             {
                 response.Message = "Project access denied";
                 response.AddError(localizer["You are not a memeber of project."]);
@@ -449,14 +511,17 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var selectedProjectMember = vwsDbContext.ProjectMembers.FirstOrDefault(projectMember =>
-                                                                    projectMember.UserProfileId == userId &&
-                                                                    projectMember.IsDeleted == false &&
-                                                                    projectMember.ProjectId == id);
-            if (selectedProjectMember == null)
+            if (HasAccessToProject(userId, id))
             {
                 response.AddError(localizer["You are not a memeber of project."]);
                 response.Message = "Project access denied";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            if(selectedProject.TeamId == null && userId != selectedProject.CreateBy)
+            {
+                response.AddError(localizer["Deleting personal project just can be done by creator."]);
+                response.Message = "Delete project access denied";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
@@ -477,12 +542,7 @@ namespace vws.web.Controllers._project
             var response = new List<ProjectResponseModel>();
             Guid userId = LoggedInUserId.Value;
 
-            HashSet<int> projectIds = vwsDbContext.ProjectMembers
-                                      .Where(projectMember => projectMember.UserProfileId == userId && projectMember.IsDeleted == false)
-                                      .Select(projectMember => projectMember.ProjectId).ToHashSet<int>();
-
-            var userProjects = vwsDbContext.Projects.Include(project => project.ProjectDepartments)
-                                                    .Where(project => projectIds.Contains(project.Id) && project.IsDeleted == false && project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Active);
+            var userProjects = GetAllUserProjects(userId).Where(project => project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Active);
 
             foreach (var project in userProjects)
             {
@@ -514,12 +574,7 @@ namespace vws.web.Controllers._project
             var response = new List<ProjectResponseModel>();
             Guid userId = LoggedInUserId.Value;
 
-            HashSet<int> projectIds = vwsDbContext.ProjectMembers
-                                      .Where(projectMember => projectMember.UserProfileId == userId && projectMember.IsDeleted == false)
-                                      .Select(projectMember => projectMember.ProjectId).ToHashSet<int>();
-
-            var userProjects = vwsDbContext.Projects.Include(project => project.ProjectDepartments)
-                                                    .Where(project => projectIds.Contains(project.Id) && project.IsDeleted == false && project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Hold);
+            var userProjects = GetAllUserProjects(userId).Where(project => project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Hold);
 
             foreach (var project in userProjects)
             {
@@ -551,12 +606,7 @@ namespace vws.web.Controllers._project
             var response = new List<ProjectResponseModel>();
             Guid userId = LoggedInUserId.Value;
 
-            HashSet<int> projectIds = vwsDbContext.ProjectMembers
-                                      .Where(projectMember => projectMember.UserProfileId == userId && projectMember.IsDeleted == false)
-                                      .Select(projectMember => projectMember.ProjectId).ToHashSet<int>();
-
-            var userProjects = vwsDbContext.Projects.Include(project => project.ProjectDepartments)
-                                                    .Where(project => projectIds.Contains(project.Id) && project.IsDeleted == false && project.StatusId == (byte)SeedDataEnum.ProjectStatuses.DoneOrArchived);
+            var userProjects = GetAllUserProjects(userId).Where(project => project.StatusId == (byte)SeedDataEnum.ProjectStatuses.DoneOrArchived);
 
             foreach (var project in userProjects)
             {
@@ -600,14 +650,21 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!vwsDbContext.ProjectMembers.Any(projectMember => projectMember.UserProfileId == userId && projectMember.ProjectId == Id && !projectMember.IsDeleted))
+            if(selectedProject.TeamId != null)
+            {
+                response.AddError(localizer["Adding user is just for personal projects."]);
+                response.Message = "Unpersonal project";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (HasAccessToProject(userId, Id))
             {
                 response.AddError(localizer["You are not a memeber of project."]);
                 response.Message = "Project access denied";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            var availableUsers = GetAvailableUsersToAddProject(selectedProject);
+            var availableUsers = GetAvailableUsersToAddProject(selectedProject, userId);
 
             foreach (var availableUserId in availableUsers)
             {
@@ -645,21 +702,31 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!vwsDbContext.ProjectMembers.Any(projectMember => projectMember.UserProfileId == userId && projectMember.ProjectId == model.ProjectId && !projectMember.IsDeleted))
+            if (selectedProject.TeamId != null)
+            {
+                response.AddError(localizer["Adding user is just for personal projects."]);
+                response.Message = "Unpersonal project";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (HasAccessToProject(userId, model.ProjectId))
             {
                 response.AddError(localizer["You are not a memeber of project."]);
                 response.Message = "Project access denied";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            if (vwsDbContext.ProjectMembers.Any(projectMember => projectMember.UserProfileId == model.UserId && projectMember.ProjectId == model.ProjectId && !projectMember.IsDeleted))
+            if (vwsDbContext.ProjectMembers.Any(projectMember => projectMember.UserProfileId == model.UserId && 
+                                                                 projectMember.ProjectId == model.ProjectId &&
+                                                                 !projectMember.IsDeleted &&
+                                                                 (projectMember.IsPermittedByCreator != false)))
             {
                 response.AddError(localizer["User you want to add, is already a member of selected project."]);
                 response.Message = "Already member of project";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var availableUsers = GetAvailableUsersToAddProject(selectedProject);
+            var availableUsers = GetAvailableUsersToAddProject(selectedProject, userId);
             if(!availableUsers.Contains(model.UserId))
             {
                 response.AddError(localizer["This user can not be added to project."]);
@@ -672,7 +739,8 @@ namespace vws.web.Controllers._project
                 CreatedOn = DateTime.Now,
                 IsDeleted = false,
                 ProjectId = model.ProjectId,
-                UserProfileId = model.UserId
+                UserProfileId = model.UserId,
+                IsPermittedByCreator = (userId == selectedProject.CreateBy) ? (bool?)true : null
             };
 
             await vwsDbContext.AddProjectMemberAsync(newPorjectMember);
@@ -797,11 +865,7 @@ namespace vws.web.Controllers._project
 
             var userId = LoggedInUserId.Value;
 
-            var selectedProjectMember = vwsDbContext.ProjectMembers.FirstOrDefault(projectMember => projectMember.UserProfileId == userId &&
-                                                                                                    projectMember.IsDeleted == false &&
-                                                                                                    projectMember.ProjectId == id);
-
-            if(selectedProjectMember == null)
+            if(HasAccessToProject(userId, id))
             {
                 response.AddError(localizer["You are not a memeber of project."]);
                 response.Message = "Not member of project";
