@@ -418,10 +418,20 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
+            bool isProjectPersonal = selectedProject.TeamId == null ? true : false;
+            bool willBeProjectPersonal = model.TeamId == null ? true : false;
+
             if (!HasAccessToProject(userId, model.Id))
             {
                 response.Message = "Project access denied";
                 response.AddError(localizer["You are not a memeber of project."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            if (isProjectPersonal && userId != selectedProject.CreateBy)
+            {
+                response.AddError(localizer["Updating personal project just can be done by creator."]);
+                response.Message = "Update project access denied";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
@@ -442,6 +452,13 @@ namespace vws.web.Controllers._project
                     response.AddError(localizer["Start Date should be before End Date."]);
                     return StatusCode(StatusCodes.Status500InternalServerError, response);
                 }
+            }
+
+            if(!isProjectPersonal && willBeProjectPersonal)
+            {
+                response.AddError(localizer["You can not change non-personal project to personal project."]);
+                response.Message = "Non-personal project to project";
+                return StatusCode(StatusCodes.Status406NotAcceptable, response);
             }
 
             List<int> projectDepartmentsIds = selectedProject.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList();
@@ -470,6 +487,13 @@ namespace vws.web.Controllers._project
 
             foreach (var addProjectDepartment in shouldBeAdded)
                 vwsDbContext.AddProjectDepartment(new ProjectDepartment() { ProjectId = model.Id, DepartmentId = addProjectDepartment });
+
+            if(isProjectPersonal && !willBeProjectPersonal)
+            {
+                var projectMembers = vwsDbContext.ProjectMembers.Where(projectMember => projectMember.ProjectId == model.Id);
+                foreach (var projectMember in projectMembers)
+                    vwsDbContext.DeleteProjectMember(projectMember);
+            }
 
             vwsDbContext.Save();
 

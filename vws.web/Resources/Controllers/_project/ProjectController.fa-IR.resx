@@ -180,8 +180,11 @@
   <data name="This user can not be added to project." xml:space="preserve">
     <value>این کاربر نمی تواند عضو پروژه شود.</value>
   </data>
+  <data name="Updating personal project just can be done by creator." xml:space="preserve">
+    <value>آپدیت پروژه شخصی تنها توسط سازنده پروژه امکان پذیر است.</value>
+  </data>
   <data name="User you want to add, is already a member of selected project." xml:space="preserve">
-    <value>کاربری مه می خواهید به پروژه اضافه کنید، هم اکنون عضوی از پروژه انتخاب شده می باشد.</value>
+    <value>کاربری که می خواهید به پروژه اضافه کنید، هم اکنون عضوی از پروژه انتخاب شده می باشد.</value>
   </data>
   <data name="User you want to to add, is not a member of selected team." xml:space="preserve">
     <value>کاربری که می خواهید اضافه کنید، عضوی از تیم انتخاب شده نمی باشد.</value>
@@ -197,6 +200,9 @@
   </data>
   <data name="You are not member of selected department." xml:space="preserve">
     <value>شما عضوی ازدپارتمان انتخاب شده نیستید.</value>
+  </data>
+  <data name="You can not change non-personal project to personal project." xml:space="preserve">
+    <value>شما نمی توانید پروژه غیر شخصی را به پروژه شخصی تبدیل کنید.</value>
   </data>
   <data name="You did not upload an image." xml:space="preserve">
     <value>شما عکسی آپلود نکردید.</value>
