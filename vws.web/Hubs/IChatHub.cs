@@ -13,5 +13,7 @@ namespace vws.web.Hubs
         Task InformUserIsOnline(Guid userId);
 
         Task UnmuteChannel(Guid channelId, byte channelTypeId);
+
+        Task ReviceDeleteMessage(long messageId, Guid channelId, byte channelTypeId);
     }
 }

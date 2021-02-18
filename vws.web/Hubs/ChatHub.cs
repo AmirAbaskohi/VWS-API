@@ -151,5 +151,18 @@ namespace vws.web.Hubs
                                                true, newMessage.ChannelTypeId, newMessage.ChannelId,
                                                newMessage.SendOn, newMessage.FromUserName, newMessage.ReplyTo);
         }
+
+        public async Task DeleteMessage(long messageId, Guid channelId)
+        {
+            var selectedMessage = vwsDbContext.Messages.FirstOrDefault(message => message.Id == messageId);
+
+            if (selectedMessage == null || selectedMessage.IsDeleted || selectedMessage.FromUserName != LoggedInUserName)
+                return;
+
+            selectedMessage.IsDeleted = true;
+            vwsDbContext.Save();
+
+            await Clients.Group(channelId.ToString()).ReviceDeleteMessage(messageId, channelId, selectedMessage.ChannelTypeId);
+        }
     }
 }
