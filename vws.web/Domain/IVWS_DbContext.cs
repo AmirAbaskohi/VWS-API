@@ -90,6 +90,7 @@ namespace vws.web.Domain
         public Task<MutedChannel> GetMutedChannelAsync(Guid channelId, Guid userId, byte channelTypeId);
         public PinnedChannel AddPinnedChannel(PinnedChannel pinnedChannel);
         public PinnedChannel DeletePinnedChannel(PinnedChannel pinnedChannel);
+        public ChannelTransaction AddChannelTransaction(ChannelTransaction channelTransaction);
 
         #endregion
 

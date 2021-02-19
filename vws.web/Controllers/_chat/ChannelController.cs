@@ -101,7 +101,7 @@ namespace vws.web.Controllers._chat
                                                                                                         transaction.ChannelId == channelResponseModel.Guid);
 
                 if (channelTransaction != null)
-                    channelTransaction.LastTransactionDateTime = channelTransaction.LastTransactionDateTime;
+                    channelResponseModel.LastTransactionDateTime = channelTransaction.LastTransactionDateTime;
             }
         }
 
@@ -122,8 +122,8 @@ namespace vws.web.Controllers._chat
 
             SetChannelLastTransactionDateTime(ref channelResponseModels);
 
-            channelResponseModels.OrderByDescending(channelResponseModel => channelResponseModel.LastTransactionDateTime);
-            channelResponseModels.OrderByDescending(channelResponseModel => channelResponseModel.EvenOrder);
+            channelResponseModels = channelResponseModels.OrderByDescending(channelResponseModel => channelResponseModel.LastTransactionDateTime).ToList();
+            channelResponseModels = channelResponseModels.OrderByDescending(channelResponseModel => channelResponseModel.EvenOrder).ToList();
 
             return Ok(new ResponseModel<List<ChannelResponseModel>>(channelResponseModels));
 

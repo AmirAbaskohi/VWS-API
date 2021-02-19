@@ -185,6 +185,12 @@ namespace vws.web.Domain
             return pinnedChannel;
         }
 
+        public ChannelTransaction AddChannelTransaction(ChannelTransaction channelTransaction)
+        {
+            ChannelTransactions.Add(channelTransaction);
+            return channelTransaction;
+        }
+
         #endregion
 
         #region department

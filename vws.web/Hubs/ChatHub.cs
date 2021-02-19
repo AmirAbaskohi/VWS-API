@@ -116,9 +116,10 @@ namespace vws.web.Hubs
                 {
                     ChannelId = channelId,
                     ChannelTypeId = channelTypeId,
-                    UserProfileId = (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private) ? null : (Guid?)userId,
+                    UserProfileId = (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private) ? (Guid?)userId : null,
                     LastTransactionDateTime = transactionTime
                 };
+                vwsDbContext.AddChannelTransaction(newChannelTransaction);
             }
             else
                 channelTransaction.LastTransactionDateTime = transactionTime;
