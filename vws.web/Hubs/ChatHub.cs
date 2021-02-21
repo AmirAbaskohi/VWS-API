@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using System;
@@ -8,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using vws.web.Core;
 using vws.web.Domain;
+using vws.web.Domain._base;
 using vws.web.Domain._chat;
 using vws.web.Enums;
 using vws.web.Extensions;
@@ -27,13 +29,15 @@ namespace vws.web.Hubs
         private readonly IVWS_DbContext vwsDbContext;
         private readonly IChannelService channelService;
         private readonly ILogger<ChatHub> logger;
+        private readonly UserManager<ApplicationUser> userManager;
 
         public ChatHub(IVWS_DbContext _vwsDbContext, IChannelService _channelService,
-                        ILogger<ChatHub> _logger)
+                        ILogger<ChatHub> _logger, UserManager<ApplicationUser> _userManager)
         {
             vwsDbContext = _vwsDbContext;
             channelService = _channelService;
             logger = _logger;
+            userManager = _userManager;
         }
 
         private string LoggedInUserName
@@ -163,7 +167,60 @@ namespace vws.web.Hubs
             selectedMessage.IsDeleted = true;
             vwsDbContext.Save();
 
-            await Clients.Group(channelId.ToString()).ReviceDeleteMessage(messageId, channelId, selectedMessage.ChannelTypeId);
+            await Clients.Group(channelId.ToString()).ReciveDeleteMessage(messageId, channelId, selectedMessage.ChannelTypeId);
+        }
+
+        public async Task PinMessage(long messageId, Guid channelId, byte channelTypeId)
+        {
+            var selectedMessage = vwsDbContext.Messages.FirstOrDefault(message => message.Id == messageId);
+
+            if (selectedMessage == null || selectedMessage.IsDeleted)
+                return;
+
+            List<Message> pinnedMessages = new List<Message>();
+            if(channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+            {
+                var directMessageContactUser = await userManager.FindByIdAsync(channelId.ToString());
+                pinnedMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId &&
+                                                                        ((message.ChannelId == channelId && message.FromUserName == LoggedInUserName) ||
+                                                                        (message.ChannelId == LoggedInUserId && message.FromUserName == directMessageContactUser.UserName)) &&
+                                                                        !message.IsDeleted &&
+                                                                        message.IsPinned).ToList();
+            }
+            else
+            {
+                pinnedMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId &&
+                                                                        message.ChannelId == channelId &&
+                                                                        !message.IsDeleted && message.IsPinned)
+                                                       .ToList();
+            }
+
+            int lastPinOrder = 0;
+            pinnedMessages = pinnedMessages.OrderByDescending(message => message.PinEvenOrder).ToList();
+            if (pinnedMessages.Count != 0)
+                lastPinOrder = (int)pinnedMessages[pinnedMessages.Count - 1].PinEvenOrder;
+
+            selectedMessage.IsPinned = true;
+            selectedMessage.PinEvenOrder = lastPinOrder + 2;
+
+            vwsDbContext.Save();
+
+            await Clients.Group(channelId.ToString()).ReciveUnpinMessage(messageId, channelId, selectedMessage.ChannelTypeId);
+        }
+
+        public async Task UnpinMessage(long messageId, Guid channelId, byte channelTypeId)
+        {
+            var selectedMessage = vwsDbContext.Messages.FirstOrDefault(message => message.Id == messageId);
+
+            if (selectedMessage == null || selectedMessage.IsDeleted || !selectedMessage.IsPinned)
+                return;
+
+            selectedMessage.IsPinned = false;
+            selectedMessage.PinEvenOrder = null;
+
+            vwsDbContext.Save();
+
+            await Clients.Group(channelId.ToString()).ReciveUnpinMessage(messageId, channelId, selectedMessage.ChannelTypeId);
         }
     }
 }

@@ -14,6 +14,10 @@ namespace vws.web.Hubs
 
         Task UnmuteChannel(Guid channelId, byte channelTypeId);
 
-        Task ReviceDeleteMessage(long messageId, Guid channelId, byte channelTypeId);
+        Task ReciveDeleteMessage(long messageId, Guid channelId, byte channelTypeId);
+
+        Task RecivePinMessage(long messageId, Guid channelId, byte channelTypeId);
+
+        Task ReciveUnpinMessage(long messageId, Guid channelId, byte channelTypeId);
     }
 }

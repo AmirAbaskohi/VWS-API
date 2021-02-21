@@ -30,10 +30,12 @@ namespace vws.web.Domain._chat
 
         public bool IsDeleted { get; set; }
 
+        public bool IsPinned { get; set; }
+        
+        public int? PinEvenOrder { get; set; } 
+
         public virtual MessageType MessageType { get; set; }
 
         public virtual ChannelType ChannelType { get; set; }
-
-       
     }
 }

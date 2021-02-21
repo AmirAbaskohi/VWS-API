@@ -35,36 +35,12 @@ namespace vws.web.Controllers._chat
             userManager = _userManager;
         }
 
-        [HttpGet]
-        [Authorize]
-        [Route("get")]
-        public async Task<IActionResult> GET(Guid channelId, byte channelTypeId, int pageIndex, int pageSize)
-        {
-            List<MessageResponseModel> MessageResponseModels = new List<MessageResponseModel>();
-
-            if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
-            {
-                var directMessageContactUser = await userManager.FindByIdAsync(channelId.ToString());
-                var privateMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId && (message.ChannelId == channelId || directMessageContactUser.UserName == message.FromUserName) && channelTypeId == 1);
-                MessageResponseModels = FillMessageResponseModel(privateMessages);
-            }
-            else
-            {
-                var publicMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId && message.ChannelId == channelId && channelTypeId != (byte)SeedDataEnum.ChannelTypes.Private);
-                MessageResponseModels = FillMessageResponseModel(publicMessages);
-            }
-
-            return Ok(new ResponseModel<List<MessageResponseModel>>(MessageResponseModels));
-
-        }
-
-        [Authorize]
         private List<MessageResponseModel> FillMessageResponseModel(IQueryable<Message> messages)
         {
-            List<MessageResponseModel> MessageResponseModels = new List<MessageResponseModel>();
+            List<MessageResponseModel> messageResponseModels = new List<MessageResponseModel>();
             foreach (var message in messages)
             {
-                MessageResponseModels.Add(new MessageResponseModel
+                messageResponseModels.Add(new MessageResponseModel
                 {
                     Id = message.Id,
                     Body = message.Body,
@@ -73,7 +49,60 @@ namespace vws.web.Controllers._chat
                     SendFromMe = message.FromUserName == LoggedInUserName ? true : false
                 }); ;
             }
-            return MessageResponseModels;
+            return messageResponseModels;
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("get")]
+        public async Task<IActionResult> GetMessages(Guid channelId, byte channelTypeId, int pageIndex, int pageSize)
+        {
+            List<MessageResponseModel> messageResponseModels = new List<MessageResponseModel>();
+
+            if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+            {
+                var directMessageContactUser = await userManager.FindByIdAsync(channelId.ToString());
+                var privateMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId &&
+                                                                            ((message.ChannelId == channelId && message.FromUserName == LoggedInUserName) ||
+                                                                            (message.ChannelId == LoggedInUserId && message.FromUserName == directMessageContactUser.UserName)) &&
+                                                                            !message.IsDeleted);
+                messageResponseModels = FillMessageResponseModel(privateMessages);
+            }
+            else
+            {
+                var publicMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId && message.ChannelId == channelId && !message.IsDeleted);
+                messageResponseModels = FillMessageResponseModel(publicMessages);
+            }
+
+            return Ok(new ResponseModel<List<MessageResponseModel>>(messageResponseModels));
+
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getPinnedMessages")]
+        public async Task<IActionResult> GetPinnedMessages(Guid channelId, byte channelTypeId)
+        {
+            List<MessageResponseModel> messageResponseModels = new List<MessageResponseModel>();
+
+            if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+            {
+                var directMessageContactUser = await userManager.FindByIdAsync(channelId.ToString());
+                var privateMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId &&
+                                                                            ((message.ChannelId == channelId && message.FromUserName == LoggedInUserName) ||
+                                                                            (message.ChannelId == LoggedInUserId && message.FromUserName == directMessageContactUser.UserName)) &&
+                                                                            !message.IsDeleted && message.IsPinned);
+                privateMessages = privateMessages.OrderByDescending(message => message.PinEvenOrder);
+                messageResponseModels = FillMessageResponseModel(privateMessages);
+            }
+            else
+            {
+                var publicMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId && message.ChannelId == channelId && !message.IsDeleted && message.IsPinned);
+                publicMessages = publicMessages.OrderByDescending(message => message.PinEvenOrder);
+                messageResponseModels = FillMessageResponseModel(publicMessages);
+            }
+
+            return Ok(new ResponseModel<List<MessageResponseModel>>(messageResponseModels));
         }
 
     }
