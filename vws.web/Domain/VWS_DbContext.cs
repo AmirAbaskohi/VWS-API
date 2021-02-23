@@ -243,6 +243,10 @@ namespace vws.web.Domain
 
         public DbSet<ProjectDepartment> ProjectDepartments { get; set; }
 
+        IQueryable<ProjectHistory> IVWS_DbContext.ProjectHistories { get => ProjectHistories; }
+
+        public DbSet<ProjectHistory> ProjectHistories { get; set; }
+
         public IQueryable<Project> GetUserProjects(Guid userId)
         {
             return ProjectMembers.Include(projectMember => projectMember.Project)
@@ -281,6 +285,12 @@ namespace vws.web.Domain
         {
             ProjectDepartments.Add(projectDepartment);
             return projectDepartment;
+        }
+
+        public ProjectHistory AddProjectHistory(ProjectHistory projectHistory)
+        {
+            ProjectHistories.Add(projectHistory);
+            return projectHistory;
         }
 
         public void DeleteProjectDepartment(ProjectDepartment projectDepartment)

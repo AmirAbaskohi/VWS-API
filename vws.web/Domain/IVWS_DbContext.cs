@@ -131,6 +131,8 @@ namespace vws.web.Domain
 
         public IQueryable<ProjectDepartment> ProjectDepartments { get; }
 
+        public IQueryable<ProjectHistory> ProjectHistories { get; }
+
         #endregion
 
         #region methods
@@ -142,6 +144,7 @@ namespace vws.web.Domain
         public Task<Project> AddProjectAsync(Project project);
         public Task<ProjectMember> AddProjectMemberAsync(ProjectMember projectMember);
         public ProjectDepartment AddProjectDepartment(ProjectDepartment projectDepartment);
+        public ProjectHistory AddProjectHistory(ProjectHistory projectHistory);
         public void DeleteProjectDepartment(ProjectDepartment projectDepartment);
         public void DeleteProjectMember(ProjectMember projectMember);
 

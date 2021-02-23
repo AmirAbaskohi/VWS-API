@@ -299,7 +299,17 @@ namespace vws.web.Controllers._project
             };
 
             await vwsDbContext.AddProjectAsync(newProject);
+            vwsDbContext.Save();
 
+            var newProjectHistory = new ProjectHistory()
+            {
+                ProjectId = newProject.Id,
+                Event = "Project created by {0}.",
+                CommaSepratedParameters = (await userManager.FindByIdAsync(userId.ToString())).UserName,
+                EventTime = creationTime
+            };
+
+            vwsDbContext.AddProjectHistory(newProjectHistory);
             vwsDbContext.Save();
 
             foreach (var departmentId in model.DepartmentIds)
@@ -466,13 +476,14 @@ namespace vws.web.Controllers._project
             List<int> shouldBeRemoved = projectDepartmentsIds.Except(model.DepartmentIds).ToList();
             List<int> shouldBeAdded = model.DepartmentIds.Except(projectDepartmentsIds).ToList();
 
+            var modificationTime = DateTime.Now;
 
             selectedProject.Name = model.Name;
             selectedProject.Description = model.Description;
             selectedProject.EndDate = model.EndDate;
             selectedProject.StartDate = model.StartDate;
             selectedProject.Color = model.Color;
-            selectedProject.ModifiedOn = DateTime.Now;
+            selectedProject.ModifiedOn = modificationTime;
             selectedProject.ModifiedBy = userId;
             selectedProject.TeamId = model.TeamId;
 
@@ -494,6 +505,16 @@ namespace vws.web.Controllers._project
                 foreach (var projectMember in projectMembers)
                     vwsDbContext.DeleteProjectMember(projectMember);
             }
+
+            var newProjectHistory = new ProjectHistory()
+            {
+                ProjectId = model.Id,
+                Event = "Project updated by {0}.",
+                EventTime = modificationTime,
+                CommaSepratedParameters = (await userManager.FindByIdAsync(userId.ToString())).UserName
+            };
+
+            vwsDbContext.AddProjectHistory(newProjectHistory);
 
             vwsDbContext.Save();
 
@@ -521,7 +542,7 @@ namespace vws.web.Controllers._project
         [HttpDelete]
         [Authorize]
         [Route("delete")]
-        public IActionResult DeleteProject(int id)
+        public async Task<IActionResult> DeleteProject(int id)
         {
             var response = new ResponseModel();
 
@@ -535,7 +556,7 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (HasAccessToProject(userId, id))
+            if (!HasAccessToProject(userId, id))
             {
                 response.AddError(localizer["You are not a memeber of project."]);
                 response.Message = "Project access denied";
@@ -549,9 +570,22 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
+            var modificationTime = DateTime.Now;
+
             selectedProject.IsDeleted = true;
             selectedProject.ModifiedBy = userId;
-            selectedProject.ModifiedOn = DateTime.Now;
+            selectedProject.ModifiedOn = modificationTime;
+
+            var newProjectHistory = new ProjectHistory()
+            {
+                ProjectId = id,
+                Event = "Project deleted by {0}.",
+                EventTime = modificationTime,
+                CommaSepratedParameters = (await userManager.FindByIdAsync(userId.ToString())).UserName
+            };
+
+            vwsDbContext.AddProjectHistory(newProjectHistory);
+
             vwsDbContext.Save();
 
             response.Message = "Project deleted successfully!";
@@ -681,7 +715,7 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (HasAccessToProject(userId, Id))
+            if (!HasAccessToProject(userId, Id))
             {
                 response.AddError(localizer["You are not a memeber of project."]);
                 response.Message = "Project access denied";
@@ -733,7 +767,7 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (HasAccessToProject(userId, model.ProjectId))
+            if (!HasAccessToProject(userId, model.ProjectId))
             {
                 response.AddError(localizer["You are not a memeber of project."]);
                 response.Message = "Project access denied";
@@ -768,6 +802,17 @@ namespace vws.web.Controllers._project
             };
 
             await vwsDbContext.AddProjectMemberAsync(newPorjectMember);
+
+            var newProjectHistory = new ProjectHistory()
+            {
+                ProjectId = model.ProjectId,
+                Event = "{0} added {1} to the project.",
+                EventTime = newPorjectMember.CreatedOn,
+                CommaSepratedParameters = (await userManager.FindByIdAsync(userId.ToString())).UserName + "," + (await userManager.FindByIdAsync(model.UserId.ToString())).UserName
+            };
+
+            vwsDbContext.AddProjectHistory(newProjectHistory);
+
             vwsDbContext.Save();
 
             response.Message = "User added successfully!";
@@ -809,13 +854,19 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var selectedProjectMember = vwsDbContext.ProjectMembers.FirstOrDefault(projectMember => projectMember.UserProfileId == userId &&
-                                                                                                    projectMember.ProjectId == projectId &&
-                                                                                                    !projectMember.IsDeleted);
-            if (selectedProjectMember == null)
+            if (!HasAccessToProject(userId, projectId))
             {
+                response.Message = "Project access denied";
                 response.AddError(localizer["You are not a memeber of project."]);
-                response.Message = "Not member of project";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            bool isProjectPersonal = selectedProject.TeamId == null ? true : false;
+
+            if (isProjectPersonal && userId != selectedProject.CreateBy)
+            {
+                response.AddError(localizer["Updating personal project just can be done by creator."]);
+                response.Message = "Update project access denied";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
@@ -861,6 +912,17 @@ namespace vws.web.Controllers._project
             }
             selectedProject.ModifiedBy = LoggedInUserId.Value;
             selectedProject.ModifiedOn = DateTime.Now;
+
+            var newProjectHistory = new ProjectHistory()
+            {
+                ProjectId = projectId,
+                Event = "Added new project image for team by {0}.",
+                EventTime = selectedProject.ModifiedOn,
+                CommaSepratedParameters = (await userManager.FindByIdAsync(userId.ToString())).UserName
+            };
+
+            vwsDbContext.AddProjectHistory(newProjectHistory);
+
             vwsDbContext.Save();
             response.Message = "Project image added successfully!";
             return Ok(response);
@@ -869,7 +931,7 @@ namespace vws.web.Controllers._project
         [HttpPut]
         [Authorize]
         [Route("changeStatus")]
-        public IActionResult ChangeProjectStatus(int id, byte statusId)
+        public async Task<IActionResult> ChangeProjectStatus(int id, byte statusId)
         {
             var response = new ResponseModel();
 
@@ -889,14 +951,40 @@ namespace vws.web.Controllers._project
 
             var userId = LoggedInUserId.Value;
 
-            if(HasAccessToProject(userId, id))
+            if (!HasAccessToProject(userId, id))
             {
+                response.Message = "Project access denied";
                 response.AddError(localizer["You are not a memeber of project."]);
-                response.Message = "Not member of project";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
+            bool isProjectPersonal = selectedProject.TeamId == null ? true : false;
+
+            if (isProjectPersonal && userId != selectedProject.CreateBy)
+            {
+                response.AddError(localizer["Updating personal project just can be done by creator."]);
+                response.Message = "Update project access denied";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            var lastStatus = selectedProject.StatusId;
+
             selectedProject.StatusId = statusId;
+            selectedProject.ModifiedOn = DateTime.Now;
+            selectedProject.ModifiedBy = userId;
+
+            var newProjectHistory = new ProjectHistory()
+            {
+                ProjectId = id,
+                Event = "Project status changed from {0} to {1} by {2}.",
+                EventTime = selectedProject.ModifiedOn,
+                CommaSepratedParameters = (SeedDataEnum.ProjectStatuses)lastStatus +
+                                          "," + (SeedDataEnum.ProjectStatuses)selectedProject.StatusId +
+                                          "," + (await userManager.FindByIdAsync(userId.ToString())).UserName
+            };
+
+            vwsDbContext.AddProjectHistory(newProjectHistory);
+
             vwsDbContext.Save();
 
             response.Message = "Project status updated successfully!";
