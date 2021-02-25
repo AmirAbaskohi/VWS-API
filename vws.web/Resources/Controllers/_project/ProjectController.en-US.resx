@@ -147,6 +147,9 @@
   <data name="Length of title is more than 500 characters." xml:space="preserve">
     <value>Length of title is more than 500 characters.</value>
   </data>
+  <data name="Project is not personal." xml:space="preserve">
+    <value>Project is not personal.</value>
+  </data>
   <data name="Start Date should be before End Date." xml:space="preserve">
     <value>Start Date should be before End Date.</value>
   </data>
@@ -177,6 +180,9 @@
   <data name="There is no user with given Id." xml:space="preserve">
     <value>There is no user with given Id.</value>
   </data>
+  <data name="There is not project member with such id." xml:space="preserve">
+    <value>There is not project member with such id.</value>
+  </data>
   <data name="This user can not be added to project." xml:space="preserve">
     <value>This user can not be added to project.</value>
   </data>
@@ -200,6 +206,9 @@
   </data>
   <data name="You are not member of selected department." xml:space="preserve">
     <value>You are not member of selected department.</value>
+  </data>
+  <data name="You are not project creator." xml:space="preserve">
+    <value>You are not project creator.</value>
   </data>
   <data name="You can not change non-personal project to personal project." xml:space="preserve">
     <value>You can not change non-personal project to personal project.</value>

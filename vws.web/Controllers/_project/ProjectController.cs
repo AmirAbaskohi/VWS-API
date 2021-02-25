@@ -711,7 +711,7 @@ namespace vws.web.Controllers._project
             if(selectedProject.TeamId != null)
             {
                 response.AddError(localizer["Adding user is just for personal projects."]);
-                response.Message = "Unpersonal project";
+                response.Message = "Non-Personal project";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
@@ -763,7 +763,7 @@ namespace vws.web.Controllers._project
             if (selectedProject.TeamId != null)
             {
                 response.AddError(localizer["Adding user is just for personal projects."]);
-                response.Message = "Unpersonal project";
+                response.Message = "Non-Personal project";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
@@ -774,14 +774,32 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            if (vwsDbContext.ProjectMembers.Any(projectMember => projectMember.UserProfileId == model.UserId && 
-                                                                 projectMember.ProjectId == model.ProjectId &&
-                                                                 !projectMember.IsDeleted &&
-                                                                 (projectMember.IsPermittedByCreator != false)))
+            var selectedProjectMember = vwsDbContext.ProjectMembers.FirstOrDefault(projectMember => projectMember.UserProfileId == model.UserId &&
+                                                                                         projectMember.ProjectId == model.ProjectId &&
+                                                                                         !projectMember.IsDeleted);
+
+            if (selectedProjectMember != null && selectedProjectMember.IsPermittedByCreator == true)
             {
                 response.AddError(localizer["User you want to add, is already a member of selected project."]);
                 response.Message = "Already member of project";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            else if (selectedProjectMember != null && selectedProjectMember.IsPermittedByCreator == null)
+            {
+                if (selectedProject.CreateBy != userId)
+                {
+                    response.AddError(localizer["User you want to add, is already a member of selected project."]);
+                    response.Message = "Already member of project";
+                    return StatusCode(StatusCodes.Status400BadRequest, response);
+                }
+                
+                selectedProjectMember.IsPermittedByCreator = true;
+                selectedProjectMember.PermittedOn = DateTime.Now;
+
+                vwsDbContext.Save();
+
+                response.Message = "User added successfully!";
+                return Ok(response);
             }
 
             var availableUsers = GetAvailableUsersToAddProject(selectedProject, userId);
@@ -988,6 +1006,102 @@ namespace vws.web.Controllers._project
             vwsDbContext.Save();
 
             response.Message = "Project status updated successfully!";
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getProjectUserRequests")]
+        public async Task<IActionResult> GetProjectUserRequests(int id)
+        {
+            var response = new ResponseModel<List<Object>>();
+            var users = new List<Object>();
+
+            var userId = LoggedInUserId.Value;
+
+            var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Id == id);
+
+            if (selectedProject == null || selectedProject.IsDeleted)
+            {
+                response.Message = "Project not found";
+                response.AddError(localizer["There is no project with given Id."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!HasAccessToProject(userId, id))
+            {
+                response.Message = "Project access denied";
+                response.AddError(localizer["You are not a memeber of project."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            if (selectedProject.TeamId != null)
+            {
+                response.Message = "Non-personal project";
+                response.AddError(localizer["Project is not personal."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (userId != selectedProject.CreateBy)
+            {
+                response.Message = "Not creator";
+                response.AddError(localizer["You are not project creator."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            var requestedUsers = vwsDbContext.ProjectMembers.Include(projectMember => projectMember.UserProfile)
+                                                            .Where(projectMember => projectMember.ProjectId == id &&
+                                                                                    !projectMember.IsDeleted &&
+                                                                                    projectMember.IsPermittedByCreator == null);
+
+            foreach (var user in requestedUsers)
+            {
+                users.Add(new
+                {
+                    Id = user.Id,
+                    UserInfo = new UserModel()
+                    {
+                        ProfileImageId = user.UserProfile.ProfileImageId,
+                        UserId = user.UserProfileId,
+                        UserName = (await userManager.FindByIdAsync(user.UserProfileId.ToString())).UserName
+                    }
+                });
+            }
+
+            response.Value = users;
+            response.Message = "Users returned successfully!";
+
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("changeProjectMemberPermisssion")]
+        public IActionResult ChangeProjectMemberPermisssion(int projectMemberId, bool hasAccess)
+        {
+            var response = new ResponseModel();
+
+            var userId = LoggedInUserId.Value;
+
+            var selectedProjecMember = vwsDbContext.ProjectMembers.Include(projectMember => projectMember.Project).FirstOrDefault(projectMember => projectMember.Id == projectMemberId);
+
+            if (selectedProjecMember == null || selectedProjecMember.IsDeleted)
+            {
+                response.AddError(localizer["There is not project member with such id."]);
+                response.Message = "Project member not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if(selectedProjecMember.Project.CreateBy != userId)
+            {
+                response.Message = "Not creator";
+                response.AddError(localizer["You are not project creator."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            selectedProjecMember.IsPermittedByCreator = hasAccess;
+            vwsDbContext.Save();
+
             return Ok(response);
         }
     }
