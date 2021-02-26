@@ -148,11 +148,11 @@ namespace vws.web.Hubs
 
             UpdateChannelTransaction(channelId, channelTypeId, LoggedInUserId, newMessage.SendOn);
 
-            await Clients.OthersInGroup(channelId.ToString()).ReciveMessage(newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
+            await Clients.OthersInGroup(channelId.ToString()).ReceiveMessage(newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
                                                                             false, newMessage.ChannelTypeId, newMessage.ChannelId,
                                                                             newMessage.SendOn, newMessage.FromUserName, newMessage.ReplyTo);
 
-            await Clients.Caller.ReciveMessage(newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
+            await Clients.Caller.ReceiveMessage(newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
                                                true, newMessage.ChannelTypeId, newMessage.ChannelId,
                                                newMessage.SendOn, newMessage.FromUserName, newMessage.ReplyTo);
         }
@@ -167,7 +167,7 @@ namespace vws.web.Hubs
             selectedMessage.IsDeleted = true;
             vwsDbContext.Save();
 
-            await Clients.Group(channelId.ToString()).ReciveDeleteMessage(messageId, channelId, selectedMessage.ChannelTypeId);
+            await Clients.Group(channelId.ToString()).ReceiveDeleteMessage(messageId, channelId, selectedMessage.ChannelTypeId);
         }
 
         public async Task PinMessage(long messageId, Guid channelId, byte channelTypeId)
@@ -205,7 +205,7 @@ namespace vws.web.Hubs
 
             vwsDbContext.Save();
 
-            await Clients.Group(channelId.ToString()).ReciveUnpinMessage(messageId, channelId, selectedMessage.ChannelTypeId);
+            await Clients.Group(channelId.ToString()).ReceiveUnpinMessage(messageId, channelId, selectedMessage.ChannelTypeId);
         }
 
         public async Task UnpinMessage(long messageId, Guid channelId, byte channelTypeId)
@@ -220,7 +220,7 @@ namespace vws.web.Hubs
 
             vwsDbContext.Save();
 
-            await Clients.Group(channelId.ToString()).ReciveUnpinMessage(messageId, channelId, selectedMessage.ChannelTypeId);
+            await Clients.Group(channelId.ToString()).ReceiveUnpinMessage(messageId, channelId, selectedMessage.ChannelTypeId);
         }
     }
 }
