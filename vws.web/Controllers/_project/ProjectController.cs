@@ -934,7 +934,7 @@ namespace vws.web.Controllers._project
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = projectId,
-                Event = "Added new project image for team by {0}.",
+                Event = "Added new project image for project by {0}.",
                 EventTime = selectedProject.ModifiedOn,
                 CommaSepratedParameters = (await userManager.FindByIdAsync(userId.ToString())).UserName
             };
@@ -1077,7 +1077,7 @@ namespace vws.web.Controllers._project
         [HttpPut]
         [Authorize]
         [Route("changeProjectMemberPermisssion")]
-        public IActionResult ChangeProjectMemberPermisssion(int projectMemberId, bool hasAccess)
+        public async Task<IActionResult> ChangeProjectMemberPermisssion(int projectMemberId, bool hasAccess)
         {
             var response = new ResponseModel();
 
@@ -1099,9 +1099,64 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
+            if(selectedProjecMember.Project.CreateBy == userId)
+            {
+                response.Message = "Creator can not change his permission.";
+                response.AddError(localizer["You are the project creator and can not change your access permission."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
             selectedProjecMember.IsPermittedByCreator = hasAccess;
             vwsDbContext.Save();
 
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getProjectHistory")]
+        public IActionResult GetProjectHistory(int id)
+        {
+            var userId = LoggedInUserId.Value;
+            var response = new ResponseModel<List<ProjectHistoryModel>>();
+
+            var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Id == id);
+
+            if (selectedProject == null || selectedProject.IsDeleted)
+            {
+                response.Message = "Project not found";
+                response.AddError(localizer["There is no project with given Id."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!HasAccessToProject(userId, id))
+            {
+                response.Message = "Project access denied";
+                response.AddError(localizer["You are not a memeber of project."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            if (selectedProject.TeamId == null && selectedProject.CreateBy != userId)
+            {
+                response.Message = "Not creator";
+                response.AddError(localizer["You are not project creator."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            var events = new List<ProjectHistoryModel>();
+            var projectEvents = vwsDbContext.ProjectHistories.Where(projectHistory => projectHistory.ProjectId == id);
+            foreach (var projectEvent in projectEvents)
+            {
+                var parameters = projectEvent.CommaSepratedParameters.Split(',');
+                events.Add(new ProjectHistoryModel()
+                {
+                    Message = String.Format(localizer[projectEvent.Event], parameters),
+                    Time = projectEvent.EventTime
+                });
+            }
+
+            response.Message = "History returned successfully!";
+            response.Value = events;
             return Ok(response);
         }
     }

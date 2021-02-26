@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Added new project image for project by {0}." xml:space="preserve">
+    <value>Added new project image for project by {0}.</value>
+  </data>
   <data name="Adding user is just for personal projects." xml:space="preserve">
     <value>Adding user is just for personal projects.</value>
   </data>
@@ -147,8 +150,20 @@
   <data name="Length of title is more than 500 characters." xml:space="preserve">
     <value>Length of title is more than 500 characters.</value>
   </data>
+  <data name="Project created by {0}." xml:space="preserve">
+    <value>Project created by {0}.</value>
+  </data>
+  <data name="Project deleted by {0}." xml:space="preserve">
+    <value>Project deleted by {0}.</value>
+  </data>
   <data name="Project is not personal." xml:space="preserve">
     <value>Project is not personal.</value>
+  </data>
+  <data name="Project status changed from {0} to {1} by {2}." xml:space="preserve">
+    <value>Project status changed from {0} to {1} by {2}.</value>
+  </data>
+  <data name="Project updated by {0}." xml:space="preserve">
+    <value>Project updated by {0}.</value>
   </data>
   <data name="Start Date should be before End Date." xml:space="preserve">
     <value>Start Date should be before End Date.</value>
@@ -210,6 +225,9 @@
   <data name="You are not project creator." xml:space="preserve">
     <value>You are not project creator.</value>
   </data>
+  <data name="You are the project creator and can not change your access permission." xml:space="preserve">
+    <value>You are the project creator and can not change your access permission.</value>
+  </data>
   <data name="You can not change non-personal project to personal project." xml:space="preserve">
     <value>You can not change non-personal project to personal project.</value>
   </data>
@@ -218,5 +236,8 @@
   </data>
   <data name="Your file does not have extension." xml:space="preserve">
     <value>Your file does not have extension.</value>
+  </data>
+  <data name="{0} added {1} to the project." xml:space="preserve">
+    <value>{0} added {1} to the project.</value>
   </data>
 </root>
