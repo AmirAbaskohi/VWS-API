@@ -208,7 +208,7 @@ namespace vws.web.Hubs
             await Clients.Group(channelId.ToString()).ReceiveUnpinMessage(messageId, channelId, selectedMessage.ChannelTypeId);
         }
 
-        public async Task UnpinMessage(long messageId, Guid channelId, byte channelTypeId)
+        public async Task UnpinMessage(long messageId, Guid channelId)
         {
             var selectedMessage = vwsDbContext.Messages.FirstOrDefault(message => message.Id == messageId);
 
@@ -221,6 +221,21 @@ namespace vws.web.Hubs
             vwsDbContext.Save();
 
             await Clients.Group(channelId.ToString()).ReceiveUnpinMessage(messageId, channelId, selectedMessage.ChannelTypeId);
+        }
+
+        public async Task EditMessage(long messageId, Guid channelId, string newBody)
+        {
+            var selectedMessage = vwsDbContext.Messages.FirstOrDefault(message => message.Id == messageId);
+
+            if (selectedMessage == null || selectedMessage.IsDeleted ||
+                selectedMessage.FromUserName != LoggedInUserName ||
+                selectedMessage.MessageTypeId != (byte)SeedDataEnum.MessageTypes.Text)
+                return;
+
+            selectedMessage.Body = newBody;
+            vwsDbContext.Save();
+
+            await Clients.Group(channelId.ToString()).ReceiveEditMessage(messageId, channelId, selectedMessage.ChannelTypeId, newBody);
         }
     }
 }
