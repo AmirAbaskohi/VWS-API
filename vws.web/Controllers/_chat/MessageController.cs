@@ -46,7 +46,8 @@ namespace vws.web.Controllers._chat
                     Body = message.Body,
                     SendOn = message.SendOn,
                     FromUserName = message.FromUserName,
-                    SendFromMe = message.FromUserName == LoggedInUserName ? true : false
+                    SendFromMe = message.FromUserName == LoggedInUserName ? true : false,
+                    ReplyTo = message.ReplyTo
                 }); ;
             }
             return messageResponseModels;

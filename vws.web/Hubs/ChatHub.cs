@@ -133,6 +133,12 @@ namespace vws.web.Hubs
 
         public async Task SendMessage(string message, byte channelTypeId, Guid channelId, byte messageTypeId, long? replyTo = null)
         {
+            if(replyTo != null)
+            {
+                var repliedMessage = vwsDbContext.Messages.FirstOrDefault(message => message.Id == replyTo);
+                if (repliedMessage == null || repliedMessage.IsDeleted || repliedMessage.ChannelId != channelId || repliedMessage.ChannelTypeId != channelTypeId)
+                    return;
+            }    
             var newMessage = new Domain._chat.Message
             {
                 Body = message,
