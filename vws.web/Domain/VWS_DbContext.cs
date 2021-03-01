@@ -118,6 +118,10 @@ namespace vws.web.Domain
 
         IQueryable<MessageRead> IVWS_DbContext.MessageReads { get => MessageReads; }
 
+        public DbSet<MessageDeliver> MessageDelivers { get; set; }
+
+        IQueryable<MessageDeliver> IVWS_DbContext.MessageDelivers { get => MessageDelivers; }
+
         public DbSet<MessageType> MessageTypes { get; set; }
 
         IQueryable<MessageType> IVWS_DbContext.MessageTypes { get => MessageTypes; }
@@ -158,6 +162,15 @@ namespace vws.web.Domain
         {
             var selectedChannelType = ChannelTypes.FirstOrDefault(channelType => channelType.Id == id);
             selectedChannelType.Name = newName;
+        }
+        public void AddMessageRead(MessageRead messageRead)
+        {
+            MessageReads.Add(messageRead);
+        }
+
+        public void AddMessageDeliver(MessageDeliver messageDeliver)
+        {
+            MessageDelivers.Add(messageDeliver);
         }
 
         public async Task<MutedChannel> AddMutedChannelAsync(MutedChannel mutedChannel)

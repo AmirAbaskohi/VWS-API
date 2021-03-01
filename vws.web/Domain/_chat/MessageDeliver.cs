@@ -1,11 +1,13 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace vws.web.Domain._chat
 {
-    [Table("Chat_MessageRead")]
-    public class MessageRead
+    [Table("Chat_MessageDeliver")]
+    public class MessageDeliver
     {
         public long Id { get; set; }
 

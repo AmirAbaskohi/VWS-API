@@ -300,5 +300,69 @@ namespace vws.web.Hubs
                 await Clients.Group(selectedMessage.ChannelId.ToString()).ReceiveEditMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId, newBody);
             }
         }
+
+        public async Task MarkMessageAsRead(long messageId)
+        {
+            if (vwsDbContext.MessageReads.Any(messageRead => messageRead.MessageId == messageId && messageRead.ReadBy == LoggedInUserId))
+                return;
+
+            var selectedMessage = vwsDbContext.Messages.FirstOrDefault(message => message.Id == messageId);
+
+            if (selectedMessage == null || selectedMessage.IsDeleted)
+                return;
+
+            vwsDbContext.AddMessageRead(new MessageRead()
+            {
+                ChannelId = selectedMessage.ChannelId,
+                ChannelTypeId = selectedMessage.ChannelTypeId,
+                MessageId = selectedMessage.Id,
+                ReadBy = LoggedInUserId
+            });
+
+            vwsDbContext.Save();
+
+            if (selectedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+            {
+                var groupName = CombineTwoGuidsInOrder(LoggedInUserId, selectedMessage.ChannelId);
+                await Clients.Caller.ReceiveReadMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId);
+                await Clients.OthersInGroup(groupName).ReceiveReadMessage(messageId, LoggedInUserId, selectedMessage.ChannelTypeId);
+            }
+            else
+            {
+                await Clients.Group(selectedMessage.ChannelId.ToString()).ReceiveReadMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId);
+            }
+        }
+
+        public async Task MarkMessageAsDeliver(long messageId)
+        {
+            if (vwsDbContext.MessageDelivers.Any(messageRead => messageRead.MessageId == messageId && messageRead.ReadBy == LoggedInUserId))
+                return;
+
+            var selectedMessage = vwsDbContext.Messages.FirstOrDefault(message => message.Id == messageId);
+
+            if (selectedMessage == null || selectedMessage.IsDeleted)
+                return;
+
+            vwsDbContext.AddMessageDeliver(new MessageDeliver()
+            {
+                ChannelId = selectedMessage.ChannelId,
+                ChannelTypeId = selectedMessage.ChannelTypeId,
+                MessageId = selectedMessage.Id,
+                ReadBy = LoggedInUserId
+            });
+
+            vwsDbContext.Save();
+
+            if (selectedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+            {
+                var groupName = CombineTwoGuidsInOrder(LoggedInUserId, selectedMessage.ChannelId);
+                await Clients.Caller.ReceiveDeliverMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId);
+                await Clients.OthersInGroup(groupName).ReceiveDeliverMessage(messageId, LoggedInUserId, selectedMessage.ChannelTypeId);
+            }
+            else
+            {
+                await Clients.Group(selectedMessage.ChannelId.ToString()).ReceiveDeliverMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId);
+            }
+        }
     }
 }

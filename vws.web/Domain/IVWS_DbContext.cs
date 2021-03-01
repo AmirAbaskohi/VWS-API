@@ -67,6 +67,8 @@ namespace vws.web.Domain
 
         public IQueryable<MessageRead> MessageReads { get; }
 
+        public IQueryable<MessageDeliver> MessageDelivers { get; }
+
         public IQueryable<MessageType> MessageTypes { get; }
 
         public IQueryable<MutedChannel> MutedChannels { get; }
@@ -86,6 +88,8 @@ namespace vws.web.Domain
         public void AddChannelType(ChannelType channelType);
         public string GetChannelType(byte id);
         public void UpdateChannelType(byte id, string newName);
+        public void AddMessageRead(MessageRead messageRead);
+        public void AddMessageDeliver(MessageDeliver messageDeliver);
         public Task<MutedChannel> AddMutedChannelAsync(MutedChannel mutedChannel);
         public Task<MutedChannel> GetMutedChannelAsync(Guid channelId, Guid userId, byte channelTypeId);
         public PinnedChannel AddPinnedChannel(PinnedChannel pinnedChannel);
