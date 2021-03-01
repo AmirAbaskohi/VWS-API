@@ -109,7 +109,7 @@ namespace vws.web.Hubs
                 if (userChannel.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
                     await Groups.AddToGroupAsync(Context.ConnectionId, CombineTwoGuidsInOrder(LoggedInUserId, userChannel.Guid));
                 else
-                    await Groups.AddToGroupAsync(Context.ConnectionId, userChannel.ToString());
+                    await Groups.AddToGroupAsync(Context.ConnectionId, userChannel.Guid.ToString());
             }
         }
 
