@@ -184,7 +184,7 @@ namespace vws.web.Hubs
                                                    newMessage.SendOn, newMessage.FromUserName, newMessage.ReplyTo);
         }
 
-        public async Task DeleteMessage(long messageId, Guid channelId)
+        public async Task DeleteMessage(long messageId)
         {
             var selectedMessage = vwsDbContext.Messages.FirstOrDefault(message => message.Id == messageId);
 
@@ -197,16 +197,16 @@ namespace vws.web.Hubs
             if (selectedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
             {
                 var groupName = CombineTwoGuidsInOrder(LoggedInUserId, selectedMessage.ChannelId);
-                await Clients.Caller.ReceiveDeleteMessage(messageId, channelId, selectedMessage.ChannelTypeId);
+                await Clients.Caller.ReceiveDeleteMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId);
                 await Clients.OthersInGroup(groupName).ReceiveDeleteMessage(messageId, LoggedInUserId, selectedMessage.ChannelTypeId);
             }
             else
             {
-                await Clients.Group(channelId.ToString()).ReceiveDeleteMessage(messageId, channelId, selectedMessage.ChannelTypeId);
+                await Clients.Group(selectedMessage.ChannelId.ToString()).ReceiveDeleteMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId);
             }
         }
 
-        public async Task PinMessage(long messageId, Guid channelId, byte channelTypeId)
+        public async Task PinMessage(long messageId)
         {
             var selectedMessage = vwsDbContext.Messages.FirstOrDefault(message => message.Id == messageId);
 
@@ -214,19 +214,19 @@ namespace vws.web.Hubs
                 return;
 
             List<Message> pinnedMessages = new List<Message>();
-            if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+            if (selectedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
             {
-                var directMessageContactUser = await userManager.FindByIdAsync(channelId.ToString());
-                pinnedMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId &&
-                                                                        ((message.ChannelId == channelId && message.FromUserName == LoggedInUserName) ||
+                var directMessageContactUser = await userManager.FindByIdAsync(selectedMessage.ChannelTypeId.ToString());
+                pinnedMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == selectedMessage.ChannelTypeId &&
+                                                                        ((message.ChannelId == selectedMessage.ChannelId && message.FromUserName == LoggedInUserName) ||
                                                                         (message.ChannelId == LoggedInUserId && message.FromUserName == directMessageContactUser.UserName)) &&
                                                                         !message.IsDeleted &&
                                                                         message.IsPinned).ToList();
             }
             else
             {
-                pinnedMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId &&
-                                                                        message.ChannelId == channelId &&
+                pinnedMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == selectedMessage.ChannelTypeId &&
+                                                                        message.ChannelId == selectedMessage.ChannelId &&
                                                                         !message.IsDeleted && message.IsPinned)
                                                        .ToList();
             }
@@ -244,16 +244,16 @@ namespace vws.web.Hubs
             if (selectedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
             {
                 var groupName = CombineTwoGuidsInOrder(LoggedInUserId, selectedMessage.ChannelId);
-                await Clients.Caller.ReceivePinMessage(messageId, channelId, selectedMessage.ChannelTypeId);
+                await Clients.Caller.ReceivePinMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId);
                 await Clients.OthersInGroup(groupName).ReceivePinMessage(messageId, LoggedInUserId, selectedMessage.ChannelTypeId);
             }
             else
             {
-                await Clients.Group(channelId.ToString()).ReceivePinMessage(messageId, channelId, selectedMessage.ChannelTypeId);
+                await Clients.Group(selectedMessage.ChannelId.ToString()).ReceivePinMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId);
             }
         }
 
-        public async Task UnpinMessage(long messageId, Guid channelId)
+        public async Task UnpinMessage(long messageId)
         {
             var selectedMessage = vwsDbContext.Messages.FirstOrDefault(message => message.Id == messageId);
 
@@ -268,16 +268,16 @@ namespace vws.web.Hubs
             if (selectedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
             {
                 var groupName = CombineTwoGuidsInOrder(LoggedInUserId, selectedMessage.ChannelId);
-                await Clients.Caller.ReceiveUnpinMessage(messageId, channelId, selectedMessage.ChannelTypeId);
+                await Clients.Caller.ReceiveUnpinMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId);
                 await Clients.OthersInGroup(groupName).ReceiveUnpinMessage(messageId, LoggedInUserId, selectedMessage.ChannelTypeId);
             }
             else
             {
-                await Clients.Group(channelId.ToString()).ReceiveUnpinMessage(messageId, channelId, selectedMessage.ChannelTypeId);
+                await Clients.Group(selectedMessage.ChannelId.ToString()).ReceiveUnpinMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId);
             }
         }
 
-        public async Task EditMessage(long messageId, Guid channelId, string newBody)
+        public async Task EditMessage(long messageId, string newBody)
         {
             var selectedMessage = vwsDbContext.Messages.FirstOrDefault(message => message.Id == messageId);
 
@@ -292,12 +292,12 @@ namespace vws.web.Hubs
             if (selectedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
             {
                 var groupName = CombineTwoGuidsInOrder(LoggedInUserId, selectedMessage.ChannelId);
-                await Clients.Caller.ReceiveEditMessage(messageId, channelId, selectedMessage.ChannelTypeId, newBody);
+                await Clients.Caller.ReceiveEditMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId, newBody);
                 await Clients.OthersInGroup(groupName).ReceiveEditMessage(messageId, LoggedInUserId, selectedMessage.ChannelTypeId, newBody);
             }
             else
             {
-                await Clients.Group(channelId.ToString()).ReceiveEditMessage(messageId, channelId, selectedMessage.ChannelTypeId, newBody);
+                await Clients.Group(selectedMessage.ChannelId.ToString()).ReceiveEditMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId, newBody);
             }
         }
     }
