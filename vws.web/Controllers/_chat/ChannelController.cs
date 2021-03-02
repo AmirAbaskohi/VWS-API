@@ -4,9 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using vws.web.Domain;
+using vws.web.Domain._base;
 using vws.web.Domain._chat;
 using vws.web.Enums;
 using vws.web.Models;
@@ -22,14 +25,17 @@ namespace vws.web.Controllers._chat
         private readonly IStringLocalizer<ChannelController> localizer;
         private readonly IVWS_DbContext vwsDbContext;
         private readonly IChannelService channelService;
+        private readonly UserManager<ApplicationUser> userManager;
 
         public ChannelController(IStringLocalizer<ChannelController> _localizer,
                                  IVWS_DbContext _vwsDbContext,
-                                 IChannelService _channelService)
+                                 IChannelService _channelService,
+                                 UserManager<ApplicationUser> _userManager)
         {
             localizer = _localizer;
             vwsDbContext = _vwsDbContext;
             channelService = _channelService;
+            userManager = _userManager;
         }
 
         private void SetChannelsIsMuted(ref List<ChannelResponseModel> channelResponseModels)
@@ -94,16 +100,47 @@ namespace vws.web.Controllers._chat
             }
         }
 
-        //private async void SetChannelUnreadMessages(ref List<ChannelResponseModel> channelResponseModels)
-        //{
-        //    foreach (var channelResponseModel in channelResponseModels)
-        //    {
-        //        int readMessagesNums;
-        //        if(channelResponseModel.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
-        //            readMessagesNums = vwsDbContext.MessageReads.Include(messageRead => messageRead.Message)
-        //                                                        .Where(messageRead => messageRead.ChannelId == LoggedInUserId && messageRead.Message.FromUserName == (await userManager.FindByIdAsync(channelResponseModel.Guid)).UserName)
-        //    }
-        //}
+        private void SetChannelUnreadMessages(ref List<ChannelResponseModel> channelResponseModels, List<string> userNames)
+        {
+            for (int i = 0; i < channelResponseModels.Count; i++)
+            {
+                int readMessagesCount;
+                int allMessagesCount;
+                Guid channelId = channelResponseModels[i].Guid;
+                
+                if (channelResponseModels[i].ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+                    readMessagesCount = vwsDbContext.MessageReads.Include(messageRead => messageRead.Message)
+                                                                 .Where(messageRead => messageRead.ChannelId == LoggedInUserId && messageRead.Message.FromUserName == userNames[i] && !messageRead.Message.IsDeleted)
+                                                                 .ToList().Count;
+                else
+                    readMessagesCount = vwsDbContext.MessageReads.Include(messageRead => messageRead.Message).Where(messageRead => messageRead.ChannelId == channelId && !messageRead.Message.IsDeleted)
+                                                                                                             .ToList().Count;
+
+                if (channelResponseModels[i].ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+                    allMessagesCount = vwsDbContext.Messages.Where(message => message.ChannelId == LoggedInUserId && message.FromUserName == userNames[i] && !message.IsDeleted)
+                                                             .ToList().Count;
+                else
+                    allMessagesCount = vwsDbContext.Messages.Where(message => message.ChannelId == channelId && !message.IsDeleted)
+                                                                 .ToList().Count;
+
+                channelResponseModels[i].NumberOfUnreadMessages = allMessagesCount - readMessagesCount;
+            }
+        }
+
+        private async Task<List<string>> GetChannelUserNames(List<ChannelResponseModel> channelResponseModels)
+        {
+            var result = new List<string>();
+
+            foreach (var channelResponseModel in channelResponseModels)
+            {
+                if (channelResponseModel.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+                    result.Add((await userManager.FindByIdAsync(channelResponseModel.Guid.ToString())).UserName);
+                else
+                    result.Add(null);
+            }
+
+            return result;
+        }
 
         [HttpGet]
         [Authorize]
@@ -122,7 +159,7 @@ namespace vws.web.Controllers._chat
 
             SetChannelLastTransactionDateTime(ref channelResponseModels);
 
-            //SetChannelUnreadMessages(ref channelResponseModels);
+            SetChannelUnreadMessages(ref channelResponseModels, await GetChannelUserNames(channelResponseModels));
 
             channelResponseModels = channelResponseModels.OrderByDescending(channelResponseModel => channelResponseModel.LastTransactionDateTime).ToList();
             channelResponseModels = channelResponseModels.OrderByDescending(channelResponseModel => channelResponseModel.EvenOrder).ToList();
