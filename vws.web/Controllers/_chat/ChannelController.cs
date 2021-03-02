@@ -42,7 +42,6 @@ namespace vws.web.Controllers._chat
 
         private void SetChannelsIsMuted(ref List<ChannelResponseModel> channelResponseModels)
         {
-            // TODO
             var userId = LoggedInUserId.Value;
 
             foreach (var channelResponseModel in channelResponseModels)
@@ -65,7 +64,6 @@ namespace vws.web.Controllers._chat
 
         private void SetChannelIsPinned(ref List<ChannelResponseModel> channelResponseModels)
         {
-            // TODO
             var userId = LoggedInUserId.Value;
 
             foreach (var channelResponseModel in channelResponseModels)
@@ -84,7 +82,6 @@ namespace vws.web.Controllers._chat
 
         private void SetChannelLastTransactionDateTime(ref List<ChannelResponseModel> channelResponseModels)
         {
-            // TODO
             var userId = LoggedInUserId.Value;
 
             foreach (var channelResponseModel in channelResponseModels)
@@ -105,6 +102,17 @@ namespace vws.web.Controllers._chat
             }
         }
 
+        //private async void SetChannelUnreadMessages(ref List<ChannelResponseModel> channelResponseModels)
+        //{
+        //    foreach (var channelResponseModel in channelResponseModels)
+        //    {
+        //        int readMessagesNums;
+        //        if(channelResponseModel.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+        //            readMessagesNums = vwsDbContext.MessageReads.Include(messageRead => messageRead.Message)
+        //                                                        .Where(messageRead => messageRead.ChannelId == LoggedInUserId && messageRead.Message.FromUserName == (await userManager.FindByIdAsync(channelResponseModel.Guid)).UserName)
+        //    }
+        //}
+
         [HttpGet]
         [Authorize]
         [Route("getAll")]
@@ -121,6 +129,8 @@ namespace vws.web.Controllers._chat
             SetChannelIsPinned(ref channelResponseModels);
 
             SetChannelLastTransactionDateTime(ref channelResponseModels);
+
+            //SetChannelUnreadMessages(ref channelResponseModels);
 
             channelResponseModels = channelResponseModels.OrderByDescending(channelResponseModel => channelResponseModel.LastTransactionDateTime).ToList();
             channelResponseModels = channelResponseModels.OrderByDescending(channelResponseModel => channelResponseModel.EvenOrder).ToList();

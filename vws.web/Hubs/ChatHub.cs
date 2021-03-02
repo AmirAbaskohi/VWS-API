@@ -286,19 +286,41 @@ namespace vws.web.Hubs
                 selectedMessage.MessageTypeId != (byte)SeedDataEnum.MessageTypes.Text)
                 return;
 
-            selectedMessage.Body = newBody;
+            selectedMessage.IsDeleted = true;
+            var newMessage = new Domain._chat.Message
+            {
+                Body = newBody,
+                SendOn = DateTime.Now,
+                ChannelId = selectedMessage.ChannelId,
+                ChannelTypeId = selectedMessage.ChannelTypeId,
+                FromUserName = selectedMessage.FromUserName,
+                MessageTypeId = selectedMessage.MessageTypeId,
+                ReplyTo = selectedMessage.ReplyTo,
+                EditRootId = selectedMessage.Id,
+                IsDeleted = false,
+                IsPinned = selectedMessage.IsPinned,
+                PinEvenOrder = selectedMessage.PinEvenOrder
+            };
+            vwsDbContext.AddMessage(newMessage);
+
             vwsDbContext.Save();
 
-            if (selectedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+            if (newMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
             {
-                var groupName = CombineTwoGuidsInOrder(LoggedInUserId, selectedMessage.ChannelId);
-                await Clients.Caller.ReceiveEditMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId, newBody);
-                await Clients.OthersInGroup(groupName).ReceiveEditMessage(messageId, LoggedInUserId, selectedMessage.ChannelTypeId, newBody);
+                var groupName = CombineTwoGuidsInOrder(LoggedInUserId, newMessage.ChannelId);
+                await Clients.OthersInGroup(groupName).ReceiveEditMessage(selectedMessage.Id, newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
+                                                                                false, newMessage.ChannelTypeId, LoggedInUserId,
+                                                                                newMessage.SendOn, newMessage.FromUserName, newMessage.ReplyTo);
+
             }
             else
-            {
-                await Clients.Group(selectedMessage.ChannelId.ToString()).ReceiveEditMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId, newBody);
-            }
+                await Clients.OthersInGroup(newMessage.ChannelId.ToString()).ReceiveEditMessage(selectedMessage.Id, newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
+                                                                                false, newMessage.ChannelTypeId, newMessage.ChannelId,
+                                                                                newMessage.SendOn, newMessage.FromUserName, newMessage.ReplyTo);
+
+            await Clients.Caller.ReceiveEditMessage(selectedMessage.Id, newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
+                                                   true, newMessage.ChannelTypeId, newMessage.ChannelId,
+                                                   newMessage.SendOn, newMessage.FromUserName, newMessage.ReplyTo);
         }
 
         public async Task MarkMessageAsRead(long messageId)

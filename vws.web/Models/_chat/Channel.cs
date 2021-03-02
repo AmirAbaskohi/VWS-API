@@ -17,6 +17,8 @@ namespace vws.web.Models._chat
 
         public int EvenOrder { get; set; }
 
+        public int NumberOfUnreadMessages { get; set; }
+
         public DateTime LastTransactionDateTime { get; set; }
     }
 }

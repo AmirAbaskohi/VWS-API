@@ -24,7 +24,7 @@ namespace vws.web.Domain._chat
 
         public long? ReplyTo { get; set; }
 
-        public long? EditTo { get; set; }
+        public long? EditRootId { get; set; }
 
         public DateTime SendOn { get; set; }
 
