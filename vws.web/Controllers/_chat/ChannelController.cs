@@ -497,5 +497,9 @@ namespace vws.web.Controllers._chat
             response.Message = "Channel unpinned successfully!";
             return Ok(response);
         }
+
+        //[HttpGet]
+        //[Authorize]
+        //[Route("getChannelMembers")]
     }
 }

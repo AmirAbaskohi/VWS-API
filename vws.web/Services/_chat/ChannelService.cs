@@ -89,5 +89,31 @@ namespace vws.web.Services._chat
 
             return channelResponseModels;
         }
+
+        public bool HasUserAccessToChannel(Guid userId, Guid channelId, byte channelTypeId)
+        {
+            List<Team> userTeams = vwsDbContext.GetUserTeams(userId).ToList();
+
+            if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+            {
+                List<Guid> userTeamMates = vwsDbContext.TeamMembers
+                .Where(teamMember => userTeams.Select(userTeam => userTeam.Id).Contains(teamMember.TeamId) && !teamMember.HasUserLeft)
+                .Select(teamMember => teamMember.UserProfileId).Distinct().ToList();
+                userTeamMates.Remove(userId);
+
+                return userTeamMates.Contains(channelId);
+            }
+
+            else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Team)
+                return userTeams.Select(team => team.Guid).Contains(channelId);
+
+            else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Project)
+                return vwsDbContext.GetUserProjects(userId).Select(project => project.Guid).Contains(channelId);
+
+            else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Project)
+                return vwsDbContext.GetUserDepartments(userId).Select(project => project.Guid).Contains(channelId);
+
+            return false;
+        }
     }
 }
