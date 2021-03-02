@@ -41,4 +41,11 @@
   <ItemGroup>
     <None Remove="appsettings.json.template" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Controllers\_chat\MessageController.cs" />
+    <Compile Remove="Controllers\_file\FileController.cs" />
+    <Compile Remove="Controllers\_project\ProjectController.cs" />
+    <Compile Remove="Controllers\_team\TeamController.cs" />
+    <Compile Remove="Controllers\_task\TaskController.cs" />
+  </ItemGroup>
 </Project>
