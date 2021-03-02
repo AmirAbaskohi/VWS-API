@@ -156,7 +156,7 @@ namespace vws.web
 
             services.Configure<FormOptions>(x =>
             {
-                x.MultipartBodyLengthLimit = 209715200;
+                x.MultipartBodyLengthLimit = 2000_000_000;
             });
 
         }

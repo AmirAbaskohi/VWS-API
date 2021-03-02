@@ -36,8 +36,6 @@ namespace vws.web.Controllers._file
 
         [HttpPost]
         [Authorize]
-        [RequestFormLimits(MultipartBodyLengthLimit = 209715200)]
-        [RequestSizeLimit(209715200)]
         [Route("upload")]
         public async Task<IActionResult> UploadFiles(List<IFormFile> formFiles)
         {
