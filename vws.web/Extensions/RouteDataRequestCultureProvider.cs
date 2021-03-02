@@ -8,6 +8,7 @@ namespace vws.web.Extensions
     public class RouteDataRequestCultureProvider : RequestCultureProvider
     {
         public int IndexOfCulture;
+
         public int IndexofUICulture;
 
         public override Task<ProviderCultureResult> DetermineProviderCultureResult(HttpContext httpContext)
