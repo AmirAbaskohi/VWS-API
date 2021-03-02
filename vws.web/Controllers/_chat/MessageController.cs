@@ -47,6 +47,7 @@ namespace vws.web.Controllers._chat
                     SendOn = message.SendOn,
                     FromUserName = message.FromUserName,
                     SendFromMe = message.FromUserName == LoggedInUserName ? true : false,
+                    IsEdited = message.EditRootId == null ? false : true,
                     ReplyTo = message.ReplyTo
                 }); ;
             }
