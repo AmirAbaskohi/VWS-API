@@ -10,13 +10,21 @@ namespace vws.web.Domain._team
     public class TeamInviteLink
     {
         public int Id { get; set; }
+
         public int TeamId { get; set; }
+
         public Guid LinkGuid { get; set; }
+
         public Guid CreatedBy { get; set; }
+
         public Guid ModifiedBy { get; set; }
+
         public DateTime CreatedOn { get; set; }
+
         public DateTime ModifiedOn { get; set; }
+
         public bool IsRevoked { get; set; }
+
         public virtual Team Team { get; set; }
     }
 }

@@ -45,6 +45,7 @@ namespace vws.web.Domain
         public void MakeRefreshTokenInvalid(string token);
 
         public void DeleteUserProfile(UserProfile userProfile);
+
         public void AddCulture(Culture culture);
 
         public string GetCulture(byte id);
@@ -82,18 +83,31 @@ namespace vws.web.Domain
         #region methods
 
         public void AddMessage(Message message);
+
         public void AddMessageType(MessageType messageType);
+
         public string GetMessageType(byte id);
+
         public void UpdateMessageType(byte id, string newName);
+
         public void AddChannelType(ChannelType channelType);
+
         public string GetChannelType(byte id);
+
         public void UpdateChannelType(byte id, string newName);
+
         public void AddMessageRead(MessageRead messageRead);
+
         public void AddMessageDeliver(MessageDeliver messageDeliver);
+
         public Task<MutedChannel> AddMutedChannelAsync(MutedChannel mutedChannel);
+
         public Task<MutedChannel> GetMutedChannelAsync(Guid channelId, Guid userId, byte channelTypeId);
+
         public PinnedChannel AddPinnedChannel(PinnedChannel pinnedChannel);
+
         public PinnedChannel DeletePinnedChannel(PinnedChannel pinnedChannel);
+
         public ChannelTransaction AddChannelTransaction(ChannelTransaction channelTransaction);
 
         #endregion
@@ -115,7 +129,9 @@ namespace vws.web.Domain
         #region methods
 
         public Task<Department> AddDepartmentAsync(Department department);
+
         public Task<DepartmentMember> AddDepartmentMemberAsync(DepartmentMember departmentMember);
+
         public IQueryable<Department> GetUserDepartments(Guid userId);
 
         #endregion
@@ -142,14 +158,23 @@ namespace vws.web.Domain
         #region methods
 
         public IQueryable<Project> GetUserProjects(Guid userId);
+
         public void AddStatus(ProjectStatus projectStatus);
+
         public string GetStatus(byte id);
+
         public void UpdateStatus(byte id, string newName);
+
         public Task<Project> AddProjectAsync(Project project);
+
         public Task<ProjectMember> AddProjectMemberAsync(ProjectMember projectMember);
+
         public ProjectDepartment AddProjectDepartment(ProjectDepartment projectDepartment);
+
         public ProjectHistory AddProjectHistory(ProjectHistory projectHistory);
+
         public void DeleteProjectDepartment(ProjectDepartment projectDepartment);
+
         public void DeleteProjectMember(ProjectMember projectMember);
 
         #endregion
@@ -179,10 +204,13 @@ namespace vws.web.Domain
         public IQueryable<TaskAssign> TaskAssigns { get; }
 
         #endregion
+
         #region methods
 
         public Task<GeneralTask> AddTaskAsync(GeneralTask generalTask);
+
         public Task<GeneralTask> GetTaskAsync(long id);
+
         public Task<TaskAssign> AddTaskAssignAsync(TaskAssign taskAssign);
 
         #endregion
@@ -208,16 +236,25 @@ namespace vws.web.Domain
         #region methods
 
         public Task<Team> AddTeamAsync(Team team);
+
         public Task<TeamMember> AddTeamMemberAsync(TeamMember teamMember);
+
         public Task<TeamInviteLink> AddTeamInviteLinkAsync(TeamInviteLink teamInviteLink);
+
         public Task<Team> GetTeamAsync(int id);
+
         public Task<TeamInviteLink> GetTeamInviteLinkByLinkGuidAsync(Guid guid);
+
         public Task<TeamInviteLink> GetTeamInviteLinkByIdAsync(int id);
+
         public Task<TeamMember> GetTeamMemberAsync(int teamId, Guid memberId);
+
         public IQueryable<Team> GetUserTeams(Guid userId);
 
         public void AddTeamType(TeamType teamType);
+
         public string GetTeamType(byte id);
+
         public void UpdateTeamType(byte id, string newName);
 
 
@@ -232,6 +269,7 @@ namespace vws.web.Domain
         #region models
 
         public IQueryable<File> Files { get; }
+
         public IQueryable<FileContainer> FileContainers { get; }
 
         #endregion
@@ -239,10 +277,15 @@ namespace vws.web.Domain
         #region methods
 
         public Task<File> AddFileAsync(File file);
+
         public Task<File> GetFileAsync(Guid guid);
+
         public Task<FileContainer> AddFileContainerAsync(FileContainer fileContainer);
+
         public Task<FileContainer> GetFileContainerAsync(int id);
+
         public void DeleteFile(File file);
+
         public void DeleteFileContainer(FileContainer fileContainer);
 
         #endregion

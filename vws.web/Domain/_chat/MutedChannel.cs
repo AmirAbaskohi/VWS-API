@@ -10,11 +10,17 @@ namespace vws.web.Domain._chat
     public class MutedChannel
     {
         public int Id { get; set; }
+
         public Guid ChannelId { get; set; }
+
         public Guid UserId { get; set; }
+
         public DateTime MuteUntil { get; set; }
+
         public byte ChannelTypeId { get; set; }
+
         public bool IsMuted { get; set; }
+
         public bool ForEver { get; set; }
     }
 }

@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using vws.web.Domain;
 using vws.web.Domain._base;
@@ -25,17 +24,14 @@ namespace vws.web.Controllers._department
     {
         private readonly IStringLocalizer<DepartmentController> localizer;
         private readonly IVWS_DbContext vwsDbContext;
-        private readonly IConfiguration configuration;
         private readonly IFileManager fileManager;
         private readonly UserManager<ApplicationUser> userManager;
 
-        public DepartmentController(IConfiguration _configuration,
-            IStringLocalizer<DepartmentController> _localizer, IVWS_DbContext _vwsDbContext,
-            IFileManager _fileManager, UserManager<ApplicationUser> _userManager)
+        public DepartmentController(IStringLocalizer<DepartmentController> _localizer, IVWS_DbContext _vwsDbContext,
+                                    IFileManager _fileManager, UserManager<ApplicationUser> _userManager)
         {
             localizer = _localizer;
             vwsDbContext = _vwsDbContext;
-            configuration = _configuration;
             fileManager = _fileManager;
             userManager = _userManager;
         }

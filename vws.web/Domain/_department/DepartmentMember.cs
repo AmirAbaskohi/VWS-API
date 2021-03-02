@@ -16,6 +16,7 @@ namespace vws.web.Domain._department
         public DateTime CreatedOn { get; set; }
 
         public DateTime? DeletedOn { get; set; }
+
         public bool IsDeleted { get; set; }
 
         public virtual Department Department { get; set; }

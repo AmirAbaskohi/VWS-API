@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using vws.web.Domain;
 using vws.web.Domain._base;
@@ -26,21 +25,14 @@ namespace vws.web.Controllers._project
     public class ProjectController : BaseController
     {
         private readonly UserManager<ApplicationUser> userManager;
-        private readonly RoleManager<IdentityRole> roleManager;
-        private readonly SignInManager<ApplicationUser> signInManager;
-        private readonly IConfiguration configuration;
         private readonly IStringLocalizer<ProjectController> localizer;
         private readonly IVWS_DbContext vwsDbContext;
         private readonly IFileManager fileManager;
 
-        public ProjectController(UserManager<ApplicationUser> _userManager, RoleManager<IdentityRole> _roleManager,
-            SignInManager<ApplicationUser> _signInManager, IStringLocalizer<ProjectController> _localizer,
-            IVWS_DbContext _vwsDbContext, IConfiguration _configuration, IFileManager _fileManager)
+        public ProjectController(UserManager<ApplicationUser> _userManager,IStringLocalizer<ProjectController> _localizer,
+            IVWS_DbContext _vwsDbContext, IFileManager _fileManager)
         {
             userManager = _userManager;
-            roleManager = _roleManager;
-            signInManager = _signInManager;
-            configuration = _configuration;
             localizer = _localizer;
             vwsDbContext = _vwsDbContext;
             fileManager = _fileManager;

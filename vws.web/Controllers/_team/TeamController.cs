@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using vws.web.Domain;
 using vws.web.Domain._base;
@@ -26,26 +25,14 @@ namespace vws.web.Controllers._team
     public class TeamController : BaseController
     {
         private readonly UserManager<ApplicationUser> userManager;
-        private readonly RoleManager<IdentityRole> roleManager;
-        private readonly SignInManager<ApplicationUser> signInManager;
-        private readonly IEmailSender emailSender;
-        private readonly IConfiguration configuration;
-        private readonly IPasswordHasher<ApplicationUser> passwordHasher;
         private readonly IStringLocalizer<TeamController> localizer;
         private readonly IVWS_DbContext vwsDbContext;
         private readonly IFileManager fileManager;
 
-        public TeamController(UserManager<ApplicationUser> _userManager, RoleManager<IdentityRole> _roleManager,
-            SignInManager<ApplicationUser> _signInManager, IConfiguration _configuration, IEmailSender _emailSender,
-            IPasswordHasher<ApplicationUser> _passwordHasher, IStringLocalizer<TeamController> _localizer,
+        public TeamController(UserManager<ApplicationUser> _userManager, IStringLocalizer<TeamController> _localizer,
             IVWS_DbContext _vwsDbContext, IFileManager _fileManager)
         {
             userManager = _userManager;
-            roleManager = _roleManager;
-            signInManager = _signInManager;
-            configuration = _configuration;
-            emailSender = _emailSender;
-            passwordHasher = _passwordHasher;
             localizer = _localizer;
             vwsDbContext = _vwsDbContext;
             fileManager = _fileManager;
@@ -250,7 +237,7 @@ namespace vws.web.Controllers._team
 
             var userTeamInviteLinks = vwsDbContext.TeamInviteLinks.Include(teamInviteLink => teamInviteLink.Team)
                                                                   .Where(teamInviteLink => teamInviteLink.CreatedBy == userId &&
-                                                                            teamInviteLink.IsRevoked == false && 
+                                                                            teamInviteLink.IsRevoked == false &&
                                                                             teamInviteLink.Team.IsDeleted == false);
 
             var teamMembers = vwsDbContext.TeamMembers.Where(teamMemeber => teamMemeber.UserProfileId == userId && teamMemeber.HasUserLeft == false);
@@ -380,14 +367,14 @@ namespace vws.web.Controllers._team
             Guid userId = LoggedInUserId.Value;
 
             var selectedTeam = await vwsDbContext.GetTeamAsync(model.Id);
-            if(selectedTeam == null || selectedTeam.IsDeleted)
+            if (selectedTeam == null || selectedTeam.IsDeleted)
             {
                 response.Message = "Team not found";
                 response.AddError(localizer["There is no team with given Id."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
             var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync(model.Id, userId);
-            if(selectedTeamMember == null)
+            if (selectedTeamMember == null)
             {
                 response.Message = "Access team is forbidden";
                 response.AddError(localizer["You are not a member of team."]);
@@ -579,7 +566,7 @@ namespace vws.web.Controllers._team
             var selectedTeam = await vwsDbContext.GetTeamAsync(id);
             var userId = LoggedInUserId.Value;
 
-            if(selectedTeam == null || selectedTeam.IsDeleted)
+            if (selectedTeam == null || selectedTeam.IsDeleted)
             {
                 response.Message = "Team not found";
                 response.AddError(localizer["There is no team with given Id."]);
@@ -599,7 +586,7 @@ namespace vws.web.Controllers._team
                 .Where(teamMember => teamMember.TeamId == id && teamMember.HasUserLeft == false)
                 .Select(teamMember => teamMember.UserProfile).Distinct().ToList();
 
-            foreach(var teamMate in userTeamMates)
+            foreach (var teamMate in userTeamMates)
             {
                 var userName = (await userManager.FindByIdAsync(teamMate.UserId.ToString())).UserName;
                 teammatesList.Add(new UserModel()
@@ -626,7 +613,7 @@ namespace vws.web.Controllers._team
 
             var selectedTeam = await vwsDbContext.GetTeamAsync(id);
 
-            if(selectedTeam == null || selectedTeam.IsDeleted)
+            if (selectedTeam == null || selectedTeam.IsDeleted)
             {
                 response.AddError(localizer["There is no team with given Id."]);
                 response.Message = "Team not found";
@@ -634,7 +621,7 @@ namespace vws.web.Controllers._team
             }
 
             var teamMember = vwsDbContext.GetTeamMemberAsync(id, userId);
-            if(teamMember == null)
+            if (teamMember == null)
             {
                 response.AddError(localizer["You are not a member of team."]);
                 response.Message = "Team access denied";
@@ -687,7 +674,7 @@ namespace vws.web.Controllers._team
 
             var teamDepartments = vwsDbContext.Departments.Where(department => department.TeamId == id && !department.IsDeleted);
 
-            foreach(var teamDepartment in teamDepartments)
+            foreach (var teamDepartment in teamDepartments)
                 departments.Add(new DepartmentResponseModel()
                 {
                     Id = teamDepartment.Id,

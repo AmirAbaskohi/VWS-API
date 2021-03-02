@@ -9,7 +9,6 @@ using vws.web.Domain._team;
 using System.Linq;
 using System.Threading.Tasks;
 using System;
-using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using vws.web.Domain._file;
 
@@ -139,30 +138,36 @@ namespace vws.web.Domain
         {
             MessageTypes.Add(messageType);
         }
+
         public string GetMessageType(byte id)
         {
             var selectedMessageType = MessageTypes.FirstOrDefault(messageType => messageType.Id == id);
             return (selectedMessageType == null) ? null : selectedMessageType.Name;
         }
+
         public void UpdateMessageType(byte id, string newName)
         {
             var selectedMessageType = MessageTypes.FirstOrDefault(messageType => messageType.Id == id);
             selectedMessageType.Name = newName;
         }
+
         public void AddChannelType(ChannelType channelType)
         {
             ChannelTypes.Add(channelType);
         }
+
         public string GetChannelType(byte id)
         {
             var selectedChannelType = ChannelTypes.FirstOrDefault(channelType => channelType.Id == id);
-            return (selectedChannelType == null) ? null : selectedChannelType.Name;
+            return selectedChannelType == null ? null : selectedChannelType.Name;
         }
+
         public void UpdateChannelType(byte id, string newName)
         {
             var selectedChannelType = ChannelTypes.FirstOrDefault(channelType => channelType.Id == id);
             selectedChannelType.Name = newName;
         }
+
         public void AddMessageRead(MessageRead messageRead)
         {
             MessageReads.Add(messageRead);
@@ -207,6 +212,7 @@ namespace vws.web.Domain
         #endregion
 
         #region department
+
         IQueryable<Department> IVWS_DbContext.Departments { get => Departments; }
 
         public DbSet<Department> Departments { get; set; }
@@ -271,11 +277,13 @@ namespace vws.web.Domain
         {
             ProjectStatuses.Add(projectStatus);
         }
+
         public string GetStatus(byte id)
         {
             var selectedStatus = ProjectStatuses.FirstOrDefault(status => status.Id == id);
             return selectedStatus == null ? null : selectedStatus.Name;
         }
+
         public void UpdateStatus(byte id, string newName)
         {
             var selected = ProjectStatuses.FirstOrDefault(status => status.Id == id);
@@ -438,11 +446,13 @@ namespace vws.web.Domain
         {
             TeamTypes.Add(teamType);
         }
+
         public string GetTeamType(byte id)
         {
             var selectedTeamType = TeamTypes.FirstOrDefault(teamType => teamType.Id == id);
             return (selectedTeamType == null) ? null : selectedTeamType.Name;
         }
+
         public void UpdateTeamType(byte id, string newName)
         {
             var selectedTeamType = TeamTypes.FirstOrDefault(teamType => teamType.Id == id);
@@ -477,6 +487,7 @@ namespace vws.web.Domain
             await FileContainers.AddAsync(fileContainer);
             return fileContainer;
         }
+
         public async Task<FileContainer> GetFileContainerAsync(int id)
         {
             return await FileContainers.FirstOrDefaultAsync(fileContainer => fileContainer.Id == id);
@@ -493,7 +504,6 @@ namespace vws.web.Domain
         }
 
         #endregion
-
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

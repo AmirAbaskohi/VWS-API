@@ -10,9 +10,13 @@ namespace vws.web.Domain._chat
     public class PinnedChannel
     {
         public int Id { get; set; }
+
         public Guid ChannelId { get; set; }
+
         public byte ChannelTypeId { get; set; }
+
         public Guid UserId { get; set; }
+
         public int EvenOrder { get; set; }
     }
 }

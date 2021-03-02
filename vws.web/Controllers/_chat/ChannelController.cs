@@ -4,16 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using vws.web.Domain;
-using vws.web.Domain._base;
 using vws.web.Domain._chat;
-using vws.web.Domain._department;
-using vws.web.Domain._project;
-using vws.web.Domain._team;
 using vws.web.Enums;
 using vws.web.Models;
 using vws.web.Models._chat;
@@ -27,16 +21,14 @@ namespace vws.web.Controllers._chat
     {
         private readonly IStringLocalizer<ChannelController> localizer;
         private readonly IVWS_DbContext vwsDbContext;
-        private readonly UserManager<ApplicationUser> userManager;
         private readonly IChannelService channelService;
 
         public ChannelController(IStringLocalizer<ChannelController> _localizer,
-                                 IVWS_DbContext _vwsDbContext, UserManager<ApplicationUser> _userManager,
+                                 IVWS_DbContext _vwsDbContext,
                                  IChannelService _channelService)
         {
             localizer = _localizer;
             vwsDbContext = _vwsDbContext;
-            userManager = _userManager;
             channelService = _channelService;
         }
 

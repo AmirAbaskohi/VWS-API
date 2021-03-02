@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -8,14 +7,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using vws.web.Domain;
 using vws.web.Domain._base;
 using vws.web.Domain._task;
 using vws.web.Models;
 using vws.web.Models._task;
-using vws.web.Repositories;
 
 namespace vws.web.Controllers._task
 {
@@ -24,25 +21,13 @@ namespace vws.web.Controllers._task
     public class TaskController : BaseController
     {
         private readonly UserManager<ApplicationUser> userManager;
-        private readonly RoleManager<IdentityRole> roleManager;
-        private readonly SignInManager<ApplicationUser> signInManager;
-        private readonly IEmailSender emailSender;
-        private readonly IConfiguration configuration;
-        private readonly IPasswordHasher<ApplicationUser> passwordHasher;
         private readonly IStringLocalizer<TaskController> localizer;
         private readonly IVWS_DbContext vwsDbContext;
 
-        public TaskController(UserManager<ApplicationUser> _userManager, RoleManager<IdentityRole> _roleManager,
-            SignInManager<ApplicationUser> _signInManager, IConfiguration _configuration, IEmailSender _emailSender,
-            IPasswordHasher<ApplicationUser> _passwordHasher, IStringLocalizer<TaskController> _localizer,
+        public TaskController(UserManager<ApplicationUser> _userManager, IStringLocalizer<TaskController> _localizer,
             IVWS_DbContext _vwsDbContext)
         {
             userManager = _userManager;
-            roleManager = _roleManager;
-            signInManager = _signInManager;
-            configuration = _configuration;
-            emailSender = _emailSender;
-            passwordHasher = _passwordHasher;
             localizer = _localizer;
             vwsDbContext = _vwsDbContext;
         }

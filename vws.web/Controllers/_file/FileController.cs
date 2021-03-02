@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using vws.web.Domain;
 using vws.web.Models;
@@ -20,15 +18,13 @@ namespace vws.web.Controllers._file
     [ApiController]
     public class FileController : BaseController
     {
-        private readonly IConfiguration configuration;
         private readonly IStringLocalizer<FileController> localizer;
         private readonly IVWS_DbContext vwsDbContext;
         private readonly IFileManager fileManager;
 
-        public FileController(IConfiguration _configuration, IStringLocalizer<FileController> _localizer,
+        public FileController(IStringLocalizer<FileController> _localizer,
             IVWS_DbContext _vwsDbContext, IFileManager _fileManager)
         {
-            configuration = _configuration;
             localizer = _localizer;
             vwsDbContext = _vwsDbContext;
             fileManager = _fileManager;
