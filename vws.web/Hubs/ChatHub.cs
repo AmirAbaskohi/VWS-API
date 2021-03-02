@@ -50,11 +50,6 @@ namespace vws.web.Hubs
             get { return Guid.Parse(Context.User.Claims.FirstOrDefault(c => c.Type == "UserId").Value); }
         }
 
-        public void UnmuteChannel(string connectionId)
-        {
-            Clients.All.UnmuteChannel(Guid.NewGuid(), 2);
-        }
-
         public override async Task OnConnectedAsync()
         {
             AddUserToConnectedUsers();

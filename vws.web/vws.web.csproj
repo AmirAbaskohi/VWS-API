@@ -36,6 +36,7 @@
     <Folder Include="Domain\_base\" />
     <Folder Include="Domain\_department\" />
     <Folder Include="Domain\_calendar\" />
+    <Folder Include="Upload\files\" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="appsettings.json.template" />
