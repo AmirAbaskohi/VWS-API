@@ -50,11 +50,6 @@ namespace vws.web.Hubs
             get { return Guid.Parse(Context.User.Claims.FirstOrDefault(c => c.Type == "UserId").Value); }
         }
 
-        public void UnmuteChannel(string connectionId)
-        {
-            Clients.All.UnmuteChannel(Guid.NewGuid(), 2);
-        }
-
         public override async Task OnConnectedAsync()
         {
             AddUserToConnectedUsers();
@@ -65,18 +60,18 @@ namespace vws.web.Hubs
         private void AddUserToConnectedUsers()
         {
             string connectionId = Context.ConnectionId;
-            string userName = LoggedInUserName;
+            string userIdToString = LoggedInUserId.ToString();
 
-            if (!UserHandler.ConnectedIds.ContainsKey(userName))
+            if (!UserHandler.ConnectedIds.ContainsKey(userIdToString))
             {
                 try
                 {
-                    UserHandler.ConnectedIds.Add(userName, new SignalRUser
+                    UserHandler.ConnectedIds.Add(userIdToString, new SignalRUser
                     {
                         ConnectionIds = new List<string>() { connectionId },
                         ConnectionStart = DateTime.Now,
                         LatestTransaction = DateTime.Now,
-                        UserName = userName
+                        UserName = LoggedInUserName
                     });
                 }
                 catch (Exception ex)
@@ -87,9 +82,9 @@ namespace vws.web.Hubs
             }
             else
             {
-                if (!UserHandler.ConnectedIds[userName].ConnectionIds.Contains(connectionId))
-                    UserHandler.ConnectedIds[userName].ConnectionIds.Add(connectionId);
-                UserHandler.ConnectedIds[userName].LatestTransaction = DateTime.Now;
+                if (!UserHandler.ConnectedIds[userIdToString].ConnectionIds.Contains(connectionId))
+                    UserHandler.ConnectedIds[userIdToString].ConnectionIds.Add(connectionId);
+                UserHandler.ConnectedIds[userIdToString].LatestTransaction = DateTime.Now;
             }
         }
 

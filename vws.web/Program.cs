@@ -1,12 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Configuration;
 using Serilog;
 
 namespace vws.web
@@ -46,7 +41,7 @@ namespace vws.web
                     webBuilder.UseStartup<Startup>()
                               .UseKestrel(options =>
                               {
-                                  options.Limits.MaxRequestBodySize = 209715200;
+                                  options.Limits.MaxRequestBodySize = 2000_000_000;
                               });
                 });
     }

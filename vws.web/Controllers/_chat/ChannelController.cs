@@ -230,7 +230,7 @@ namespace vws.web.Controllers._chat
         [HttpPost]
         [Authorize]
         [Route("unmuteChannel")]
-        public async Task<IActionResult> UmuteChannel([FromBody] UnmuteChannelModel model)
+        public async Task<IActionResult> UnmuteChannel([FromBody] UnmuteChannelModel model)
         {
             var userId = LoggedInUserId.Value;
             var response = new ResponseModel();
