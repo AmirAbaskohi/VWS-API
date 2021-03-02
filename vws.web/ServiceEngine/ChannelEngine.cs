@@ -25,20 +25,31 @@ namespace vws.web.ServiceEngine
                 {
                     try
                     {
+                        var vwsDbContext = serviceScope.ServiceProvider.GetRequiredService<IVWS_DbContext>();
+                        var channelService = serviceScope.ServiceProvider.GetRequiredService<IChannelService>();
+                        var hub = serviceScope.ServiceProvider.GetRequiredService<IHubContext<ChatHub, IChatHub>>();
                         while (true)
                         {
-                            Thread.Sleep(1000 * 15 * 1);
-                            var context = serviceScope.ServiceProvider.GetRequiredService<IVWS_DbContext>();
-                            var channelService = serviceScope.ServiceProvider.GetRequiredService<IChannelService>();
-                            var logger = serviceScope.ServiceProvider.GetRequiredService<ILogger<ChatHub>>();
-                            var hub = serviceScope.ServiceProvider.GetRequiredService<IHubContext<ChatHub>>();
-                            //var a = new ChatHub(context, channelService, logger);
-                            hub.Clients.All.SendAsync("UnmuteChannel", "a2");
+                            Thread.Sleep(1000 * 60 * 5);
+                          
+                            var mutedChannels = vwsDbContext.MutedChannels.Where(mutedChannel => mutedChannel.IsMuted == true && mutedChannel.ForEver == false).ToList();
+                            mutedChannels = mutedChannels.Where(mutedChannel => mutedChannel.MuteUntil <= DateTime.Now).ToList();
+                            foreach (var mutedChannel in mutedChannels)
+                            {
+                                mutedChannel.IsMuted = false;
+                                if (UserHandler.ConnectedIds.Keys.Contains(mutedChannel.UserId.ToString()))
+                                    UserHandler.ConnectedIds[mutedChannel.UserId.ToString()]
+                                               .ConnectionIds
+                                               .ForEach(connectionId => hub.Clients.Client(connectionId)
+                                                                                   .UnmuteChannel(mutedChannel.ChannelId, mutedChannel.ChannelTypeId));
+                            }
+
+                            vwsDbContext.Save();
                         }
                     }
                     catch (Exception e)
                     {
-                        //serviceScope.ServiceProvider.GetRequiredService<ILogger>();
+
                     }
 
                 }
@@ -46,5 +57,6 @@ namespace vws.web.ServiceEngine
             });
 
         }
+
     }
 }
