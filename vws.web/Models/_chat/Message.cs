@@ -15,6 +15,8 @@ namespace vws.web.Models._chat
 
         public bool IsEdited { get; set; }
 
+        public bool IsPinned { get; set; }
+
         public long? ReplyTo { get; set; }
     }
 }
