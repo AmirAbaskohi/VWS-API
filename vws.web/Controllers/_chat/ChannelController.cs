@@ -501,5 +501,9 @@ namespace vws.web.Controllers._chat
         //[HttpGet]
         //[Authorize]
         //[Route("getChannelMembers")]
+        //public IActionResult GetChannelMembers(Guid channelId, byte channelTypeId)
+        //{
+        //    var response = new ResponseModel<List<UserModel>>();
+        //}
     }
 }

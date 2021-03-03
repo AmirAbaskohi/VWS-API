@@ -24,13 +24,13 @@ namespace vws.web.Domain._chat
 
         public long? ReplyTo { get; set; }
 
-        public long? EditRootId { get; set; }
-
         public DateTime SendOn { get; set; }
 
         public bool IsDeleted { get; set; }
 
         public bool IsPinned { get; set; }
+
+        public bool IsEdited { get; set; }
         
         public int? PinEvenOrder { get; set; } 
 

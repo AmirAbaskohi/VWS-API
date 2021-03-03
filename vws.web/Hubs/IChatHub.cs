@@ -20,9 +20,7 @@ namespace vws.web.Hubs
 
         Task ReceiveUnpinMessage(long messageId, Guid channelId, byte channelTypeId);
 
-        Task ReceiveEditMessage(long edittedMessageId, long messageId, string message, byte messageTypeId,
-                           bool isSentFromMe, byte channelTypeId, Guid channelId,
-                           DateTime sentOn, string senderUserName, long? replyTo);
+        Task ReceiveEditMessage(long messageId, Guid channelId, byte channelTypeId, string newBody);
 
         Task ReceiveReadMessage(long messageId, Guid channelId, byte channelTypeId);
 

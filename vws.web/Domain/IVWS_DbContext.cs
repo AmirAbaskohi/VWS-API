@@ -70,6 +70,8 @@ namespace vws.web.Domain
 
         public IQueryable<MessageDeliver> MessageDelivers { get; }
 
+        public IQueryable<MessageEdit> MessageEdits { get; }
+
         public IQueryable<MessageType> MessageTypes { get; }
 
         public IQueryable<MutedChannel> MutedChannels { get; }
@@ -97,6 +99,8 @@ namespace vws.web.Domain
         public void UpdateChannelType(byte id, string newName);
 
         public void AddMessageRead(MessageRead messageRead);
+
+        public void AddMessageEdit(MessageEdit messageEdit);
 
         public void AddMessageDeliver(MessageDeliver messageDeliver);
 

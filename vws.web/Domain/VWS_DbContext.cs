@@ -123,6 +123,10 @@ namespace vws.web.Domain
 
         public DbSet<MessageType> MessageTypes { get; set; }
 
+        IQueryable<MessageEdit> IVWS_DbContext.MessageEdits { get => MessageEdits; }
+
+        public DbSet<MessageEdit> MessageEdits { get; set; }
+
         IQueryable<MessageType> IVWS_DbContext.MessageTypes { get => MessageTypes; }
 
         public DbSet<ChannelTransaction> ChannelTransactions { get; set; }
@@ -176,6 +180,11 @@ namespace vws.web.Domain
         public void AddMessageDeliver(MessageDeliver messageDeliver)
         {
             MessageDelivers.Add(messageDeliver);
+        }
+
+        public void AddMessageEdit(MessageEdit messageEdit)
+        {
+            MessageEdits.Add(messageEdit);
         }
 
         public async Task<MutedChannel> AddMutedChannelAsync(MutedChannel mutedChannel)

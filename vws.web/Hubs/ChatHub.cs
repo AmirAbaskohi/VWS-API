@@ -140,6 +140,9 @@ namespace vws.web.Hubs
 
         public async Task SendMessage(string message, byte channelTypeId, Guid channelId, byte messageTypeId, long? replyTo = null)
         {
+            if (message.Length > 4000)
+                return;
+
             if (replyTo != null)
             {
                 var repliedMessage = vwsDbContext.Messages.FirstOrDefault(message => message.Id == replyTo);
@@ -274,6 +277,9 @@ namespace vws.web.Hubs
 
         public async Task EditMessage(long messageId, string newBody)
         {
+            if (newBody.Length > 4000)
+                return;
+
             var selectedMessage = vwsDbContext.Messages.FirstOrDefault(message => message.Id == messageId);
 
             if (selectedMessage == null || selectedMessage.IsDeleted ||
@@ -281,41 +287,33 @@ namespace vws.web.Hubs
                 selectedMessage.MessageTypeId != (byte)SeedDataEnum.MessageTypes.Text)
                 return;
 
-            selectedMessage.IsDeleted = true;
-            var newMessage = new Domain._chat.Message
+            var newMessageEdit = new Domain._chat.MessageEdit
             {
-                Body = newBody,
-                SendOn = DateTime.Now,
                 ChannelId = selectedMessage.ChannelId,
                 ChannelTypeId = selectedMessage.ChannelTypeId,
-                FromUserName = selectedMessage.FromUserName,
-                MessageTypeId = selectedMessage.MessageTypeId,
-                ReplyTo = selectedMessage.ReplyTo,
-                EditRootId = selectedMessage.Id,
-                IsDeleted = false,
-                IsPinned = selectedMessage.IsPinned,
-                PinEvenOrder = selectedMessage.PinEvenOrder
+                MessageId = selectedMessage.Id,
+                NewBody = newBody,
+                OldBody = selectedMessage.Body,
+                UserProfileId = LoggedInUserId
             };
-            vwsDbContext.AddMessage(newMessage);
+
+            vwsDbContext.AddMessageEdit(newMessageEdit);
+
+            selectedMessage.IsEdited = true;
+            selectedMessage.Body = newBody;
 
             vwsDbContext.Save();
 
-            if (newMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+            if (selectedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
             {
-                var groupName = CombineTwoGuidsInOrder(LoggedInUserId, newMessage.ChannelId);
-                await Clients.OthersInGroup(groupName).ReceiveEditMessage(selectedMessage.Id, newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
-                                                                                false, newMessage.ChannelTypeId, LoggedInUserId,
-                                                                                newMessage.SendOn, newMessage.FromUserName, newMessage.ReplyTo);
-
+                var groupName = CombineTwoGuidsInOrder(LoggedInUserId, selectedMessage.ChannelId);
+                await Clients.Caller.ReceiveEditMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId, newBody);
+                await Clients.OthersInGroup(groupName).ReceiveEditMessage(messageId, LoggedInUserId, selectedMessage.ChannelTypeId, newBody);
             }
             else
-                await Clients.OthersInGroup(newMessage.ChannelId.ToString()).ReceiveEditMessage(selectedMessage.Id, newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
-                                                                                false, newMessage.ChannelTypeId, newMessage.ChannelId,
-                                                                                newMessage.SendOn, newMessage.FromUserName, newMessage.ReplyTo);
-
-            await Clients.Caller.ReceiveEditMessage(selectedMessage.Id, newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
-                                                   true, newMessage.ChannelTypeId, newMessage.ChannelId,
-                                                   newMessage.SendOn, newMessage.FromUserName, newMessage.ReplyTo);
+            {
+                await Clients.Group(selectedMessage.ChannelId.ToString()).ReceiveEditMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId, newBody);
+            }
         }
 
         public async Task MarkMessageAsRead(long messageId)
