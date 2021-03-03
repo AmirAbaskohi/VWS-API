@@ -498,77 +498,112 @@ namespace vws.web.Controllers._chat
             return Ok(response);
         }
 
-        //[HttpGet]
-        //[Authorize]
-        //[Route("getChannelMembers")]
-        //public async Task<IActionResult> GetChannelMembers(Guid channelId, byte channelTypeId)
-        //{
-        //    var response = new ResponseModel<List<UserModel>>();
-        //    var members = new List<UserModel>();
+        [HttpGet]
+        [Authorize]
+        [Route("getChannelMembers")]
+        public async Task<IActionResult> GetChannelMembers(Guid channelId, byte channelTypeId)
+        {
+            var response = new ResponseModel<List<UserModel>>();
+            var members = new List<UserModel>();
 
-        //    var userId = LoggedInUserId.Value;
+            var userId = LoggedInUserId.Value;
 
-        //    if (!channelService.DoesChannelExist(channelId, channelTypeId))
-        //    {
-        //        response.AddError(localizer["There is no channel with given information."]);
-        //        response.Message = "Channel not found";
-        //        return StatusCode(StatusCodes.Status400BadRequest, response);
-        //    }
+            if (!channelService.DoesChannelExist(channelId, channelTypeId))
+            {
+                response.AddError(localizer["There is no channel with given information."]);
+                response.Message = "Channel not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
 
-        //    if (!channelService.HasUserAccessToChannel(userId, channelId, channelTypeId))
-        //    {
-        //        response.AddError(localizer["You do not have access to this channel."]);
-        //        response.Message = "Channel access denied";
-        //        return StatusCode(StatusCodes.Status403Forbidden, response);
-        //    }
+            if (!channelService.HasUserAccessToChannel(userId, channelId, channelTypeId))
+            {
+                response.AddError(localizer["You do not have access to this channel."]);
+                response.Message = "Channel access denied";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
 
-        //    List<UserProfile> users = new List<UserProfile>();
+            List<UserProfile> users = new List<UserProfile>();
 
-        //    if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
-        //    {
-        //        var userProfile = await vwsDbContext.GetUserProfileAsync(userId);
-        //        var otherUserProfile = await vwsDbContext.GetUserProfileAsync(channelId);
-        //        members.Add(new UserModel()
-        //        {
-        //            ProfileImageId = userProfile.ProfileImageId,
-        //            UserId = userId,
-        //            UserName = (await userManager.FindByIdAsync(userId.ToString())).UserName
-        //        });
-        //        members.Add(new UserModel()
-        //        {
-        //            ProfileImageId = otherUserProfile.ProfileImageId,
-        //            UserId = channelId,
-        //            UserName = (await userManager.FindByIdAsync(channelId.ToString())).UserName
-        //        });
+            if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+            {
+                var userProfile = await vwsDbContext.GetUserProfileAsync(userId);
+                var otherUserProfile = await vwsDbContext.GetUserProfileAsync(channelId);
+                members.Add(new UserModel()
+                {
+                    ProfileImageId = userProfile.ProfileImageId,
+                    UserId = userId,
+                    UserName = (await userManager.FindByIdAsync(userId.ToString())).UserName
+                });
+                members.Add(new UserModel()
+                {
+                    ProfileImageId = otherUserProfile.ProfileImageId,
+                    UserId = channelId,
+                    UserName = (await userManager.FindByIdAsync(channelId.ToString())).UserName
+                });
 
-        //        response.Value = members;
-        //        response.Message = "Members returned successfully!";
-        //        return Ok(response);
-        //    }
+                response.Value = members;
+                response.Message = "Members returned successfully!";
+                return Ok(response);
+            }
 
-        //    else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Team)
-        //    {
-        //        var selectedTeam = vwsDbContext.Teams.FirstOrDefault(team => team.Guid == channelId);
-        //        users = vwsDbContext.TeamMembers.Include(teamMember => teamMember.UserProfile)
-        //                                        .Where(teamMember => teamMember.Id == selectedTeam.Id && !teamMember.IsDeleted)
-        //                                        .Select(teamMember => teamMember.UserProfile).ToList();
-        //    }
+            else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Team)
+            {
+                var selectedTeam = vwsDbContext.Teams.FirstOrDefault(team => team.Guid == channelId);
+                users = vwsDbContext.TeamMembers.Include(teamMember => teamMember.UserProfile)
+                                                .Where(teamMember => teamMember.TeamId == selectedTeam.Id && !teamMember.IsDeleted)
+                                                .Select(teamMember => teamMember.UserProfile).ToList();
+            }
 
-        //    else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Department)
-        //    {
-        //        var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Guid == channelId);
-        //        users = vwsDbContext.DepartmentMembers.Include(departmentMember => departmentMember.UserProfile)
-        //                                        .Where(departmentMember => departmentMember.Id == departmentMember.Id && !departmentMember.IsDeleted)
-        //                                        .Select(departmentMember => departmentMember.UserProfile).ToList();
-        //    }
+            else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Department)
+            {
+                var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Guid == channelId);
+                users = vwsDbContext.DepartmentMembers.Include(departmentMember => departmentMember.UserProfile)
+                                                      .Where(departmentMember => departmentMember.DepartmentId == selectedDepartment.Id && !departmentMember.IsDeleted)
+                                                      .Select(departmentMember => departmentMember.UserProfile).ToList();
+            }
 
-        //    else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Project)
-        //    {
-        //        var team = vwsDbContext.Teams.FirstOrDefault(team => team.Guid == channelId);
-        //        users = vwsDbContext.TeamMembers.Include(teamMember => teamMember.UserProfile)
-        //                                        .Where(teamMember => teamMember.Id == team.Id && !teamMember.IsDeleted)
-        //                                        .Select(teamMember => teamMember.UserProfile).ToList();
-        //    }
-        //}
+            else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Project)
+            {
+                var selectedProject = vwsDbContext.Projects.Include(project => project.ProjectDepartments).FirstOrDefault(project => project.Guid == channelId);
+                if (selectedProject.TeamId == null)
+                {
+                    users = vwsDbContext.ProjectMembers.Include(projectMember => projectMember.UserProfile)
+                                                       .Where(projectMember => projectMember.ProjectId == selectedProject.Id && !projectMember.IsDeleted)
+                                                       .Select(projectMember => projectMember.UserProfile).ToList();
+
+                }
+                else if(selectedProject.ProjectDepartments.Count == 0)
+                {
+                    users = vwsDbContext.TeamMembers.Include(teamMember => teamMember.UserProfile)
+                                                    .Where(teamMember => teamMember.TeamId == selectedProject.TeamId && !teamMember.IsDeleted)
+                                                    .Select(teamMember => teamMember.UserProfile).ToList();
+                }
+                else
+                {
+                    foreach (var projectDepartment in selectedProject.ProjectDepartments)
+                    {
+                        var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Id == projectDepartment.DepartmentId);
+                        users.AddRange(vwsDbContext.DepartmentMembers.Include(departmentMember => departmentMember.UserProfile)
+                                                                     .Where(departmentMember => departmentMember.DepartmentId == selectedDepartment.Id && !departmentMember.IsDeleted)
+                                                                     .Select(departmentMember => departmentMember.UserProfile));
+                    }
+                }
+            }
+
+            foreach  (var user in users)
+            {
+                members.Add(new UserModel()
+                {
+                    UserId = user.UserId,
+                    UserName = (await userManager.FindByIdAsync(user.UserId.ToString())).UserName,
+                    ProfileImageId = user.ProfileImageId
+                });
+            }
+
+            response.Message = "Members returned successfully!";
+            response.Value = members;
+
+            return Ok(response);
+        }
     }
 }
