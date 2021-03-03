@@ -41,7 +41,8 @@ namespace vws.web.Controllers._chat
                     SendFromMe = message.FromUserName == LoggedInUserName ? true : false,
                     ReplyTo = message.ReplyTo,
                     IsEdited = message.IsEdited,
-                    IsPinned = message.IsPinned
+                    IsPinned = message.IsPinned,
+                    MessageTypeId = message.MessageTypeId
                 }); ;
             }
             return messageResponseModels;

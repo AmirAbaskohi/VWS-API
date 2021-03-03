@@ -13,6 +13,8 @@ namespace vws.web.Models._chat
 
         public bool SendFromMe { get; set; }
 
+        public byte MessageTypeId { get; set; }
+
         public bool IsEdited { get; set; }
 
         public bool IsPinned { get; set; }
