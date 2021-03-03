@@ -214,7 +214,7 @@ namespace vws.web.Hubs
             List<Message> pinnedMessages = new List<Message>();
             if (selectedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
             {
-                var directMessageContactUser = await userManager.FindByIdAsync(selectedMessage.ChannelTypeId.ToString());
+                var directMessageContactUser = await userManager.FindByIdAsync(selectedMessage.ChannelId.ToString());
                 pinnedMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == selectedMessage.ChannelTypeId &&
                                                                         ((message.ChannelId == selectedMessage.ChannelId && message.FromUserName == LoggedInUserName) ||
                                                                         (message.ChannelId == LoggedInUserId && message.FromUserName == directMessageContactUser.UserName)) &&

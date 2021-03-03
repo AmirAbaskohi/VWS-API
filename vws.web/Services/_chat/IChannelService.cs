@@ -11,5 +11,7 @@ namespace vws.web.Services._chat
         public Task<List<ChannelResponseModel>> GetUserChannels(Guid userId);
 
         public bool HasUserAccessToChannel(Guid userId, Guid channelId, byte channelTypeId);
+
+        public bool DoesChannelExist(Guid channelId, byte channelTypeId);
     }
 }

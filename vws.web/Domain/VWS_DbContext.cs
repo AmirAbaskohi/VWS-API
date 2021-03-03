@@ -441,13 +441,13 @@ namespace vws.web.Domain
 
         public async Task<TeamMember> GetTeamMemberAsync(int teamId, Guid memberId)
         {
-            return await TeamMembers.FirstOrDefaultAsync(teamMember => teamMember.TeamId == teamId && teamMember.UserProfileId == memberId && teamMember.HasUserLeft == false);
+            return await TeamMembers.FirstOrDefaultAsync(teamMember => teamMember.TeamId == teamId && teamMember.UserProfileId == memberId && teamMember.IsDeleted == false);
         }
 
         public IQueryable<Team> GetUserTeams(Guid userId)
         {
             return TeamMembers.Include(teamMember => teamMember.Team)
-                              .Where(teamMember => teamMember.UserProfileId == userId && teamMember.HasUserLeft == false && teamMember.Team.IsDeleted == false)
+                              .Where(teamMember => teamMember.UserProfileId == userId && teamMember.IsDeleted == false && teamMember.Team.IsDeleted == false)
                               .Select(teamMember => teamMember.Team);
         }
 

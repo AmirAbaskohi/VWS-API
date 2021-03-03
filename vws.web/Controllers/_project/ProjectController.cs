@@ -115,7 +115,7 @@ namespace vws.web.Controllers._project
 
             List<Team> userTeams = vwsDbContext.GetUserTeams(userId).ToList();
             List<Guid> userTeamMates = vwsDbContext.TeamMembers
-                .Where(teamMember => userTeams.Select(userTeam => userTeam.Id).Contains(teamMember.TeamId) && !teamMember.HasUserLeft)
+                .Where(teamMember => userTeams.Select(userTeam => userTeam.Id).Contains(teamMember.TeamId) && !teamMember.IsDeleted)
                 .Select(teamMember => teamMember.UserProfileId).Distinct().ToList();
 
             availableUsers = userTeamMates.Except(projectUsers).ToList();
@@ -135,7 +135,7 @@ namespace vws.web.Controllers._project
                 if (selectedProject.ProjectDepartments.Count == 0)
                 {
                     projectUsers = vwsDbContext.TeamMembers.Where(teamMember => teamMember.TeamId == (int)selectedProject.TeamId &&
-                                                                                                     !teamMember.HasUserLeft)
+                                                                                                     !teamMember.IsDeleted)
                                                            .Select(teamMember => teamMember.UserProfileId)
                                                            .ToList();
                 }

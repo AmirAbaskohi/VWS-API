@@ -69,7 +69,7 @@ namespace vws.web.Controllers._team
             var hasTeamWithSameName = vwsDbContext.TeamMembers.Any(teamMember => teamMember.UserProfileId == userId &&
                                                                     teamMember.Team.Name == model.Name &&
                                                                     teamMember.Team.IsDeleted == false &&
-                                                                    teamMember.HasUserLeft == false);
+                                                                    teamMember.IsDeleted == false);
             if (hasTeamWithSameName)
             {
                 response.Message = "Team model data has problem.";
@@ -240,7 +240,7 @@ namespace vws.web.Controllers._team
                                                                             teamInviteLink.IsRevoked == false &&
                                                                             teamInviteLink.Team.IsDeleted == false);
 
-            var teamMembers = vwsDbContext.TeamMembers.Where(teamMemeber => teamMemeber.UserProfileId == userId && teamMemeber.HasUserLeft == false);
+            var teamMembers = vwsDbContext.TeamMembers.Where(teamMemeber => teamMemeber.UserProfileId == userId && teamMemeber.IsDeleted == false);
 
             foreach (var userTeamInviteLink in userTeamInviteLinks)
             {
@@ -310,7 +310,7 @@ namespace vws.web.Controllers._team
                 response.AddError(localizer["Link does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
-            if (selectedInviteLink.CreatedBy != userId || !vwsDbContext.TeamMembers.Any(teamMember => teamMember.UserProfileId == userId && teamMember.HasUserLeft == false))
+            if (selectedInviteLink.CreatedBy != userId || !vwsDbContext.TeamMembers.Any(teamMember => teamMember.UserProfileId == userId && teamMember.IsDeleted == false))
             {
                 response.Message = "Team access forbidden";
                 response.AddError(localizer["You don't have access to this team."]);
@@ -335,7 +335,7 @@ namespace vws.web.Controllers._team
             return vwsDbContext.TeamMembers.Any(teamMember => teamMember.UserProfileId == userId &&
                                                 teamMember.Team.Name == name &&
                                                 teamMember.Team.IsDeleted == false &&
-                                                teamMember.HasUserLeft == false);
+                                                teamMember.IsDeleted == false);
         }
 
         [HttpPut]
@@ -583,7 +583,7 @@ namespace vws.web.Controllers._team
 
             List<UserProfile> userTeamMates = vwsDbContext.TeamMembers
                 .Include(teamMember => teamMember.UserProfile)
-                .Where(teamMember => teamMember.TeamId == id && teamMember.HasUserLeft == false)
+                .Where(teamMember => teamMember.TeamId == id && teamMember.IsDeleted == false)
                 .Select(teamMember => teamMember.UserProfile).Distinct().ToList();
 
             foreach (var teamMate in userTeamMates)

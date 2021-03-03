@@ -19,7 +19,7 @@ namespace vws.web.Domain._team
 
         public virtual Team Team { get; set; }
 
-        public bool HasUserLeft { get; set; }
+        public bool IsDeleted { get; set; }
 
         public virtual UserProfile UserProfile { get; set; }
 

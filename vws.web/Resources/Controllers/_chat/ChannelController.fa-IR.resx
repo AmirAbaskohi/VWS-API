@@ -129,6 +129,9 @@
   <data name="Channel type Id is not valid." xml:space="preserve">
     <value>آی دی تایپ کانال معتبر نیست.</value>
   </data>
+  <data name="There is no channel with given information." xml:space="preserve">
+    <value>کانالی با این اطلاعات وجود ندارد.</value>
+  </data>
   <data name="There is no department with such Id." xml:space="preserve">
     <value>دپارتمانی با این آی دی وجو ندارد.</value>
   </data>
@@ -140,5 +143,8 @@
   </data>
   <data name="There is no user with such Id." xml:space="preserve">
     <value>کاربری با این آی دی وجود ندارد.</value>
+  </data>
+  <data name="You do not have access to this channel." xml:space="preserve">
+    <value>شما به این کانال دسترسی ندارید.</value>
   </data>
 </root>

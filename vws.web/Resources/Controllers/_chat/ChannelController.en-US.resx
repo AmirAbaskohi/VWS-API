@@ -129,6 +129,9 @@
   <data name="Channel type Id is not valid." xml:space="preserve">
     <value>Channel type Id is not valid.</value>
   </data>
+  <data name="There is no channel with given information." xml:space="preserve">
+    <value>There is no channel with given information.</value>
+  </data>
   <data name="There is no department with such Id." xml:space="preserve">
     <value>There is no department with such Id.</value>
   </data>
@@ -140,5 +143,8 @@
   </data>
   <data name="There is no user with such Id." xml:space="preserve">
     <value>There is no user with such Id.</value>
+  </data>
+  <data name="You do not have access to this channel." xml:space="preserve">
+    <value>You do not have access to this channel.</value>
   </data>
 </root>

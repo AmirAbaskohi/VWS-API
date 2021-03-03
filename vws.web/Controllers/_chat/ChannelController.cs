@@ -501,9 +501,74 @@ namespace vws.web.Controllers._chat
         //[HttpGet]
         //[Authorize]
         //[Route("getChannelMembers")]
-        //public IActionResult GetChannelMembers(Guid channelId, byte channelTypeId)
+        //public async Task<IActionResult> GetChannelMembers(Guid channelId, byte channelTypeId)
         //{
         //    var response = new ResponseModel<List<UserModel>>();
+        //    var members = new List<UserModel>();
+
+        //    var userId = LoggedInUserId.Value;
+
+        //    if (!channelService.DoesChannelExist(channelId, channelTypeId))
+        //    {
+        //        response.AddError(localizer["There is no channel with given information."]);
+        //        response.Message = "Channel not found";
+        //        return StatusCode(StatusCodes.Status400BadRequest, response);
+        //    }
+
+        //    if (!channelService.HasUserAccessToChannel(userId, channelId, channelTypeId))
+        //    {
+        //        response.AddError(localizer["You do not have access to this channel."]);
+        //        response.Message = "Channel access denied";
+        //        return StatusCode(StatusCodes.Status403Forbidden, response);
+        //    }
+
+        //    List<UserProfile> users = new List<UserProfile>();
+
+        //    if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+        //    {
+        //        var userProfile = await vwsDbContext.GetUserProfileAsync(userId);
+        //        var otherUserProfile = await vwsDbContext.GetUserProfileAsync(channelId);
+        //        members.Add(new UserModel()
+        //        {
+        //            ProfileImageId = userProfile.ProfileImageId,
+        //            UserId = userId,
+        //            UserName = (await userManager.FindByIdAsync(userId.ToString())).UserName
+        //        });
+        //        members.Add(new UserModel()
+        //        {
+        //            ProfileImageId = otherUserProfile.ProfileImageId,
+        //            UserId = channelId,
+        //            UserName = (await userManager.FindByIdAsync(channelId.ToString())).UserName
+        //        });
+
+        //        response.Value = members;
+        //        response.Message = "Members returned successfully!";
+        //        return Ok(response);
+        //    }
+
+        //    else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Team)
+        //    {
+        //        var selectedTeam = vwsDbContext.Teams.FirstOrDefault(team => team.Guid == channelId);
+        //        users = vwsDbContext.TeamMembers.Include(teamMember => teamMember.UserProfile)
+        //                                        .Where(teamMember => teamMember.Id == selectedTeam.Id && !teamMember.IsDeleted)
+        //                                        .Select(teamMember => teamMember.UserProfile).ToList();
+        //    }
+
+        //    else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Department)
+        //    {
+        //        var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Guid == channelId);
+        //        users = vwsDbContext.DepartmentMembers.Include(departmentMember => departmentMember.UserProfile)
+        //                                        .Where(departmentMember => departmentMember.Id == departmentMember.Id && !departmentMember.IsDeleted)
+        //                                        .Select(departmentMember => departmentMember.UserProfile).ToList();
+        //    }
+
+        //    else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Project)
+        //    {
+        //        var team = vwsDbContext.Teams.FirstOrDefault(team => team.Guid == channelId);
+        //        users = vwsDbContext.TeamMembers.Include(teamMember => teamMember.UserProfile)
+        //                                        .Where(teamMember => teamMember.Id == team.Id && !teamMember.IsDeleted)
+        //                                        .Select(teamMember => teamMember.UserProfile).ToList();
+        //    }
         //}
     }
 }
