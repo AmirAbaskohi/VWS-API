@@ -142,6 +142,20 @@ namespace vws.web.Controllers._chat
             return result;
         }
 
+        private void ReorderPinnedChannels(ref List<PinnedChannel> pinnedChannels)
+        {
+            int evenOrder = 2;
+            pinnedChannels = pinnedChannels.OrderBy(pinnedChannel => pinnedChannel.EvenOrder).ToList();
+
+            foreach (var pinnedChannel in pinnedChannels)
+            {
+                pinnedChannel.EvenOrder = evenOrder;
+                evenOrder += 2;
+            }
+
+            vwsDbContext.Save();
+        }
+
         [HttpGet]
         [Authorize]
         [Route("getAll")]
@@ -493,6 +507,12 @@ namespace vws.web.Controllers._chat
 
             vwsDbContext.DeletePinnedChannel(selectedPinnedChannel);
             vwsDbContext.Save();
+
+            var userPinnedChannels = vwsDbContext.PinnedChannels.Where(pinnedChannel => pinnedChannel.UserId == userId)
+                                                                .OrderByDescending(userPinnedChannel => userPinnedChannel.EvenOrder).
+                                                                ToList();
+
+            ReorderPinnedChannels(ref userPinnedChannels);
 
             response.Message = "Channel unpinned successfully!";
             return Ok(response);
