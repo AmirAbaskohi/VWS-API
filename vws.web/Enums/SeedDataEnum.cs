@@ -15,6 +15,7 @@ namespace vws.web.Enums
             Voice = 4,
             Others = 5
         };
+
         public enum TeamTypes : byte
         {
             Team = 1,

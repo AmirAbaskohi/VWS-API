@@ -25,6 +25,12 @@
           "path": "D:\\SevenTaskLogs\\log.json",
           "formatter": "Serilog.Formatting.Json.JsonFormatter, Serilog"
         }
+      },
+      {
+        "Name": "Seq",
+        "Args": {
+          "serverUrl":  "http://localhost:8081"
+        }
       }
     ]
   },
