@@ -77,7 +77,8 @@ namespace vws.web.Repositories
                     Extension = extension,
                     Name = file.FileName,
                     UploadedBy = userId,
-                    FileContainerId = fileContainerId
+                    FileContainerId = fileContainerId,
+                    Size = file.Length
                 };
 
                 await vwsDbContext.AddFileAsync(newFile);

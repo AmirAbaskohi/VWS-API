@@ -10,10 +10,10 @@ namespace vws.web.Models._file
         public FileUploadResponseModel()
         {
             UnsuccessfulFileUpload = new List<string>();
-            SuccessfulFileUpload = new List<string>();
+            SuccessfulFileUpload = new List<FileModel>();
         }
         public bool UploadedCompletely { get => UnsuccessfulFileUpload.Count == 0; }
         public List<string> UnsuccessfulFileUpload { get; set; }
-        public List<string> SuccessfulFileUpload { get; set; }
+        public List<FileModel> SuccessfulFileUpload { get; set; }
     }
 }

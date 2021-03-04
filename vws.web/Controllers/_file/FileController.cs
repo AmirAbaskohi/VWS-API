@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using vws.web.Domain;
+using vws.web.Enums;
+using vws.web.Hubs;
 using vws.web.Models;
 using vws.web.Models._file;
 using vws.web.Repositories;
@@ -33,17 +35,31 @@ namespace vws.web.Controllers._file
         [HttpPost]
         [Authorize]
         [Route("upload")]
-        public async Task<IActionResult> UploadFiles(List<IFormFile> formFiles)
+        public async Task<IActionResult> UploadFiles(List<IFormFile> formFiles, Guid? channelId, byte? channelTypeId)
         {
             var files = Request.Form.Files.Union(formFiles);
             var response = new ResponseModel<FileUploadResponseModel>();
 
-            List<string> fileNames = files.Select(file => file.FileName).ToList();
+            if ((channelId == null && channelTypeId != null) && (channelId != null && channelTypeId == null))
+            {
+                response.AddError(localizer["Invalid parameters."]);
+                response.Message = "Invalid parameters.";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            string channelFolderName = "";
+            if (channelId != null)
+                channelFolderName = (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private) ?
+                                    ChatHub.CombineTwoGuidsInOrder(LoggedInUserId.Value, channelId.Value) :
+                                    channelId.Value.ToString();
+
+            string location = (channelId == null) ? "files" : $"chat{Path.DirectorySeparatorChar}" + channelFolderName;
 
             List<Domain._file.File> successfullyUploadedFiles = new List<Domain._file.File>();
-            Domain._file.FileContainer tempFileContainer = null;
+            List<string> unsuccessfullyUploadedFiles = new List<string>();
 
-            bool hasError = false;
+            List<Domain._file.FileContainer> unsuccessfullyFileContainers = new List<Domain._file.FileContainer>();
+
             var time = DateTime.Now;
 
             foreach (var file in files)
@@ -58,14 +74,13 @@ namespace vws.web.Controllers._file
                 };
                 await vwsDbContext.AddFileContainerAsync(newFileContainer);
                 vwsDbContext.Save();
-                tempFileContainer = newFileContainer;
-                var result = await fileManager.WriteFile(file, LoggedInUserId.Value, "files", newFileContainer.Id);
+                var result = await fileManager.WriteFile(file, LoggedInUserId.Value, location, newFileContainer.Id);
                 if (result.HasError)
                 {
                     foreach (var error in result.Errors)
                         response.AddError(localizer[error]);
-                    hasError = true;
-                    break;
+                    unsuccessfullyFileContainers.Add(newFileContainer);
+                    unsuccessfullyUploadedFiles.Add(file.FileName);
                 }
                 else
                 {
@@ -75,28 +90,16 @@ namespace vws.web.Controllers._file
                 }
             }
 
-            var successfulFileNames = successfullyUploadedFiles.Select(file => file.Name).ToList();
+            var successfulFiles = successfullyUploadedFiles.Select(file => new FileModel { Name = file.Name, Extension = file.Extension, Size = file.Size }).ToList();
 
-            if (hasError)
+            if (unsuccessfullyFileContainers.Count != 0)
             {
-                var successFileNames = successfullyUploadedFiles.Select(file => file.Name).ToList();
-
-                vwsDbContext.DeleteFileContainer(tempFileContainer);
+                foreach(var unsuccessfullFileContainer in unsuccessfullyFileContainers)
+                    vwsDbContext.DeleteFileContainer(unsuccessfullFileContainer);
 
                 vwsDbContext.Save();          
-
-                var fileUploadResponseModel = new FileUploadResponseModel()
-                {
-                    SuccessfulFileUpload = successfulFileNames,
-                    UnsuccessfulFileUpload = fileNames.Except(successfulFileNames).ToList()
-                };
-
-                response.Value = fileUploadResponseModel;
-                response.Message = "Unsuccessful writing";
-                return StatusCode(StatusCodes.Status500InternalServerError, response);
             }
-
-            response.Value = new FileUploadResponseModel() { SuccessfulFileUpload = successfulFileNames };
+            response.Value = new FileUploadResponseModel() { SuccessfulFileUpload = successfulFiles, UnsuccessfulFileUpload = unsuccessfullyUploadedFiles };
             response.Message = "Successful writing";
             return Ok(response);
         }
