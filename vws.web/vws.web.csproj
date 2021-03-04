@@ -33,7 +33,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Domain\_task\" />
     <Folder Include="Domain\_base\" />
     <Folder Include="Domain\_department\" />
     <Folder Include="Domain\_calendar\" />

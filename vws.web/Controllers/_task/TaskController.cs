@@ -11,6 +11,7 @@ using Microsoft.Extensions.Localization;
 using vws.web.Domain;
 using vws.web.Domain._base;
 using vws.web.Domain._task;
+using vws.web.Enums;
 using vws.web.Models;
 using vws.web.Models._task;
 
@@ -57,6 +58,11 @@ namespace vws.web.Controllers._task
                     response.AddError(localizer["Start Date should be before End Date."]);
                 }
             }
+            if (!Enum.IsDefined(typeof(SeedDataEnum.TaskPriority), model.PriorityId))
+            {
+                response.Message = "Task model data has problem.";
+                response.AddError(localizer["Priority id is not defined."]);
+            }
 
             if (response.HasError)
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
@@ -75,7 +81,8 @@ namespace vws.web.Controllers._task
                 ModifiedBy = userId,
                 CreatedOn = creationTime,
                 ModifiedOn = creationTime,
-                Guid = Guid.NewGuid()
+                Guid = Guid.NewGuid(),
+                TaskPriorityId = model.PriorityId
             };
 
             await vwsDbContext.AddTaskAsync(newTask);
@@ -83,6 +90,7 @@ namespace vws.web.Controllers._task
 
             var newTaskResponseModel = new TaskResponseModel()
             {
+                Id = newTask.Id,
                 Title = newTask.Title,
                 CreatedOn = newTask.CreatedOn,
                 Description = newTask.Description,
@@ -91,7 +99,9 @@ namespace vws.web.Controllers._task
                 Guid = newTask.Guid,
                 ModifiedOn = newTask.ModifiedOn,
                 ModifiedBy = (await userManager.FindByIdAsync(newTask.ModifiedBy.ToString())).UserName,
-                CreatedBy = (await userManager.FindByIdAsync(newTask.CreatedBy.ToString())).UserName
+                CreatedBy = (await userManager.FindByIdAsync(newTask.CreatedBy.ToString())).UserName,
+                PriorityId = newTask.TaskPriorityId,
+                PriorityTitle = localizer[((SeedDataEnum.TaskPriority)newTask.TaskPriorityId).ToString()]
             };
 
             response.Value = newTaskResponseModel;
@@ -124,6 +134,11 @@ namespace vws.web.Controllers._task
                     response.Message = "Task model data has problem";
                     response.AddError(localizer["Start Date should be before End Date."]);
                 }
+            }
+            if (!Enum.IsDefined(typeof(SeedDataEnum.TaskPriority), model.PriorityId))
+            {
+                response.Message = "Task model data has problem.";
+                response.AddError(localizer["Priority id is not defined."]);
             }
 
             if (response.HasError)
@@ -172,11 +187,13 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedOn = DateTime.Now;
             selectedTask.Title = model.Title;
             selectedTask.Description = model.Description;
+            selectedTask.TaskPriorityId = model.PriorityId;
 
             vwsDbContext.Save();
 
             var updatedTaskResponseModel = new TaskResponseModel()
             {
+                Id = selectedTask.Id,
                 Title = selectedTask.Title,
                 CreatedOn = selectedTask.CreatedOn,
                 Description = selectedTask.Description,
@@ -185,7 +202,9 @@ namespace vws.web.Controllers._task
                 Guid = selectedTask.Guid,
                 ModifiedOn = selectedTask.ModifiedOn,
                 ModifiedBy = (await userManager.FindByIdAsync(selectedTask.ModifiedBy.ToString())).UserName,
-                CreatedBy = (await userManager.FindByIdAsync(selectedTask.CreatedBy.ToString())).UserName
+                CreatedBy = (await userManager.FindByIdAsync(selectedTask.CreatedBy.ToString())).UserName,
+                PriorityId = selectedTask.TaskPriorityId,
+                PriorityTitle = localizer[((SeedDataEnum.TaskPriority)selectedTask.TaskPriorityId).ToString()]
             };
 
             response.Value = updatedTaskResponseModel;
@@ -203,7 +222,7 @@ namespace vws.web.Controllers._task
 
             List<TaskResponseModel> response = new List<TaskResponseModel>();
 
-            var userTasks = vwsDbContext.GeneralTasks.Where(task => task.CreatedBy == userId);
+            var userTasks = vwsDbContext.GeneralTasks.Include(task => task.TaskPriority).Where(task => task.CreatedBy == userId);
             foreach (var userTask in userTasks)
             {
                 if (userTask.IsDeleted || userTask.IsArchived)
@@ -220,7 +239,9 @@ namespace vws.web.Controllers._task
                     ModifiedOn = userTask.ModifiedOn,
                     CreatedBy = (await userManager.FindByIdAsync(userTask.CreatedBy.ToString())).UserName,
                     ModifiedBy = (await userManager.FindByIdAsync(userTask.ModifiedBy.ToString())).UserName,
-                    Guid = userTask.Guid
+                    Guid = userTask.Guid,
+                    PriorityId = userTask.TaskPriorityId,
+                    PriorityTitle = localizer[userTask.TaskPriority.Name]
                 });
             }
             return response;
@@ -251,7 +272,9 @@ namespace vws.web.Controllers._task
                         ModifiedOn = userTask.ModifiedOn,
                         CreatedBy = (await userManager.FindByIdAsync(userTask.CreatedBy.ToString())).UserName,
                         ModifiedBy = (await userManager.FindByIdAsync(userTask.ModifiedBy.ToString())).UserName,
-                        Guid = userTask.Guid
+                        Guid = userTask.Guid,
+                        PriorityId = userTask.TaskPriorityId,
+                        PriorityTitle = localizer[userTask.TaskPriority.Name]
                     });
                 }
             }

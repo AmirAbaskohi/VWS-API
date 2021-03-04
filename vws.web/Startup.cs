@@ -267,6 +267,15 @@ namespace vws.web
                         context.UpdateStatus((byte)status, status.ToString());
                 }
                 context.Save();
+                foreach (var priority in Enum.GetValues(typeof(SeedDataEnum.TaskPriority)))
+                {
+                    string dbPriority = context.GetTaskPriority((byte)priority);
+                    if (dbPriority == null)
+                        context.AddTaskPriority(new Domain._task.TaskPriority { Id = (byte)priority, Name = priority.ToString() });
+                    else if (dbPriority != priority.ToString())
+                        context.UpdateTaskPriority((byte)priority, priority.ToString());
+                }
+                context.Save();
                 foreach (var culture in Enum.GetValues(typeof(SeedDataEnum.Cultures)))
                 {
                     string dbCulture = context.GetCulture((byte)culture);

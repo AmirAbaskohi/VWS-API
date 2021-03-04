@@ -117,11 +117,23 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="High" xml:space="preserve">
+    <value>بالا</value>
+  </data>
   <data name="Length of description is more than 2000 characters." xml:space="preserve">
     <value>تعداد کاراکتر های بخش توضیحات بیشتر از 2000 کاراکتر است.</value>
   </data>
   <data name="Length of title is more than 500 characters." xml:space="preserve">
     <value>تعداد کاراکتر های بخش عنوان بیشتر از 500 کاراکتر است.</value>
+  </data>
+  <data name="Low" xml:space="preserve">
+    <value>پایین</value>
+  </data>
+  <data name="Medium" xml:space="preserve">
+    <value>متوسط</value>
+  </data>
+  <data name="Priority id is not defined." xml:space="preserve">
+    <value>اولویت تسک معتبر نیست.</value>
   </data>
   <data name="Start Date should be before End Date." xml:space="preserve">
     <value>زمان شروع باید قبل از زمان پایان باشد.</value>

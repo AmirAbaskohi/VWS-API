@@ -14,6 +14,8 @@ namespace vws.web.Models._task
         public string Title { get; set; }
         [Required]
         public string Description { get; set; }
+        [Required]
+        public byte PriorityId { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
     }

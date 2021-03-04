@@ -38,6 +38,13 @@ namespace vws.web.Enums
             DoneOrArchived = 3
         };
 
+        public enum TaskPriority : byte
+        {
+            Low = 1,
+            Medium = 3,
+            High = 5
+        }
+
         public enum Cultures : byte
         {
             en_US = 1,

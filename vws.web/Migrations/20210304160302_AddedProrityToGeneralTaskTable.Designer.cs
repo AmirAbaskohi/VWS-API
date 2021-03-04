@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using vws.web.Domain;
 
 namespace vws.web.Migrations
 {
     [DbContext(typeof(VWS_DbContext))]
-    partial class VWS_DbContextModelSnapshot : ModelSnapshot
+    [Migration("20210304160302_AddedProrityToGeneralTaskTable")]
+    partial class AddedProrityToGeneralTaskTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -869,14 +871,11 @@ namespace vws.web.Migrations
                     b.Property<DateTime>("ModifiedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<byte>("PriorityId")
+                    b.Property<byte>("Priority")
                         .HasColumnType("tinyint");
 
                     b.Property<DateTime?>("StartDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<byte?>("TaskPriorityId")
-                        .HasColumnType("tinyint");
 
                     b.Property<byte?>("TaskScheduleTypeId")
                         .HasColumnType("tinyint");
@@ -887,8 +886,6 @@ namespace vws.web.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("TaskPriorityId");
 
                     b.HasIndex("TaskScheduleTypeId");
 
@@ -1015,19 +1012,6 @@ namespace vws.web.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Task_TaskCommentTemplate");
-                });
-
-            modelBuilder.Entity("vws.web.Domain._task.TaskPriority", b =>
-                {
-                    b.Property<byte>("Id")
-                        .HasColumnType("tinyint");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Task_TaskPriority");
                 });
 
             modelBuilder.Entity("vws.web.Domain._task.TaskReminder", b =>
@@ -1450,15 +1434,9 @@ namespace vws.web.Migrations
 
             modelBuilder.Entity("vws.web.Domain._task.GeneralTask", b =>
                 {
-                    b.HasOne("vws.web.Domain._task.TaskPriority", "TaskPriority")
-                        .WithMany()
-                        .HasForeignKey("TaskPriorityId");
-
                     b.HasOne("vws.web.Domain._task.TaskScheduleType", "TaskScheduleType")
                         .WithMany("GeneralTasks")
                         .HasForeignKey("TaskScheduleTypeId");
-
-                    b.Navigation("TaskPriority");
 
                     b.Navigation("TaskScheduleType");
                 });

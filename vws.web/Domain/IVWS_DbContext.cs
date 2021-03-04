@@ -207,6 +207,8 @@ namespace vws.web.Domain
 
         public IQueryable<TaskAssign> TaskAssigns { get; }
 
+        public IQueryable<TaskPriority> TaskPriorities { get; }
+
         #endregion
 
         #region methods
@@ -216,6 +218,12 @@ namespace vws.web.Domain
         public Task<GeneralTask> GetTaskAsync(long id);
 
         public Task<TaskAssign> AddTaskAssignAsync(TaskAssign taskAssign);
+
+        public void AddTaskPriority(TaskPriority taskPriority);
+
+        public string GetTaskPriority(byte id);
+
+        public void UpdateTaskPriority(byte id, string newName);
 
         #endregion
 

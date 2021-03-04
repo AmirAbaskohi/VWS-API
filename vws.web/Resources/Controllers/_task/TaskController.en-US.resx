@@ -120,11 +120,23 @@
   <data name="File size is not allowed." xml:space="preserve">
     <value>File size is not allowed.</value>
   </data>
+  <data name="High" xml:space="preserve">
+    <value>High</value>
+  </data>
   <data name="Length of description is more than 2000 characters." xml:space="preserve">
     <value>Length of description is more than 2000 characters.</value>
   </data>
   <data name="Length of title is more than 500 characters." xml:space="preserve">
     <value>Length of title is more than 500 characters.</value>
+  </data>
+  <data name="Low" xml:space="preserve">
+    <value>Low</value>
+  </data>
+  <data name="Medium" xml:space="preserve">
+    <value>Medium</value>
+  </data>
+  <data name="Priority id is not defined." xml:space="preserve">
+    <value>Priority id is not defined.</value>
   </data>
   <data name="Start Date should be before End Date." xml:space="preserve">
     <value>Start Date should be before End Date.</value>

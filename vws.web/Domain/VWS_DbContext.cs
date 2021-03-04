@@ -369,6 +369,10 @@ namespace vws.web.Domain
 
         public DbSet<TaskAssign> TaskAssigns { get; set; }
 
+        IQueryable<TaskPriority> IVWS_DbContext.TaskPriorities { get => TaskPriorities; }
+
+        public DbSet<TaskPriority> TaskPriorities { get; set; }
+
         public async Task<GeneralTask> AddTaskAsync(GeneralTask generalTask)
         {
             await GeneralTasks.AddAsync(generalTask);
@@ -384,6 +388,23 @@ namespace vws.web.Domain
         {
             await TaskAssigns.AddAsync(taskAssign);
             return taskAssign;
+        }
+
+        public void AddTaskPriority(TaskPriority taskPriority)
+        {
+            TaskPriorities.Add(taskPriority);
+        }
+
+        public string GetTaskPriority(byte id)
+        {
+            var selectedTaskPriority = TaskPriorities.FirstOrDefault(taskPriority => taskPriority.Id == id);
+            return selectedTaskPriority == null ? null : selectedTaskPriority.Name;
+        }
+
+        public void UpdateTaskPriority(byte id, string newName)
+        {
+            var selectedTaskPriority = TaskPriorities.FirstOrDefault(taskPriority => taskPriority.Id == id);
+            selectedTaskPriority.Name = newName;
         }
 
         #endregion

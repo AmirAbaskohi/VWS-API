@@ -25,6 +25,8 @@ namespace vws.web.Domain._task
         [MaxLength(2000, ErrorMessage = "Max allowed length is 2000 char")] // TODO: Get and Localize
         public string Description { get; set; }
 
+        public byte TaskPriorityId { get; set; }
+
         public bool IsArchived { get; set; }
 
         public bool IsDeleted { get; set; }
@@ -42,6 +44,8 @@ namespace vws.web.Domain._task
         public DateTime CreatedOn { get; set; }
 
         public DateTime ModifiedOn { get; set; }
+
+        public virtual TaskPriority TaskPriority { get; set; }
 
         public virtual TaskScheduleType TaskScheduleType { get; set; }
 
