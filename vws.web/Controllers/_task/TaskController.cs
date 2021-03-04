@@ -506,5 +506,18 @@ namespace vws.web.Controllers._task
             response.Message = "User unassigned from task successfully!";
             return Ok(response);
         }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getTaskPriorities")]
+        public ICollection<Object> GetTaskPriorities()
+        {
+            List<Object> result = new List<Object>();
+
+            foreach (var priority in Enum.GetValues(typeof(SeedDataEnum.TaskPriority)))
+                result.Add(new { Id = (byte)priority, Name = priority.ToString() });
+
+            return result;
+        }
     }
 }
