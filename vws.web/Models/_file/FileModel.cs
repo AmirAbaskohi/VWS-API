@@ -10,5 +10,7 @@ namespace vws.web.Models._file
         public string Name { get; set; }
         public string Extension { get; set; }
         public long Size { get; set; }
+
+        public Guid FileContainerGuid { get; set; }
     }
 }

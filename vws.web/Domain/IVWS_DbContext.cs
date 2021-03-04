@@ -286,7 +286,7 @@ namespace vws.web.Domain
 
         public Task<FileContainer> AddFileContainerAsync(FileContainer fileContainer);
 
-        public Task<FileContainer> GetFileContainerAsync(int id);
+        public Task<FileContainer> GetFileContainerAsync(Guid id);
 
         public void DeleteFile(File file);
 

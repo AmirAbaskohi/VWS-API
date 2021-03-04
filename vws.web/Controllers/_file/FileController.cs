@@ -90,7 +90,7 @@ namespace vws.web.Controllers._file
                 }
             }
 
-            var successfulFiles = successfullyUploadedFiles.Select(file => new FileModel { Name = file.Name, Extension = file.Extension, Size = file.Size }).ToList();
+            var successfulFiles = successfullyUploadedFiles.Select(file => new FileModel { Name = file.Name, Extension = file.Extension, Size = file.Size, FileContainerGuid = file.FileContainerGuid }).ToList();
 
             if (unsuccessfullyFileContainers.Count != 0)
             {
@@ -107,7 +107,7 @@ namespace vws.web.Controllers._file
 
         [HttpGet]
         [Route("get")]
-        public async Task<IActionResult> GetFile(int id)
+        public async Task<IActionResult> GetFile(Guid id)
         {
             var response = new ResponseModel();
             var fileContainer = await vwsDbContext.GetFileContainerAsync(id);

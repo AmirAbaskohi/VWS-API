@@ -17,5 +17,6 @@ namespace vws.web.Domain._file
         public long Size { get; set; }
         public Guid UploadedBy { get; set; }
         public int FileContainerId { get; set; }
+        public Guid FileContainerGuid { get; set; }
     }
 }

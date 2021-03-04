@@ -497,9 +497,9 @@ namespace vws.web.Domain
             return fileContainer;
         }
 
-        public async Task<FileContainer> GetFileContainerAsync(int id)
+        public async Task<FileContainer> GetFileContainerAsync(Guid guid)
         {
-            return await FileContainers.FirstOrDefaultAsync(fileContainer => fileContainer.Id == id);
+            return await FileContainers.FirstOrDefaultAsync(fileContainer => fileContainer.Guid == guid);
         }
 
         public void DeleteFile(File file)
