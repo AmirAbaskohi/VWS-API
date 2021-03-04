@@ -138,6 +138,20 @@ namespace vws.web.Hubs
             vwsDbContext.Save();
         }
 
+        private void ReorderPinnedMessages(ref List<Message> pinnedMessages)
+        {
+            int evenOrder = 2;
+            pinnedMessages = pinnedMessages.OrderBy(message => message.PinEvenOrder).ToList();
+
+            foreach (var pinnedMessage in pinnedMessages)
+            {
+                pinnedMessage.PinEvenOrder = evenOrder;
+                evenOrder += 2;
+            }
+
+            vwsDbContext.Save();
+        }
+
         public async Task SendMessage(string message, byte channelTypeId, Guid channelId, byte messageTypeId, long? replyTo = null)
         {
             if (message.Length > 4000)
@@ -245,7 +259,7 @@ namespace vws.web.Hubs
             int lastPinOrder = 0;
             pinnedMessages = pinnedMessages.OrderByDescending(message => message.PinEvenOrder).ToList();
             if (pinnedMessages.Count != 0)
-                lastPinOrder = (int)pinnedMessages[pinnedMessages.Count - 1].PinEvenOrder;
+                lastPinOrder = (int)pinnedMessages[0].PinEvenOrder;
 
             selectedMessage.IsPinned = true;
             selectedMessage.PinEvenOrder = lastPinOrder + 2;
@@ -275,6 +289,26 @@ namespace vws.web.Hubs
             selectedMessage.PinEvenOrder = null;
 
             vwsDbContext.Save();
+
+            List<Message> pinnedMessages = new List<Message>();
+            if (selectedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+            {
+                var directMessageContactUser = await userManager.FindByIdAsync(selectedMessage.ChannelId.ToString());
+                pinnedMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == selectedMessage.ChannelTypeId &&
+                                                                        ((message.ChannelId == selectedMessage.ChannelId && message.FromUserName == LoggedInUserName) ||
+                                                                        (message.ChannelId == LoggedInUserId && message.FromUserName == directMessageContactUser.UserName)) &&
+                                                                        !message.IsDeleted &&
+                                                                        message.IsPinned).ToList();
+            }
+            else
+            {
+                pinnedMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == selectedMessage.ChannelTypeId &&
+                                                                        message.ChannelId == selectedMessage.ChannelId &&
+                                                                        !message.IsDeleted && message.IsPinned)
+                                                       .ToList();
+            }
+
+            ReorderPinnedMessages(ref pinnedMessages);
 
             if (selectedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
             {
