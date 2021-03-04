@@ -154,6 +154,12 @@ namespace vws.web.Hubs
 
         public async Task SendMessage(string message, byte channelTypeId, Guid channelId, byte messageTypeId, long? replyTo = null)
         {
+            #region check channel existance and access
+            if (!channelService.DoesChannelExist(channelId, channelTypeId) ||
+                    !channelService.HasUserAccessToChannel(LoggedInUserId, channelId, channelTypeId))
+                return; 
+            #endregion
+
             if (message.Length > 4000)
                 return;
 
@@ -213,8 +219,15 @@ namespace vws.web.Hubs
         {
             var selectedMessage = vwsDbContext.Messages.FirstOrDefault(message => message.Id == messageId);
 
+
             if (selectedMessage == null || selectedMessage.IsDeleted || selectedMessage.FromUserName != LoggedInUserName)
                 return;
+
+            #region check channel existance and access
+            if (!channelService.DoesChannelExist(selectedMessage.ChannelId, selectedMessage.ChannelTypeId) ||
+                    !channelService.HasUserAccessToChannel(LoggedInUserId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId))
+                return;
+            #endregion
 
             selectedMessage.IsDeleted = true;
             vwsDbContext.Save();
@@ -237,6 +250,12 @@ namespace vws.web.Hubs
 
             if (selectedMessage == null || selectedMessage.IsDeleted || selectedMessage.IsPinned)
                 return;
+
+            #region check channel existance and access
+            if (!channelService.DoesChannelExist(selectedMessage.ChannelId, selectedMessage.ChannelTypeId) ||
+                    !channelService.HasUserAccessToChannel(LoggedInUserId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId))
+                return;
+            #endregion
 
             List<Message> pinnedMessages = new List<Message>();
             if (selectedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
@@ -284,6 +303,12 @@ namespace vws.web.Hubs
 
             if (selectedMessage == null || selectedMessage.IsDeleted || !selectedMessage.IsPinned)
                 return;
+
+            #region check channel existance and access
+            if (!channelService.DoesChannelExist(selectedMessage.ChannelId, selectedMessage.ChannelTypeId) ||
+                    !channelService.HasUserAccessToChannel(LoggedInUserId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId))
+                return;
+            #endregion
 
             selectedMessage.IsPinned = false;
             selectedMessage.PinEvenOrder = null;
@@ -334,6 +359,12 @@ namespace vws.web.Hubs
                 selectedMessage.MessageTypeId != (byte)SeedDataEnum.MessageTypes.Text)
                 return;
 
+            #region check channel existance and access
+            if (!channelService.DoesChannelExist(selectedMessage.ChannelId, selectedMessage.ChannelTypeId) ||
+                    !channelService.HasUserAccessToChannel(LoggedInUserId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId))
+                return;
+            #endregion
+
             var newMessageEdit = new Domain._chat.MessageEdit
             {
                 ChannelId = selectedMessage.ChannelId,
@@ -373,6 +404,12 @@ namespace vws.web.Hubs
             if (selectedMessage == null || selectedMessage.IsDeleted)
                 return;
 
+            #region check channel existance and access
+            if (!channelService.DoesChannelExist(selectedMessage.ChannelId, selectedMessage.ChannelTypeId) ||
+                    !channelService.HasUserAccessToChannel(LoggedInUserId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId))
+                return;
+            #endregion
+
             vwsDbContext.AddMessageRead(new MessageRead()
             {
                 ChannelId = selectedMessage.ChannelId,
@@ -404,6 +441,12 @@ namespace vws.web.Hubs
 
             if (selectedMessage == null || selectedMessage.IsDeleted)
                 return;
+
+            #region check channel existance and access
+            if (!channelService.DoesChannelExist(selectedMessage.ChannelId, selectedMessage.ChannelTypeId) ||
+                    !channelService.HasUserAccessToChannel(LoggedInUserId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId))
+                return;
+            #endregion
 
             vwsDbContext.AddMessageDeliver(new MessageDeliver()
             {

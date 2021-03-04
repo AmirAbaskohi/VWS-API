@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using vws.web.Domain;
 using vws.web.Domain._base;
 using vws.web.Domain._chat;
 using vws.web.Enums;
 using vws.web.Models;
 using vws.web.Models._chat;
+using vws.web.Services._chat;
 
 namespace vws.web.Controllers._chat
 {
@@ -20,11 +23,16 @@ namespace vws.web.Controllers._chat
     {
         private readonly IVWS_DbContext vwsDbContext;
         private readonly UserManager<ApplicationUser> userManager;
+        private readonly IChannelService channelService;
+        private readonly IStringLocalizer<MessageController> localizer;
 
-        public MessageController(IVWS_DbContext _vwsDbContext, UserManager<ApplicationUser> _userManager)
+        public MessageController(IVWS_DbContext _vwsDbContext, UserManager<ApplicationUser> _userManager,
+                                 IChannelService _channelService, IStringLocalizer<MessageController> _localizer)
         {
             vwsDbContext = _vwsDbContext;
             userManager = _userManager;
+            channelService = _channelService;
+            localizer = _localizer;
         }
 
         private List<MessageResponseModel> FillMessageResponseModel(IQueryable<Message> messages)
@@ -53,7 +61,24 @@ namespace vws.web.Controllers._chat
         [Route("get")]
         public async Task<IActionResult> GetMessages(Guid channelId, byte channelTypeId, int pageIndex, int pageSize)
         {
+            var response = new ResponseModel<List<MessageResponseModel>>();
+            var userId = LoggedInUserId.Value;
+
             List<MessageResponseModel> messageResponseModels = new List<MessageResponseModel>();
+
+            if (!channelService.DoesChannelExist(channelId, channelTypeId))
+            {
+                response.AddError(localizer["There is no channel with given information."]);
+                response.Message = "Channel not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!channelService.HasUserAccessToChannel(userId, channelId, channelTypeId))
+            {
+                response.AddError(localizer["You do not have access to this channel."]);
+                response.Message = "Channel access denied";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
 
             if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
             {
@@ -70,7 +95,9 @@ namespace vws.web.Controllers._chat
                 messageResponseModels = FillMessageResponseModel(publicMessages);
             }
 
-            return Ok(new ResponseModel<List<MessageResponseModel>>(messageResponseModels));
+            response.Value = messageResponseModels;
+            response.Message = "Messages returned successfully!";
+            return Ok(response);
 
         }
 
@@ -79,7 +106,24 @@ namespace vws.web.Controllers._chat
         [Route("getPinnedMessages")]
         public async Task<IActionResult> GetPinnedMessages(Guid channelId, byte channelTypeId)
         {
+            var response = new ResponseModel<List<MessageResponseModel>>();
+            var userId = LoggedInUserId.Value;
+
             List<MessageResponseModel> messageResponseModels = new List<MessageResponseModel>();
+
+            if (!channelService.DoesChannelExist(channelId, channelTypeId))
+            {
+                response.AddError(localizer["There is no channel with given information."]);
+                response.Message = "Channel not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!channelService.HasUserAccessToChannel(userId, channelId, channelTypeId))
+            {
+                response.AddError(localizer["You do not have access to this channel."]);
+                response.Message = "Channel access denied";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
 
             if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
             {
@@ -98,7 +142,9 @@ namespace vws.web.Controllers._chat
                 messageResponseModels = FillMessageResponseModel(publicMessages);
             }
 
-            return Ok(new ResponseModel<List<MessageResponseModel>>(messageResponseModels));
+            response.Value = messageResponseModels;
+            response.Message = "Pinned messages returned successfully!";
+            return Ok(response);
         }
 
     }

@@ -192,53 +192,18 @@ namespace vws.web.Controllers._chat
 
             var muteUntil = DateTime.Now.AddMinutes(model.MuteMinutes);
 
-            if (model.ChannelTypeId < 1 || model.ChannelTypeId > 4)
+            if (!channelService.DoesChannelExist(model.ChannelId, model.ChannelTypeId))
             {
-                response.AddError(localizer["Channel type Id is not valid."]);
-                response.Message = "Invalid channel type id";
+                response.AddError(localizer["There is no channel with given information."]);
+                response.Message = "Channel not found";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            switch (model.ChannelTypeId)
+            if (!channelService.HasUserAccessToChannel(userId, model.ChannelId, model.ChannelTypeId))
             {
-                case (byte)SeedDataEnum.ChannelTypes.Private:
-                    var user = await vwsDbContext.GetUserProfileAsync(model.ChannelId);
-                    if (user == null)
-                    {
-                        response.AddError(localizer["There is no user with such Id."]);
-                        response.Message = "User not found";
-                        return StatusCode(StatusCodes.Status400BadRequest, response);
-                    }
-                    break;
-                case (byte)SeedDataEnum.ChannelTypes.Team:
-                    var selectedTeam = vwsDbContext.Teams.FirstOrDefault(team => team.Guid == model.ChannelId);
-                    if (selectedTeam == null || selectedTeam.IsDeleted)
-                    {
-                        response.AddError(localizer["There is no team with such Id."]);
-                        response.Message = "Team not found";
-                        return StatusCode(StatusCodes.Status400BadRequest, response);
-                    }
-                    break;
-                case (byte)SeedDataEnum.ChannelTypes.Project:
-                    var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Guid == model.ChannelId);
-                    if (selectedProject == null || selectedProject.IsDeleted)
-                    {
-                        response.AddError(localizer["There is no project with such Id."]);
-                        response.Message = "Project not found";
-                        return StatusCode(StatusCodes.Status400BadRequest, response);
-                    }
-                    break;
-                case (byte)SeedDataEnum.ChannelTypes.Department:
-                    var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Guid == model.ChannelId);
-                    if (selectedDepartment == null || selectedDepartment.IsDeleted)
-                    {
-                        response.AddError(localizer["There is no department with such Id."]);
-                        response.Message = "Department not found";
-                        return StatusCode(StatusCodes.Status400BadRequest, response);
-                    }
-                    break;
-                default:
-                    break;
+                response.AddError(localizer["You do not have access to this channel."]);
+                response.Message = "Channel access denied";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
             var selectedMutedChannel = vwsDbContext.MutedChannels.FirstOrDefault(mutedChannels => mutedChannels.ChannelId == model.ChannelId &&
@@ -273,58 +238,23 @@ namespace vws.web.Controllers._chat
         [HttpPost]
         [Authorize]
         [Route("unmuteChannel")]
-        public async Task<IActionResult> UnmuteChannel([FromBody] UnmuteChannelModel model)
+        public IActionResult UnmuteChannel([FromBody] UnmuteChannelModel model)
         {
             var userId = LoggedInUserId.Value;
             var response = new ResponseModel();
 
-            if (model.ChannelTypeId < 1 || model.ChannelTypeId > 4)
+            if (!channelService.DoesChannelExist(model.ChannelId, model.ChannelTypeId))
             {
-                response.AddError(localizer["Channel type Id is not valid."]);
-                response.Message = "Invalid channel type id";
+                response.AddError(localizer["There is no channel with given information."]);
+                response.Message = "Channel not found";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            switch (model.ChannelTypeId)
+            if (!channelService.HasUserAccessToChannel(userId, model.ChannelId, model.ChannelTypeId))
             {
-                case (byte)SeedDataEnum.ChannelTypes.Private:
-                    var user = await vwsDbContext.GetUserProfileAsync(model.ChannelId);
-                    if (user == null)
-                    {
-                        response.AddError(localizer["There is no user with such Id."]);
-                        response.Message = "User not found";
-                        return StatusCode(StatusCodes.Status400BadRequest, response);
-                    }
-                    break;
-                case (byte)SeedDataEnum.ChannelTypes.Team:
-                    var selectedTeam = vwsDbContext.Teams.FirstOrDefault(team => team.Guid == model.ChannelId);
-                    if (selectedTeam == null || selectedTeam.IsDeleted)
-                    {
-                        response.AddError(localizer["There is no team with such Id."]);
-                        response.Message = "Team not found";
-                        return StatusCode(StatusCodes.Status400BadRequest, response);
-                    }
-                    break;
-                case (byte)SeedDataEnum.ChannelTypes.Project:
-                    var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Guid == model.ChannelId);
-                    if (selectedProject == null || selectedProject.IsDeleted)
-                    {
-                        response.AddError(localizer["There is no project with such Id."]);
-                        response.Message = "Project not found";
-                        return StatusCode(StatusCodes.Status400BadRequest, response);
-                    }
-                    break;
-                case (byte)SeedDataEnum.ChannelTypes.Department:
-                    var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Guid == model.ChannelId);
-                    if (selectedDepartment == null || selectedDepartment.IsDeleted)
-                    {
-                        response.AddError(localizer["There is no department with such Id."]);
-                        response.Message = "Department not found";
-                        return StatusCode(StatusCodes.Status400BadRequest, response);
-                    }
-                    break;
-                default:
-                    break;
+                response.AddError(localizer["You do not have access to this channel."]);
+                response.Message = "Channel access denied";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
             var selectedMutedChannel = vwsDbContext.MutedChannels.FirstOrDefault(mutedChannels => mutedChannels.ChannelId == model.ChannelId &&
@@ -349,58 +279,23 @@ namespace vws.web.Controllers._chat
         [HttpPost]
         [Authorize]
         [Route("pinChannel")]
-        public async Task<IActionResult> PinChannel([FromBody] PinChannelModel model)
+        public IActionResult PinChannel([FromBody] PinChannelModel model)
         {
             var userId = LoggedInUserId.Value;
             var response = new ResponseModel();
 
-            if (model.ChannelTypeId < 1 || model.ChannelTypeId > 4)
+            if (!channelService.DoesChannelExist(model.ChannelId, model.ChannelTypeId))
             {
-                response.AddError(localizer["Channel type Id is not valid."]);
-                response.Message = "Invalid channel type id";
+                response.AddError(localizer["There is no channel with given information."]);
+                response.Message = "Channel not found";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            switch (model.ChannelTypeId)
+            if (!channelService.HasUserAccessToChannel(userId, model.ChannelId, model.ChannelTypeId))
             {
-                case (byte)SeedDataEnum.ChannelTypes.Private:
-                    var user = await vwsDbContext.GetUserProfileAsync(model.ChannelId);
-                    if (user == null)
-                    {
-                        response.AddError(localizer["There is no user with such Id."]);
-                        response.Message = "User not found";
-                        return StatusCode(StatusCodes.Status400BadRequest, response);
-                    }
-                    break;
-                case (byte)SeedDataEnum.ChannelTypes.Team:
-                    var selectedTeam = vwsDbContext.Teams.FirstOrDefault(team => team.Guid == model.ChannelId);
-                    if (selectedTeam == null || selectedTeam.IsDeleted)
-                    {
-                        response.AddError(localizer["There is no team with such Id."]);
-                        response.Message = "Team not found";
-                        return StatusCode(StatusCodes.Status400BadRequest, response);
-                    }
-                    break;
-                case (byte)SeedDataEnum.ChannelTypes.Project:
-                    var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Guid == model.ChannelId);
-                    if (selectedProject == null || selectedProject.IsDeleted)
-                    {
-                        response.AddError(localizer["There is no project with such Id."]);
-                        response.Message = "Project not found";
-                        return StatusCode(StatusCodes.Status400BadRequest, response);
-                    }
-                    break;
-                case (byte)SeedDataEnum.ChannelTypes.Department:
-                    var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Guid == model.ChannelId);
-                    if (selectedDepartment == null || selectedDepartment.IsDeleted)
-                    {
-                        response.AddError(localizer["There is no department with such Id."]);
-                        response.Message = "Department not found";
-                        return StatusCode(StatusCodes.Status400BadRequest, response);
-                    }
-                    break;
-                default:
-                    break;
+                response.AddError(localizer["You do not have access to this channel."]);
+                response.Message = "Channel access denied";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
             var selectedPinnedChannel = vwsDbContext.PinnedChannels.FirstOrDefault(pinnedChannel => pinnedChannel.ChannelId == model.ChannelId &&
@@ -440,58 +335,23 @@ namespace vws.web.Controllers._chat
         [HttpPut]
         [Authorize]
         [Route("unpinChannel")]
-        public async Task<IActionResult> UnpinChannel([FromBody] PinChannelModel model)
+        public IActionResult UnpinChannel([FromBody] PinChannelModel model)
         {
             var userId = LoggedInUserId.Value;
             var response = new ResponseModel();
 
-            if (model.ChannelTypeId < 1 || model.ChannelTypeId > 4)
+            if (!channelService.DoesChannelExist(model.ChannelId, model.ChannelTypeId))
             {
-                response.AddError(localizer["Channel type Id is not valid."]);
-                response.Message = "Invalid channel type id";
+                response.AddError(localizer["There is no channel with given information."]);
+                response.Message = "Channel not found";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            switch (model.ChannelTypeId)
+            if (!channelService.HasUserAccessToChannel(userId, model.ChannelId, model.ChannelTypeId))
             {
-                case (byte)SeedDataEnum.ChannelTypes.Private:
-                    var user = await vwsDbContext.GetUserProfileAsync(model.ChannelId);
-                    if (user == null)
-                    {
-                        response.AddError(localizer["There is no user with such Id."]);
-                        response.Message = "User not found";
-                        return StatusCode(StatusCodes.Status400BadRequest, response);
-                    }
-                    break;
-                case (byte)SeedDataEnum.ChannelTypes.Team:
-                    var selectedTeam = vwsDbContext.Teams.FirstOrDefault(team => team.Guid == model.ChannelId);
-                    if (selectedTeam == null || selectedTeam.IsDeleted)
-                    {
-                        response.AddError(localizer["There is no team with such Id."]);
-                        response.Message = "Team not found";
-                        return StatusCode(StatusCodes.Status400BadRequest, response);
-                    }
-                    break;
-                case (byte)SeedDataEnum.ChannelTypes.Project:
-                    var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Guid == model.ChannelId);
-                    if (selectedProject == null || selectedProject.IsDeleted)
-                    {
-                        response.AddError(localizer["There is no project with such Id."]);
-                        response.Message = "Project not found";
-                        return StatusCode(StatusCodes.Status400BadRequest, response);
-                    }
-                    break;
-                case (byte)SeedDataEnum.ChannelTypes.Department:
-                    var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Guid == model.ChannelId);
-                    if (selectedDepartment == null || selectedDepartment.IsDeleted)
-                    {
-                        response.AddError(localizer["There is no department with such Id."]);
-                        response.Message = "Department not found";
-                        return StatusCode(StatusCodes.Status400BadRequest, response);
-                    }
-                    break;
-                default:
-                    break;
+                response.AddError(localizer["You do not have access to this channel."]);
+                response.Message = "Channel access denied";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
             var selectedPinnedChannel = vwsDbContext.PinnedChannels.FirstOrDefault(pinnedChannel => pinnedChannel.ChannelId == model.ChannelId &&
