@@ -651,7 +651,9 @@ namespace vws.web.Controllers._project
         {
             Guid userId = LoggedInUserId.Value;
 
-            var project = GetAllUserProjects(userId).Where(project => project.Id == Id);
+            var project = GetAllUserProjects(userId).FirstOrDefault(project => project.Id == Id);
+            if (project == null)
+                return new ProjectResponseModel();
 
             var response = new ProjectResponseModel()
             {
