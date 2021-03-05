@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using System;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using vws.web.Domain._file;
+using System.Collections.Generic;
+using Microsoft.Data.SqlClient;
 
 namespace vws.web.Domain
 {
@@ -220,7 +222,13 @@ namespace vws.web.Domain
 
         public IQueryable<MessageRead> MarkMessagesAsRead(long messageId, Guid userId, string userName)
         {
-            return MessageReads.FromSqlRaw<MessageRead>("EXEC MarkUnreadMessages {0}, \'{1}\', \'{2}\'", messageId, userId.ToString(), userName);
+            SqlParameter[] sqlParameters =
+            {
+               new SqlParameter("MessageId", messageId),
+               new SqlParameter("UserId", $"{userId.ToString()}"),
+               new SqlParameter("UserName", $"{userName}")
+            };
+            return MessageReads.FromSqlRaw<MessageRead>("MarkUnreadMessages @MessageId, @UserId, @UserName", sqlParameters);
         }
 
         #endregion

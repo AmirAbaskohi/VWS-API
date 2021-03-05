@@ -178,6 +178,7 @@ namespace vws.web.Hubs
 
         public async Task SendMessage(string message, byte channelTypeId, Guid channelId, byte messageTypeId, long? replyTo = null)
         {
+            await MarkMessageAsRead(11);
             #region check channel existance and access
             if (!channelService.DoesChannelExist(channelId, channelTypeId) ||
                     !channelService.HasUserAccessToChannel(LoggedInUserId, channelId, channelTypeId))
@@ -413,42 +414,20 @@ namespace vws.web.Hubs
                 return;
             #endregion
 
-            vwsDbContext.AddMessageRead(new MessageRead()
+            var markedMessages = vwsDbContext.MarkMessagesAsRead(messageId, LoggedInUserId, LoggedInUserName).ToList();
+            foreach (var markedMessage in markedMessages)
             {
-                ChannelId = selectedMessage.ChannelId,
-                ChannelTypeId = selectedMessage.ChannelTypeId,
-                MessageId = selectedMessage.Id,
-                ReadBy = LoggedInUserId
-            });
-
-            vwsDbContext.Save();
-
-            if (selectedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
-            {
-                var groupName = CombineTwoGuidsInOrder(LoggedInUserId, selectedMessage.ChannelId);
-                await Clients.Caller.ReceiveReadMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId);
-                await Clients.OthersInGroup(groupName).ReceiveReadMessage(messageId, LoggedInUserId, selectedMessage.ChannelTypeId);
+                if (markedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+                {
+                    var groupName = CombineTwoGuidsInOrder(LoggedInUserId, markedMessage.ChannelId);
+                    await Clients.Caller.ReceiveReadMessage(messageId, markedMessage.ChannelId, markedMessage.ChannelTypeId);
+                    await Clients.OthersInGroup(groupName).ReceiveReadMessage(messageId, LoggedInUserId, markedMessage.ChannelTypeId);
+                }
+                else
+                {
+                    await Clients.Group(markedMessage.ChannelId.ToString()).ReceiveReadMessage(messageId, markedMessage.ChannelId, markedMessage.ChannelTypeId);
+                }
             }
-            else
-            {
-                await Clients.Group(selectedMessage.ChannelId.ToString()).ReceiveReadMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId);
-            }
-
-            //var markedMessages = vwsDbContext.MarkMessagesAsRead(messageId, LoggedInUserId, LoggedInUserName);
-
-            //foreach (var markedMessage in markedMessages)
-            //{
-            //    if (markedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
-            //    {
-            //        var groupName = CombineTwoGuidsInOrder(LoggedInUserId, markedMessage.ChannelId);
-            //        await Clients.Caller.ReceiveReadMessage(messageId, markedMessage.ChannelId, markedMessage.ChannelTypeId);
-            //        await Clients.OthersInGroup(groupName).ReceiveReadMessage(messageId, LoggedInUserId, markedMessage.ChannelTypeId);
-            //    }
-            //    else
-            //    {
-            //        await Clients.Group(markedMessage.ChannelId.ToString()).ReceiveReadMessage(messageId, markedMessage.ChannelId, markedMessage.ChannelTypeId);
-            //    }
-            //} 
         }
 
         public async Task MarkMessageAsDeliver(long messageId)
