@@ -335,7 +335,8 @@ namespace vws.web.Controllers._project
                 IsDelete = newProject.IsDeleted,
                 TeamId = newProject.TeamId,
                 ProjectImageId = newProject.ProjectImageId,
-                DepartmentIds = model.DepartmentIds
+                DepartmentIds = model.DepartmentIds,
+                NumberOfUpdates = vwsDbContext.ProjectHistories.Where(history => history.ProjectId == newProject.Id).Count()
             };
 
             response.Value = newProjectResponse;
@@ -523,7 +524,8 @@ namespace vws.web.Controllers._project
                 IsDelete = selectedProject.IsDeleted,
                 TeamId = selectedProject.TeamId,
                 ProjectImageId = selectedProject.ProjectImageId,
-                DepartmentIds = model.DepartmentIds
+                DepartmentIds = model.DepartmentIds,
+                NumberOfUpdates = vwsDbContext.ProjectHistories.Where(history => history.ProjectId == selectedProject.Id).Count()
             };
 
             response.Value = newProjectResponse;
@@ -609,7 +611,8 @@ namespace vws.web.Controllers._project
                     StatusId = project.StatusId,
                     TeamId = project.TeamId,
                     ProjectImageId = project.ProjectImageId,
-                    DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList()
+                    DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
+                    NumberOfUpdates = vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count()
                 });
             }
 
@@ -641,7 +644,8 @@ namespace vws.web.Controllers._project
                     StatusId = project.StatusId,
                     TeamId = project.TeamId,
                     ProjectImageId = project.ProjectImageId,
-                    DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList()
+                    DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
+                    NumberOfUpdates = vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count()
                 });
             }
 

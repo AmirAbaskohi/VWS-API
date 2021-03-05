@@ -107,21 +107,21 @@ namespace vws.web.Controllers._chat
                 int readMessagesCount;
                 int allMessagesCount;
                 Guid channelId = channelResponseModels[i].Guid;
-                
+
                 if (channelResponseModels[i].ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
                     readMessagesCount = vwsDbContext.MessageReads.Include(messageRead => messageRead.Message)
                                                                  .Where(messageRead => messageRead.ChannelId == LoggedInUserId && messageRead.Message.FromUserName == userNames[i] && !messageRead.Message.IsDeleted)
-                                                                 .ToList().Count;
+                                                                 .Count();
                 else
                     readMessagesCount = vwsDbContext.MessageReads.Include(messageRead => messageRead.Message).Where(messageRead => messageRead.ChannelId == channelId && !messageRead.Message.IsDeleted)
-                                                                                                             .ToList().Count;
+                                                                                                             .Count();
 
                 if (channelResponseModels[i].ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
                     allMessagesCount = vwsDbContext.Messages.Where(message => message.ChannelId == LoggedInUserId && message.FromUserName == userNames[i] && !message.IsDeleted)
-                                                             .ToList().Count;
+                                                             .Count();
                 else
                     allMessagesCount = vwsDbContext.Messages.Where(message => message.ChannelId == channelId && !message.IsDeleted)
-                                                                 .ToList().Count;
+                                                                 .Count();
 
                 channelResponseModels[i].NumberOfUnreadMessages = allMessagesCount - readMessagesCount;
             }
