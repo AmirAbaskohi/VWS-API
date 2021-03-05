@@ -646,6 +646,36 @@ namespace vws.web.Controllers._project
 
         [HttpGet]
         [Authorize]
+        [Route("get")]
+        public async Task<ProjectResponseModel> Get(int Id)
+        {
+            Guid userId = LoggedInUserId.Value;
+
+            var project = GetAllUserProjects(userId).Where(project => project.Id == Id);
+
+            var response = new ProjectResponseModel()
+            {
+                Id = project.Id,
+                Description = project.Description,
+                Color = project.Color,
+                EndDate = project.EndDate,
+                Guid = project.Guid,
+                IsDelete = project.IsDeleted,
+                Name = project.Name,
+                StartDate = project.StartDate,
+                StatusId = project.StatusId,
+                TeamId = project.TeamId,
+                ProjectImageId = project.ProjectImageId,
+                DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
+                NumberOfUpdates = vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
+                Users = await GetProjectUsers(project.Id)
+            });
+       
+            return response;
+        }
+
+        [HttpGet]
+        [Authorize]
         [Route("getActive")]
         public async Task<IEnumerable<ProjectResponseModel>> GetActiveProject()
         {
