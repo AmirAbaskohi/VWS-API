@@ -218,6 +218,11 @@ namespace vws.web.Domain
             return channelTransaction;
         }
 
+        public IQueryable<MessageRead> MarkMessagesAsRead(long messageId, Guid userId, string userName)
+        {
+            return MessageReads.FromSqlRaw<MessageRead>("EXEC MarkUnreadMessages {0}, \'{1}\', \'{2}\'", messageId, userId.ToString(), userName);
+        }
+
         #endregion
 
         #region department

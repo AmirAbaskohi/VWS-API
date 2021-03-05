@@ -114,6 +114,8 @@ namespace vws.web.Domain
 
         public ChannelTransaction AddChannelTransaction(ChannelTransaction channelTransaction);
 
+        public IQueryable<MessageRead> MarkMessagesAsRead(long messageId, Guid userId, string userName);
+
         #endregion
 
         #endregion

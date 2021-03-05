@@ -433,6 +433,22 @@ namespace vws.web.Hubs
             {
                 await Clients.Group(selectedMessage.ChannelId.ToString()).ReceiveReadMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId);
             }
+
+            //var markedMessages = vwsDbContext.MarkMessagesAsRead(messageId, LoggedInUserId, LoggedInUserName);
+
+            //foreach (var markedMessage in markedMessages)
+            //{
+            //    if (markedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+            //    {
+            //        var groupName = CombineTwoGuidsInOrder(LoggedInUserId, markedMessage.ChannelId);
+            //        await Clients.Caller.ReceiveReadMessage(messageId, markedMessage.ChannelId, markedMessage.ChannelTypeId);
+            //        await Clients.OthersInGroup(groupName).ReceiveReadMessage(messageId, LoggedInUserId, markedMessage.ChannelTypeId);
+            //    }
+            //    else
+            //    {
+            //        await Clients.Group(markedMessage.ChannelId.ToString()).ReceiveReadMessage(messageId, markedMessage.ChannelId, markedMessage.ChannelTypeId);
+            //    }
+            //} 
         }
 
         public async Task MarkMessageAsDeliver(long messageId)
