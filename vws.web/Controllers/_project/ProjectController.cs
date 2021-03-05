@@ -669,7 +669,7 @@ namespace vws.web.Controllers._project
                 DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
                 NumberOfUpdates = vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
                 Users = await GetProjectUsers(project.Id)
-            });
+            };
        
             return response;
         }
