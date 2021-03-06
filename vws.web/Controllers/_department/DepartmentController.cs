@@ -395,7 +395,7 @@ namespace vws.web.Controllers._department
         [Route("uploadDepartmentImage")]
         public async Task<IActionResult> UploadDepartmentImage(IFormFile image, int departmentId)
         {
-            var response = new ResponseModel<FileModel>();
+            var response = new ResponseModel<Guid>();
 
             string[] types = { "png", "jpg", "jpeg" };
 
@@ -480,13 +480,7 @@ namespace vws.web.Controllers._department
             selectedDepartment.ModifiedOn = DateTime.Now;
             vwsDbContext.Save();
 
-            response.Value = new FileModel()
-            {
-                Name = fileResponse.Value.Name,
-                Size = fileResponse.Value.Size,
-                Extension = fileResponse.Value.Extension,
-                FileContainerGuid = fileResponse.Value.FileContainerGuid
-            };
+            response.Value = fileResponse.Value.FileContainerGuid;
             response.Message = "Department image added successfully!";
             return Ok(response);
         }

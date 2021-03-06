@@ -663,12 +663,11 @@ namespace vws.web.Controllers._project
                 Color = project.Color,
                 EndDate = project.EndDate,
                 Guid = project.Guid,
-                IsDelete = project.IsDeleted,
                 Name = project.Name,
                 StartDate = project.StartDate,
                 StatusId = project.StatusId,
                 TeamId = project.TeamId,
-                ProjectImageId = project.ProjectImageId,
+                ProjectImageGuid = project.ProjectImageGuid,
                 DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
                 NumberOfUpdates = vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
                 Users = await GetProjectUsers(project.Id)
@@ -879,7 +878,7 @@ namespace vws.web.Controllers._project
                 {
                     UserId = user.UserId,
                     UserName = (await userManager.FindByIdAsync(user.UserId.ToString())).UserName,
-                    ProfileImageId = user.ProfileImageId
+                    ProfileImageGuid = user.ProfileImageGuid
                 });
             }
 
@@ -990,7 +989,7 @@ namespace vws.web.Controllers._project
         [Route("uploadProjectImage")]
         public async Task<IActionResult> UploadProjectImage(IFormFile image, int projectId)
         {
-            var response = new ResponseModel<FileModel>();
+            var response = new ResponseModel<Guid>();
 
             string[] types = { "png", "jpg", "jpeg" };
 
@@ -1092,13 +1091,7 @@ namespace vws.web.Controllers._project
 
             vwsDbContext.Save();
 
-            response.Value = new FileModel()
-            {
-                Name = fileResponse.Value.Name,
-                Size = fileResponse.Value.Size,
-                Extension = fileResponse.Value.Extension,
-                FileContainerGuid = fileResponse.Value.FileContainerGuid
-            };
+            response.Value = fileResponse.Value.FileContainerGuid;
             response.Message = "Project image added successfully!";
             return Ok(response);
         }

@@ -413,7 +413,7 @@ namespace vws.web.Controllers._team
         [Route("uploadTeamImage")]
         public async Task<IActionResult> UploadTeamImage(IFormFile image, int teamId)
         {
-            var response = new ResponseModel<FileModel>();
+            var response = new ResponseModel<Guid>();
 
             string[] types = { "png", "jpg", "jpeg" };
 
@@ -496,13 +496,7 @@ namespace vws.web.Controllers._team
             selectedTeam.ModifiedOn = DateTime.Now;
             vwsDbContext.Save();
 
-            response.Value = new FileModel()
-            {
-                Name = fileResponse.Value.Name,
-                Size = fileResponse.Value.Size,
-                Extension = fileResponse.Value.Extension,
-                FileContainerGuid = fileResponse.Value.FileContainerGuid
-            };
+            response.Value = fileResponse.Value.FileContainerGuid;
             response.Message = "Team image added successfully!";
             return Ok(response);
         }

@@ -596,7 +596,7 @@ namespace vws.web.Controllers._account
         [Route("uploadProfileImage")]
         public async Task<IActionResult> UploadProfileImage(IFormFile image)
         {
-            var response = new ResponseModel<FileModel>();
+            var response = new ResponseModel<Guid>();
 
             string[] types = { "png", "jpg", "jpeg" };
 
@@ -663,13 +663,7 @@ namespace vws.web.Controllers._account
                 vwsDbContext.Save();
             }
 
-            response.Value = new FileModel()
-            {
-                Name = fileResponse.Value.Name,
-                Size = fileResponse.Value.Size,
-                Extension = fileResponse.Value.Extension,
-                FileContainerGuid = fileResponse.Value.FileContainerGuid
-            };
+            response.Value = fileResponse.Value.FileContainerGuid;
             response.Message = "User image added successfully!";
             return Ok(response);
         }
