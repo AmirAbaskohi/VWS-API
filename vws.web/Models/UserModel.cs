@@ -9,6 +9,6 @@ namespace vws.web.Models
     {
         public string UserName { get; set; }
         public Guid UserId { get; set; }
-        public int? ProfileImageId { get; set; }
+        public Guid? ProfileImageGuid { get; set; }
     }
 }

@@ -16,10 +16,9 @@ namespace vws.web.Models._project
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public string Color { get; set; }
-        public bool IsDelete { get; set; }
         public int? TeamId { get; set; }
         public List<UserModel> Users { get; set; }
         public List<int> DepartmentIds { get; set; }
-        public int? ProjectImageId { get; set; }
+        public Guid? ProjectImageGuid { get; set; }
     }
 }

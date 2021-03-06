@@ -210,7 +210,7 @@ namespace vws.web.Controllers._project
                 users.Add(new UserModel()
                 {
                     UserId = user.UserId,
-                    ProfileImageId = user.ProfileImageId,
+                    ProfileImageGuid = user.ProfileImageGuid,
                     UserName = (await userManager.FindByIdAsync(user.UserId.ToString())).UserName
                 });
             }
@@ -388,9 +388,8 @@ namespace vws.web.Controllers._project
                 StartDate = newProject.StartDate,
                 EndDate = newProject.EndDate,
                 Guid = newProject.Guid,
-                IsDelete = newProject.IsDeleted,
                 TeamId = newProject.TeamId,
-                ProjectImageId = newProject.ProjectImageId,
+                ProjectImageGuid = newProject.ProjectImageGuid,
                 DepartmentIds = model.DepartmentIds,
                 NumberOfUpdates = vwsDbContext.ProjectHistories.Where(history => history.ProjectId == newProject.Id).Count(),
                 Users = await GetProjectUsers(newProject.Id)
@@ -578,9 +577,8 @@ namespace vws.web.Controllers._project
                 StartDate = selectedProject.StartDate,
                 EndDate = selectedProject.EndDate,
                 Guid = selectedProject.Guid,
-                IsDelete = selectedProject.IsDeleted,
                 TeamId = selectedProject.TeamId,
-                ProjectImageId = selectedProject.ProjectImageId,
+                ProjectImageGuid = selectedProject.ProjectImageGuid,
                 DepartmentIds = model.DepartmentIds,
                 NumberOfUpdates = vwsDbContext.ProjectHistories.Where(history => history.ProjectId == selectedProject.Id).Count(),
                 Users = await GetProjectUsers(selectedProject.Id)
@@ -663,12 +661,11 @@ namespace vws.web.Controllers._project
                     Color = project.Color,
                     EndDate = project.EndDate,
                     Guid = project.Guid,
-                    IsDelete = project.IsDeleted,
                     Name = project.Name,
                     StartDate = project.StartDate,
                     StatusId = project.StatusId,
                     TeamId = project.TeamId,
-                    ProjectImageId = project.ProjectImageId,
+                    ProjectImageGuid = project.ProjectImageGuid,
                     DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
                     NumberOfUpdates = vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
                     Users = await GetProjectUsers(project.Id)
@@ -697,12 +694,11 @@ namespace vws.web.Controllers._project
                     Color = project.Color,
                     EndDate = project.EndDate,
                     Guid = project.Guid,
-                    IsDelete = project.IsDeleted,
                     Name = project.Name,
                     StartDate = project.StartDate,
                     StatusId = project.StatusId,
                     TeamId = project.TeamId,
-                    ProjectImageId = project.ProjectImageId,
+                    ProjectImageGuid = project.ProjectImageGuid,
                     DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
                     NumberOfUpdates = vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
                     Users = await GetProjectUsers(project.Id)
@@ -731,12 +727,11 @@ namespace vws.web.Controllers._project
                     Color = project.Color,
                     EndDate = project.EndDate,
                     Guid = project.Guid,
-                    IsDelete = project.IsDeleted,
                     Name = project.Name,
                     StartDate = project.StartDate,
                     StatusId = project.StatusId,
                     TeamId = project.TeamId,
-                    ProjectImageId = project.ProjectImageId,
+                    ProjectImageGuid = project.ProjectImageGuid,
                     DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
                     Users = await GetProjectUsers(project.Id)
                 });
@@ -788,7 +783,7 @@ namespace vws.web.Controllers._project
                 users.Add(new UserModel()
                 {
                     UserId = availableUserId,
-                    ProfileImageId = userProfile.ProfileImageId,
+                    ProfileImageGuid = userProfile.ProfileImageGuid,
                     UserName = user.UserName
                 });
             }
@@ -899,7 +894,7 @@ namespace vws.web.Controllers._project
         [Route("uploadProjectImage")]
         public async Task<IActionResult> UploadProjectImage(IFormFile image, int projectId)
         {
-            var response = new ResponseModel();
+            var response = new ResponseModel<FileModel>();
 
             string[] types = { "png", "jpg", "jpeg" };
 
@@ -984,6 +979,7 @@ namespace vws.web.Controllers._project
                 }
                 newFileContainer.RecentFileId = fileResponse.Value.Id;
                 selectedProject.ProjectImageId = newFileContainer.Id;
+                selectedProject.ProjectImageGuid = newFileContainer.Guid;
             }
             selectedProject.ModifiedBy = LoggedInUserId.Value;
             selectedProject.ModifiedOn = DateTime.Now;
@@ -999,6 +995,14 @@ namespace vws.web.Controllers._project
             vwsDbContext.AddProjectHistory(newProjectHistory);
 
             vwsDbContext.Save();
+
+            response.Value = new FileModel()
+            {
+                Name = fileResponse.Value.Name,
+                Size = fileResponse.Value.Size,
+                Extension = fileResponse.Value.Extension,
+                FileContainerGuid = fileResponse.Value.FileContainerGuid
+            };
             response.Message = "Project image added successfully!";
             return Ok(response);
         }
@@ -1118,7 +1122,7 @@ namespace vws.web.Controllers._project
                     Id = user.Id,
                     UserInfo = new UserModel()
                     {
-                        ProfileImageId = user.UserProfile.ProfileImageId,
+                        ProfileImageGuid = user.UserProfile.ProfileImageGuid,
                         UserId = user.UserProfileId,
                         UserName = (await userManager.FindByIdAsync(user.UserProfileId.ToString())).UserName
                     }

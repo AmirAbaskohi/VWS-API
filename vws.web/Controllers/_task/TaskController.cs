@@ -445,7 +445,7 @@ namespace vws.web.Controllers._task
             {
                 assignedUsersList.Add(new UserModel()
                 {
-                    ProfileImageId = user.ProfileImageId,
+                    ProfileImageGuid = user.ProfileImageGuid,
                     UserId = user.UserId,
                     UserName = (await userManager.FindByIdAsync(user.UserId.ToString())).UserName
                 });

@@ -25,6 +25,8 @@ namespace vws.web.Domain._base
         [ForeignKey("ProfileImage")]
         public int? ProfileImageId { get; set; }
 
+        public Guid? ProfileImageGuid { get; set; }
+
         public virtual Culture Culture { get; set; }
 
         public virtual FileContainer ProfileImage { get; set; }

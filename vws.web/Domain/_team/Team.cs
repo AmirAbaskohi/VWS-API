@@ -45,6 +45,8 @@ namespace vws.web.Domain._team
         [ForeignKey("TeamImage")]
         public int? TeamImageId { get; set; }
 
+        public Guid? TeamImageGuid { get; set; }
+
         public virtual FileContainer TeamImage { get; set; }
 
         public virtual TeamType TeamType { get; set; }

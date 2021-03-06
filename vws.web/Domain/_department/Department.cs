@@ -45,6 +45,8 @@ namespace vws.web.Domain._department
         [ForeignKey("DepartmentImage")]
         public int? DepartmentImageId { get; set; }
 
+        public Guid? DepartmentImageGuid { get; set; }
+
         public virtual FileContainer DepartmentImage { get; set; }
 
         public virtual Team Team { get; set; }

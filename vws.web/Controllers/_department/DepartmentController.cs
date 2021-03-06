@@ -130,7 +130,7 @@ namespace vws.web.Controllers._department
                 ModifiedBy = (await userManager.FindByIdAsync(newDepartment.ModifiedBy.ToString())).UserName,
                 CreatedOn = newDepartment.CreatedOn,
                 ModifiedOn = newDepartment.ModifiedOn,
-                DepartmentImageId = newDepartment.DepartmentImageId
+                DepartmentImageGuid = newDepartment.DepartmentImageGuid
             };
 
             response.Value = departmentResponse;
@@ -231,7 +231,7 @@ namespace vws.web.Controllers._department
                 ModifiedBy = (await userManager.FindByIdAsync(selectedDepartment.ModifiedBy.ToString())).UserName,
                 CreatedOn = selectedDepartment.CreatedOn,
                 ModifiedOn = selectedDepartment.ModifiedOn,
-                DepartmentImageId = selectedDepartment.DepartmentImageId
+                DepartmentImageGuid = selectedDepartment.DepartmentImageGuid
             };
 
             response.Message = "Department updated successfully!";
@@ -304,7 +304,7 @@ namespace vws.web.Controllers._department
                     ModifiedBy = (await userManager.FindByIdAsync(userDepartment.ModifiedBy.ToString())).UserName,
                     CreatedOn = userDepartment.CreatedOn,
                     ModifiedOn = userDepartment.ModifiedOn,
-                    DepartmentImageId = userDepartment.DepartmentImageId
+                    DepartmentImageGuid = userDepartment.DepartmentImageGuid
                 });
             }
 
@@ -395,7 +395,7 @@ namespace vws.web.Controllers._department
         [Route("uploadDepartmentImage")]
         public async Task<IActionResult> UploadDepartmentImage(IFormFile image, int departmentId)
         {
-            var response = new ResponseModel();
+            var response = new ResponseModel<FileModel>();
 
             string[] types = { "png", "jpg", "jpeg" };
 
@@ -474,10 +474,19 @@ namespace vws.web.Controllers._department
                 }
                 newFileContainer.RecentFileId = fileResponse.Value.Id;
                 selectedDepartment.DepartmentImageId = newFileContainer.Id;
+                selectedDepartment.DepartmentImageGuid = newFileContainer.Guid;
             }
             selectedDepartment.ModifiedBy = LoggedInUserId.Value;
             selectedDepartment.ModifiedOn = DateTime.Now;
             vwsDbContext.Save();
+
+            response.Value = new FileModel()
+            {
+                Name = fileResponse.Value.Name,
+                Size = fileResponse.Value.Size,
+                Extension = fileResponse.Value.Extension,
+                FileContainerGuid = fileResponse.Value.FileContainerGuid
+            };
             response.Message = "Department image added successfully!";
             return Ok(response);
         }
@@ -523,7 +532,7 @@ namespace vws.web.Controllers._department
                 {
                     UserName = userName,
                     UserId = userCoDepartment.UserId,
-                    ProfileImageId = userCoDepartment.ProfileImageId
+                    ProfileImageGuid = userCoDepartment.ProfileImageGuid
                 });
             }
 
@@ -572,7 +581,7 @@ namespace vws.web.Controllers._department
                 ModifiedBy = (await userManager.FindByIdAsync(selectedDepartment.ModifiedBy.ToString())).UserName,
                 CreatedOn = selectedDepartment.CreatedOn,
                 ModifiedOn = selectedDepartment.ModifiedOn,
-                DepartmentImageId = selectedDepartment.DepartmentImageId
+                DepartmentImageGuid = selectedDepartment.DepartmentImageGuid
             };
             response.Message = "Department retured successfully!";
             return Ok(response);

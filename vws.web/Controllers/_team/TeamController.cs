@@ -117,7 +117,7 @@ namespace vws.web.Controllers._team
                 CreatedOn = newTeam.CreatedOn,
                 ModifiedOn = newTeam.ModifiedOn,
                 Guid = newTeam.Guid,
-                TeamImageId = newTeam.TeamImageId
+                TeamImageGuid = newTeam.TeamImageGuid
             };
 
             response.Value = newTeamResponse;
@@ -287,7 +287,7 @@ namespace vws.web.Controllers._team
                     CreatedOn = userTeam.CreatedOn,
                     ModifiedOn = userTeam.ModifiedOn,
                     Guid = userTeam.Guid,
-                    TeamImageId = userTeam.TeamImageId
+                    TeamImageGuid = userTeam.TeamImageGuid
                 });
             }
             return response;
@@ -400,7 +400,7 @@ namespace vws.web.Controllers._team
                 CreatedOn = selectedTeam.CreatedOn,
                 ModifiedOn = selectedTeam.ModifiedOn,
                 Guid = selectedTeam.Guid,
-                TeamImageId = selectedTeam.TeamImageId
+                TeamImageGuid = selectedTeam.TeamImageGuid
             };
 
             response.Message = "Team updated successfully";
@@ -413,7 +413,7 @@ namespace vws.web.Controllers._team
         [Route("uploadTeamImage")]
         public async Task<IActionResult> UploadTeamImage(IFormFile image, int teamId)
         {
-            var response = new ResponseModel();
+            var response = new ResponseModel<FileModel>();
 
             string[] types = { "png", "jpg", "jpeg" };
 
@@ -490,10 +490,19 @@ namespace vws.web.Controllers._team
                 }
                 newFileContainer.RecentFileId = fileResponse.Value.Id;
                 selectedTeam.TeamImageId = newFileContainer.Id;
+                selectedTeam.TeamImageGuid = newFileContainer.Guid;
             }
             selectedTeam.ModifiedBy = LoggedInUserId.Value;
             selectedTeam.ModifiedOn = DateTime.Now;
             vwsDbContext.Save();
+
+            response.Value = new FileModel()
+            {
+                Name = fileResponse.Value.Name,
+                Size = fileResponse.Value.Size,
+                Extension = fileResponse.Value.Extension,
+                FileContainerGuid = fileResponse.Value.FileContainerGuid
+            };
             response.Message = "Team image added successfully!";
             return Ok(response);
         }
@@ -593,7 +602,7 @@ namespace vws.web.Controllers._team
                 {
                     UserName = userName,
                     UserId = teamMate.UserId,
-                    ProfileImageId = teamMate.ProfileImageId
+                    ProfileImageGuid = teamMate.ProfileImageGuid
                 });
             }
 
@@ -640,7 +649,7 @@ namespace vws.web.Controllers._team
                 ModifiedBy = (await userManager.FindByIdAsync(selectedTeam.ModifiedBy.ToString())).UserName,
                 CreatedOn = selectedTeam.CreatedOn,
                 ModifiedOn = selectedTeam.ModifiedOn,
-                TeamImageId = selectedTeam.TeamImageId
+                TeamImageGuid = selectedTeam.TeamImageGuid
             };
             response.Message = "Team retured successfully!";
             return Ok(response);
@@ -679,7 +688,7 @@ namespace vws.web.Controllers._team
                 {
                     Id = teamDepartment.Id,
                     Name = teamDepartment.Name,
-                    DepartmentImageId = teamDepartment.DepartmentImageId,
+                    DepartmentImageGuid = teamDepartment.DepartmentImageGuid,
                     Description = teamDepartment.Description,
                     Color = teamDepartment.Color,
                     CreatedBy = (await userManager.FindByIdAsync(teamDepartment.CreatedBy.ToString())).UserName,

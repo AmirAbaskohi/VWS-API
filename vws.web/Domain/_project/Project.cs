@@ -52,6 +52,8 @@ namespace vws.web.Domain._project
         [ForeignKey("ProjectImage")]
         public int? ProjectImageId { get; set; }
 
+        public Guid? ProjectImageGuid { get; set; }
+
         public virtual FileContainer ProjectImage { get; set; }
 
         public virtual Team Team { get; set; }
