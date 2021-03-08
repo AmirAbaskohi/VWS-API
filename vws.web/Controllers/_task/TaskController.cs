@@ -33,6 +33,38 @@ namespace vws.web.Controllers._task
             vwsDbContext = _vwsDbContext;
         }
 
+        private async Task<List<UserModel>> GetAssignedTo(long taskId)
+        {
+            var result = new List<UserModel>();
+            var assignedUsers = vwsDbContext.TaskAssigns.Include(taskAssign => taskAssign.UserProfile)
+                                                        .Where(taskAssign => taskAssign.GeneralTaskId == taskId && !taskAssign.IsDeleted)
+                                                        .Select(taskAssign => taskAssign.UserProfile);
+
+            foreach (var user in assignedUsers)
+            {
+                result.Add(new UserModel()
+                {
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId,
+                    UserName = (await userManager.FindByIdAsync(user.UserId.ToString())).UserName
+                });
+            }
+
+            return result;
+        }
+
+        private List<GeneralTask> GetUserTasks(Guid userId)
+        {
+            var assignedTasks = vwsDbContext.TaskAssigns.Include(taskAssign => taskAssign.GeneralTask)
+                                                        .Where(taskAssign => taskAssign.UserProfileId == userId && !taskAssign.IsDeleted && taskAssign.CreatedBy != userId)
+                                                        .Select(taskAssign => taskAssign.GeneralTask)
+                                                        .ToList();
+
+            assignedTasks.AddRange(vwsDbContext.GeneralTasks.Where(task => task.CreatedBy == userId && !task.IsDeleted));
+
+            return assignedTasks;
+        }
+
         [HttpPost]
         [Authorize]
         [Route("create")]
@@ -101,7 +133,8 @@ namespace vws.web.Controllers._task
                 ModifiedBy = (await userManager.FindByIdAsync(newTask.ModifiedBy.ToString())).UserName,
                 CreatedBy = (await userManager.FindByIdAsync(newTask.CreatedBy.ToString())).UserName,
                 PriorityId = newTask.TaskPriorityId,
-                PriorityTitle = localizer[((SeedDataEnum.TaskPriority)newTask.TaskPriorityId).ToString()]
+                PriorityTitle = localizer[((SeedDataEnum.TaskPriority)newTask.TaskPriorityId).ToString()],
+                UsersAssignedTo = await GetAssignedTo(newTask.Id)
             };
 
             response.Value = newTaskResponseModel;
@@ -204,7 +237,8 @@ namespace vws.web.Controllers._task
                 ModifiedBy = (await userManager.FindByIdAsync(selectedTask.ModifiedBy.ToString())).UserName,
                 CreatedBy = (await userManager.FindByIdAsync(selectedTask.CreatedBy.ToString())).UserName,
                 PriorityId = selectedTask.TaskPriorityId,
-                PriorityTitle = localizer[((SeedDataEnum.TaskPriority)selectedTask.TaskPriorityId).ToString()]
+                PriorityTitle = localizer[((SeedDataEnum.TaskPriority)selectedTask.TaskPriorityId).ToString()],
+                UsersAssignedTo = await GetAssignedTo(selectedTask.Id)
             };
 
             response.Value = updatedTaskResponseModel;
@@ -222,7 +256,7 @@ namespace vws.web.Controllers._task
 
             List<TaskResponseModel> response = new List<TaskResponseModel>();
 
-            var userTasks = vwsDbContext.GeneralTasks.Include(task => task.TaskPriority).Where(task => task.CreatedBy == userId);
+            var userTasks = GetUserTasks(userId);
             foreach (var userTask in userTasks)
             {
                 if (userTask.IsDeleted || userTask.IsArchived)
@@ -241,7 +275,8 @@ namespace vws.web.Controllers._task
                     ModifiedBy = (await userManager.FindByIdAsync(userTask.ModifiedBy.ToString())).UserName,
                     Guid = userTask.Guid,
                     PriorityId = userTask.TaskPriorityId,
-                    PriorityTitle = localizer[userTask.TaskPriority.Name]
+                    PriorityTitle = localizer[((SeedDataEnum.TaskPriority)userTask.TaskPriorityId).ToString()],
+                    UsersAssignedTo = await GetAssignedTo(userTask.Id)
                 });
             }
             return response;
@@ -256,7 +291,7 @@ namespace vws.web.Controllers._task
 
             List<TaskResponseModel> response = new List<TaskResponseModel>();
 
-            var userTasks = vwsDbContext.GeneralTasks.Where(task => task.CreatedBy == userId);
+            var userTasks = GetUserTasks(userId);
             foreach (var userTask in userTasks)
             {
                 if (userTask.IsArchived && !userTask.IsDeleted)
@@ -274,7 +309,8 @@ namespace vws.web.Controllers._task
                         ModifiedBy = (await userManager.FindByIdAsync(userTask.ModifiedBy.ToString())).UserName,
                         Guid = userTask.Guid,
                         PriorityId = userTask.TaskPriorityId,
-                        PriorityTitle = localizer[userTask.TaskPriority.Name]
+                        PriorityTitle = localizer[((SeedDataEnum.TaskPriority)userTask.TaskPriorityId).ToString()],
+                        UsersAssignedTo = await GetAssignedTo(userTask.Id)
                     });
                 }
             }
@@ -437,19 +473,7 @@ namespace vws.web.Controllers._task
                 }
             }
 
-            var assignedUsers = vwsDbContext.TaskAssigns.Include(taskAssign => taskAssign.UserProfile)
-                                                        .Where(taskAssign => taskAssign.GeneralTaskId == id && !taskAssign.IsDeleted)
-                                                        .Select(taskAssign => taskAssign.UserProfile);
-
-            foreach(var user in assignedUsers)
-            {
-                assignedUsersList.Add(new UserModel()
-                {
-                    ProfileImageGuid = user.ProfileImageGuid,
-                    UserId = user.UserId,
-                    UserName = (await userManager.FindByIdAsync(user.UserId.ToString())).UserName
-                });
-            }
+            assignedUsersList = await GetAssignedTo(id);
 
             response.Message = "Users returned successfully!";
             response.Value = assignedUsersList;

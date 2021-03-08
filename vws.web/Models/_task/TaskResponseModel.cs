@@ -7,6 +7,10 @@ namespace vws.web.Models._task
 {
     public class TaskResponseModel
     {
+        public TaskResponseModel()
+        {
+            UsersAssignedTo = new List<UserModel>();
+        }
         public long Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
@@ -19,5 +23,6 @@ namespace vws.web.Models._task
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public Guid Guid { get; set; }
+        public List<UserModel> UsersAssignedTo { get; set; }
     }
 }
