@@ -15,7 +15,8 @@ namespace vws.web.Migrations
                 name: "TaskPriorityId",
                 table: "Task_GeneralTask",
                 type: "tinyint",
-                nullable: true);
+                nullable: false,
+                defaultValue: (byte)1);
 
             migrationBuilder.CreateTable(
                 name: "Task_TaskPriority",
