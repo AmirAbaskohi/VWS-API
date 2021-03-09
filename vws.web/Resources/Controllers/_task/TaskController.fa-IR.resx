@@ -135,6 +135,12 @@
   <data name="Priority id is not defined." xml:space="preserve">
     <value>اولویت تسک معتبر نیست.</value>
   </data>
+  <data name="Project not found." xml:space="preserve">
+    <value>پروژه یافت نشد.</value>
+  </data>
+  <data name="Some of users you want to add do not have access to team or project." xml:space="preserve">
+    <value>تعدادی از کاربرانی که میخواهید تسک را به آن ها اساین کنید، به تیم یا پروژه مشخص شده دسترسی ندارند.</value>
+  </data>
   <data name="Start Date should be before End Date." xml:space="preserve">
     <value>زمان شروع باید قبل از زمان پایان باشد.</value>
   </data>
@@ -144,11 +150,23 @@
   <data name="Task is assigned to user before." xml:space="preserve">
     <value>تسک قبلا به کاربر اختصاص داده شده است.</value>
   </data>
+  <data name="Team not found." xml:space="preserve">
+    <value>تیم یافت نشد.</value>
+  </data>
   <data name="User does not exist." xml:space="preserve">
     <value>کاربر وجود ندارد.</value>
   </data>
   <data name="User you selected does not have access to task already." xml:space="preserve">
     <value>کاربر انتخاب شده، در حال حاضر به تسک دسترسی ندارد.</value>
+  </data>
+  <data name="You can not provide both project id and team id." xml:space="preserve">
+    <value>نمی توانید شناسه پروژه و شناسه تیم را با هم ارائه دهید.</value>
+  </data>
+  <data name="You do not have access to project." xml:space="preserve">
+    <value>شما به پروژه دسترسی ندارید.</value>
+  </data>
+  <data name="You do not have access to team." xml:space="preserve">
+    <value>شما به تیم دسترسی ندارید.</value>
   </data>
   <data name="You don't have access to this task." xml:space="preserve">
     <value>شما به این تسک دسترسی ندارید.</value>

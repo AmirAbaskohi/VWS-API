@@ -17,6 +17,7 @@ using vws.web.Enums;
 using vws.web.Models;
 using vws.web.Models._project;
 using vws.web.Repositories;
+using vws.web.Services;
 using vws.web.Services._chat;
 
 namespace vws.web.Controllers._project
@@ -30,15 +31,17 @@ namespace vws.web.Controllers._project
         private readonly IVWS_DbContext vwsDbContext;
         private readonly IFileManager fileManager;
         private readonly IChannelService channelService;
+        private readonly IPermissionService permissionService;
 
         public ProjectController(UserManager<ApplicationUser> _userManager, IStringLocalizer<ProjectController> _localizer,
-            IVWS_DbContext _vwsDbContext, IFileManager _fileManager, IChannelService _channelService)
+            IVWS_DbContext _vwsDbContext, IFileManager _fileManager, IChannelService _channelService, IPermissionService _permissionService)
         {
             userManager = _userManager;
             localizer = _localizer;
             vwsDbContext = _vwsDbContext;
             fileManager = _fileManager;
             channelService = _channelService;
+            permissionService = _permissionService;
         }
 
         private List<string> CheckProjectModel(ProjectModel model)
@@ -124,45 +127,6 @@ namespace vws.web.Controllers._project
             availableUsers = userTeamMates.Except(projectUsers).ToList();
 
             return availableUsers;
-        }
-
-        private bool HasAccessToProject(Guid userId, int projectId)
-        {
-            var selectedProject = vwsDbContext.Projects.Include(project => project.ProjectDepartments)
-                                                       .FirstOrDefault(project => project.Id == projectId);
-
-            if (selectedProject.TeamId != null)
-            {
-                List<Guid> projectUsers = new List<Guid>();
-
-                if (selectedProject.ProjectDepartments.Count == 0)
-                {
-                    projectUsers = vwsDbContext.TeamMembers.Where(teamMember => teamMember.TeamId == (int)selectedProject.TeamId &&
-                                                                                                     !teamMember.IsDeleted)
-                                                           .Select(teamMember => teamMember.UserProfileId)
-                                                           .ToList();
-                }
-
-                else
-                {
-                    foreach (var departmentId in selectedProject.ProjectDepartments.Select(pd => pd.DepartmentId))
-                    {
-                        projectUsers.AddRange(vwsDbContext.DepartmentMembers.Where(departmentMember => departmentMember.DepartmentId == departmentId &&
-                                                                                                       !departmentMember.IsDeleted)
-                                                                            .Select(departmentMember => departmentMember.UserProfileId)
-                                                                            .ToList());
-                    }
-                }
-
-                return projectUsers.Contains(userId);
-            }
-
-            var selectedProjectMember = vwsDbContext.ProjectMembers.FirstOrDefault(projectMember => !projectMember.IsDeleted &&
-                                                                                                    projectMember.IsPermittedByCreator == true &&
-                                                                                                    projectMember.ProjectId == projectId &&
-                                                                                                    projectMember.UserProfileId == userId);
-
-            return selectedProjectMember != null;
         }
 
         private async Task<List<UserModel>> GetProjectUsers(int projectId)
@@ -483,7 +447,7 @@ namespace vws.web.Controllers._project
             bool isProjectPersonal = selectedProject.TeamId == null ? true : false;
             bool willBeProjectPersonal = model.TeamId == null ? true : false;
 
-            if (!HasAccessToProject(userId, model.Id))
+            if (!permissionService.HasAccessToProject(userId, model.Id))
             {
                 response.Message = "Project access denied";
                 response.AddError(localizer["You are not a memeber of project."]);
@@ -609,7 +573,7 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!HasAccessToProject(userId, id))
+            if (!permissionService.HasAccessToProject(userId, id))
             {
                 response.AddError(localizer["You are not a memeber of project."]);
                 response.Message = "Project access denied";
@@ -801,7 +765,7 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!HasAccessToProject(userId, Id))
+            if (!permissionService.HasAccessToProject(userId, Id))
             {
                 response.AddError(localizer["You are not a memeber of project."]);
                 response.Message = "Project access denied";
@@ -914,7 +878,7 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!HasAccessToProject(userId, model.ProjectId))
+            if (!permissionService.HasAccessToProject(userId, model.ProjectId))
             {
                 response.AddError(localizer["You are not a memeber of project."]);
                 response.Message = "Project access denied";
@@ -1019,7 +983,7 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!HasAccessToProject(userId, projectId))
+            if (!permissionService.HasAccessToProject(userId, projectId))
             {
                 response.Message = "Project access denied";
                 response.AddError(localizer["You are not a memeber of project."]);
@@ -1119,7 +1083,7 @@ namespace vws.web.Controllers._project
 
             var userId = LoggedInUserId.Value;
 
-            if (!HasAccessToProject(userId, id))
+            if (!permissionService.HasAccessToProject(userId, id))
             {
                 response.Message = "Project access denied";
                 response.AddError(localizer["You are not a memeber of project."]);
@@ -1178,7 +1142,7 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!HasAccessToProject(userId, id))
+            if (!permissionService.HasAccessToProject(userId, id))
             {
                 response.Message = "Project access denied";
                 response.AddError(localizer["You are not a memeber of project."]);
@@ -1279,7 +1243,7 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!HasAccessToProject(userId, id))
+            if (!permissionService.HasAccessToProject(userId, id))
             {
                 response.Message = "Project access denied";
                 response.AddError(localizer["You are not a memeber of project."]);

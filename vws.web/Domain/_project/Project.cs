@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using vws.web.Domain._department;
 using vws.web.Domain._file;
+using vws.web.Domain._task;
 using vws.web.Domain._team;
 
 namespace vws.web.Domain._project
@@ -15,6 +16,7 @@ namespace vws.web.Domain._project
         {
             ProjectMembers = new HashSet<ProjectMember>();
             ProjectDepartments = new HashSet<ProjectDepartment>();
+            Tasks = new HashSet<GeneralTask>();
         }
 
         public int Id { get; set; }
@@ -63,6 +65,8 @@ namespace vws.web.Domain._project
         public virtual ICollection<ProjectMember> ProjectMembers { get; set; }
 
         public virtual ICollection<ProjectDepartment> ProjectDepartments { get; set; }
+
+        public virtual ICollection<GeneralTask> Tasks { get; set; }
 
     }
 }

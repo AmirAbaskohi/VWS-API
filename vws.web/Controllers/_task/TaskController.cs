@@ -10,10 +10,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using vws.web.Domain;
 using vws.web.Domain._base;
+using vws.web.Domain._project;
 using vws.web.Domain._task;
 using vws.web.Enums;
 using vws.web.Models;
 using vws.web.Models._task;
+using vws.web.Services;
 
 namespace vws.web.Controllers._task
 {
@@ -24,13 +26,15 @@ namespace vws.web.Controllers._task
         private readonly UserManager<ApplicationUser> userManager;
         private readonly IStringLocalizer<TaskController> localizer;
         private readonly IVWS_DbContext vwsDbContext;
+        private readonly IPermissionService permissionService;
 
         public TaskController(UserManager<ApplicationUser> _userManager, IStringLocalizer<TaskController> _localizer,
-            IVWS_DbContext _vwsDbContext)
+            IVWS_DbContext _vwsDbContext, IPermissionService _permissionService)
         {
             userManager = _userManager;
             localizer = _localizer;
             vwsDbContext = _vwsDbContext;
+            permissionService = _permissionService;
         }
 
         private async Task<List<UserModel>> GetAssignedTo(long taskId)
@@ -65,6 +69,60 @@ namespace vws.web.Controllers._task
             return assignedTasks;
         }
 
+        private async Task AddUsersToTask(long taskId, List<Guid> users)
+        {
+            var creationTime = DateTime.Now;
+            foreach (var user in users)
+            {
+                await vwsDbContext.AddTaskAssignAsync(new TaskAssign() 
+                {
+                    CreatedBy = LoggedInUserId.Value,
+                    IsDeleted = false,
+                    CreatedOn = creationTime,
+                    UserProfileId = user,
+                    Guid = Guid.NewGuid(),
+                    GeneralTaskId = taskId
+                });
+            }
+            vwsDbContext.Save();
+        }
+
+        private async Task UpdateTaskUsers(long taskId, List<Guid> users)
+        {
+            var taskAssigns = vwsDbContext.TaskAssigns.Where(taskAssign => taskAssign.GeneralTaskId == taskId && !taskAssign.IsDeleted)
+                                                      .Select(taskAssign => taskAssign.UserProfileId).ToList();
+
+            var actionTime = DateTime.Now;
+
+            var shouldBeDeleted = taskAssigns.Except(users).ToList();
+            var shouldBeAdded = users.Except(taskAssigns).ToList();
+
+            foreach (var user in shouldBeDeleted)
+            {
+                var selectedAssignTask = vwsDbContext.TaskAssigns.FirstOrDefault(taskAssign => taskAssign.UserProfileId == user && taskAssign.GeneralTaskId == taskId && !taskAssign.IsDeleted);
+                selectedAssignTask.IsDeleted = true;
+                selectedAssignTask.DeletedOn = actionTime;
+                selectedAssignTask.DeletedBy = LoggedInUserId.Value;
+            }
+
+            vwsDbContext.Save();
+
+            await AddUsersToTask(taskId, shouldBeAdded.ToList());
+        }
+
+        private List<Guid> GetUsersCanBeAddedToTask(int? teamId, int? projectId)
+        {
+            if (teamId != null && projectId != null)
+                teamId = null;
+
+            if (teamId != null)
+                return permissionService.GetUsersHaveAccessToTeam((int)teamId);
+            else if (projectId != null)
+                return permissionService.GetUsersHaveAccessToProject((int)projectId);
+
+            return new List<Guid>();
+        }
+
         [HttpPost]
         [Authorize]
         [Route("create")]
@@ -95,15 +153,54 @@ namespace vws.web.Controllers._task
                 response.Message = "Task model data has problem.";
                 response.AddError(localizer["Priority id is not defined."]);
             }
-
             if (response.HasError)
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
 
+            if (model.TeamId != null && model.ProjectId != null)
+                model.TeamId = null;
+
             Guid userId = LoggedInUserId.Value;
+
+            #region CheckTeamAndProjectExistance
+            if (model.ProjectId != null && !vwsDbContext.Projects.Any(p => p.Id == model.ProjectId && !p.IsDeleted))
+            {
+                response.Message = "Project not found";
+                response.AddError(localizer["Project not found."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            if (model.TeamId!= null && !vwsDbContext.Teams.Any(t => t.Id == model.TeamId && !t.IsDeleted))
+            {
+                response.Message = "Team not found";
+                response.AddError(localizer["Team not found."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            #endregion
+
+            #region CheckTeamAndProjectAccess
+            if (model.ProjectId != null && !permissionService.HasAccessToProject(userId, (int)model.ProjectId))
+            {
+                response.Message = "Project access denied";
+                response.AddError(localizer["You do not have access to project."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+            if (model.TeamId != null && !permissionService.HasAccessToTeam(userId, (int)model.TeamId))
+            {
+                response.Message = "Team access denied";
+                response.AddError(localizer["You do not have access to team."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+            #endregion
 
             DateTime creationTime = DateTime.Now;
 
-            var newTask = new GeneralTask()
+            if (GetUsersCanBeAddedToTask(model.TeamId, model.ProjectId).Intersect(model.Users).Count() != model.Users.Count)
+            {
+                response.Message = "Users do not have access";
+                response.AddError(localizer["Some of users you want to add do not have access to team or project."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+                var newTask = new GeneralTask()
             {
                 Title = model.Title,
                 Description = model.Description,
@@ -114,11 +211,21 @@ namespace vws.web.Controllers._task
                 CreatedOn = creationTime,
                 ModifiedOn = creationTime,
                 Guid = Guid.NewGuid(),
-                TaskPriorityId = model.PriorityId
+                TaskPriorityId = model.PriorityId,
+                TeamId = model.TeamId
             };
+
+            if (newTask.TeamId == null && model.ProjectId != null)
+            {
+                var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Id == model.ProjectId);
+                newTask.ProjectId = model.ProjectId;
+                newTask.TeamId = selectedProject.TeamId;
+            }
 
             await vwsDbContext.AddTaskAsync(newTask);
             vwsDbContext.Save();
+
+            await AddUsersToTask(newTask.Id, model.Users);
 
             var newTaskResponseModel = new TaskResponseModel()
             {
@@ -134,7 +241,9 @@ namespace vws.web.Controllers._task
                 CreatedBy = (await userManager.FindByIdAsync(newTask.CreatedBy.ToString())).UserName,
                 PriorityId = newTask.TaskPriorityId,
                 PriorityTitle = localizer[((SeedDataEnum.TaskPriority)newTask.TaskPriorityId).ToString()],
-                UsersAssignedTo = await GetAssignedTo(newTask.Id)
+                UsersAssignedTo = await GetAssignedTo(newTask.Id),
+                ProjectId = newTask.ProjectId,
+                TeamId = newTask.TeamId
             };
 
             response.Value = newTaskResponseModel;
@@ -177,8 +286,44 @@ namespace vws.web.Controllers._task
             if (response.HasError)
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
 
-            string userEmail = User.Claims.First(claim => claim.Type == "UserEmail").Value;
             Guid userId = LoggedInUserId.Value;
+
+            #region CheckTeamAndProjectExistance
+            if (model.ProjectId != null && !vwsDbContext.Projects.Any(p => p.Id == model.ProjectId && !p.IsDeleted))
+            {
+                response.Message = "Project not found";
+                response.AddError(localizer["Project not found."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            if (model.TeamId != null && !vwsDbContext.Teams.Any(t => t.Id == model.TeamId && !t.IsDeleted))
+            {
+                response.Message = "Team not found";
+                response.AddError(localizer["Team not found."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            #endregion
+
+            #region CheckTeamAndProjectAccess
+            if (model.ProjectId != null && !permissionService.HasAccessToProject(userId, (int)model.ProjectId))
+            {
+                response.Message = "Project access denied";
+                response.AddError(localizer["You do not have access to project."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+            if (model.TeamId != null && !permissionService.HasAccessToTeam(userId, (int)model.TeamId))
+            {
+                response.Message = "Team access denied";
+                response.AddError(localizer["You do not have access to team."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+            #endregion
+
+            if (GetUsersCanBeAddedToTask(model.TeamId, model.ProjectId).Intersect(model.Users).Count() != model.Users.Count)
+            {
+                response.Message = "Users do not have access";
+                response.AddError(localizer["Some of users you want to add do not have access to team or project."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
 
             var selectedTask = await vwsDbContext.GetTaskAsync(model.TaskId);
 
@@ -214,6 +359,9 @@ namespace vws.web.Controllers._task
                 }
             }
 
+            if (model.TeamId != null && model.ProjectId != null)
+                model.TeamId = null;
+
             selectedTask.StartDate = model.StartDate;
             selectedTask.EndDate = model.EndDate;
             selectedTask.ModifiedBy = userId;
@@ -221,8 +369,19 @@ namespace vws.web.Controllers._task
             selectedTask.Title = model.Title;
             selectedTask.Description = model.Description;
             selectedTask.TaskPriorityId = model.PriorityId;
+            selectedTask.TeamId = model.TeamId;
+            selectedTask.ProjectId = model.ProjectId;
+
+            if (selectedTask.TeamId == null && model.ProjectId != null)
+            {
+                var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Id == model.ProjectId);
+                selectedTask.ProjectId = model.ProjectId;
+                selectedTask.TeamId = selectedProject.TeamId;
+            }
 
             vwsDbContext.Save();
+
+            await UpdateTaskUsers(selectedTask.Id, model.Users);
 
             var updatedTaskResponseModel = new TaskResponseModel()
             {
@@ -238,7 +397,9 @@ namespace vws.web.Controllers._task
                 CreatedBy = (await userManager.FindByIdAsync(selectedTask.CreatedBy.ToString())).UserName,
                 PriorityId = selectedTask.TaskPriorityId,
                 PriorityTitle = localizer[((SeedDataEnum.TaskPriority)selectedTask.TaskPriorityId).ToString()],
-                UsersAssignedTo = await GetAssignedTo(selectedTask.Id)
+                UsersAssignedTo = await GetAssignedTo(selectedTask.Id),
+                ProjectId = selectedTask.ProjectId,
+                TeamId = selectedTask.TeamId
             };
 
             response.Value = updatedTaskResponseModel;
@@ -276,7 +437,9 @@ namespace vws.web.Controllers._task
                     Guid = userTask.Guid,
                     PriorityId = userTask.TaskPriorityId,
                     PriorityTitle = localizer[((SeedDataEnum.TaskPriority)userTask.TaskPriorityId).ToString()],
-                    UsersAssignedTo = await GetAssignedTo(userTask.Id)
+                    UsersAssignedTo = await GetAssignedTo(userTask.Id),
+                    ProjectId = userTask.ProjectId,
+                    TeamId = userTask.TeamId
                 });
             }
             return response;
@@ -310,7 +473,9 @@ namespace vws.web.Controllers._task
                         Guid = userTask.Guid,
                         PriorityId = userTask.TaskPriorityId,
                         PriorityTitle = localizer[((SeedDataEnum.TaskPriority)userTask.TaskPriorityId).ToString()],
-                        UsersAssignedTo = await GetAssignedTo(userTask.Id)
+                        UsersAssignedTo = await GetAssignedTo(userTask.Id),
+                        ProjectId = userTask.ProjectId,
+                        TeamId = userTask.TeamId
                     });
                 }
             }
@@ -542,6 +707,64 @@ namespace vws.web.Controllers._task
                 result.Add(new { Id = (byte)priority, Name = priority.ToString() });
 
             return result;
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getUsersCanBeAssigned")]
+        public async Task<IActionResult> GetUsersCanBeAssigned(int? teamId, int? projectId)
+        {
+            var response = new ResponseModel<List<UserModel>>();
+            var result = new List<UserModel>();
+
+            if (projectId != null && teamId != null)
+                teamId = null;
+
+            #region CheckTeamAndProjectExistance
+            if (projectId != null && !vwsDbContext.Projects.Any(p => p.Id == projectId && !p.IsDeleted))
+            {
+                response.Message = "Project not found";
+                response.AddError(localizer["Project not found."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            if (teamId != null && !vwsDbContext.Teams.Any(t => t.Id == teamId && !t.IsDeleted))
+            {
+                response.Message = "Team not found";
+                response.AddError(localizer["Team not found."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            #endregion
+
+            #region CheckTeamAndProjectAccess
+            if (projectId != null && !permissionService.HasAccessToProject(LoggedInUserId.Value, (int)projectId))
+            {
+                response.Message = "Project access denied";
+                response.AddError(localizer["You do not have access to project."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+            if (teamId != null && !permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)teamId))
+            {
+                response.Message = "Team access denied";
+                response.AddError(localizer["You do not have access to team."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+            #endregion
+
+            var users = GetUsersCanBeAddedToTask(teamId, projectId);
+            foreach (var user in users)
+            {
+                var selectedUser = vwsDbContext.UserProfiles.FirstOrDefault(profile => profile.UserId == user);
+                result.Add(new UserModel()
+                {
+                    UserId = user,
+                    UserName = (await userManager.FindByIdAsync(user.ToString())).UserName,
+                    ProfileImageGuid = selectedUser.ProfileImageGuid
+                });
+            }
+
+            response.Value = result;
+            response.Message = "Users returned successfully!";
+            return Ok(response);
         }
     }
 }

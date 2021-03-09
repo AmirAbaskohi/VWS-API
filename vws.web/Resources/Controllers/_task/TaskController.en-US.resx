@@ -138,6 +138,12 @@
   <data name="Priority id is not defined." xml:space="preserve">
     <value>Priority id is not defined.</value>
   </data>
+  <data name="Project not found." xml:space="preserve">
+    <value>Project not found.</value>
+  </data>
+  <data name="Some of users you want to add do not have access to team or project." xml:space="preserve">
+    <value>Some of users you want to add do not have access to team or project.</value>
+  </data>
   <data name="Start Date should be before End Date." xml:space="preserve">
     <value>Start Date should be before End Date.</value>
   </data>
@@ -147,10 +153,22 @@
   <data name="Task is assigned to user before." xml:space="preserve">
     <value>Task is assigned to user before.</value>
   </data>
+  <data name="Team not found." xml:space="preserve">
+    <value>Team not found.</value>
+  </data>
   <data name="User does not exist." xml:space="preserve">
     <value>User does not exist.</value>
   </data>
   <data name="User you selected does not have access to task already." xml:space="preserve">
     <value>User you selected does not have access to task already.</value>
+  </data>
+  <data name="You can not provide both project id and team id." xml:space="preserve">
+    <value>You can not provide both project id and team id.</value>
+  </data>
+  <data name="You do not have access to project." xml:space="preserve">
+    <value>You do not have access to project.</value>
+  </data>
+  <data name="You do not have access to team." xml:space="preserve">
+    <value>You do not have access to team.</value>
   </data>
 </root>

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using vws.web.Domain._project;
+using vws.web.Domain._team;
 
 namespace vws.web.Domain._task
 {
@@ -45,9 +47,17 @@ namespace vws.web.Domain._task
 
         public DateTime ModifiedOn { get; set; }
 
+        public int? TeamId { get; set; }
+
+        public int? ProjectId { get; set; }
+
         public virtual TaskPriority TaskPriority { get; set; }
 
         public virtual TaskScheduleType TaskScheduleType { get; set; }
+
+        public virtual Team Team { get; set; }
+
+        public virtual Project Project { get; set; }
 
         public virtual ICollection<TaskReminder> TaskReminders { get; set; }
 

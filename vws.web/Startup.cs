@@ -27,6 +27,7 @@ using Serilog;
 using vws.web.Services._chat;
 using vws.web.ServiceEngine;
 using Microsoft.AspNetCore.Http.Features;
+using vws.web.Services;
 
 namespace vws.web
 {
@@ -123,6 +124,8 @@ namespace vws.web
             services.AddScoped<IFileManager, FileManager>();
 
             services.AddScoped<IChannelService, ChannelService>();
+
+            services.AddScoped<IPermissionService, PermissionService>();
 
             services.AddScoped<TokenValidationFilterAttribute>();
 

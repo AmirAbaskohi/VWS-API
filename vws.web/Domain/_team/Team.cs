@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using vws.web.Domain._department;
 using vws.web.Domain._file;
+using vws.web.Domain._task;
 
 namespace vws.web.Domain._team
 {
@@ -14,6 +15,7 @@ namespace vws.web.Domain._team
         public Team()
         {
             Departments = new HashSet<Department>();
+            Tasks = new HashSet<GeneralTask>();
         }
 
         public int Id { get; set; }
@@ -50,6 +52,8 @@ namespace vws.web.Domain._team
         public virtual FileContainer TeamImage { get; set; }
 
         public virtual TeamType TeamType { get; set; }
+
+        public virtual ICollection<GeneralTask> Tasks { get; set; }
 
         public virtual ICollection<Department> Departments { get; set; }
 

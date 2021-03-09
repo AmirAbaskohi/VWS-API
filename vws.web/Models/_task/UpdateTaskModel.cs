@@ -18,5 +18,8 @@ namespace vws.web.Models._task
         public byte PriorityId { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public int? TeamId { get; set; }
+        public int? ProjectId { get; set; }
+        public List<Guid> Users { get; set; }
     }
 }
