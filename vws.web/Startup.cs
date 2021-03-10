@@ -263,11 +263,11 @@ namespace vws.web
                 context.Save();
                 foreach (var status in Enum.GetValues(typeof(SeedDataEnum.ProjectStatuses)))
                 {
-                    string dbStatusType = context.GetStatus((byte)status);
+                    string dbStatusType = context.GetProjectStatus((byte)status);
                     if (dbStatusType == null)
-                        context.AddStatus(new Domain._project.ProjectStatus { Id = (byte)status, Name = status.ToString() });
+                        context.AddProjectStatus(new Domain._project.ProjectStatus { Id = (byte)status, Name = status.ToString() });
                     else if (dbStatusType != status.ToString())
-                        context.UpdateStatus((byte)status, status.ToString());
+                        context.UpdateProjectStatus((byte)status, status.ToString());
                 }
                 context.Save();
                 foreach (var priority in Enum.GetValues(typeof(SeedDataEnum.TaskPriority)))

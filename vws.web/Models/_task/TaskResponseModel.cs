@@ -25,6 +25,8 @@ namespace vws.web.Models._task
         public Guid Guid { get; set; }
         public int? TeamId { get; set; }
         public int? ProjectId { get; set; }
+        public int StatusId { get; set; }
+        public string StatusTitle { get; set; }
         public List<UserModel> UsersAssignedTo { get; set; }
     }
 }

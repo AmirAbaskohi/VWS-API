@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using vws.web.Domain;
 
 namespace vws.web.Migrations
 {
     [DbContext(typeof(VWS_DbContext))]
-    partial class VWS_DbContextModelSnapshot : ModelSnapshot
+    [Migration("20210310110833_AddedStatusToGeneralTask")]
+    partial class AddedStatusToGeneralTask
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -890,7 +892,7 @@ namespace vws.web.Migrations
                     b.Property<byte?>("TaskScheduleTypeId")
                         .HasColumnType("tinyint");
 
-                    b.Property<int>("TaskStatusId")
+                    b.Property<int?>("TaskStatusId")
                         .HasColumnType("int");
 
                     b.Property<int?>("TeamId")
@@ -1529,9 +1531,7 @@ namespace vws.web.Migrations
 
                     b.HasOne("vws.web.Domain._task.TaskStatus", "Status")
                         .WithMany()
-                        .HasForeignKey("TaskStatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("TaskStatusId");
 
                     b.HasOne("vws.web.Domain._team.Team", "Team")
                         .WithMany("Tasks")

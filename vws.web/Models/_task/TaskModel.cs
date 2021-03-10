@@ -10,6 +10,7 @@ namespace vws.web.Models._task
     {
         [Required]
         public string Title { get; set; }
+        public int? StatusId { get; set; }
         public string Description { get; set; }
         public byte PriorityId { get; set; }
         public int? TeamId { get; set; }

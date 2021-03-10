@@ -17,6 +17,7 @@ namespace vws.web.Domain._project
             ProjectMembers = new HashSet<ProjectMember>();
             ProjectDepartments = new HashSet<ProjectDepartment>();
             Tasks = new HashSet<GeneralTask>();
+            TaskStatuses = new HashSet<TaskStatus>();
         }
 
         public int Id { get; set; }
@@ -68,5 +69,6 @@ namespace vws.web.Domain._project
 
         public virtual ICollection<GeneralTask> Tasks { get; set; }
 
+        public virtual ICollection<TaskStatus> TaskStatuses { get; set; }
     }
 }

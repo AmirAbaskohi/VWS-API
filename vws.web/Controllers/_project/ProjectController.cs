@@ -225,6 +225,15 @@ namespace vws.web.Controllers._project
             return userProjects;
         }
 
+        private void CreateProjectTaskStatuses(int projectId)
+        {
+            vwsDbContext.AddTaskStatus(new Domain._task.TaskStatus() { EvenOrder = 2, ProjectId = projectId, UserProfileId = null, TeamId = null, Title = "To Do" });
+            vwsDbContext.AddTaskStatus(new Domain._task.TaskStatus() { EvenOrder = 4, ProjectId = projectId, UserProfileId = null, TeamId = null, Title = "Doing" });
+            vwsDbContext.AddTaskStatus(new Domain._task.TaskStatus() { EvenOrder = 6, ProjectId = projectId, UserProfileId = null, TeamId = null, Title = "Done"});
+
+            vwsDbContext.Save();
+        }
+
         [HttpPost]
         [Authorize]
         [Route("create")]
@@ -344,6 +353,8 @@ namespace vws.web.Controllers._project
                 await vwsDbContext.AddProjectMemberAsync(newProjectMember);
                 vwsDbContext.Save();
             }
+
+            CreateProjectTaskStatuses(newProject.Id);
 
             var newProjectResponse = new ProjectResponseModel()
             {

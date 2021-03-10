@@ -120,6 +120,9 @@
   <data name="High" xml:space="preserve">
     <value>بالا</value>
   </data>
+  <data name="Invalid status." xml:space="preserve">
+    <value>وضعیت نا معتبر.</value>
+  </data>
   <data name="Length of description is more than 2000 characters." xml:space="preserve">
     <value>تعداد کاراکتر های بخش توضیحات بیشتر از 2000 کاراکتر است.</value>
   </data>
@@ -144,6 +147,9 @@
   <data name="Start Date should be before End Date." xml:space="preserve">
     <value>زمان شروع باید قبل از زمان پایان باشد.</value>
   </data>
+  <data name="Status not found." xml:space="preserve">
+    <value>وضعیتی با آی دی داده شده یافت نشد.</value>
+  </data>
   <data name="Task does not exist." xml:space="preserve">
     <value>تسک وجود ندارد.</value>
   </data>
@@ -159,11 +165,17 @@
   <data name="User you selected does not have access to task already." xml:space="preserve">
     <value>کاربر انتخاب شده، در حال حاضر به تسک دسترسی ندارد.</value>
   </data>
+  <data name="You can not delete status which has task." xml:space="preserve">
+    <value>شما نمیتوانید وضعیتی که در آن تسک وجود دارد را حذف کنید.</value>
+  </data>
   <data name="You can not provide both project id and team id." xml:space="preserve">
     <value>نمی توانید شناسه پروژه و شناسه تیم را با هم ارائه دهید.</value>
   </data>
   <data name="You do not have access to project." xml:space="preserve">
     <value>شما به پروژه دسترسی ندارید.</value>
+  </data>
+  <data name="You do not have access to task status." xml:space="preserve">
+    <value>عدم دسترسی.</value>
   </data>
   <data name="You do not have access to team." xml:space="preserve">
     <value>شما به تیم دسترسی ندارید.</value>

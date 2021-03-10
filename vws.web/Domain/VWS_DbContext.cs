@@ -295,18 +295,18 @@ namespace vws.web.Domain
                 .Select(projectMember => projectMember.Project);
         }
 
-        public void AddStatus(ProjectStatus projectStatus)
+        public void AddProjectStatus(ProjectStatus projectStatus)
         {
             ProjectStatuses.Add(projectStatus);
         }
 
-        public string GetStatus(byte id)
+        public string GetProjectStatus(byte id)
         {
             var selectedStatus = ProjectStatuses.FirstOrDefault(status => status.Id == id);
             return selectedStatus == null ? null : selectedStatus.Name;
         }
 
-        public void UpdateStatus(byte id, string newName)
+        public void UpdateProjectStatus(byte id, string newName)
         {
             var selected = ProjectStatuses.FirstOrDefault(status => status.Id == id);
             selected.Name = newName;
@@ -386,6 +386,10 @@ namespace vws.web.Domain
 
         public DbSet<TaskPriority> TaskPriorities { get; set; }
 
+        IQueryable<_task.TaskStatus> IVWS_DbContext.TaskStatuses { get => TaskStatuses; }
+
+        public DbSet<_task.TaskStatus> TaskStatuses { get; set; }
+
         public async Task<GeneralTask> AddTaskAsync(GeneralTask generalTask)
         {
             await GeneralTasks.AddAsync(generalTask);
@@ -418,6 +422,16 @@ namespace vws.web.Domain
         {
             var selectedTaskPriority = TaskPriorities.FirstOrDefault(taskPriority => taskPriority.Id == id);
             selectedTaskPriority.Name = newName;
+        }
+
+        public void AddTaskStatus(_task.TaskStatus taskStatus)
+        {
+            TaskStatuses.Add(taskStatus);
+        }
+
+        public void DeleteTaskStatus(int id)
+        {
+            TaskStatuses.Remove(TaskStatuses.FirstOrDefault(status => status.Id == id));
         }
 
         #endregion

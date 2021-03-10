@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using vws.web.Domain;
 
 namespace vws.web.Migrations
 {
     [DbContext(typeof(VWS_DbContext))]
-    partial class VWS_DbContextModelSnapshot : ModelSnapshot
+    [Migration("20210310083951_UpdatedTaskStatusTable")]
+    partial class UpdatedTaskStatusTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -890,9 +892,6 @@ namespace vws.web.Migrations
                     b.Property<byte?>("TaskScheduleTypeId")
                         .HasColumnType("tinyint");
 
-                    b.Property<int>("TaskStatusId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("TeamId")
                         .HasColumnType("int");
 
@@ -908,8 +907,6 @@ namespace vws.web.Migrations
                     b.HasIndex("TaskPriorityId");
 
                     b.HasIndex("TaskScheduleTypeId");
-
-                    b.HasIndex("TaskStatusId");
 
                     b.HasIndex("TeamId");
 
@@ -1527,19 +1524,11 @@ namespace vws.web.Migrations
                         .WithMany("GeneralTasks")
                         .HasForeignKey("TaskScheduleTypeId");
 
-                    b.HasOne("vws.web.Domain._task.TaskStatus", "Status")
-                        .WithMany()
-                        .HasForeignKey("TaskStatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("vws.web.Domain._team.Team", "Team")
                         .WithMany("Tasks")
                         .HasForeignKey("TeamId");
 
                     b.Navigation("Project");
-
-                    b.Navigation("Status");
 
                     b.Navigation("TaskPriority");
 

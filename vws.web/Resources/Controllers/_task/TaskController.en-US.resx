@@ -123,6 +123,9 @@
   <data name="High" xml:space="preserve">
     <value>High</value>
   </data>
+  <data name="Invalid status." xml:space="preserve">
+    <value>Invalid status.</value>
+  </data>
   <data name="Length of description is more than 2000 characters." xml:space="preserve">
     <value>Length of description is more than 2000 characters.</value>
   </data>
@@ -147,6 +150,9 @@
   <data name="Start Date should be before End Date." xml:space="preserve">
     <value>Start Date should be before End Date.</value>
   </data>
+  <data name="Status not found." xml:space="preserve">
+    <value>Status not found.</value>
+  </data>
   <data name="Task does not exist." xml:space="preserve">
     <value>Task does not exist.</value>
   </data>
@@ -162,11 +168,17 @@
   <data name="User you selected does not have access to task already." xml:space="preserve">
     <value>User you selected does not have access to task already.</value>
   </data>
+  <data name="You can not delete status which has task." xml:space="preserve">
+    <value>You can not delete status which has task.</value>
+  </data>
   <data name="You can not provide both project id and team id." xml:space="preserve">
     <value>You can not provide both project id and team id.</value>
   </data>
   <data name="You do not have access to project." xml:space="preserve">
     <value>You do not have access to project.</value>
+  </data>
+  <data name="You do not have access to task status." xml:space="preserve">
+    <value>You do not have access to task status.</value>
   </data>
   <data name="You do not have access to team." xml:space="preserve">
     <value>You do not have access to team.</value>

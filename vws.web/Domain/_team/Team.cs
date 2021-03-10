@@ -16,6 +16,7 @@ namespace vws.web.Domain._team
         {
             Departments = new HashSet<Department>();
             Tasks = new HashSet<GeneralTask>();
+            TaskStatuses = new HashSet<TaskStatus>();
         }
 
         public int Id { get; set; }
@@ -57,6 +58,6 @@ namespace vws.web.Domain._team
 
         public virtual ICollection<Department> Departments { get; set; }
 
-
+        public virtual ICollection<TaskStatus> TaskStatuses { get; set; }
     }
 }

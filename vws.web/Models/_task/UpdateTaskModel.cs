@@ -20,6 +20,7 @@ namespace vws.web.Models._task
         public DateTime? EndDate { get; set; }
         public int? TeamId { get; set; }
         public int? ProjectId { get; set; }
+        public int? StatusId { get; set; }
         public List<Guid> Users { get; set; }
     }
 }

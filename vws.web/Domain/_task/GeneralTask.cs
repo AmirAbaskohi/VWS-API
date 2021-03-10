@@ -50,6 +50,8 @@ namespace vws.web.Domain._task
         public int? TeamId { get; set; }
 
         public int? ProjectId { get; set; }
+        
+        public int TaskStatusId { get; set; }
 
         public virtual TaskPriority TaskPriority { get; set; }
 
@@ -59,9 +61,10 @@ namespace vws.web.Domain._task
 
         public virtual Project Project { get; set; }
 
+        public virtual TaskStatus Status { get; set; }
+
         public virtual ICollection<TaskReminder> TaskReminders { get; set; }
 
         public virtual ICollection<TaskAssign> TaskAssigns { get; set; }
-
     }
 }

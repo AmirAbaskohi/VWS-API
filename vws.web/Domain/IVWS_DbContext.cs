@@ -165,11 +165,11 @@ namespace vws.web.Domain
 
         public IQueryable<Project> GetUserProjects(Guid userId);
 
-        public void AddStatus(ProjectStatus projectStatus);
+        public void AddProjectStatus(ProjectStatus projectStatus);
 
-        public string GetStatus(byte id);
+        public string GetProjectStatus(byte id);
 
-        public void UpdateStatus(byte id, string newName);
+        public void UpdateProjectStatus(byte id, string newName);
 
         public Task<Project> AddProjectAsync(Project project);
 
@@ -211,6 +211,8 @@ namespace vws.web.Domain
 
         public IQueryable<TaskPriority> TaskPriorities { get; }
 
+        public IQueryable<_task.TaskStatus> TaskStatuses { get; }
+
         #endregion
 
         #region methods
@@ -226,6 +228,10 @@ namespace vws.web.Domain
         public string GetTaskPriority(byte id);
 
         public void UpdateTaskPriority(byte id, string newName);
+
+        public void AddTaskStatus(_task.TaskStatus taskStatus);
+
+        public void DeleteTaskStatus(int id);
 
         #endregion
 
