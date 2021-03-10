@@ -38,6 +38,15 @@ namespace vws.web.Controllers._team
             fileManager = _fileManager;
         }
 
+        private void CreateTeamTaskStatuses(int teamId)
+        {
+            vwsDbContext.AddTaskStatus(new Domain._task.TaskStatus() { EvenOrder = 2, ProjectId = null, UserProfileId = null, TeamId = teamId, Title = "To Do" });
+            vwsDbContext.AddTaskStatus(new Domain._task.TaskStatus() { EvenOrder = 4, ProjectId = null, UserProfileId = null, TeamId = teamId, Title = "Doing" });
+            vwsDbContext.AddTaskStatus(new Domain._task.TaskStatus() { EvenOrder = 6, ProjectId = null, UserProfileId = null, TeamId = teamId, Title = "Done" });
+
+            vwsDbContext.Save();
+        }
+
         [HttpPost]
         [Authorize]
         [Route("create")]
@@ -94,6 +103,8 @@ namespace vws.web.Controllers._team
 
             await vwsDbContext.AddTeamAsync(newTeam);
             vwsDbContext.Save();
+
+            CreateTeamTaskStatuses(newTeam.Id);
 
             var newTeamMember = new TeamMember()
             {

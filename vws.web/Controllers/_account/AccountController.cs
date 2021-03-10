@@ -154,6 +154,15 @@ namespace vws.web.Controllers._account
             vwsDbContext.Save();
         }
 
+        private void CreateUserTaskStatuses(Guid userId)
+        {
+            vwsDbContext.AddTaskStatus(new Domain._task.TaskStatus() { EvenOrder = 2, ProjectId = null, UserProfileId = userId, TeamId = null, Title = "To Do" });
+            vwsDbContext.AddTaskStatus(new Domain._task.TaskStatus() { EvenOrder = 4, ProjectId = null, UserProfileId = userId, TeamId = null, Title = "Doing" });
+            vwsDbContext.AddTaskStatus(new Domain._task.TaskStatus() { EvenOrder = 6, ProjectId = null, UserProfileId = userId, TeamId = null, Title = "Done" });
+
+            vwsDbContext.Save();
+        }
+
         [HttpPost]
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
@@ -233,6 +242,7 @@ namespace vws.web.Controllers._account
             }
 
             await CreateUserProfile(Guid.Parse(user.Id));
+            CreateUserTaskStatuses(Guid.Parse(user.Id));
 
             return Ok(new ResponseModel { Message = "User created successfully!" });
         }
@@ -261,6 +271,9 @@ namespace vws.web.Controllers._account
                             UserName = payload.Email
                         };
                         IdentityResult identityResult = await userManager.CreateAsync(user);
+                        user.EmailConfirmed = true;
+                        vwsDbContext.Save();
+                        CreateUserTaskStatuses(Guid.Parse(user.Id));
                         if (identityResult.Succeeded)
                         {
                             identityResult = await userManager.AddLoginAsync(user, new UserLoginInfo(model.ProviderName, payload.Subject, model.ProviderName));

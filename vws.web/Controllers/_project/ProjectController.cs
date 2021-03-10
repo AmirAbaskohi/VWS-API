@@ -111,18 +111,20 @@ namespace vws.web.Controllers._project
             return result;
         }
 
-        private List<Guid> GetAvailableUsersToAddProject(Project project, Guid userId)
+        private List<Guid> GetAvailableUsersToAddProject(int? projectId)
         {
             var availableUsers = new List<Guid>();
+            var projectUsers = new List<Guid>();
 
-            var projectUsers = vwsDbContext.ProjectMembers.Where(projectMember => projectMember.ProjectId == project.Id &&
-                                                                                  !projectMember.IsDeleted)
-                                                          .Select(projectMember => projectMember.UserProfileId);
+            if (projectId != null)
+                projectUsers = vwsDbContext.ProjectMembers.Where(projectMember => projectMember.ProjectId == projectId &&
+                                                                                      !projectMember.IsDeleted)
+                                                          .Select(projectMember => projectMember.UserProfileId).ToList();
 
-            List<Team> userTeams = vwsDbContext.GetUserTeams(userId).ToList();
+            List<Team> userTeams = vwsDbContext.GetUserTeams(LoggedInUserId.Value).ToList();
             List<Guid> userTeamMates = vwsDbContext.TeamMembers
                 .Where(teamMember => userTeams.Select(userTeam => userTeam.Id).Contains(teamMember.TeamId) && !teamMember.IsDeleted)
-                .Select(teamMember => teamMember.UserProfileId).Distinct().ToList();
+                .Select(teamMember => teamMember.UserProfileId).Distinct().Where(id => id != LoggedInUserId.Value).ToList();
 
             availableUsers = userTeamMates.Except(projectUsers).ToList();
 
@@ -182,7 +184,7 @@ namespace vws.web.Controllers._project
                 });
             }
 
-            return users;
+            return users.Distinct().ToList();
         }
 
         private List<Project> GetAllUserProjects(Guid userId)
@@ -223,6 +225,24 @@ namespace vws.web.Controllers._project
                                                              .Select(projectMember => projectMember.Project));
 
             return userProjects;
+        }
+
+        private async Task AddProjectUsers(int projectId, List<Guid> users)
+        {
+            var creationTime = DateTime.Now;
+            foreach (var user in users)
+            {
+                await vwsDbContext.AddProjectMemberAsync(new ProjectMember()
+                {
+                    CreatedOn = creationTime,
+                    IsDeleted = false,
+                    IsPermittedByCreator = true,
+                    UserProfileId = user,
+                    ProjectId = projectId,
+                    PermittedOn = creationTime
+                });
+            }
+            vwsDbContext.Save();
         }
 
         private void CreateProjectTaskStatuses(int projectId)
@@ -303,6 +323,9 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
+            model.Users = model.Users.Distinct().ToList();
+            model.Users.Remove(userId);
+
             DateTime creationTime = DateTime.Now;
 
             var newProject = new Project()
@@ -341,17 +364,8 @@ namespace vws.web.Controllers._project
 
             if (newProject.TeamId == null)
             {
-                var newProjectMember = new ProjectMember()
-                {
-                    CreatedOn = creationTime,
-                    ProjectId = newProject.Id,
-                    UserProfileId = userId,
-                    IsDeleted = false,
-                    IsPermittedByCreator = true,
-                    PermittedOn = creationTime
-                };
-                await vwsDbContext.AddProjectMemberAsync(newProjectMember);
-                vwsDbContext.Save();
+                model.Users.Add(LoggedInUserId.Value);
+                await AddProjectUsers(newProject.Id, model.Users);
             }
 
             CreateProjectTaskStatuses(newProject.Id);
@@ -752,38 +766,41 @@ namespace vws.web.Controllers._project
         [HttpGet]
         [Authorize]
         [Route("getUsersCanBeAddedToProject")]
-        public async Task<IActionResult> GetUsersCanBeAddedToProject(int Id)
+        public async Task<IActionResult> GetUsersCanBeAddedToProject(int? Id)
         {
             var response = new ResponseModel<List<UserModel>>();
             var users = new List<UserModel>();
 
             var userId = LoggedInUserId.Value;
 
-            var selectedProject = vwsDbContext.Projects.Include(project => project.ProjectDepartments)
-                                                       .FirstOrDefault(project => project.Id == Id);
-
-            if (selectedProject == null || selectedProject.IsDeleted)
+            if (Id != null)
             {
-                response.AddError(localizer["There is no project with given Id."]);
-                response.Message = "Projet not found";
-                return StatusCode(StatusCodes.Status400BadRequest, response);
+                var selectedProject = vwsDbContext.Projects.Include(project => project.ProjectDepartments)
+                                                           .FirstOrDefault(project => project.Id == Id);
+
+                if (selectedProject == null || selectedProject.IsDeleted)
+                {
+                    response.AddError(localizer["There is no project with given Id."]);
+                    response.Message = "Projet not found";
+                    return StatusCode(StatusCodes.Status400BadRequest, response);
+                }
+
+                if (selectedProject.TeamId != null)
+                {
+                    response.AddError(localizer["Adding user is just for personal projects."]);
+                    response.Message = "Non-Personal project";
+                    return StatusCode(StatusCodes.Status400BadRequest, response);
+                }
+
+                if (!permissionService.HasAccessToProject(userId, (int)Id))
+                {
+                    response.AddError(localizer["You are not a memeber of project."]);
+                    response.Message = "Project access denied";
+                    return StatusCode(StatusCodes.Status403Forbidden, response);
+                }
             }
 
-            if (selectedProject.TeamId != null)
-            {
-                response.AddError(localizer["Adding user is just for personal projects."]);
-                response.Message = "Non-Personal project";
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-
-            if (!permissionService.HasAccessToProject(userId, Id))
-            {
-                response.AddError(localizer["You are not a memeber of project."]);
-                response.Message = "Project access denied";
-                return StatusCode(StatusCodes.Status403Forbidden, response);
-            }
-
-            var availableUsers = GetAvailableUsersToAddProject(selectedProject, userId);
+            var availableUsers = GetAvailableUsersToAddProject(Id);
 
             foreach (var availableUserId in availableUsers)
             {
@@ -924,7 +941,7 @@ namespace vws.web.Controllers._project
                 return Ok(response);
             }
 
-            var availableUsers = GetAvailableUsersToAddProject(selectedProject, userId);
+            var availableUsers = GetAvailableUsersToAddProject(selectedProject.Id);
             if (!availableUsers.Contains(model.UserId))
             {
                 response.AddError(localizer["This user can not be added to project."]);
@@ -1202,7 +1219,7 @@ namespace vws.web.Controllers._project
         [HttpPut]
         [Authorize]
         [Route("changeProjectMemberPermisssion")]
-        public async Task<IActionResult> ChangeProjectMemberPermisssion(int projectMemberId, bool hasAccess)
+        public IActionResult ChangeProjectMemberPermisssion(int projectMemberId, bool hasAccess)
         {
             var response = new ResponseModel();
 

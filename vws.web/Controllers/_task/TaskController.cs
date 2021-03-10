@@ -212,6 +212,8 @@ namespace vws.web.Controllers._task
             }
             #endregion
 
+            model.Users = model.Users.Distinct().ToList();
+
             DateTime creationTime = DateTime.Now;
 
             if (GetUsersCanBeAddedToTask(model.TeamId, model.ProjectId).Intersect(model.Users).Count() != model.Users.Count)
@@ -342,6 +344,8 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
             #endregion
+
+            model.Users = model.Users.Distinct().ToList();
 
             #region CheckTeamAndProjectAccess
             if (model.ProjectId != null && !permissionService.HasAccessToProject(userId, (int)model.ProjectId))
