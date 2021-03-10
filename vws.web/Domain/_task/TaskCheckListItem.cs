@@ -23,6 +23,8 @@ namespace vws.web.Domain._task
 
         public DateTime ModifiedOn { get; set; }
 
+        public bool IsDeleted { get; set; }
+
         public virtual TaskCheckList TaskCheckList { get; set; }
 
 
