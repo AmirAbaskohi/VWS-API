@@ -708,5 +708,32 @@ namespace vws.web.Controllers._team
             response.Message = "Team departments returned successfully!";
             return Ok(response);
         }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getAllTeamMates")]
+        public async Task<ICollection<UserModel>> GetAllTeamMates()
+        {
+            var result = new List<UserModel>();
+
+            List<Team> userTeams = vwsDbContext.GetUserTeams(LoggedInUserId.Value).ToList();
+            List<Guid> userTeamMates = vwsDbContext.TeamMembers
+                .Where(teamMember => userTeams.Select(userTeam => userTeam.Id).Contains(teamMember.TeamId) && !teamMember.IsDeleted)
+                .Select(teamMember => teamMember.UserProfileId).Distinct().Where(id => id != LoggedInUserId.Value).ToList();
+
+            foreach (var userId in userTeamMates)
+            {
+                var user = await userManager.FindByIdAsync(userId.ToString());
+                var userProfile = await vwsDbContext.GetUserProfileAsync(userId);
+                result.Add(new UserModel()
+                {
+                    UserId = userId,
+                    ProfileImageGuid = userProfile.ProfileImageGuid,
+                    UserName = user.UserName
+                });
+            }
+
+            return result;
+        }
     }
 }
