@@ -245,6 +245,11 @@ namespace vws.web.Controllers._project
             vwsDbContext.Save();
         }
 
+        private long GetNumberOfProjectTasks(int id)
+        {
+            return vwsDbContext.GeneralTasks.Where(task => task.ProjectId == id && !task.IsDeleted).Count();
+        }
+
         private void CreateProjectTaskStatuses(int projectId)
         {
             vwsDbContext.AddTaskStatus(new Domain._task.TaskStatus() { EvenOrder = 2, ProjectId = projectId, UserProfileId = null, TeamId = null, Title = "To Do" });
@@ -384,7 +389,8 @@ namespace vws.web.Controllers._project
                 ProjectImageGuid = newProject.ProjectImageGuid,
                 DepartmentIds = model.DepartmentIds,
                 NumberOfUpdates = vwsDbContext.ProjectHistories.Where(history => history.ProjectId == newProject.Id).Count(),
-                Users = await GetProjectUsers(newProject.Id)
+                Users = await GetProjectUsers(newProject.Id),
+                NumberOfTasks = GetNumberOfProjectTasks(newProject.Id)
             };
 
             response.Value = newProjectResponse;
@@ -573,7 +579,8 @@ namespace vws.web.Controllers._project
                 ProjectImageGuid = selectedProject.ProjectImageGuid,
                 DepartmentIds = model.DepartmentIds,
                 NumberOfUpdates = vwsDbContext.ProjectHistories.Where(history => history.ProjectId == selectedProject.Id).Count(),
-                Users = await GetProjectUsers(selectedProject.Id)
+                Users = await GetProjectUsers(selectedProject.Id),
+                NumberOfTasks = GetNumberOfProjectTasks(selectedProject.Id)
             };
 
             response.Value = newProjectResponse;
@@ -659,7 +666,8 @@ namespace vws.web.Controllers._project
                 ProjectImageGuid = project.ProjectImageGuid,
                 DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
                 NumberOfUpdates = vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
-                Users = await GetProjectUsers(project.Id)
+                Users = await GetProjectUsers(project.Id),
+                NumberOfTasks = GetNumberOfProjectTasks(project.Id)
             };
 
             return response;
@@ -691,7 +699,8 @@ namespace vws.web.Controllers._project
                     ProjectImageGuid = project.ProjectImageGuid,
                     DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
                     NumberOfUpdates = vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
-                    Users = await GetProjectUsers(project.Id)
+                    Users = await GetProjectUsers(project.Id),
+                    NumberOfTasks = GetNumberOfProjectTasks(project.Id)
                 });
             }
 
@@ -724,7 +733,8 @@ namespace vws.web.Controllers._project
                     ProjectImageGuid = project.ProjectImageGuid,
                     DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
                     NumberOfUpdates = vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
-                    Users = await GetProjectUsers(project.Id)
+                    Users = await GetProjectUsers(project.Id),
+                    NumberOfTasks = GetNumberOfProjectTasks(project.Id)
                 });
             }
 
@@ -756,7 +766,8 @@ namespace vws.web.Controllers._project
                     TeamId = project.TeamId,
                     ProjectImageGuid = project.ProjectImageGuid,
                     DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
-                    Users = await GetProjectUsers(project.Id)
+                    Users = await GetProjectUsers(project.Id),
+                    NumberOfTasks = GetNumberOfProjectTasks(project.Id)
                 });
             }
 

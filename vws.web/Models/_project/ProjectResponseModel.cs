@@ -20,5 +20,6 @@ namespace vws.web.Models._project
         public List<UserModel> Users { get; set; }
         public List<int> DepartmentIds { get; set; }
         public Guid? ProjectImageGuid { get; set; }
+        public long NumberOfTasks { get; set; }
     }
 }
