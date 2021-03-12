@@ -242,7 +242,6 @@ namespace vws.web.Controllers._account
             }
 
             await CreateUserProfile(Guid.Parse(user.Id));
-            CreateUserTaskStatuses(Guid.Parse(user.Id));
 
             return Ok(new ResponseModel { Message = "User created successfully!" });
         }
@@ -368,7 +367,10 @@ namespace vws.web.Controllers._account
                 user.EmailConfirmed = true;
                 var result = await userManager.UpdateAsync(user);
                 if (result.Succeeded)
+                {
+                    CreateUserTaskStatuses(Guid.Parse(user.Id));
                     return Ok(new ResponseModel { Message = "Email confirmed successfully!" });
+                }
             }
 
             errors.Add(localizer["Emil confirmation failed."]);
