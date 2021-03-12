@@ -6,13 +6,9 @@ using System.Threading.Tasks;
 
 namespace vws.web.Models._department
 {
-    public class DepartmentModel
+    public class DepartmentModel : DepartmentBaseModel
     {
         [Required]
         public int TeamId { get; set; }
-        [Required]
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string Color { get; set; }
     }
 }

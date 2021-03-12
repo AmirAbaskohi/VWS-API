@@ -28,6 +28,8 @@ using vws.web.Services._chat;
 using vws.web.ServiceEngine;
 using Microsoft.AspNetCore.Http.Features;
 using vws.web.Services;
+using vws.web.Services._department;
+using vws.web.Services._team;
 
 namespace vws.web
 {
@@ -126,6 +128,10 @@ namespace vws.web
             services.AddScoped<IChannelService, ChannelService>();
 
             services.AddScoped<IPermissionService, PermissionService>();
+
+            services.AddScoped<IDepartmentManagerService, DepartmentManagerService>();
+
+            services.AddScoped<ITeamManagerService, TeamManagerService>();
 
             services.AddScoped<TokenValidationFilterAttribute>();
 

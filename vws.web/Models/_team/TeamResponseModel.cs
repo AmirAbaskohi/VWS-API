@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using vws.web.Models._department;
 
 namespace vws.web.Models._team
 {
@@ -18,5 +19,10 @@ namespace vws.web.Models._team
         public DateTime ModifiedOn { get; set; }
         public Guid Guid { get; set; }
         public Guid? TeamImageGuid { get; set; }
+        public long NumberOfTasks { get; set; }
+        public int NumberOfDepartments { get; set; }
+        public int NumberOfMembers { get; set; }
+        public List<UserModel> Users { get; set; }
+        public List<DepartmentResponseModel> Departments { get; set; }
     }
 }

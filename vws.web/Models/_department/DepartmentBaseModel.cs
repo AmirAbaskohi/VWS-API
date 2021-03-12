@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 
 namespace vws.web.Models._department
 {
-    public class AddTeammateToDepartmentModel
+    public class DepartmentBaseModel
     {
         [Required]
-        public int DepartmentId { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string Color { get; set; }
         [Required]
-        public Guid UserId { get; set; }
+        public List<Guid> Users { get; set; }
     }
 }

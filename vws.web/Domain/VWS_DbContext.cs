@@ -258,9 +258,11 @@ namespace vws.web.Domain
         public IQueryable<Department> GetUserDepartments(Guid userId)
         {
             return DepartmentMembers.Include(departmentMember => departmentMember.Department)
+                                    .ThenInclude(department => department.Team)
                                     .Where(departmentMember => departmentMember.IsDeleted == false &&
                                                                 departmentMember.UserProfileId == userId &&
-                                                                departmentMember.Department.IsDeleted == false)
+                                                                !departmentMember.Department.IsDeleted &&
+                                                                !departmentMember.Department.Team.IsDeleted)
                                     .Select(departmentMember => departmentMember.Department);
         }
 
