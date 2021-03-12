@@ -434,6 +434,21 @@ namespace vws.web.Domain
             TaskStatuses.Remove(TaskStatuses.FirstOrDefault(status => status.Id == id));
         }
 
+        public void AddCheckList(TaskCheckList checkList)
+        {
+            TaskCheckLists.Add(checkList);
+        }
+
+        public void AddCheckListItem(TaskCheckListItem taskCheckListItem)
+        {
+            TaskCheckListItems.Add(taskCheckListItem);
+        }
+
+        public void AddCheckListItems(List<TaskCheckListItem> taskCheckListItems)
+        {
+            TaskCheckListItems.AddRange(taskCheckListItems);
+        }
+
         #endregion
 
         #region team

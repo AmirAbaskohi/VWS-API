@@ -233,6 +233,12 @@ namespace vws.web.Domain
 
         public void DeleteTaskStatus(int id);
 
+        public void AddCheckList(TaskCheckList checkList);
+
+        public void AddCheckListItem(TaskCheckListItem taskCheckListItem);
+
+        public void AddCheckListItems(List<TaskCheckListItem> taskCheckListItems);
+
         #endregion
 
         #endregion

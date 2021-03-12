@@ -68,6 +68,17 @@ namespace vws.web.Services
                                                               !teamMember.IsDeleted);
         }
 
+        public bool HasAccessToTask(Guid userId, long taskId)
+        {
+            bool hasAccess = vwsDbContext.TaskAssigns.Any(assign => assign.UserProfileId == userId && assign.GeneralTaskId == taskId && !assign.IsDeleted);
+
+            if (hasAccess == true)
+                return true;
+
+            var selectedTask = vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == taskId);
+            return selectedTask.CreatedBy == userId;
+        }
+
         public List<Guid> GetUsersHaveAccessToProject(int projectId)
         {
             var selectedProject = vwsDbContext.Projects.Include(project => project.ProjectDepartments)

@@ -144,6 +144,105 @@ namespace vws.web.Controllers._task
                                                       .ToList();
         }
 
+        private List<CheckListResponseModel> GetCheckLists(long taskId)
+        {
+            var result = new List<CheckListResponseModel>();
+
+            var checkLists = vwsDbContext.TaskCheckLists.Where(checkList => checkList.GeneralTaskId == taskId && !checkList.IsDeleted);
+            foreach (var checkList in checkLists)
+            {
+                result.Add(new CheckListResponseModel()
+                {
+                    Id = checkList.Id,
+                    CreatedBy = checkList.CreatedBy,
+                    CreatedOn = checkList.CreatedOn,
+                    GeneralTaskId = checkList.GeneralTaskId,
+                    ModifiedBy = checkList.ModifiedBy,
+                    ModifiedOn = checkList.ModifiedOn,
+                    Title = checkList.Title,
+                    Items = vwsDbContext.TaskCheckListItems.Where(item => item.TaskCheckListId == checkList.Id && !item.IsDeleted)
+                                                           .Select(item => new CheckListItemResponseModel()
+                                                           {
+                                                               Id = item.Id,
+                                                               CreatedBy = item.CreatedBy,
+                                                               CreatedOn = item.CreatedOn,
+                                                               IsChecked = item.IsChecked,
+                                                               ModifiedBy = item.ModifiedBy,
+                                                               ModifiedOn = item.ModifiedOn,
+                                                               TaskCheckListId = item.TaskCheckListId,
+                                                               Title = item.Title
+                                                           })
+                                                           .ToList()
+                });
+            }
+            return result;
+        }
+
+        private bool HasCheckListsTitleMoreCharacters(List<CheckListModel> checkLists)
+        {
+            return checkLists.Any(checkList => checkList.Title.Length > 250);
+        }
+
+        private bool HasCheckListsTitleItemMoreCharacters(List<CheckListItemModel> checkListItems)
+        {
+            return checkListItems.Any(checkListItem => checkListItem.Title.Length > 500);
+        }
+
+        private void AddCheckLists(long id, List<CheckListModel> checkLists)
+        {
+            foreach (var checkList in checkLists)
+            {
+                var newCheckList = new TaskCheckList()
+                {
+                    CreatedBy = LoggedInUserId.Value,
+                    CreatedOn = DateTime.Now,
+                    IsDeleted = false,
+                    GeneralTaskId = id,
+                    ModifiedBy = LoggedInUserId.Value,
+                    ModifiedOn = DateTime.Now,
+                    Title = checkList.Title
+                };
+                vwsDbContext.AddCheckList(newCheckList);
+                vwsDbContext.Save();
+
+                var itemsResponse = AddCheckListItems(newCheckList.Id, checkList.Items);
+                vwsDbContext.Save();
+            }
+        }
+
+        private List<CheckListItemResponseModel> AddCheckListItems(long checkListId, List<CheckListItemModel> items)
+        {
+            var taskCheckListItems = new List<TaskCheckListItem>();
+            var creationTime = DateTime.Now;
+            
+            taskCheckListItems = items.Select(item => new TaskCheckListItem
+            {
+                CreatedBy = LoggedInUserId.Value,
+                CreatedOn = creationTime,
+                IsDeleted = false,
+                TaskCheckListId = checkListId,
+                IsChecked = item.IsChecked,
+                Title = item.Title,
+                ModifiedBy = LoggedInUserId.Value,
+                ModifiedOn = creationTime
+            }).ToList();
+
+            vwsDbContext.AddCheckListItems(taskCheckListItems);
+            vwsDbContext.Save();
+
+            return taskCheckListItems.Select(item => new CheckListItemResponseModel()
+            {
+                Id = item.Id,
+                CreatedBy = item.CreatedBy,
+                CreatedOn = item.CreatedOn,
+                IsChecked = item.IsChecked,
+                ModifiedBy = item.ModifiedBy,
+                ModifiedOn = item.ModifiedOn,
+                TaskCheckListId = item.TaskCheckListId,
+                Title = item.Title
+            }).ToList();
+        }
+
         [HttpPost]
         [Authorize]
         [Route("create")]
@@ -173,6 +272,20 @@ namespace vws.web.Controllers._task
             {
                 response.Message = "Task model data has problem.";
                 response.AddError(localizer["Priority id is not defined."]);
+            }
+            if (HasCheckListsTitleMoreCharacters(model.CheckLists))
+            {
+                response.Message = "Task model data has problem.";
+                response.AddError(localizer["Check list title can not have more than 250 characters."]);
+            }
+            foreach (var checkList in model.CheckLists)
+            {
+                if (HasCheckListsTitleItemMoreCharacters(checkList.Items))
+                {
+                    response.Message = "Task model data has problem.";
+                    response.AddError(localizer["Check list item title can not have more than 500 characters."]);
+                    break;
+                }
             }
             if (response.HasError)
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
@@ -266,6 +379,7 @@ namespace vws.web.Controllers._task
             vwsDbContext.Save();
 
             await AddUsersToTask(newTask.Id, model.Users);
+            AddCheckLists(newTask.Id, model.CheckLists);
 
             var newTaskResponseModel = new TaskResponseModel()
             {
@@ -285,7 +399,8 @@ namespace vws.web.Controllers._task
                 ProjectId = newTask.ProjectId,
                 TeamId = newTask.TeamId,
                 StatusId = newTask.TaskStatusId,
-                StatusTitle = vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == newTask.TaskStatusId).Title
+                StatusTitle = vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == newTask.TaskStatusId).Title,
+                CheckLists = GetCheckLists(newTask.Id)
             };
 
             response.Value = newTaskResponseModel;
@@ -461,7 +576,8 @@ namespace vws.web.Controllers._task
                 ProjectId = selectedTask.ProjectId,
                 TeamId = selectedTask.TeamId,
                 StatusId = selectedTask.TaskStatusId,
-                StatusTitle = vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == selectedTask.TaskStatusId).Title
+                StatusTitle = vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == selectedTask.TaskStatusId).Title,
+                CheckLists = GetCheckLists(selectedTask.Id)
             };
 
             response.Value = updatedTaskResponseModel;
@@ -503,7 +619,8 @@ namespace vws.web.Controllers._task
                     ProjectId = userTask.ProjectId,
                     TeamId = userTask.TeamId,
                     StatusId = userTask.TaskStatusId,
-                    StatusTitle = vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == userTask.TaskStatusId).Title
+                    StatusTitle = vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == userTask.TaskStatusId).Title,
+                    CheckLists = GetCheckLists(userTask.Id)
                 });
             }
             return response;
@@ -541,7 +658,8 @@ namespace vws.web.Controllers._task
                         ProjectId = userTask.ProjectId,
                         TeamId = userTask.TeamId,
                         StatusId = userTask.TaskStatusId,
-                        StatusTitle = vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == userTask.TaskStatusId).Title
+                        StatusTitle = vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == userTask.TaskStatusId).Title,
+                        CheckLists = GetCheckLists(userTask.Id)
                     });
                 }
             }
@@ -631,7 +749,7 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (selectedTask.CreatedBy != userId)
+            if (!permissionService.HasAccessToTask(userId, model.TaskId))
             {
                 response.AddError(localizer["You don't have access to this task."]);
                 response.Message = "Task access forbidden";
@@ -690,18 +808,11 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (selectedTask.CreatedBy != userId)
+            if (!permissionService.HasAccessToTask(userId, id))
             {
-                var assignedTask = vwsDbContext.TaskAssigns.FirstOrDefault(taskAssign => taskAssign.UserProfileId == userId &&
-                                                                                         taskAssign.GeneralTaskId == id &&
-                                                                                         taskAssign.IsDeleted == false);
-
-                if (assignedTask == null)
-                {
-                    response.Message = "Task access forbidden";
-                    response.AddError(localizer["You don't have access to this task."]);
-                    return StatusCode(StatusCodes.Status403Forbidden, response);
-                }
+                response.Message = "Task access forbidden";
+                response.AddError(localizer["You don't have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
             assignedUsersList = await GetAssignedTo(id);
@@ -727,18 +838,11 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (selectedTask.CreatedBy != LoggedInUserId.Value)
+            if (!permissionService.HasAccessToTask(userId, taskId))
             {
-                var assignedTask = vwsDbContext.TaskAssigns.FirstOrDefault(taskAssign => taskAssign.UserProfileId == LoggedInUserId.Value &&
-                                                                                         taskAssign.GeneralTaskId == taskId &&
-                                                                                         taskAssign.IsDeleted == false);
-
-                if (assignedTask == null)
-                {
-                    response.Message = "Task access forbidden";
-                    response.AddError(localizer["You don't have access to this task."]);
-                    return StatusCode(StatusCodes.Status403Forbidden, response);
-                }
+                response.Message = "Task access forbidden";
+                response.AddError(localizer["You don't have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
             var selectedUserAssignedTask = vwsDbContext.TaskAssigns.FirstOrDefault(taskAssign => taskAssign.UserProfileId == userId &&
@@ -1036,6 +1140,276 @@ namespace vws.web.Controllers._task
             vwsDbContext.Save();
 
             response.Message = "Status deleted successfully!";
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("addCheckList")]
+        public IActionResult AddCheckList(int id, [FromBody] CheckListModel model)
+        {
+            var response = new ResponseModel<CheckListResponseModel>();
+            var userId = LoggedInUserId.Value;
+
+            if (model.Title.Length > 250)
+            {
+                response.Message = "Task check list model has problem.";
+                response.AddError(localizer["Check list title can not have more than 250 characters."]);
+            }
+            if (HasCheckListsTitleItemMoreCharacters(model.Items))
+            {
+                response.Message = "Task check list model has problem.";
+                response.AddError(localizer["Check list item title can not have more than 500 characters."]);
+            }
+            if (response.HasError)
+                return StatusCode(StatusCodes.Status400BadRequest);
+
+
+            var selectedTask = vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == id);
+
+            if (selectedTask == null || selectedTask.IsDeleted)
+            {
+                response.Message = "Task not found";
+                response.AddError(localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!permissionService.HasAccessToTask(userId, id))
+            {
+                response.Message = "Task access forbidden";
+                response.AddError(localizer["You don't have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            var newCheckList = new TaskCheckList()
+            {
+                CreatedBy = userId,
+                CreatedOn = DateTime.Now,
+                IsDeleted = false,
+                GeneralTaskId = id,
+                ModifiedBy = userId,
+                ModifiedOn = DateTime.Now,
+                Title = model.Title
+            };
+            vwsDbContext.AddCheckList(newCheckList);
+            vwsDbContext.Save();
+
+            var itemsResponse = AddCheckListItems(newCheckList.Id, model.Items);
+
+            response.Message = "Check list added successfully!";
+            response.Value = new CheckListResponseModel()
+            {
+                CreatedBy = newCheckList.CreatedBy,
+                CreatedOn = newCheckList.CreatedOn,
+                GeneralTaskId = newCheckList.GeneralTaskId,
+                ModifiedBy = newCheckList.ModifiedBy,
+                ModifiedOn = newCheckList.ModifiedOn,
+                Title = newCheckList.Title,
+                Id = newCheckList.Id,
+                Items = itemsResponse
+            };
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("addCheckListItem")]
+        public IActionResult AddCheckListItem(long checkListId, [FromBody] CheckListItemModel model)
+        {
+            var response = new ResponseModel<CheckListItemResponseModel>();
+            var userId = LoggedInUserId.Value;
+
+            if (model.Title.Length > 250)
+            {
+                response.Message = "Task check list item title has problem.";
+                response.AddError(localizer["Check list title can not have more than 250 characters."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var selectedCheckList = vwsDbContext.TaskCheckLists.Include(checkList => checkList.GeneralTask)
+                                                               .FirstOrDefault(checkList => checkList.Id == checkListId && !checkList.IsDeleted);
+
+            if (selectedCheckList == null || selectedCheckList.IsDeleted)
+            {
+                response.AddError(localizer["Check list with given id does not exist."]);
+                response.Message = "Check list not found";
+                return StatusCode(StatusCodes.Status400BadRequest);
+            }
+
+            if (selectedCheckList.GeneralTask.IsDeleted)
+            {
+                response.Message = "Task not found";
+                response.AddError(localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!permissionService.HasAccessToTask(userId, selectedCheckList.GeneralTaskId))
+            {
+                response.Message = "Task access forbidden";
+                response.AddError(localizer["You don't have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            var creationTime = DateTime.Now;
+            var newCheckListItem = new TaskCheckListItem()
+            {
+                CreatedBy = userId,
+                CreatedOn = creationTime,
+                IsDeleted = false,
+                TaskCheckListId = checkListId,
+                IsChecked = model.IsChecked,
+                ModifiedBy = userId,
+                ModifiedOn = creationTime,
+                Title = model.Title
+            };
+            vwsDbContext.AddCheckListItem(newCheckListItem);
+            vwsDbContext.Save();
+
+            response.Value = new CheckListItemResponseModel()
+            {
+                Id = newCheckListItem.Id,
+                CreatedBy = newCheckListItem.CreatedBy,
+                CreatedOn = newCheckListItem.CreatedOn,
+                IsChecked = newCheckListItem.IsChecked,
+                ModifiedBy = newCheckListItem.ModifiedBy,
+                ModifiedOn = newCheckListItem.ModifiedOn,
+                TaskCheckListId = newCheckListItem.TaskCheckListId,
+                Title = newCheckListItem.Title
+            };
+            response.Message = "Check list item added successfully!";
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("updateCheckListTitle")]
+        public IActionResult UpdateCheckListTitle(long checkListId, string newTitle)
+        {
+            var response = new ResponseModel();
+            var userId = LoggedInUserId.Value;
+
+            if (newTitle.Length > 250)
+            {
+                response.Message = "Task check list title has problem.";
+                response.AddError(localizer["Check list title can not have more than 250 characters."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var selectedCheckList = vwsDbContext.TaskCheckLists.Include(checkList => checkList.GeneralTask)
+                                                               .FirstOrDefault(checkList => checkList.Id == checkListId && !checkList.IsDeleted);
+
+            if (selectedCheckList == null || selectedCheckList.IsDeleted)
+            {
+                response.AddError(localizer["Check list with given id does not exist."]);
+                response.Message = "Check list not found";
+                return StatusCode(StatusCodes.Status400BadRequest);
+            }
+
+            if (selectedCheckList.GeneralTask.IsDeleted)
+            {
+                response.Message = "Task not found";
+                response.AddError(localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!permissionService.HasAccessToTask(userId, selectedCheckList.GeneralTaskId))
+            {
+                response.Message = "Task access forbidden";
+                response.AddError(localizer["You don't have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            selectedCheckList.Title = newTitle;
+            vwsDbContext.Save();
+
+            response.Message = "Check list title updated successfully!";
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("updateCheckListItemTitle")]
+        public IActionResult UpdateCheckListItemTitle(long checkListItemId, string newTitle)
+        {
+            var response = new ResponseModel();
+            var userId = LoggedInUserId.Value;
+
+            if (newTitle.Length > 500)
+            {
+                response.Message = "Task check list item title has problem.";
+                response.AddError(localizer["Check list item title can not have more than 500 characters."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var selectedCheckListItem = vwsDbContext.TaskCheckListItems.Include(checkListItem => checkListItem.TaskCheckList)
+                                                                       .ThenInclude(checkList => checkList.GeneralTask)
+                                                                       .FirstOrDefault(checkListItem => checkListItem.Id == checkListItemId && !checkListItem.IsDeleted);
+
+            if (selectedCheckListItem == null || selectedCheckListItem.IsDeleted)
+            {
+                response.AddError(localizer["Check list item with given id does not exist."]);
+                response.Message = "Check list not found";
+                return StatusCode(StatusCodes.Status400BadRequest);
+            }
+
+            if (selectedCheckListItem.TaskCheckList.GeneralTask.IsDeleted)
+            {
+                response.Message = "Task not found";
+                response.AddError(localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!permissionService.HasAccessToTask(userId, selectedCheckListItem.TaskCheckList.GeneralTask.Id))
+            {
+                response.Message = "Task access forbidden";
+                response.AddError(localizer["You don't have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            selectedCheckListItem.Title = newTitle;
+            vwsDbContext.Save();
+
+            response.Message = "Check list item title updated successfully!";
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("updateListItemIsChecked")]
+        public IActionResult UpdateListItemIsChecked(long checkListItemId, bool isChecked)
+        {
+            var response = new ResponseModel();
+            var userId = LoggedInUserId.Value;
+
+            var selectedCheckListItem = vwsDbContext.TaskCheckListItems.Include(checkListItem => checkListItem.TaskCheckList)
+                                                                       .ThenInclude(checkList => checkList.GeneralTask)
+                                                                       .FirstOrDefault(checkListItem => checkListItem.Id == checkListItemId && !checkListItem.IsDeleted);
+
+            if (selectedCheckListItem == null || selectedCheckListItem.IsDeleted)
+            {
+                response.AddError(localizer["Check list item with given id does not exist."]);
+                response.Message = "Check list not found";
+                return StatusCode(StatusCodes.Status400BadRequest);
+            }
+
+            if (selectedCheckListItem.TaskCheckList.GeneralTask.IsDeleted)
+            {
+                response.Message = "Task not found";
+                response.AddError(localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!permissionService.HasAccessToTask(userId, selectedCheckListItem.TaskCheckList.GeneralTask.Id))
+            {
+                response.Message = "Task access forbidden";
+                response.AddError(localizer["You don't have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            selectedCheckListItem.IsChecked = isChecked;
+            vwsDbContext.Save();
+
+            response.Message = "Check list item is checked updated successfully!";
             return Ok(response);
         }
     }

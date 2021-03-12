@@ -66,5 +66,7 @@ namespace vws.web.Domain._task
         public virtual ICollection<TaskReminder> TaskReminders { get; set; }
 
         public virtual ICollection<TaskAssign> TaskAssigns { get; set; }
+
+        public virtual ICollection<TaskCheckList> TaskChecklist { get; set; }
     }
 }

@@ -19,5 +19,6 @@ namespace vws.web.Models._task
         public DateTime? EndDate { get; set; }
         [Required]
         public List<Guid> Users { get; set; }
+        public List<CheckListModel> CheckLists { get; set; }
     }
 }

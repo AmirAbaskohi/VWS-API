@@ -1,34 +1,19 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace vws.web.Domain._task
+namespace vws.web.Models._task
 {
-    [Table("Task_TaskCheckListItem")]
-    public class TaskCheckListItem
+    public class CheckListItemResponseModel
     {
-        [Key]
         public long Id { get; set; }
-
         public long TaskCheckListId { get; set; }
-
-        [MaxLength(500)]
         public string Title { get; set; }
-
         public Guid CreatedBy { get; set; }
-
         public Guid ModifiedBy { get; set; }
-
         public DateTime CreatedOn { get; set; }
-
         public DateTime ModifiedOn { get; set; }
-
         public bool IsChecked { get; set; }
-
-        public bool IsDeleted { get; set; }
-
-        public virtual TaskCheckList TaskCheckList { get; set; }
-
-
     }
 }

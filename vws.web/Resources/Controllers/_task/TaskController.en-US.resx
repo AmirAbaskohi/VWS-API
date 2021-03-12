@@ -117,6 +117,18 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Check list item title can not have more than 500 characters." xml:space="preserve">
+    <value>Check list item title can not have more than 500 characters.</value>
+  </data>
+  <data name="Check list item with given id does not exist." xml:space="preserve">
+    <value>Check list item with given id does not exist.</value>
+  </data>
+  <data name="Check list title can not have more than 250 characters." xml:space="preserve">
+    <value>Check list title can not have more than 250 characters.</value>
+  </data>
+  <data name="Check list with given id does not exist." xml:space="preserve">
+    <value>Check list with given id does not exist.</value>
+  </data>
   <data name="File size is not allowed." xml:space="preserve">
     <value>File size is not allowed.</value>
   </data>
@@ -182,5 +194,8 @@
   </data>
   <data name="You do not have access to team." xml:space="preserve">
     <value>You do not have access to team.</value>
+  </data>
+  <data name="You don not have access to this check list." xml:space="preserve">
+    <value>You don not have access to this check list.</value>
   </data>
 </root>

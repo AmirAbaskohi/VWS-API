@@ -28,5 +28,6 @@ namespace vws.web.Models._task
         public int StatusId { get; set; }
         public string StatusTitle { get; set; }
         public List<UserModel> UsersAssignedTo { get; set; }
+        public List<CheckListResponseModel> CheckLists { get; set; }
     }
 }
