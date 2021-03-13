@@ -1326,6 +1326,45 @@ namespace vws.web.Controllers._task
             return Ok(response);
         }
 
+        [HttpDelete]
+        [Authorize]
+        [Route("deleteCheckLists")]
+        public IActionResult DeleteCheckList(long checkListId)
+        {
+            var response = new ResponseModel();
+            var userId = LoggedInUserId.Value;
+
+            var selectedCheckList = vwsDbContext.TaskCheckLists.Include(checkList => checkList.GeneralTask)
+                                                               .FirstOrDefault(checkList => checkList.Id == checkListId && !checkList.IsDeleted);
+
+            if (selectedCheckList == null || selectedCheckList.IsDeleted)
+            {
+                response.AddError(localizer["Check list with given id does not exist."]);
+                response.Message = "Check list not found";
+                return StatusCode(StatusCodes.Status400BadRequest);
+            }
+
+            if (selectedCheckList.GeneralTask.IsDeleted)
+            {
+                response.Message = "Task not found";
+                response.AddError(localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!permissionService.HasAccessToTask(userId, selectedCheckList.GeneralTaskId))
+            {
+                response.Message = "Task access forbidden";
+                response.AddError(localizer["You don't have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            selectedCheckList.IsDeleted = true;
+            vwsDbContext.Save();
+
+            response.Message = "Check list deleted successfully!";
+            return Ok(response);
+        }
+
         [HttpPost]
         [Authorize]
         [Route("updateCheckListItemTitle")]
@@ -1370,6 +1409,46 @@ namespace vws.web.Controllers._task
             vwsDbContext.Save();
 
             response.Message = "Check list item title updated successfully!";
+            return Ok(response);
+        }
+
+        [HttpDelete]
+        [Authorize]
+        [Route("deleteCheckListItem")]
+        public IActionResult DeleteCheckListItem(long checkListItemId)
+        {
+            var response = new ResponseModel();
+            var userId = LoggedInUserId.Value;
+
+            var selectedCheckListItem = vwsDbContext.TaskCheckListItems.Include(checkListItem => checkListItem.TaskCheckList)
+                                                                       .ThenInclude(checkList => checkList.GeneralTask)
+                                                                       .FirstOrDefault(checkListItem => checkListItem.Id == checkListItemId && !checkListItem.IsDeleted);
+
+            if (selectedCheckListItem == null || selectedCheckListItem.IsDeleted)
+            {
+                response.AddError(localizer["Check list item with given id does not exist."]);
+                response.Message = "Check list not found";
+                return StatusCode(StatusCodes.Status400BadRequest);
+            }
+
+            if (selectedCheckListItem.TaskCheckList.GeneralTask.IsDeleted)
+            {
+                response.Message = "Task not found";
+                response.AddError(localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!permissionService.HasAccessToTask(userId, selectedCheckListItem.TaskCheckList.GeneralTask.Id))
+            {
+                response.Message = "Task access forbidden";
+                response.AddError(localizer["You don't have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            selectedCheckListItem.IsDeleted = true;
+            vwsDbContext.Save();
+
+            response.Message = "Check list item delete successfully!";
             return Ok(response);
         }
 
