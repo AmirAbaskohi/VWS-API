@@ -984,7 +984,7 @@ namespace vws.web.Controllers._task
 
         [HttpPut]
         [Authorize]
-        [Route("addStatuses")]
+        [Route("addStatus")]
         public IActionResult AddStatus(int? projectId, int? teamId, string title)
         {
             var response = new ResponseModel<TaskStatusResponseModel>();
