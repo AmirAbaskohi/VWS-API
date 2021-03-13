@@ -174,6 +174,9 @@
   <data name="Team not found." xml:space="preserve">
     <value>Team not found.</value>
   </data>
+  <data name="There is no status to give task." xml:space="preserve">
+    <value>There is no status to give task.</value>
+  </data>
   <data name="User does not exist." xml:space="preserve">
     <value>User does not exist.</value>
   </data>

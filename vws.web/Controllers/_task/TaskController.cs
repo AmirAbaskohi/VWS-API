@@ -357,13 +357,14 @@ namespace vws.web.Controllers._task
             }
 
             var statuses = GetTaskStatuses(model.ProjectId, model.TeamId).Select(status => status.Id);
-            if (model.StatusId == null)
+            if (statuses.Count() == 0)
             {
-                if (statuses.Count() != 0)
-                    model.StatusId = statuses.First();
-                else
-                    model.StatusId = 0;
+                response.Message = "No status";
+                response.AddError(localizer["There is no status to give task."]);
+                return StatusCode(StatusCodes.Status424FailedDependency, response);
             }
+            if (model.StatusId == null)
+                model.StatusId = statuses.First();
 
             if (!statuses.Contains((int)model.StatusId))
             {
