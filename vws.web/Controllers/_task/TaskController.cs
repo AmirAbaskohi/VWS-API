@@ -288,7 +288,7 @@ namespace vws.web.Controllers._task
                 }
             }
             if (response.HasError)
-                return StatusCode(StatusCodes.Status500InternalServerError, response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
 
             if (model.TeamId != null && model.ProjectId != null)
                 model.TeamId = null;
@@ -696,7 +696,7 @@ namespace vws.web.Controllers._task
 
             vwsDbContext.Save();
 
-            response.Message = "Task updated successfully!";
+            response.Message = "Task deleted successfully!";
             return Ok(response);
         }
 
@@ -728,7 +728,7 @@ namespace vws.web.Controllers._task
 
             vwsDbContext.Save();
 
-            response.Message = "Task updated successfully!";
+            response.Message = "Task archived successfully!";
             return Ok(response);
         }
 
@@ -1410,6 +1410,44 @@ namespace vws.web.Controllers._task
             vwsDbContext.Save();
 
             response.Message = "Check list item is checked updated successfully!";
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("updateStatus")]
+        public IActionResult UpdateTaskStatus(long id, int newStatusId)
+        {
+            var response = new ResponseModel();
+            var userId = LoggedInUserId.Value;
+
+            var selectedTask = vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == id);
+            if (selectedTask == null || selectedTask.IsDeleted)
+            {
+                response.Message = "Task not found";
+                response.AddError(localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!permissionService.HasAccessToTask(userId, id))
+            {
+                response.AddError(localizer["You don't have access to this task."]);
+                response.Message = "Task access forbidden";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            var statuses = GetTaskStatuses(selectedTask.ProjectId, selectedTask.TeamId).Select(status => status.Id);
+            if (!statuses.Contains(newStatusId))
+            {
+                response.Message = "Invalid status";
+                response.AddError(localizer["Invalid status."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            selectedTask.TaskStatusId = newStatusId;
+            vwsDbContext.Save();
+
+            response.Message = "Task status changed";
             return Ok(response);
         }
     }
