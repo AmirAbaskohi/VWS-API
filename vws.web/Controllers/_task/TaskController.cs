@@ -243,6 +243,26 @@ namespace vws.web.Controllers._task
             }).ToList();
         }
 
+        private void ReorderStatuses(int? teamId, int?projectId)
+        {
+            var userId = LoggedInUserId;
+            if (teamId != null && projectId != null)
+                teamId = null;
+            if (teamId != null || projectId != null)
+                userId = null;
+
+            int startOrder = 2;
+            var statuses = vwsDbContext.TaskStatuses.Where(status => status.TeamId == teamId && status.ProjectId == projectId && status.UserProfileId == userId)
+                                                    .OrderBy(status => status.EvenOrder);
+            foreach (var status in statuses)
+            {
+                status.EvenOrder = startOrder;
+                startOrder += 2;
+            }
+
+            vwsDbContext.Save();
+        }
+
         [HttpPost]
         [Authorize]
         [Route("create")]
@@ -1192,6 +1212,7 @@ namespace vws.web.Controllers._task
 
             vwsDbContext.DeleteTaskStatus(statusId);
             vwsDbContext.Save();
+            ReorderStatuses(selectedStatus.TeamId, selectedStatus.ProjectId);
 
             response.Message = "Status deleted successfully!";
             return Ok(response);
