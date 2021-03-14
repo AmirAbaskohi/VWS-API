@@ -392,6 +392,14 @@ namespace vws.web.Domain
 
         public DbSet<_task.TaskStatus> TaskStatuses { get; set; }
 
+        IQueryable<Tag> IVWS_DbContext.Tags { get => Tags; }
+
+        public DbSet<Tag> Tags { get; set; }
+
+        IQueryable<TaskTag> IVWS_DbContext.TaskTags { get => TaskTags; }
+
+        public DbSet<TaskTag> TaskTags { get; set; }
+
         public async Task<GeneralTask> AddTaskAsync(GeneralTask generalTask)
         {
             await GeneralTasks.AddAsync(generalTask);
@@ -593,6 +601,17 @@ namespace vws.web.Domain
                 .HasOne(pd => pd.Department)
                 .WithMany(d => d.ProjectDepartments)
                 .HasForeignKey(pd => pd.DepartmentId);
+
+            builder.Entity<TaskTag>()
+                .HasKey(tt => new { tt.TagId, tt.GeneralTaskId });
+            builder.Entity<TaskTag>()
+                .HasOne(tt => tt.Tag)
+                .WithMany(tag => tag.TaskTags)
+                .HasForeignKey(tt => tt.TagId);
+            builder.Entity<TaskTag>()
+                .HasOne(tt => tt.GeneralTask)
+                .WithMany(task => task.TaskTags)
+                .HasForeignKey(tt => tt.GeneralTaskId);
         }
     }
 }

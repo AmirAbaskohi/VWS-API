@@ -213,6 +213,10 @@ namespace vws.web.Domain
 
         public IQueryable<_task.TaskStatus> TaskStatuses { get; }
 
+        public IQueryable<Tag> Tags { get; }
+
+        public IQueryable<TaskTag> TaskTags { get; }
+
         #endregion
 
         #region methods
