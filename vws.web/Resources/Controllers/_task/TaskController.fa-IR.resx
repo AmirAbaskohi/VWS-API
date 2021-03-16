@@ -135,8 +135,14 @@
   <data name="Invalid status." xml:space="preserve">
     <value>وضعیت نا معتبر.</value>
   </data>
+  <data name="Length of color is more than 6 characters." xml:space="preserve">
+    <value>طول رنگ در باید کمتر از 6 کاراکتر باشد.</value>
+  </data>
   <data name="Length of description is more than 2000 characters." xml:space="preserve">
     <value>تعداد کاراکتر های بخش توضیحات بیشتر از 2000 کاراکتر است.</value>
+  </data>
+  <data name="Length of title is more than 100 characters." xml:space="preserve">
+    <value>طول تیتر باید کمتر از 100 کاراکتر باشد.</value>
   </data>
   <data name="Length of title is more than 500 characters." xml:space="preserve">
     <value>تعداد کاراکتر های بخش عنوان بیشتر از 500 کاراکتر است.</value>

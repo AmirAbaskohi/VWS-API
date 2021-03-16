@@ -243,6 +243,10 @@ namespace vws.web.Domain
 
         public void AddCheckListItems(List<TaskCheckListItem> taskCheckListItems);
 
+        public void AddTag(Tag tag);
+
+        public void AddTaskTag(TaskTag taskTag);
+
         #endregion
 
         #endregion

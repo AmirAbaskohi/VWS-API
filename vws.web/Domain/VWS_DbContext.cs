@@ -459,6 +459,16 @@ namespace vws.web.Domain
             TaskCheckListItems.AddRange(taskCheckListItems);
         }
 
+        public void AddTag(Tag tag)
+        {
+            Tags.Add(tag);
+        }
+
+        public void AddTaskTag(TaskTag taskTag)
+        {
+            TaskTags.Add(taskTag);
+        }
+
         #endregion
 
         #region team

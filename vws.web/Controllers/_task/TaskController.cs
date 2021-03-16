@@ -124,16 +124,16 @@ namespace vws.web.Controllers._task
 
         private List<TaskStatusResponseModel> GetTaskStatuses(int? projectId, int? teamId)
         {
-            if (teamId != null)
+            if (projectId != null)
             {
-                return vwsDbContext.TaskStatuses.Where(status => status.TeamId == teamId)
+                return vwsDbContext.TaskStatuses.Where(status => status.ProjectId == projectId)
                                                           .OrderBy(status => status.EvenOrder)
                                                           .Select(status => new TaskStatusResponseModel() { Id = status.Id, Title = status.Title })
                                                           .ToList();
             }
-            else if (projectId != null)
+            else if (teamId != null)
             {
-                return vwsDbContext.TaskStatuses.Where(status => status.ProjectId == projectId)
+                return vwsDbContext.TaskStatuses.Where(status => status.TeamId == teamId)
                                                           .OrderBy(status => status.EvenOrder)
                                                           .Select(status => new TaskStatusResponseModel() { Id = status.Id, Title = status.Title })
                                                           .ToList();
@@ -1064,6 +1064,13 @@ namespace vws.web.Controllers._task
         {
             var response = new ResponseModel<TaskStatusResponseModel>();
 
+            if (!String.IsNullOrEmpty(title) && title.Length > 100)
+            {
+                response.AddError(localizer["Length of title is more than 100 characters."]);
+                response.Message = "Tag model data has problem.";
+                return StatusCode(StatusCodes.Status400BadRequest);
+            }
+
             if (teamId != null && projectId != null)
                 teamId = null;
 
@@ -1151,6 +1158,13 @@ namespace vws.web.Controllers._task
         public IActionResult UpdateStatusTitle(int statusId, string newTitle)
         {
             var response = new ResponseModel();
+
+            if (!String.IsNullOrEmpty(newTitle) && newTitle.Length > 100)
+            {
+                response.AddError(localizer["Length of title is more than 100 characters."]);
+                response.Message = "Tag model data has problem.";
+                return StatusCode(StatusCodes.Status400BadRequest);
+            }
 
             var selectedStatus = vwsDbContext.TaskStatuses.FirstOrDefault(status => status.Id == statusId);
             if (selectedStatus == null)
@@ -1603,6 +1617,75 @@ namespace vws.web.Controllers._task
             vwsDbContext.Save();
 
             response.Message = "Task status changed";
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("addTag")]
+        public IActionResult AddTag([FromBody] TagModel model)
+        {
+            var response = new ResponseModel<TagResponseModel>();
+            var userId = LoggedInUserId.Value;
+
+            if (!String.IsNullOrEmpty(model.Color) && model.Color.Length > 6)  
+                response.AddError(localizer["Length of color is more than 6 characters."]);
+            if (!String.IsNullOrEmpty(model.Title) && model.Title.Length > 100)
+                response.AddError(localizer["Length of title is more than 100 characters."]);
+            if (response.HasError)
+            {
+                response.Message = "Tag model data has problem.";
+                return StatusCode(StatusCodes.Status400BadRequest);
+            }
+
+            if (model.TeamId != null && model.ProjectId != null)
+                model.TeamId = null;
+
+            #region CheckTeamAndProjectExistance
+            if (model.ProjectId != null && !vwsDbContext.Projects.Any(p => p.Id == model.ProjectId && !p.IsDeleted))
+            {
+                response.Message = "Project not found";
+                response.AddError(localizer["Project not found."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            if (model.TeamId != null && !vwsDbContext.Teams.Any(t => t.Id == model.TeamId && !t.IsDeleted))
+            {
+                response.Message = "Team not found";
+                response.AddError(localizer["Team not found."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            #endregion
+
+            #region CheckTeamAndProjectAccess
+            if (model.ProjectId != null && !permissionService.HasAccessToProject(LoggedInUserId.Value, (int)model.ProjectId))
+            {
+                response.Message = "Project access denied";
+                response.AddError(localizer["You do not have access to project."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+            if (model.TeamId != null && !permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)model.TeamId))
+            {
+                response.Message = "Team access denied";
+                response.AddError(localizer["You do not have access to team."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+            #endregion
+
+            bool isForUser = (model.ProjectId == null && model.TeamId == null) ? true : false;
+
+            Tag newTag = new Tag()
+            {
+                ProjectId = model.ProjectId,
+                TeamId = model.TeamId,
+                UserProfileId = isForUser ? userId : (Guid?)null,
+                Title = model.Title,
+                Color = model.Color
+            };
+            vwsDbContext.AddTag(newTag);
+            vwsDbContext.Save();
+
+            response.Value = new TagResponseModel() { Id = newTag.Id, Title = newTag.Title, Color = newTag.Color };
+            response.Message = "New tag added successfully!";
             return Ok(response);
         }
     }
