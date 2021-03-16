@@ -138,6 +138,9 @@
   <data name="Invalid status." xml:space="preserve">
     <value>Invalid status.</value>
   </data>
+  <data name="Invalid tags." xml:space="preserve">
+    <value>Invalid tags.</value>
+  </data>
   <data name="Length of color is more than 6 characters." xml:space="preserve">
     <value>Length of color is more than 6 characters.</value>
   </data>
@@ -171,8 +174,14 @@
   <data name="Status not found." xml:space="preserve">
     <value>Status not found.</value>
   </data>
+  <data name="Task already has the tag." xml:space="preserve">
+    <value>Task already has the tag.</value>
+  </data>
   <data name="Task does not exist." xml:space="preserve">
     <value>Task does not exist.</value>
+  </data>
+  <data name="Task does not have the tag." xml:space="preserve">
+    <value>Task does not have the tag.</value>
   </data>
   <data name="Task is assigned to user before." xml:space="preserve">
     <value>Task is assigned to user before.</value>
@@ -200,6 +209,9 @@
   </data>
   <data name="You do not have access to task status." xml:space="preserve">
     <value>You do not have access to task status.</value>
+  </data>
+  <data name="You do not have access to task tag." xml:space="preserve">
+    <value>You do not have access to task tag.</value>
   </data>
   <data name="You do not have access to team." xml:space="preserve">
     <value>You do not have access to team.</value>

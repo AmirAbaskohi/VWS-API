@@ -144,6 +144,25 @@ namespace vws.web.Controllers._task
                                                       .ToList();
         }
 
+        private List<TagResponseModel> GetTaskTags(int? projectId, int? teamId)
+        {
+            if (projectId != null)
+            {
+                return vwsDbContext.Tags.Where(tag => tag.ProjectId == projectId)
+                                        .Select(tag => new TagResponseModel() { Id = tag.Id, Title = tag.Title, Color = tag.Color })
+                                        .ToList();
+            }
+            else if (teamId != null)
+            {
+                return vwsDbContext.Tags.Where(tag => tag.TeamId == teamId)
+                                        .Select(tag => new TagResponseModel() { Id = tag.Id, Title = tag.Title, Color = tag.Color })
+                                        .ToList();
+            }
+            return vwsDbContext.Tags.Where(tag => tag.UserProfileId == LoggedInUserId.Value)
+                                    .Select(tag => new TagResponseModel() { Id = tag.Id, Title = tag.Title, Color = tag.Color })
+                                    .ToList();
+        }
+
         private List<CheckListResponseModel> GetCheckLists(long taskId)
         {
             var result = new List<CheckListResponseModel>();
@@ -243,6 +262,21 @@ namespace vws.web.Controllers._task
             }).ToList();
         }
 
+        private bool AreTagsValid(ICollection<int> tagIds, int? projectId, int? teamId)
+        {
+            Guid? userId = LoggedInUserId.Value;
+            
+            if (projectId != null && teamId != null)
+                teamId = null;
+            if (projectId != null || teamId != null)
+                userId = null;
+
+            var validTagIds = vwsDbContext.Tags.Where(tag => tag.ProjectId == projectId && tag.TeamId == teamId && tag.UserProfileId == userId)
+                                               .Select(tag => tag.Id).ToList();
+
+            return tagIds.Except(validTagIds).Count() == 0;
+        }
+
         private void ReorderStatuses(int? teamId, int?projectId)
         {
             var userId = LoggedInUserId;
@@ -263,12 +297,30 @@ namespace vws.web.Controllers._task
             vwsDbContext.Save();
         }
 
+        private void AddTaskTags(long taskId, ICollection<int> tagIds)
+        {
+            foreach (var tagId in tagIds)
+                vwsDbContext.AddTaskTag(new TaskTag() { GeneralTaskId = taskId, TagId = tagId });
+            vwsDbContext.Save();
+        }
+
+        private List<TagResponseModel> GetTaskTags(long taskId)
+        {
+            return vwsDbContext.TaskTags.Include(taskTag => taskTag.Tag)
+                                        .Where(taskTag => taskTag.GeneralTaskId == taskId)
+                                        .Select(taskTag => new TagResponseModel() { Id = taskTag.Tag.Id, Title = taskTag.Tag.Title, Color = taskTag.Tag.Color })
+                                        .ToList();
+        }
+
         [HttpPost]
         [Authorize]
         [Route("create")]
         public async Task<IActionResult> CreateTask([FromBody] TaskModel model)
         {
             var response = new ResponseModel<TaskResponseModel>();
+
+            if (model.TeamId != null && model.ProjectId != null)
+                model.TeamId = null;
 
             if (!String.IsNullOrEmpty(model.Description) && model.Description.Length > 2000)
             {
@@ -310,9 +362,6 @@ namespace vws.web.Controllers._task
             if (response.HasError)
                 return StatusCode(StatusCodes.Status400BadRequest, response);
 
-            if (model.TeamId != null && model.ProjectId != null)
-                model.TeamId = null;
-
             Guid userId = LoggedInUserId.Value;
 
             #region CheckTeamAndProjectExistance
@@ -348,6 +397,13 @@ namespace vws.web.Controllers._task
             model.Users = model.Users.Distinct().ToList();
 
             DateTime creationTime = DateTime.Now;
+
+            if (!AreTagsValid(model.Tags, model.ProjectId, model.TeamId))
+            {
+                response.Message = "Invalid tags";
+                response.AddError(localizer["Invalid tags."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }    
 
             if (GetUsersCanBeAddedToTask(model.TeamId, model.ProjectId).Intersect(model.Users).Count() != model.Users.Count)
             {
@@ -399,6 +455,8 @@ namespace vws.web.Controllers._task
             await vwsDbContext.AddTaskAsync(newTask);
             vwsDbContext.Save();
 
+            AddTaskTags(newTask.Id, model.Tags);
+
             await AddUsersToTask(newTask.Id, model.Users);
             AddCheckLists(newTask.Id, model.CheckLists);
 
@@ -421,7 +479,8 @@ namespace vws.web.Controllers._task
                 TeamId = newTask.TeamId,
                 StatusId = newTask.TaskStatusId,
                 StatusTitle = vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == newTask.TaskStatusId).Title,
-                CheckLists = GetCheckLists(newTask.Id)
+                CheckLists = GetCheckLists(newTask.Id),
+                Tags = GetTaskTags(newTask.Id)
             };
 
             response.Value = newTaskResponseModel;
@@ -598,7 +657,8 @@ namespace vws.web.Controllers._task
                 TeamId = selectedTask.TeamId,
                 StatusId = selectedTask.TaskStatusId,
                 StatusTitle = vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == selectedTask.TaskStatusId).Title,
-                CheckLists = GetCheckLists(selectedTask.Id)
+                CheckLists = GetCheckLists(selectedTask.Id),
+                Tags = GetTaskTags(selectedTask.Id)
             };
 
             response.Value = updatedTaskResponseModel;
@@ -641,7 +701,8 @@ namespace vws.web.Controllers._task
                     TeamId = userTask.TeamId,
                     StatusId = userTask.TaskStatusId,
                     StatusTitle = vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == userTask.TaskStatusId).Title,
-                    CheckLists = GetCheckLists(userTask.Id)
+                    CheckLists = GetCheckLists(userTask.Id),
+                    Tags = GetTaskTags(userTask.Id)
                 });
             }
             return response;
@@ -693,7 +754,8 @@ namespace vws.web.Controllers._task
                     TeamId = projectTask.TeamId,
                     StatusId = projectTask.TaskStatusId,
                     StatusTitle = vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == projectTask.TaskStatusId).Title,
-                    CheckLists = GetCheckLists(projectTask.Id)
+                    CheckLists = GetCheckLists(projectTask.Id),
+                    Tags = GetTaskTags(projectTask.Id)
                 });
             }
             response.Value = result;
@@ -734,7 +796,8 @@ namespace vws.web.Controllers._task
                         TeamId = userTask.TeamId,
                         StatusId = userTask.TaskStatusId,
                         StatusTitle = vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == userTask.TaskStatusId).Title,
-                        CheckLists = GetCheckLists(userTask.Id)
+                        CheckLists = GetCheckLists(userTask.Id),
+                        Tags = GetTaskTags(userTask.Id)
                     });
                 }
             }
@@ -1162,7 +1225,7 @@ namespace vws.web.Controllers._task
             if (!String.IsNullOrEmpty(newTitle) && newTitle.Length > 100)
             {
                 response.AddError(localizer["Length of title is more than 100 characters."]);
-                response.Message = "Tag model data has problem.";
+                response.Message = "Status model data has problem.";
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
@@ -1236,7 +1299,7 @@ namespace vws.web.Controllers._task
         [HttpPost]
         [Authorize]
         [Route("addCheckList")]
-        public IActionResult AddCheckList(int id, [FromBody] CheckListModel model)
+        public IActionResult AddCheckList(long id, [FromBody] CheckListModel model)
         {
             var response = new ResponseModel<CheckListResponseModel>();
             var userId = LoggedInUserId.Value;
@@ -1686,6 +1749,283 @@ namespace vws.web.Controllers._task
 
             response.Value = new TagResponseModel() { Id = newTag.Id, Title = newTag.Title, Color = newTag.Color };
             response.Message = "New tag added successfully!";
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("updateTagTitle")]
+        public IActionResult UpdateTagTitle(int tagId, string newTitle)
+        {
+            var response = new ResponseModel();
+
+            if (!String.IsNullOrEmpty(newTitle) && newTitle.Length > 100)
+            {
+                response.AddError(localizer["Length of title is more than 100 characters."]);
+                response.Message = "Tag model data has problem.";
+                return StatusCode(StatusCodes.Status400BadRequest);
+            }
+
+            var selectedTag = vwsDbContext.Tags.FirstOrDefault(tag => tag.Id == tagId);
+            if (selectedTag == null)
+            {
+                response.Message = "Status not found!";
+                response.AddError(localizer["Status not found."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            #region CheckAccess
+            if ((selectedTag.ProjectId != null && !permissionService.HasAccessToProject(LoggedInUserId.Value, (int)selectedTag.ProjectId)) ||
+                (selectedTag.TeamId != null && !permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)selectedTag.TeamId)) ||
+                selectedTag.UserProfileId != null && selectedTag.UserProfileId != LoggedInUserId.Value)
+            {
+                response.Message = "Task tag access denied";
+                response.AddError(localizer["You do not have access to task tag."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+            #endregion
+
+            selectedTag.Title = newTitle;
+            vwsDbContext.Save();
+
+            response.Message = "Tag title updated successfully!";
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("updateTagColor")]
+        public IActionResult UpdateTagColor(int tagId, string newColor)
+        {
+            var response = new ResponseModel();
+
+            if (!String.IsNullOrEmpty(newColor) && newColor.Length > 6)
+            {
+                response.AddError(localizer["Length of color is more than 6 characters."]);
+                response.Message = "Tag model data has problem.";
+                return StatusCode(StatusCodes.Status400BadRequest);
+            }
+
+            var selectedTag = vwsDbContext.Tags.FirstOrDefault(tag => tag.Id == tagId);
+            if (selectedTag == null)
+            {
+                response.Message = "Status not found!";
+                response.AddError(localizer["Status not found."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            #region CheckAccess
+            if ((selectedTag.ProjectId != null && !permissionService.HasAccessToProject(LoggedInUserId.Value, (int)selectedTag.ProjectId)) ||
+                (selectedTag.TeamId != null && !permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)selectedTag.TeamId)) ||
+                selectedTag.UserProfileId != null && selectedTag.UserProfileId != LoggedInUserId.Value)
+            {
+                response.Message = "Task tag access denied";
+                response.AddError(localizer["You do not have access to task tag."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+            #endregion
+
+            selectedTag.Color = newColor;
+            vwsDbContext.Save();
+
+            response.Message = "Tag color updated successfully!";
+            return Ok(response);
+        }
+
+        [HttpDelete]
+        [Authorize]
+        [Route("deleteTag")]
+        public IActionResult DeleteTag(int tagId)
+        {
+            var response = new ResponseModel();
+
+            var selectedTag = vwsDbContext.Tags.FirstOrDefault(tag => tag.Id == tagId);
+            if (selectedTag == null)
+            {
+                response.Message = "Status not found!";
+                response.AddError(localizer["Status not found."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            #region CheckAccess
+            if ((selectedTag.ProjectId != null && !permissionService.HasAccessToProject(LoggedInUserId.Value, (int)selectedTag.ProjectId)) ||
+                (selectedTag.TeamId != null && !permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)selectedTag.TeamId)) ||
+                selectedTag.UserProfileId != null && selectedTag.UserProfileId != LoggedInUserId.Value)
+            {
+                response.Message = "Task tag access denied";
+                response.AddError(localizer["You do not have access to task tag."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+            #endregion
+
+            vwsDbContext.DeleteTag(tagId);
+            vwsDbContext.Save();
+
+            response.Message = "Tag deleted successfully!";
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("addTagToTask")]
+        public IActionResult AddTagToTask(long id, int tagId)
+        {
+            var response = new ResponseModel();
+            var userId = LoggedInUserId.Value;
+
+            var selectedTask = vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == id);
+            if (selectedTask == null || selectedTask.IsDeleted)
+            {
+                response.Message = "Task not found";
+                response.AddError(localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!permissionService.HasAccessToTask(userId, id))
+            {
+                response.Message = "Task access forbidden";
+                response.AddError(localizer["You don't have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            var selectedTag = vwsDbContext.Tags.FirstOrDefault(tag => tag.Id == tagId);
+            if (selectedTag == null)
+            {
+                response.Message = "Status not found!";
+                response.AddError(localizer["Status not found."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            #region CheckAccess
+            if ((selectedTag.ProjectId != null && !permissionService.HasAccessToProject(LoggedInUserId.Value, (int)selectedTag.ProjectId)) ||
+                (selectedTag.TeamId != null && !permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)selectedTag.TeamId)) ||
+                selectedTag.UserProfileId != null && selectedTag.UserProfileId != LoggedInUserId.Value)
+            {
+                response.Message = "Task tag access denied";
+                response.AddError(localizer["You do not have access to task tag."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+            #endregion
+
+            int[] tagArray = { tagId };
+            if (!AreTagsValid(tagArray, selectedTask.ProjectId, selectedTask.TeamId))
+            {
+                response.Message = "Invalid tags";
+                response.AddError(localizer["Invalid tags."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (vwsDbContext.TaskTags.Any(taskTag => taskTag.GeneralTaskId == id && taskTag.TagId == tagId))
+            {
+                response.Message = "Tag was assigned before";
+                response.AddError(localizer["Task already has the tag."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            AddTaskTags(id, tagArray);
+
+            response.Message = "New tag added to task";
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("deleteTagOfTask")]
+        public IActionResult DeleteTagOfTask(long id, int tagId)
+        {
+            var response = new ResponseModel();
+            var userId = LoggedInUserId.Value;
+
+            var selectedTask = vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == id);
+            if (selectedTask == null || selectedTask.IsDeleted)
+            {
+                response.Message = "Task not found";
+                response.AddError(localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!permissionService.HasAccessToTask(userId, id))
+            {
+                response.Message = "Task access forbidden";
+                response.AddError(localizer["You don't have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            var selectedTag = vwsDbContext.Tags.FirstOrDefault(tag => tag.Id == tagId);
+            if (selectedTag == null)
+            {
+                response.Message = "Status not found!";
+                response.AddError(localizer["Status not found."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            #region CheckAccess
+            if ((selectedTag.ProjectId != null && !permissionService.HasAccessToProject(LoggedInUserId.Value, (int)selectedTag.ProjectId)) ||
+                (selectedTag.TeamId != null && !permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)selectedTag.TeamId)) ||
+                selectedTag.UserProfileId != null && selectedTag.UserProfileId != LoggedInUserId.Value)
+            {
+                response.Message = "Task tag access denied";
+                response.AddError(localizer["You do not have access to task tag."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+            #endregion
+
+            var selectedTaskTag = vwsDbContext.TaskTags.FirstOrDefault(taskTag => taskTag.GeneralTaskId == id && taskTag.TagId == tagId);
+
+            if (selectedTag == null)
+            {
+                response.Message = "Tag was not assigned before";
+                response.AddError(localizer["Task does not have the tag."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            vwsDbContext.DeleteTaskTag(selectedTaskTag.GeneralTaskId, selectedTaskTag.TagId);
+
+            response.Message = "Task tag deleted";
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getTags")]
+        public IActionResult GetTags(int? projectId, int? teamId)
+        {
+            var response = new ResponseModel<List<TagResponseModel>>();
+
+            if (teamId != null && projectId != null)
+                teamId = null;
+
+            #region CheckTeamAndProjectExistance
+            if (projectId != null && !vwsDbContext.Projects.Any(p => p.Id == projectId && !p.IsDeleted))
+            {
+                response.Message = "Project not found";
+                response.AddError(localizer["Project not found."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            if (teamId != null && !vwsDbContext.Teams.Any(t => t.Id == teamId && !t.IsDeleted))
+            {
+                response.Message = "Team not found";
+                response.AddError(localizer["Team not found."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            #endregion
+
+            #region CheckTeamAndProjectAccess
+            if (projectId != null && !permissionService.HasAccessToProject(LoggedInUserId.Value, (int)projectId))
+            {
+                response.Message = "Project access denied";
+                response.AddError(localizer["You do not have access to project."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+            if (teamId != null && !permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)teamId))
+            {
+                response.Message = "Team access denied";
+                response.AddError(localizer["You do not have access to team."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+            #endregion
+
+            response.Value = GetTaskTags(projectId, teamId);
+            response.Message = "Tags returned successfully!";
             return Ok(response);
         }
     }

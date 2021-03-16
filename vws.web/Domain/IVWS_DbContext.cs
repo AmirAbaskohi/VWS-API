@@ -247,6 +247,10 @@ namespace vws.web.Domain
 
         public void AddTaskTag(TaskTag taskTag);
 
+        public void DeleteTag(int id);
+
+        public void DeleteTaskTag(long taskId, int tagId);
+
         #endregion
 
         #endregion

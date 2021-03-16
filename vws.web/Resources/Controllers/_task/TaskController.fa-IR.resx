@@ -135,6 +135,9 @@
   <data name="Invalid status." xml:space="preserve">
     <value>وضعیت نا معتبر.</value>
   </data>
+  <data name="Invalid tags." xml:space="preserve">
+    <value>تگ نامعتبر.</value>
+  </data>
   <data name="Length of color is more than 6 characters." xml:space="preserve">
     <value>طول رنگ در باید کمتر از 6 کاراکتر باشد.</value>
   </data>
@@ -168,8 +171,14 @@
   <data name="Status not found." xml:space="preserve">
     <value>وضعیتی با آی دی داده شده یافت نشد.</value>
   </data>
+  <data name="Task already has the tag." xml:space="preserve">
+    <value>تسک در حال حاضر این تگ را دارد.</value>
+  </data>
   <data name="Task does not exist." xml:space="preserve">
     <value>تسک وجود ندارد.</value>
+  </data>
+  <data name="Task does not have the tag." xml:space="preserve">
+    <value>تسک دارای تگ انتخاب شده نیست.</value>
   </data>
   <data name="Task is assigned to user before." xml:space="preserve">
     <value>تسک قبلا به کاربر اختصاص داده شده است.</value>
@@ -197,6 +206,9 @@
   </data>
   <data name="You do not have access to task status." xml:space="preserve">
     <value>عدم دسترسی.</value>
+  </data>
+  <data name="You do not have access to task tag." xml:space="preserve">
+    <value>شما به این تگ دسترسی ندارید.</value>
   </data>
   <data name="You do not have access to team." xml:space="preserve">
     <value>شما به تیم دسترسی ندارید.</value>

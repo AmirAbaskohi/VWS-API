@@ -469,6 +469,18 @@ namespace vws.web.Domain
             TaskTags.Add(taskTag);
         }
 
+        public void DeleteTag(int id)
+        {
+            var selectedTag = Tags.FirstOrDefault(tag => tag.Id == id);
+            Tags.Remove(selectedTag);
+        }
+
+        public void DeleteTaskTag(long taskId, int tagId)
+        {
+            var selectedTaskTag = TaskTags.FirstOrDefault(taskTag => taskTag.GeneralTaskId == taskId && taskTag.TagId == tagId);
+            TaskTags.Remove(selectedTaskTag);
+        }
+
         #endregion
 
         #region team
