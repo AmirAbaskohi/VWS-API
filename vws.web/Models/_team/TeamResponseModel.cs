@@ -21,6 +21,7 @@ namespace vws.web.Models._team
         public Guid? TeamImageGuid { get; set; }
         public long NumberOfTasks { get; set; }
         public int NumberOfDepartments { get; set; }
+        public int NumberOfProjects { get; set; }
         public int NumberOfMembers { get; set; }
         public List<UserModel> Users { get; set; }
         public List<DepartmentResponseModel> Departments { get; set; }

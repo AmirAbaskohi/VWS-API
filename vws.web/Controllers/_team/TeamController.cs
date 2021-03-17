@@ -185,7 +185,8 @@ namespace vws.web.Controllers._team
                 TeamImageGuid = newTeam.TeamImageGuid,
                 NumberOfDepartments = vwsDbContext.Departments.Where(department => department.TeamId == newTeam.Id && !department.IsDeleted).Count(),
                 NumberOfMembers = vwsDbContext.TeamMembers.Where(teamMember => teamMember.TeamId == newTeam.Id && !teamMember.IsDeleted).Count(),
-                NumberOfTasks = vwsDbContext.GeneralTasks.Where(task => task.TeamId == newTeam.Id && !task.IsDeleted).Count()
+                NumberOfTasks = vwsDbContext.GeneralTasks.Where(task => task.TeamId == newTeam.Id && !task.IsDeleted).Count(),
+                NumberOfProjects = vwsDbContext.Projects.Where(project => project.TeamId == newTeam.Id && !project.IsDeleted).Count()
             };
 
             response.Value = newTeamResponse;
@@ -358,7 +359,8 @@ namespace vws.web.Controllers._team
                     TeamImageGuid = userTeam.TeamImageGuid,
                     NumberOfDepartments = vwsDbContext.Departments.Where(department => department.TeamId == userTeam.Id && !department.IsDeleted).Count(),
                     NumberOfMembers = vwsDbContext.TeamMembers.Where(teamMember => teamMember.TeamId == userTeam.Id && !teamMember.IsDeleted).Count(),
-                    NumberOfTasks = vwsDbContext.GeneralTasks.Where(task => task.TeamId == userTeam.Id && !task.IsDeleted).Count()
+                    NumberOfTasks = vwsDbContext.GeneralTasks.Where(task => task.TeamId == userTeam.Id && !task.IsDeleted).Count(),
+                    NumberOfProjects = vwsDbContext.Projects.Where(project => project.TeamId == userTeam.Id && !project.IsDeleted).Count()
                 });
             }
             return response;
@@ -474,7 +476,8 @@ namespace vws.web.Controllers._team
                 TeamImageGuid = selectedTeam.TeamImageGuid,
                 NumberOfDepartments = vwsDbContext.Departments.Where(department => department.TeamId == selectedTeam.Id && !department.IsDeleted).Count(),
                 NumberOfMembers = vwsDbContext.TeamMembers.Where(teamMember => teamMember.TeamId == selectedTeam.Id && !teamMember.IsDeleted).Count(),
-                NumberOfTasks = vwsDbContext.GeneralTasks.Where(task => task.TeamId == selectedTeam.Id && !task.IsDeleted).Count()
+                NumberOfTasks = vwsDbContext.GeneralTasks.Where(task => task.TeamId == selectedTeam.Id && !task.IsDeleted).Count(),
+                NumberOfProjects = vwsDbContext.Projects.Where(project => project.TeamId == selectedTeam.Id && !project.IsDeleted).Count()
             };
 
             response.Message = "Team updated successfully";
@@ -721,6 +724,7 @@ namespace vws.web.Controllers._team
                 NumberOfDepartments = vwsDbContext.Departments.Where(department => department.TeamId == selectedTeam.Id && !department.IsDeleted).Count(),
                 NumberOfMembers = vwsDbContext.TeamMembers.Where(teamMember => teamMember.TeamId == selectedTeam.Id && !teamMember.IsDeleted).Count(),
                 NumberOfTasks = vwsDbContext.GeneralTasks.Where(task => task.TeamId == selectedTeam.Id && !task.IsDeleted).Count(),
+                NumberOfProjects = vwsDbContext.Projects.Where(project => project.TeamId == selectedTeam.Id && !project.IsDeleted).Count(),
                 Users = await teamManager.GetTeamMembers(selectedTeam.Id),
                 Departments = await GetDepartments(selectedTeam.Id) 
             };

@@ -17,6 +17,7 @@ namespace vws.web.Models._project
         public DateTime? EndDate { get; set; }
         public string Color { get; set; }
         public int? TeamId { get; set; }
+        public string TeamName { get; set; }
         public List<UserModel> Users { get; set; }
         public List<int> DepartmentIds { get; set; }
         public Guid? ProjectImageGuid { get; set; }
