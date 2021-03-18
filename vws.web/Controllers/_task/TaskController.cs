@@ -86,29 +86,6 @@ namespace vws.web.Controllers._task
             vwsDbContext.Save();
         }
 
-        private async Task UpdateTaskUsers(long taskId, List<Guid> users)
-        {
-            var taskAssigns = vwsDbContext.TaskAssigns.Where(taskAssign => taskAssign.GeneralTaskId == taskId && !taskAssign.IsDeleted)
-                                                      .Select(taskAssign => taskAssign.UserProfileId).ToList();
-
-            var actionTime = DateTime.Now;
-
-            var shouldBeDeleted = taskAssigns.Except(users).ToList();
-            var shouldBeAdded = users.Except(taskAssigns).ToList();
-
-            foreach (var user in shouldBeDeleted)
-            {
-                var selectedAssignTask = vwsDbContext.TaskAssigns.FirstOrDefault(taskAssign => taskAssign.UserProfileId == user && taskAssign.GeneralTaskId == taskId && !taskAssign.IsDeleted);
-                selectedAssignTask.IsDeleted = true;
-                selectedAssignTask.DeletedOn = actionTime;
-                selectedAssignTask.DeletedBy = LoggedInUserId.Value;
-            }
-
-            vwsDbContext.Save();
-
-            await AddUsersToTask(taskId, shouldBeAdded.ToList());
-        }
-
         private List<Guid> GetUsersCanBeAddedToTask(int? teamId, int? projectId)
         {
             if (teamId != null && projectId != null)
@@ -493,48 +470,132 @@ namespace vws.web.Controllers._task
 
         [HttpPut]
         [Authorize]
-        [Route("update")]
-        public async Task<IActionResult> UpdateTask([FromBody] UpdateTaskModel model)
+        [Route("updateTitle")]
+        public async Task<IActionResult> UpdateTitle(long id, string newTitle)
         {
-            var response = new ResponseModel<TaskResponseModel>();
+            var response = new ResponseModel();
+            
+            if (String.IsNullOrEmpty(newTitle) || newTitle.Length > 500)
+            {
+                response.Message = "Task model data has problem";
+                response.AddError(localizer["Title can not be empty or with more than 500 characters."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
 
-            if (model.Description.Length > 2000)
+            var selectedTask = await vwsDbContext.GetTaskAsync(id);
+            if (selectedTask == null || selectedTask.IsDeleted)
+            {
+                response.Message = "Task not found";
+                response.AddError(localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!permissionService.HasAccessToTask(LoggedInUserId.Value, id))
+            {
+                response.AddError(localizer["You don't have access to this task."]);
+                response.Message = "Task access forbidden";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            selectedTask.Title = newTitle;
+            vwsDbContext.Save();
+
+            response.Message = "Task title updated successfully!";
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("updateDescription")]
+        public async Task<IActionResult> UpdateDescription(long id, string newDescription)
+        {
+            var response = new ResponseModel();
+
+            if (newDescription.Length > 2000)
             {
                 response.Message = "Task model data has problem";
                 response.AddError(localizer["Length of description is more than 2000 characters."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
-            if (model.Title.Length > 500)
+
+            var selectedTask = await vwsDbContext.GetTaskAsync(id);
+            if (selectedTask == null || selectedTask.IsDeleted)
             {
-                response.Message = "Task model data has problem";
-                response.AddError(localizer["Length of title is more than 500 characters."]);
+                response.Message = "Task not found";
+                response.AddError(localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
-            if (model.StartDate.HasValue && model.EndDate.HasValue)
+
+            if (!permissionService.HasAccessToTask(LoggedInUserId.Value, id))
             {
-                if (model.StartDate > model.EndDate)
-                {
-                    response.Message = "Task model data has problem";
-                    response.AddError(localizer["Start Date should be before End Date."]);
-                }
+                response.AddError(localizer["You don't have access to this task."]);
+                response.Message = "Task access forbidden";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
             }
-            if (!Enum.IsDefined(typeof(SeedDataEnum.TaskPriority), model.PriorityId))
+
+            selectedTask.Description = newDescription;
+            vwsDbContext.Save();
+
+            response.Message = "Task title updated successfully!";
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("updatePriority")]
+        public async Task<IActionResult> UpdatePriority(long id, byte newPriority)
+        {
+            var response = new ResponseModel();
+
+            if (!Enum.IsDefined(typeof(SeedDataEnum.TaskPriority), newPriority))
             {
                 response.Message = "Task model data has problem.";
                 response.AddError(localizer["Priority id is not defined."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (response.HasError)
-                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            var selectedTask = await vwsDbContext.GetTaskAsync(id);
+            if (selectedTask == null || selectedTask.IsDeleted)
+            {
+                response.Message = "Task not found";
+                response.AddError(localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!permissionService.HasAccessToTask(LoggedInUserId.Value, id))
+            {
+                response.AddError(localizer["You don't have access to this task."]);
+                response.Message = "Task access forbidden";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            selectedTask.ProjectId = newPriority;
+            vwsDbContext.Save();
+
+            response.Message = "Task priority updated successfully!";
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("updateTeamAndProject")]
+        public async Task<IActionResult> UpdateTeamAndProject(long id, int? projectId, int? teamId)
+        {
+            var response = new ResponseModel();
+
+            if (projectId != null && teamId != null)
+                teamId = null;
 
             Guid userId = LoggedInUserId.Value;
 
             #region CheckTeamAndProjectExistance
-            if (model.ProjectId != null && !vwsDbContext.Projects.Any(p => p.Id == model.ProjectId && !p.IsDeleted))
+            if (projectId != null && !vwsDbContext.Projects.Any(p => p.Id == projectId && !p.IsDeleted))
             {
                 response.Message = "Project not found";
                 response.AddError(localizer["Project not found."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
-            if (model.TeamId != null && !vwsDbContext.Teams.Any(t => t.Id == model.TeamId && !t.IsDeleted))
+            if (teamId != null && !vwsDbContext.Teams.Any(t => t.Id == teamId && !t.IsDeleted))
             {
                 response.Message = "Team not found";
                 response.AddError(localizer["Team not found."]);
@@ -542,16 +603,14 @@ namespace vws.web.Controllers._task
             }
             #endregion
 
-            model.Users = model.Users.Distinct().ToList();
-
             #region CheckTeamAndProjectAccess
-            if (model.ProjectId != null && !permissionService.HasAccessToProject(userId, (int)model.ProjectId))
+            if (projectId != null && !permissionService.HasAccessToProject(userId, (int)projectId))
             {
                 response.Message = "Project access denied";
                 response.AddError(localizer["You do not have access to project."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
-            if (model.TeamId != null && !permissionService.HasAccessToTeam(userId, (int)model.TeamId))
+            if (teamId != null && !permissionService.HasAccessToTeam(userId, (int)teamId))
             {
                 response.Message = "Team access denied";
                 response.AddError(localizer["You do not have access to team."]);
@@ -559,14 +618,7 @@ namespace vws.web.Controllers._task
             }
             #endregion
 
-            if (GetUsersCanBeAddedToTask(model.TeamId, model.ProjectId).Intersect(model.Users).Count() != model.Users.Count)
-            {
-                response.Message = "Users do not have access";
-                response.AddError(localizer["Some of users you want to add do not have access to team or project."]);
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-
-            var selectedTask = await vwsDbContext.GetTaskAsync(model.TaskId);
+            var selectedTask = await vwsDbContext.GetTaskAsync(id);
 
             if (selectedTask == null || selectedTask.IsDeleted)
             {
@@ -574,101 +626,103 @@ namespace vws.web.Controllers._task
                 response.AddError(localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
-            if (selectedTask.CreatedBy != userId)
+            if (!permissionService.HasAccessToTask(userId, id))
             {
                 response.Message = "Task access forbidden";
                 response.AddError(localizer["You don't have access to this task."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            var statuses = GetTaskStatuses(model.ProjectId, model.TeamId).Select(status => status.Id);
-            if (model.StatusId == null)
+            selectedTask.TeamId = teamId;
+            selectedTask.ProjectId = projectId;
+            if (selectedTask.TeamId == null && projectId != null)
             {
-                if (statuses.Count() != 0)
-                    model.StatusId = statuses.First();
-                else
-                    model.StatusId = 0;
-            }
-            if (!statuses.Contains((int)model.StatusId))
-            {
-                response.Message = "Invalid status";
-                response.AddError(localizer["Invalid status."]);
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-
-            if (model.StartDate.HasValue && !(model.EndDate.HasValue) && selectedTask.EndDate.HasValue)
-            {
-                if (model.StartDate > selectedTask.EndDate)
-                {
-                    response.Message = "Task model data has problem";
-                    response.AddError(localizer["Start Date should be before End Date."]);
-                    return StatusCode(StatusCodes.Status500InternalServerError, response);
-                }
-            }
-            if (model.EndDate.HasValue && !(model.StartDate.HasValue) && selectedTask.StartDate.HasValue)
-            {
-                if (model.EndDate < selectedTask.StartDate)
-                {
-                    response.Message = "Task model data has problem";
-                    response.AddError(localizer["Start Date should be before End Date."]);
-                    return StatusCode(StatusCodes.Status500InternalServerError, response);
-                }
-            }
-
-            if (model.TeamId != null && model.ProjectId != null)
-                model.TeamId = null;
-
-            selectedTask.StartDate = model.StartDate;
-            selectedTask.EndDate = model.EndDate;
-            selectedTask.ModifiedBy = userId;
-            selectedTask.ModifiedOn = DateTime.Now;
-            selectedTask.Title = model.Title;
-            selectedTask.Description = model.Description;
-            selectedTask.TaskPriorityId = model.PriorityId;
-            selectedTask.TeamId = model.TeamId;
-            selectedTask.ProjectId = model.ProjectId;
-            selectedTask.TaskStatusId = (int)model.StatusId;
-
-            if (selectedTask.TeamId == null && model.ProjectId != null)
-            {
-                var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Id == model.ProjectId);
-                selectedTask.ProjectId = model.ProjectId;
+                var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Id == projectId);
                 selectedTask.TeamId = selectedProject.TeamId;
             }
-
             vwsDbContext.Save();
 
-            await UpdateTaskUsers(selectedTask.Id, model.Users);
-
-            var updatedTaskResponseModel = new TaskResponseModel()
-            {
-                Id = selectedTask.Id,
-                Title = selectedTask.Title,
-                CreatedOn = selectedTask.CreatedOn,
-                Description = selectedTask.Description,
-                EndDate = selectedTask.EndDate,
-                StartDate = selectedTask.StartDate,
-                Guid = selectedTask.Guid,
-                ModifiedOn = selectedTask.ModifiedOn,
-                ModifiedBy = (await userManager.FindByIdAsync(selectedTask.ModifiedBy.ToString())).UserName,
-                CreatedBy = (await userManager.FindByIdAsync(selectedTask.CreatedBy.ToString())).UserName,
-                PriorityId = selectedTask.TaskPriorityId,
-                PriorityTitle = localizer[((SeedDataEnum.TaskPriority)selectedTask.TaskPriorityId).ToString()],
-                UsersAssignedTo = await GetAssignedTo(selectedTask.Id),
-                ProjectId = selectedTask.ProjectId,
-                TeamId = selectedTask.TeamId,
-                TeamName = selectedTask.TeamId == null ? null : vwsDbContext.Teams.FirstOrDefault(team => team.Id == selectedTask.TeamId).Name,
-                ProjectName = selectedTask.ProjectId == null ? null : vwsDbContext.Projects.FirstOrDefault(project => project.Id == selectedTask.ProjectId).Name,
-                StatusId = selectedTask.TaskStatusId,
-                StatusTitle = vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == selectedTask.TaskStatusId).Title,
-                CheckLists = GetCheckLists(selectedTask.Id),
-                Tags = GetTaskTags(selectedTask.Id)
-            };
-
-            response.Value = updatedTaskResponseModel;
-            response.Message = "Task updated successfully!";
+            
+            response.Message = "Task team and project updated successfully!";
             return Ok(response);
+        }
 
+        [HttpPut]
+        [Authorize]
+        [Route("updateStartDate")]
+        public async Task<IActionResult> UpdateStartDate(long id, DateTime? newStartDate)
+        {
+            var response = new ResponseModel();
+
+            Guid userId = LoggedInUserId.Value;
+
+            var selectedTask = await vwsDbContext.GetTaskAsync(id);
+
+            if (selectedTask == null || selectedTask.IsDeleted)
+            {
+                response.Message = "Task not found";
+                response.AddError(localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            if (!permissionService.HasAccessToTask(userId, id))
+            {
+                response.Message = "Task access forbidden";
+                response.AddError(localizer["You don't have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            if (selectedTask.EndDate.HasValue && newStartDate.HasValue && newStartDate > selectedTask.EndDate)
+            {
+                response.Message = "Task model data has problem";
+                response.AddError(localizer["Start Date should be before End Date."]);
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
+
+            selectedTask.StartDate = newStartDate;
+            vwsDbContext.Save();
+
+
+            response.Message = "Task start date updated successfully!";
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("updateEndDate")]
+        public async Task<IActionResult> UWpdateEndDate(long id, DateTime? newEndDate)
+        {
+            var response = new ResponseModel();
+
+            Guid userId = LoggedInUserId.Value;
+
+            var selectedTask = await vwsDbContext.GetTaskAsync(id);
+
+            if (selectedTask == null || selectedTask.IsDeleted)
+            {
+                response.Message = "Task not found";
+                response.AddError(localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            if (!permissionService.HasAccessToTask(userId, id))
+            {
+                response.Message = "Task access forbidden";
+                response.AddError(localizer["You don't have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            if (selectedTask.StartDate.HasValue && newEndDate.HasValue && selectedTask.StartDate > newEndDate)
+            {
+                response.Message = "Task model data has problem";
+                response.AddError(localizer["Start Date should be before End Date."]);
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
+
+            selectedTask.EndDate = newEndDate;
+            vwsDbContext.Save();
+
+
+            response.Message = "Task start date updated successfully!";
+            return Ok(response);
         }
 
         [HttpGet]

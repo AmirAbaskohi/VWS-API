@@ -192,6 +192,9 @@
   <data name="There is no status to give task." xml:space="preserve">
     <value>There is no status to give task.</value>
   </data>
+  <data name="Title can not be empty or with more than 500 characters." xml:space="preserve">
+    <value>Title can not be empty or with more than 500 characters.</value>
+  </data>
   <data name="User does not exist." xml:space="preserve">
     <value>User does not exist.</value>
   </data>
