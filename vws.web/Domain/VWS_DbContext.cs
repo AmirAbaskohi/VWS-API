@@ -400,6 +400,14 @@ namespace vws.web.Domain
 
         public DbSet<TaskTag> TaskTags { get; set; }
 
+        IQueryable<TaskComment> IVWS_DbContext.TaskComments { get => TaskComments; }
+
+        public DbSet<TaskComment> TaskComments { get; set; }
+
+        IQueryable<TaskCommentAttachment> IVWS_DbContext.TaskCommentAttachments { get => TaskCommentAttachments; }
+
+        public DbSet<TaskCommentAttachment> TaskCommentAttachments { get; set; }
+
         public async Task<GeneralTask> AddTaskAsync(GeneralTask generalTask)
         {
             await GeneralTasks.AddAsync(generalTask);
@@ -469,6 +477,16 @@ namespace vws.web.Domain
             TaskTags.Add(taskTag);
         }
 
+        public void AddTaskComment(TaskComment taskComment)
+        {
+            TaskComments.Add(taskComment);
+        }
+
+        public void AddTaskCommentAttachment(TaskCommentAttachment taskCommentAttachment)
+        {
+            TaskCommentAttachments.Add(taskCommentAttachment);
+        }
+
         public void DeleteTag(int id)
         {
             var selectedTag = Tags.FirstOrDefault(tag => tag.Id == id);
@@ -479,6 +497,12 @@ namespace vws.web.Domain
         {
             var selectedTaskTag = TaskTags.FirstOrDefault(taskTag => taskTag.GeneralTaskId == taskId && taskTag.TagId == tagId);
             TaskTags.Remove(selectedTaskTag);
+        }
+
+        public void DeleteTaskComment(long id)
+        {
+            var selectedTaskComment = TaskComments.FirstOrDefault(comment => comment.Id == id);
+            TaskComments.Remove(selectedTaskComment);
         }
 
         #endregion
@@ -612,6 +636,9 @@ namespace vws.web.Domain
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<TaskCommentAttachment>()
+                .HasKey(commentAttachment => new { commentAttachment.FileContainerId, commentAttachment.TaskCommentId});
 
             builder.Entity<ProjectDepartment>()
                 .HasKey(pd => new { pd.ProjectId, pd.DepartmentId });

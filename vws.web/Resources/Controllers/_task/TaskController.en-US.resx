@@ -129,6 +129,9 @@
   <data name="Check list with given id does not exist." xml:space="preserve">
     <value>Check list with given id does not exist.</value>
   </data>
+  <data name="Comment body can not be emty or have more than 1000 characters." xml:space="preserve">
+    <value>Comment body can not be emty or have more than 1000 characters.</value>
+  </data>
   <data name="File size is not allowed." xml:space="preserve">
     <value>File size is not allowed.</value>
   </data>
@@ -177,6 +180,12 @@
   <data name="Task already has the tag." xml:space="preserve">
     <value>Task already has the tag.</value>
   </data>
+  <data name="Task comment access denied." xml:space="preserve">
+    <value>Task comment access denied.</value>
+  </data>
+  <data name="Task comment not found." xml:space="preserve">
+    <value>Task comment not found.</value>
+  </data>
   <data name="Task does not exist." xml:space="preserve">
     <value>Task does not exist.</value>
   </data>
@@ -188,6 +197,9 @@
   </data>
   <data name="Team not found." xml:space="preserve">
     <value>Team not found.</value>
+  </data>
+  <data name="There is no attachment with such information for given comment." xml:space="preserve">
+    <value>There is no attachment with such information for given comment.</value>
   </data>
   <data name="There is no status to give task." xml:space="preserve">
     <value>There is no status to give task.</value>
@@ -203,6 +215,9 @@
   </data>
   <data name="You can not delete status which has task." xml:space="preserve">
     <value>You can not delete status which has task.</value>
+  </data>
+  <data name="You can not edit and delete comment before 5 minutes of your last change." xml:space="preserve">
+    <value>You can not edit and delete comment before 5 minutes of your last change.</value>
   </data>
   <data name="You can not provide both project id and team id." xml:space="preserve">
     <value>You can not provide both project id and team id.</value>

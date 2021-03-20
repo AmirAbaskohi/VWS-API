@@ -129,6 +129,9 @@
   <data name="Check list with given id does not exist." xml:space="preserve">
     <value>چک لیستی با آی دی وجود ندارد. </value>
   </data>
+  <data name="Comment body can not be emty or have more than 1000 characters." xml:space="preserve">
+    <value>کامنت نمیتواند خالی باشد یا بیش از 1000 کاراکتر داشته باشد.</value>
+  </data>
   <data name="High" xml:space="preserve">
     <value>بالا</value>
   </data>
@@ -174,6 +177,12 @@
   <data name="Task already has the tag." xml:space="preserve">
     <value>تسک در حال حاضر این تگ را دارد.</value>
   </data>
+  <data name="Task comment access denied." xml:space="preserve">
+    <value>شما به کامنت دسترسی ندارید.</value>
+  </data>
+  <data name="Task comment not found." xml:space="preserve">
+    <value>کامنت یافت نشد.</value>
+  </data>
   <data name="Task does not exist." xml:space="preserve">
     <value>تسک وجود ندارد.</value>
   </data>
@@ -185,6 +194,9 @@
   </data>
   <data name="Team not found." xml:space="preserve">
     <value>تیم یافت نشد.</value>
+  </data>
+  <data name="There is no attachment with such information for given comment." xml:space="preserve">
+    <value>ضمیمه ای با اطلاعات داده شده برای کامنت انتخاب شده وجود ندارد.</value>
   </data>
   <data name="There is no status to give task." xml:space="preserve">
     <value>وضعیتی وجو ندارد تا به تسک الصاق شود/</value>
@@ -200,6 +212,9 @@
   </data>
   <data name="You can not delete status which has task." xml:space="preserve">
     <value>شما نمیتوانید وضعیتی که در آن تسک وجود دارد را حذف کنید.</value>
+  </data>
+  <data name="You can not edit and delete comment before 5 minutes of your last change." xml:space="preserve">
+    <value>شما نمی توانید تسک را قبل از گذشتن 5 دقیقه از آخرین تغییر، تغییر دهید یا حذف کنید.</value>
   </data>
   <data name="You can not provide both project id and team id." xml:space="preserve">
     <value>نمی توانید شناسه پروژه و شناسه تیم را با هم ارائه دهید.</value>

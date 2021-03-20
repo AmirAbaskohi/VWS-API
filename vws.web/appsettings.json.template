@@ -29,7 +29,7 @@
       {
         "Name": "Seq",
         "Args": {
-          "serverUrl":  "http://localhost:8081"
+          "serverUrl": "http://localhost:8081"
         }
       }
     ]
@@ -41,7 +41,7 @@
     "Audience": "VWS App",
     "Issuer": "https://vws.ir",
     "Secret": "ByYM000OLlMQG6VVVp1OH7Xzyr7gHuw1qvUC5dcGt3SNM",
-    "ValidTimeInMinutes": 10
+    "ValidTimeInMinutes": 30
   },
   "Google": {
     "ClientId": "592198124436-24rg7bm3850gk8q14h5o6anrmuhtmojp.apps.googleusercontent.com",
@@ -71,5 +71,8 @@
   "Files": {
     "RestrictedExtensions": "exe",
     "FileMaxSizeInBytes": "20000000"
+  },
+  "TimeDifference": {
+    "EditTaskComment" :  5
   }
 }

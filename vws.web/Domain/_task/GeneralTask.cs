@@ -16,6 +16,7 @@ namespace vws.web.Domain._task
             TaskReminders = new HashSet<TaskReminder>();
             TaskAssigns = new HashSet<TaskAssign>();
             TaskTags = new HashSet<TaskTag>();
+            TaskComments = new HashSet<TaskComment>();
         }
 
         public long Id { get; set; }
@@ -71,5 +72,7 @@ namespace vws.web.Domain._task
         public virtual ICollection<TaskCheckList> TaskChecklist { get; set; }
 
         public virtual ICollection<TaskTag> TaskTags { get; set; }
+
+        public ICollection<TaskComment> TaskComments { get; set; }
     }
 }

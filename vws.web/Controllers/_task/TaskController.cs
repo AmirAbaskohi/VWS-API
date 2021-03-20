@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ using vws.web.Domain._task;
 using vws.web.Enums;
 using vws.web.Models;
 using vws.web.Models._task;
+using vws.web.Repositories;
 using vws.web.Services;
 
 namespace vws.web.Controllers._task
@@ -26,14 +28,18 @@ namespace vws.web.Controllers._task
         private readonly IStringLocalizer<TaskController> localizer;
         private readonly IVWS_DbContext vwsDbContext;
         private readonly IPermissionService permissionService;
+        private readonly IConfiguration configuration;
+        private readonly IFileManager fileManager;
 
         public TaskController(UserManager<ApplicationUser> _userManager, IStringLocalizer<TaskController> _localizer,
-            IVWS_DbContext _vwsDbContext, IPermissionService _permissionService)
+            IVWS_DbContext _vwsDbContext, IPermissionService _permissionService, IConfiguration _configuration, IFileManager _fileManager)
         {
             userManager = _userManager;
             localizer = _localizer;
             vwsDbContext = _vwsDbContext;
             permissionService = _permissionService;
+            configuration = _configuration;
+            fileManager = _fileManager;
         }
 
         private async Task<List<UserModel>> GetAssignedTo(long taskId)
@@ -289,6 +295,99 @@ namespace vws.web.Controllers._task
                                         .ToList();
         }
 
+        private List<FileModel> AddCommentAttachments(long commentId, List<Guid> attachments)
+        {
+            var result = new List<FileModel>();
+            foreach(var attachment in attachments)
+            {
+                var selectedFileContainer = vwsDbContext.FileContainers.FirstOrDefault(container => container.Guid == attachment);
+                if (selectedFileContainer == null || selectedFileContainer.CreatedBy != LoggedInUserId.Value)
+                    continue;
+                vwsDbContext.AddTaskCommentAttachment(new TaskCommentAttachment()
+                {
+                    FileContainerId = selectedFileContainer.Id,
+                    FileContainerGuid = selectedFileContainer.Guid,
+                    TaskCommentId = commentId
+                });
+                var recentFile = vwsDbContext.Files.FirstOrDefault(file => file.Id == selectedFileContainer.RecentFileId);
+                result.Add(new FileModel() 
+                {
+                    FileContainerGuid = selectedFileContainer.Guid,
+                    Name = recentFile.Name,
+                    Extension = recentFile.Extension,
+                    Size = recentFile.Size
+                });
+            }
+
+            vwsDbContext.Save();
+            return result;
+        }
+
+        private void DeleteTaskComment(long commentId)
+        {
+            var attachments = vwsDbContext.TaskCommentAttachments.Include(attachment => attachment.FileContainer)
+                                                                 .ThenInclude(container => container.Files)
+                                                                 .Where(attachment => attachment.TaskCommentId == commentId)
+                                                                 .Select(attachment => attachment.FileContainer);
+            foreach (var attachment in attachments)
+            {
+                foreach (var file in attachment.Files)
+                    fileManager.DeleteFile(file.Address);
+                vwsDbContext.DeleteFileContainer(attachment);
+            }
+            vwsDbContext.DeleteTaskComment(commentId);
+            vwsDbContext.Save();
+        }
+
+        private List<FileModel> GetCommentAttachments(long commentId)
+        {
+            var result = new List<FileModel>();
+            
+            var attachments = vwsDbContext.TaskCommentAttachments.Include(attachment => attachment.FileContainer)
+                                                                 .Where(attachment => attachment.TaskCommentId == commentId)
+                                                                 .Select(attachment => attachment.FileContainer);
+
+            foreach (var attachment in attachments)
+            {
+                var recentFile = vwsDbContext.Files.FirstOrDefault(file => file.Id == attachment.RecentFileId);
+                result.Add(new FileModel()
+                {
+                    FileContainerGuid = attachment.Guid,
+                    Name = recentFile.Name,
+                    Extension = recentFile.Extension,
+                    Size = recentFile.Size
+                });
+            }
+
+            return result;
+        }
+
+        private async Task<List<CommentResponseModel>> GetTaskComments(long taskId)
+        {
+            var result = new List<CommentResponseModel>();
+            var comments = vwsDbContext.TaskComments.Where(comment => comment.GeneralTaskId == taskId);
+
+            foreach(var comment in comments)
+            {
+                result.Add(new CommentResponseModel()
+                {
+                    Id = comment.Id,
+                    Body = comment.Body,
+                    CommentedBy = new UserModel()
+                    {
+                        UserId = comment.CommentedBy,
+                        UserName = (await userManager.FindByIdAsync(comment.CommentedBy.ToString())).UserName,
+                        ProfileImageGuid = (await vwsDbContext.GetUserProfileAsync(comment.CommentedBy)).ProfileImageGuid
+                    },
+                    CommentedOn = comment.CommentedOn,
+                    MidifiedOn = comment.ModifiedOn,
+                    Attachments = GetCommentAttachments(comment.Id)
+                });
+            }
+
+            return result;
+        }
+
         [HttpPost]
         [Authorize]
         [Route("create")]
@@ -459,7 +558,8 @@ namespace vws.web.Controllers._task
                 StatusId = newTask.TaskStatusId,
                 StatusTitle = vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == newTask.TaskStatusId).Title,
                 CheckLists = GetCheckLists(newTask.Id),
-                Tags = GetTaskTags(newTask.Id)
+                Tags = GetTaskTags(newTask.Id),
+                Comments = await GetTaskComments(newTask.Id)
             };
 
             response.Value = newTaskResponseModel;
@@ -762,7 +862,8 @@ namespace vws.web.Controllers._task
                     StatusId = userTask.TaskStatusId,
                     StatusTitle = vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == userTask.TaskStatusId).Title,
                     CheckLists = GetCheckLists(userTask.Id),
-                    Tags = GetTaskTags(userTask.Id)
+                    Tags = GetTaskTags(userTask.Id),
+                    Comments = await GetTaskComments(userTask.Id)
                 });
             }
             return response;
@@ -817,7 +918,8 @@ namespace vws.web.Controllers._task
                     StatusId = projectTask.TaskStatusId,
                     StatusTitle = vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == projectTask.TaskStatusId).Title,
                     CheckLists = GetCheckLists(projectTask.Id),
-                    Tags = GetTaskTags(projectTask.Id)
+                    Tags = GetTaskTags(projectTask.Id),
+                    Comments = await GetTaskComments(projectTask.Id)
                 });
             }
             response.Value = result;
@@ -861,7 +963,8 @@ namespace vws.web.Controllers._task
                         StatusId = userTask.TaskStatusId,
                         StatusTitle = vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == userTask.TaskStatusId).Title,
                         CheckLists = GetCheckLists(userTask.Id),
-                        Tags = GetTaskTags(userTask.Id)
+                        Tags = GetTaskTags(userTask.Id),
+                        Comments = await GetTaskComments(userTask.Id)
                     });
                 }
             }
@@ -2090,6 +2193,221 @@ namespace vws.web.Controllers._task
 
             response.Value = GetTaskTags(projectId, teamId);
             response.Message = "Tags returned successfully!";
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("addComment")]
+        public async Task<IActionResult> AddComment([FromBody] TaskCommentModel model)
+        {
+            var response = new ResponseModel<CommentResponseModel>();
+
+            if (String.IsNullOrEmpty(model.Body) || model.Body.Length > 1000)
+            {
+                response.AddError(localizer["Comment body can not be emty or have more than 1000 characters."]);
+                response.Message = "Invalid comment body";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var userId = LoggedInUserId.Value;
+
+            var selectedTask = vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == model.Id);
+            if (selectedTask == null || selectedTask.IsDeleted)
+            {
+                response.Message = "Task not found";
+                response.AddError(localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!permissionService.HasAccessToTask(userId, model.Id))
+            {
+                response.Message = "Task access forbidden";
+                response.AddError(localizer["You don't have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            var creationTime = DateTime.Now;
+            var newComment = new TaskComment()
+            {
+                Body = model.Body,
+                CommentedBy = userId,
+                CommentedOn = creationTime,
+                ModifiedOn = creationTime,
+                GeneralTaskId = selectedTask.Id
+            };
+            vwsDbContext.AddTaskComment(newComment);
+            vwsDbContext.Save();
+            AddCommentAttachments(newComment.Id, model.Attachments);
+
+            response.Value = new CommentResponseModel()
+            {
+                Id = newComment.Id,
+                Body = newComment.Body,
+                CommentedBy = new UserModel()
+                {
+                    UserId = newComment.CommentedBy,
+                    UserName = (await userManager.FindByIdAsync(newComment.CommentedBy.ToString())).UserName,
+                    ProfileImageGuid = (await vwsDbContext.GetUserProfileAsync(newComment.CommentedBy)).ProfileImageGuid
+                },
+                CommentedOn = newComment.CommentedOn,
+                MidifiedOn = newComment.ModifiedOn,
+                Attachments = GetCommentAttachments(newComment.Id)
+            };
+            response.Message = "Comment added successfully!";
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("editComment")]
+        public IActionResult EditComment(long commentId, string newBody)
+        {
+            var response = new ResponseModel();
+
+            if (String.IsNullOrEmpty(newBody) || newBody.Length > 1000)
+            {
+                response.AddError(localizer["Comment body can not be emty or have more than 1000 characters."]);
+                response.Message = "Invalid comment body";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var userId = LoggedInUserId.Value;
+
+            var selectedComment = vwsDbContext.TaskComments.FirstOrDefault(comment => comment.Id == commentId);
+            if (selectedComment == null)
+            {
+                response.AddError(localizer["Task comment not found."]);
+                response.Message = "Task comment not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            if (selectedComment.CommentedBy != userId)
+            {
+                response.AddError(localizer["Task comment access denied."]);
+                response.Message = "Task comment access denied";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if ((DateTime.Now - selectedComment.ModifiedOn).TotalMinutes < Int16.Parse(configuration["TimeDifference:EditTaskComment"]))
+            {
+                response.AddError(localizer["You can not edit and delete comment before 5 minutes of your last change."]);
+                response.Message = "Can not edit and delete comment before 5 minutes of your last change";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            selectedComment.Body = newBody;
+            selectedComment.ModifiedOn = DateTime.Now;
+            vwsDbContext.Save();
+
+            response.Message = "Comment body updated successfully";
+            return Ok(response);
+        }
+
+        [HttpDelete]
+        [Authorize]
+        [Route("deleteComment")]
+        public IActionResult DeleteComment(long commentId)
+        {
+            var response = new ResponseModel();
+
+            var userId = LoggedInUserId.Value;
+
+            var selectedComment = vwsDbContext.TaskComments.FirstOrDefault(comment => comment.Id == commentId);
+            if (selectedComment == null)
+            {
+                response.AddError(localizer["Task comment not found."]);
+                response.Message = "Task comment not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            if (selectedComment.CommentedBy != userId)
+            {
+                response.AddError(localizer["Task comment access denied."]);
+                response.Message = "Task comment access denied";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if ((DateTime.Now - selectedComment.ModifiedOn).TotalMinutes < Int16.Parse(configuration["TimeDifference:EditTaskComment"]))
+            {
+                response.AddError(localizer["You can not edit and delete comment before 5 minutes of your last change."]);
+                response.Message = "Can not edit and delete comment before 5 minutes of your last change";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            DeleteTaskComment(commentId);
+
+            response.Message = "Comment body deleted successfully";
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("addAtachmentToComment")]
+        public IActionResult AddAtachmentToComment([FromBody] AddAtachmentModel model)
+        {
+            var response = new ResponseModel<List<FileModel>>();
+
+            var userId = LoggedInUserId.Value;
+
+            var selectedComment = vwsDbContext.TaskComments.FirstOrDefault(comment => comment.Id == model.CommentId);
+            if (selectedComment == null)
+            {
+                response.AddError(localizer["Task comment not found."]);
+                response.Message = "Task comment not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            if (selectedComment.CommentedBy != userId)
+            {
+                response.AddError(localizer["Task comment access denied."]);
+                response.Message = "Task comment access denied";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            response.Value = AddCommentAttachments(selectedComment.Id, model.Attachments);
+            response.Message = "Attachments added successfully";
+
+            return Ok(response);
+        }
+
+        [HttpDelete]
+        [Authorize]
+        [Route("deleteAttachmentFromComment")]
+        public IActionResult DeleteAttachmentFromComment(long commentId, Guid attachmentGuid)
+        {
+            var response = new ResponseModel();
+
+            var userId = LoggedInUserId.Value;
+
+            var selectedComment = vwsDbContext.TaskComments.FirstOrDefault(comment => comment.Id == commentId);
+            if (selectedComment == null)
+            {
+                response.AddError(localizer["Task comment not found."]);
+                response.Message = "Task comment not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            if (selectedComment.CommentedBy != userId)
+            {
+                response.AddError(localizer["Task comment access denied."]);
+                response.Message = "Task comment access denied";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var selectedAttachment = vwsDbContext.TaskCommentAttachments.Include(attachment => attachment.FileContainer)
+                                                                        .ThenInclude(attachment => attachment.Files)
+                                                                        .FirstOrDefault(attachment => attachment.FileContainerGuid == attachmentGuid && attachment.TaskCommentId == commentId);
+            if (selectedAttachment == null)
+            {
+                response.AddError(localizer["There is no attachment with such information for given comment."]);
+                response.Message = "Attachment not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            foreach (var file in selectedAttachment.FileContainer.Files)
+                fileManager.DeleteFile(file.Address);
+
+            var selectedContainer = vwsDbContext.FileContainers.FirstOrDefault(container => container.Id == selectedAttachment.FileContainerId);
+            vwsDbContext.DeleteFileContainer(selectedContainer);
+            vwsDbContext.Save();
+
             return Ok(response);
         }
     }

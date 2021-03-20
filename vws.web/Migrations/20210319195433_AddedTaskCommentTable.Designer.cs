@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using vws.web.Domain;
 
 namespace vws.web.Migrations
 {
     [DbContext(typeof(VWS_DbContext))]
-    partial class VWS_DbContextModelSnapshot : ModelSnapshot
+    [Migration("20210319195433_AddedTaskCommentTable")]
+    partial class AddedTaskCommentTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1083,35 +1085,17 @@ namespace vws.web.Migrations
                     b.Property<DateTime>("CommentedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<long>("GeneralTaskId")
+                    b.Property<long?>("GeneralTaskId")
                         .HasColumnType("bigint");
 
-                    b.Property<DateTime>("ModifiedOn")
-                        .HasColumnType("datetime2");
+                    b.Property<long>("TaskId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
                     b.HasIndex("GeneralTaskId");
 
                     b.ToTable("Task_TaskComment");
-                });
-
-            modelBuilder.Entity("vws.web.Domain._task.TaskCommentAttachment", b =>
-                {
-                    b.Property<int>("FileContainerId")
-                        .HasColumnType("int");
-
-                    b.Property<long>("TaskCommentId")
-                        .HasColumnType("bigint");
-
-                    b.Property<Guid>("FileContainerGuid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("FileContainerId", "TaskCommentId");
-
-                    b.HasIndex("TaskCommentId");
-
-                    b.ToTable("Task_TaskCommentAttachment");
                 });
 
             modelBuilder.Entity("vws.web.Domain._task.TaskCommentTemplate", b =>
@@ -1716,30 +1700,9 @@ namespace vws.web.Migrations
                 {
                     b.HasOne("vws.web.Domain._task.GeneralTask", "GeneralTask")
                         .WithMany("TaskComments")
-                        .HasForeignKey("GeneralTaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("GeneralTaskId");
 
                     b.Navigation("GeneralTask");
-                });
-
-            modelBuilder.Entity("vws.web.Domain._task.TaskCommentAttachment", b =>
-                {
-                    b.HasOne("vws.web.Domain._file.FileContainer", "FileContainer")
-                        .WithMany()
-                        .HasForeignKey("FileContainerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("vws.web.Domain._task.TaskComment", "TaskComment")
-                        .WithMany("Attachments")
-                        .HasForeignKey("TaskCommentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("FileContainer");
-
-                    b.Navigation("TaskComment");
                 });
 
             modelBuilder.Entity("vws.web.Domain._task.TaskReminder", b =>
@@ -1923,11 +1886,6 @@ namespace vws.web.Migrations
             modelBuilder.Entity("vws.web.Domain._task.TaskCheckList", b =>
                 {
                     b.Navigation("TaskCheckListItems");
-                });
-
-            modelBuilder.Entity("vws.web.Domain._task.TaskComment", b =>
-                {
-                    b.Navigation("Attachments");
                 });
 
             modelBuilder.Entity("vws.web.Domain._task.TaskReminder", b =>
