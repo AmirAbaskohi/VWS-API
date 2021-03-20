@@ -974,13 +974,17 @@ namespace vws.web.Controllers._task
         [HttpDelete]
         [Authorize]
         [Route("delete")]
-        public async Task<IActionResult> DeleteTask(long taskId)
+        public IActionResult DeleteTask(long taskId)
         {
             var response = new ResponseModel();
 
             Guid userId = LoggedInUserId.Value;
 
-            var selectedTask = await vwsDbContext.GetTaskAsync(taskId);
+            var selectedTask = vwsDbContext.GeneralTasks.Include(task => task.TaskComments)
+                                                        .ThenInclude(comment => comment.Attachments)
+                                                        .ThenInclude(attachment => attachment.FileContainer)
+                                                        .ThenInclude(container => container.Files)
+                                                        .FirstOrDefault(task => task.Id == taskId);
 
             if (selectedTask == null || selectedTask.IsDeleted)
             {
@@ -988,17 +992,28 @@ namespace vws.web.Controllers._task
                 response.AddError(localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
-            if (selectedTask.CreatedBy != userId)
+            if (!permissionService.HasAccessToTask(userId, taskId))
             {
                 response.Message = "Task access forbidden";
                 response.AddError(localizer["You don't have access to this task."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
+            var commentsAttachmentsPaths = new List<string>();
+            foreach (var comment in selectedTask.TaskComments)
+            {
+                foreach (var attachment in comment.Attachments)
+                {
+                    foreach (var file in attachment.FileContainer.Files)
+                        fileManager.DeleteFile(file.Address);
+
+                    var selectedContainer = vwsDbContext.FileContainers.FirstOrDefault(container => container.Id == attachment.FileContainerId);
+                    vwsDbContext.DeleteFileContainer(selectedContainer);
+                }
+            }
             selectedTask.IsDeleted = true;
             selectedTask.ModifiedBy = userId;
             selectedTask.ModifiedOn = DateTime.Now;
-
             vwsDbContext.Save();
 
             response.Message = "Task deleted successfully!";
