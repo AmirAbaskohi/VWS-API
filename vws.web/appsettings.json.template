@@ -57,9 +57,16 @@
     "Url": "http://localhost:4200"
   },
   "EmailSender": {
-    "UserName": "seventasktest",
-    "Password": "@dmin123321",
-    "EmailAddress": "seventasktest@gmail.com"
+    "RegistrationEmail": {
+      "UserName": "seventasktest",
+      "Password": "@dmin123321",
+      "EmailAddress": "seventasktest@gmail.com"
+    },
+    "NotificationEmail": {
+      "UserName": "seventasktest",
+      "Password": "@dmin123321",
+      "EmailAddress": "seventasktest@gmail.com"
+    }
   },
   "Security": {
     "PasswordLength": 8,
@@ -73,6 +80,6 @@
     "FileMaxSizeInBytes": "20000000"
   },
   "TimeDifference": {
-    "EditTaskComment" :  5
+    "EditTaskComment": 5
   }
 }

@@ -1,45 +1,44 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
+using vws.web.Models;
 
 namespace vws.web.Repositories
 {
     public class EmailSender : IEmailSender
     {
-        public Task SendEmailAsync(string toEmail, string subject, string message, IConfiguration configuration, out string errorMessage, bool isMessageHtml = false)
+        private readonly ILogger<EmailSender> _logger;
+
+        public EmailSender(ILogger<EmailSender> logger)
+        {
+            _logger = logger;
+        }
+
+        public Task SendEmailAsync(SendEmailModel emailModel, out string errorMessage)
         {
             errorMessage = "";
             try
             {
                 using (var client = new SmtpClient())
                 {
-                    var credentials = new NetworkCredential()
-                    {
-                        UserName = configuration["EmailSender:UserName"], // without @gmail.com
-                        Password = configuration["EmailSender:Password"]
-                    };
-
-                    client.Credentials = credentials;
-                    client.Host = "smtp.gmail.com";
+                    client.Credentials = emailModel.Credential;
+                    client.Host = "smtp.zoho.com";
                     client.Port = 587;
                     client.EnableSsl = true;
 
                     using var emailMessage = new MailMessage()
                     {
-                        To = { new MailAddress(toEmail) },
-                        From = new MailAddress(configuration["EmailSender:EmailAddress"]),
-                        Subject = subject,
-                        Body = message,
-                        IsBodyHtml = isMessageHtml
+                        To = { new MailAddress(emailModel.ToEmail) },
+                        From = new MailAddress(emailModel.FromEmail),
+                        Subject = emailModel.Subject,
+                        Body = emailModel.Body,
+                        IsBodyHtml = emailModel.IsBodyHtml
                     };
                     client.Send(emailMessage);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 errorMessage = "Problem happened in sending email.";
             }

@@ -31,6 +31,7 @@
     <PackageReference Include="Swashbuckle.Core" Version="5.6.0" />
     <PackageReference Include="Google.Apis.Auth" Version="1.49.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="5.0.2" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.31" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,8 +39,12 @@
     <Folder Include="Domain\_department\" />
     <Folder Include="Domain\_calendar\" />
     <Folder Include="Upload\files\" />
+    <Folder Include="EmailTemplates\" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="appsettings.json.template" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Remove="appsettings1.json" />
   </ItemGroup>
 </Project>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -421,7 +422,16 @@ namespace vws.web.Controllers._account
             if (result.Succeeded)
             {
                 string emailErrorMessage;
-                await emailSender.SendEmailAsync(user.Email, "EmailConfirmation", randomCode, configuration, out emailErrorMessage);
+                SendEmailModel emailModel = new SendEmailModel
+                {
+                    FromEmail = configuration["EmailSender:RegistrationEmail:EmailAddress"],
+                    ToEmail = user.Email,
+                    Subject = "Email Confirmation",
+                    Body = randomCode,
+                    Credential = new NetworkCredential { UserName = configuration["EmailSender:RegistrationEmail:UserName"], Password = configuration["EmailSender:RegistrationEmail:Password"] },
+                    IsBodyHtml = true
+                };
+                await emailSender.SendEmailAsync(emailModel, out emailErrorMessage);
                 if (string.IsNullOrEmpty(emailErrorMessage))
                     return Ok(new ResponseModel { Message = "Email sent successfully!" });
                 errors.Add(localizer[emailErrorMessage]);
@@ -471,7 +481,16 @@ namespace vws.web.Controllers._account
             if (result.Succeeded)
             {
                 string emailErrorMessage;
-                await emailSender.SendEmailAsync(user.Email, "EmailConfirmation", randomCode, configuration, out emailErrorMessage);
+                SendEmailModel emailModel = new SendEmailModel
+                {
+                    FromEmail = configuration["EmailSender:RegistrationEmail:EmailAddress"],
+                    ToEmail = user.Email,
+                    Subject = "Reset Password",
+                    Body = randomCode,
+                    Credential = new NetworkCredential { UserName = configuration["EmailSender:RegistrationEmail:UserName"], Password = configuration["EmailSender:RegistrationEmail:Password"] },
+                    IsBodyHtml = true
+                };
+                await emailSender.SendEmailAsync(emailModel, out emailErrorMessage);
                 if (string.IsNullOrEmpty(emailErrorMessage))
                     return Ok(new ResponseModel { Message = "Email sent successfully!" });
                 errors.Add(localizer[emailErrorMessage]);
@@ -703,7 +722,16 @@ namespace vws.web.Controllers._account
                     if (res.Succeeded == true)
                     {
                         string emailError;
-                        await emailSender.SendEmailAsync(user.Email, "Email Changed", localizer["Your password changed successfully!"], configuration, out emailError);
+                        SendEmailModel emailModel = new SendEmailModel
+                        {
+                            FromEmail = configuration["EmailSender:RegistrationEmail:EmailAddress"],
+                            ToEmail = user.Email,
+                            Subject = "Change Password Alert",
+                            Body = "Email Changed",
+                            Credential = new NetworkCredential { UserName = configuration["EmailSender:RegistrationEmail:UserName"], Password = configuration["EmailSender:RegistrationEmail:Password"] },
+                            IsBodyHtml = true
+                        };
+                        await emailSender.SendEmailAsync(emailModel, out emailError);
                         return Ok(new ResponseModel { Message = "Password changed successfully!" });
                     }
                     errors.Add("Changing the password was unsuccessful.");
