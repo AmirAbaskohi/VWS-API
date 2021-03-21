@@ -20,10 +20,12 @@ using Microsoft.IdentityModel.Tokens;
 using vws.web.Domain;
 using vws.web.Domain._base;
 using vws.web.Domain._file;
+using vws.web.EmailTemplates;
 using vws.web.Enums;
 using vws.web.Models;
 using vws.web.Models._account;
 using vws.web.Repositories;
+using static vws.web.EmailTemplates.EmailTemplateTypes;
 
 namespace vws.web.Controllers._account
 {
@@ -427,8 +429,12 @@ namespace vws.web.Controllers._account
                     FromEmail = configuration["EmailSender:RegistrationEmail:EmailAddress"],
                     ToEmail = user.Email,
                     Subject = "Email Confirmation",
-                    Body = randomCode,
-                    Credential = new NetworkCredential { UserName = configuration["EmailSender:RegistrationEmail:UserName"], Password = configuration["EmailSender:RegistrationEmail:Password"] },
+                    Body = EmailTemplateUtility.GetEmailTemplate((int)EmailTemplateEnum.EmailVerificationCode).Replace("{0}", randomCode),
+                    Credential = new NetworkCredential
+                    {
+                        UserName = configuration["EmailSender:RegistrationEmail:UserName"],
+                        Password = configuration["EmailSender:RegistrationEmail:Password"]
+                    },
                     IsBodyHtml = true
                 };
                 await emailSender.SendEmailAsync(emailModel, out emailErrorMessage);
