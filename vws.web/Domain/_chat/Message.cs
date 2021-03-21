@@ -19,8 +19,10 @@ namespace vws.web.Domain._chat
 
         public Guid ChannelId { get; set; }
 
-        [MaxLength(256)]
-        public string FromUserName { get; set; }
+        [MaxLength(100)]
+        public string FromNickName { get; set; }
+
+        public Guid FromUserId { get; set; }
 
         public long? ReplyTo { get; set; }
 
