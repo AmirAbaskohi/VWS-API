@@ -19,6 +19,9 @@ namespace vws.web.Domain._base
 
         public byte? CultureId { get; set; }
 
+        [MaxLength(100, ErrorMessage = "Nick-Name can not be over 100 chars.", ErrorMessageResourceName = "AccountController")]
+        public string NickName{ get; set; }
+
         [MaxLength(6)]
         public string ThemeColorCode { get; set; }
 

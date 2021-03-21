@@ -10,14 +10,17 @@ namespace vws.web.Models._account
     {
         [Required]
         public string UsernameOrEmail { get; set; }
+
         [Required]
         public string Password { get; set; }
+
         public bool? RememberMe { get; set; }
     }
 
     public class LoginResponseModel
     {
         public string Token { get; set; }
+
         public string RefreshToken { get; set; }
         
         public DateTime ValidTo{ get; set; }

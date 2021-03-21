@@ -63,6 +63,8 @@ namespace vws.web.Controllers._account
             fileManager = _fileManager;
         }
 
+        #region Private Methods
+
         private JwtSecurityToken GenerateToken(IEnumerable<Claim> claims)
         {
             var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]));
@@ -88,12 +90,12 @@ namespace vws.web.Controllers._account
             }
         }
 
-        private async Task<LoginResponseModel> GenerateJWT(IdentityUser user)
+        private async Task<JwtTokenModel> GenerateJWT(IdentityUser user)
         {
             var authClaims = new List<Claim>
                 {
                     new Claim("UserEmail", user.Email),
-                    new Claim("UserName", user.UserName),
+                    //new Claim("UserName", user.UserName),
                     new Claim("UserId", user.Id),
                 };
 
@@ -108,13 +110,41 @@ namespace vws.web.Controllers._account
             await vwsDbContext.AddRefreshTokenAsync(refreshToken);
             vwsDbContext.Save();
 
-            return new LoginResponseModel
+            return new JwtTokenModel
             {
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
                 RefreshToken = refreshToken.Token,
                 ValidTo = token.ValidTo
             };
         }
+
+        //private async Task<LoginResponseModel> GenerateJWT(IdentityUser user)
+        //{
+        //    var authClaims = new List<Claim>
+        //        {
+        //            new Claim("UserEmail", user.Email),
+        //            new Claim("UserName", user.UserName),
+        //            new Claim("UserId", user.Id),
+        //        };
+
+        //    var token = GenerateToken(authClaims);
+
+        //    var refreshToken = new RefreshToken()
+        //    {
+        //        IsValid = true,
+        //        Token = GenerateRefreshToken(),
+        //        UserId = new Guid(user.Id)
+        //    };
+        //    await vwsDbContext.AddRefreshTokenAsync(refreshToken);
+        //    vwsDbContext.Save();
+
+        //    return new LoginResponseModel
+        //    {
+        //        Token = new JwtSecurityTokenHandler().WriteToken(token),
+        //        RefreshToken = refreshToken.Token,
+        //        ValidTo = token.ValidTo
+        //    };
+        //}
 
         private async Task<GoogleJsonWebSignature.Payload> ValidateGoogleToken(string googleTokenId)
         {
@@ -166,88 +196,176 @@ namespace vws.web.Controllers._account
             vwsDbContext.Save();
         }
 
-        [HttpPost]
-        [Route("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterModel model)
-        {
-            List<string> errors = new List<string>();
+        #endregion
 
-            if (model.Username.Contains("@"))
-            {
-                errors.Add(localizer["Username should not contain @ character."]);
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    new ResponseModel { Message = "Username has @ character.", Errors = errors });
-            }
+        [HttpPost]
+        [Route("loginRegister")]
+        public async Task<IActionResult> LoginRegister([FromBody] LoginRegisterModel model)
+        {
+            ResponseModel<LoginRegisterResponseModel> responseModel = new ResponseModel<LoginRegisterResponseModel>();
 
             if (!emailChecker.IsValid(model.Email))
             {
-                errors.Add(localizer["Email is invalid."]);
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    new ResponseModel { Message = "Invalid Email.", Errors = errors });
+                responseModel.AddError(localizer["Email is invalid."]);
+                responseModel.Message = "Invalid Email.";
+                return StatusCode(StatusCodes.Status400BadRequest, responseModel);
             }
 
-            var userExistsWithUserName = await userManager.FindByNameAsync(model.Username);
+            var user = await userManager.FindByEmailAsync(model.Email);
 
-            var userExistsWithEmail = await userManager.FindByEmailAsync(model.Email);
-
-            if (userExistsWithEmail != null)
+            if (user != null)
             {
-                if (userExistsWithEmail.EmailConfirmed)
+                responseModel.Value.EmailConfirmed = user.EmailConfirmed;
+
+                if (await userManager.CheckPasswordAsync(user, model.Password))
                 {
-                    errors.Add(localizer["There is a user with this email."]);
-                    if (userExistsWithUserName != null)
-                        errors.Add(localizer["There is a user with this username."]);
-                    return StatusCode(StatusCodes.Status500InternalServerError,
-                        new ResponseModel { Message = "User already exists!", Errors = errors });
-                }
-                else
-                {
-                    if (userExistsWithUserName != null)
+                    if (responseModel.Value.EmailConfirmed)
                     {
-                        errors.Add(localizer["There is a user with this username."]);
-                        return StatusCode(StatusCodes.Status500InternalServerError,
-                            new ResponseModel { Message = "User already exists!", Errors = errors });
+                        var userProfile = await vwsDbContext.GetUserProfileAsync(new Guid(user.Id));
+                        if (string.IsNullOrWhiteSpace(userProfile.NickName))
+                        {
+                            responseModel.Value.HasNickName = false;
+                            responseModel.Message = "User has not nick-name.";
+                            return Ok(responseModel);
+                        }
+                        else
+                        {
+                            responseModel.Value.HasNickName = true;
+                            responseModel.Value.JwtToken = await GenerateJWT(user);
+                            responseModel.Message = "Logged in successfully.";
+                            return Ok(responseModel);
+                        }
                     }
                     else
                     {
-                        Guid userId = new Guid(userExistsWithEmail.Id);
-                        await userManager.DeleteAsync(userExistsWithEmail);
-                        vwsDbContext.DeleteUserProfile(await vwsDbContext.GetUserProfileAsync(userId));
-                        vwsDbContext.Save();
+                        responseModel.Value.HasNickName = false;
+                        responseModel.Message = "Email is not confirmed";
+                        return Ok(responseModel);
                     }
+                }
+                else
+                {
+                    responseModel.Message = "User login failed.";
+                    responseModel.AddError(localizer["Email or password is wrong."]);
+                    return StatusCode(StatusCodes.Status401Unauthorized, responseModel);
                 }
             }
             else
             {
-                if (userExistsWithUserName != null)
+                responseModel.Value.EmailConfirmed = false;
+                responseModel.Value.HasNickName = false;
+                #region Create AspNetUser
+                ApplicationUser applicationUser = new ApplicationUser()
                 {
-                    errors.Add(localizer["There is a user with this username."]);
-                    return StatusCode(StatusCodes.Status500InternalServerError,
-                        new ResponseModel { Message = "User already exists!", Errors = errors });
-                }
-            }
-
-            ApplicationUser user = new ApplicationUser()
-            {
-                Email = model.Email,
-                SecurityStamp = Guid.NewGuid().ToString(),
-                UserName = model.Username
-            };
-
-            var result = await userManager.CreateAsync(user, model.Password);
-            if (!result.Succeeded)
-            {
-                foreach (var error in result.Errors)
+                    Email = model.Email,
+                    SecurityStamp = Guid.NewGuid().ToString()
+                };
+                var result = await userManager.CreateAsync(applicationUser, model.Password);
+                if (!result.Succeeded)
                 {
-                    errors.Add(localizer[error.Description]);
+                    foreach (var error in result.Errors)
+                        responseModel.AddError(localizer[error.Description]);
+                    responseModel.Message = "User creation failed!";
+                    return StatusCode(StatusCodes.Status500InternalServerError, responseModel);
                 }
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "User creation failed!", Errors = errors });
+                #endregion
+                try
+                {
+                    await CreateUserProfile(Guid.Parse(applicationUser.Id));
+                }
+                catch
+                {
+                    responseModel.AddError(localizer["User creation failed."]);
+                    responseModel.Message = "User creation failed!";
+                    return StatusCode(StatusCodes.Status500InternalServerError, responseModel);
+                }
+                responseModel.Message = "User created successfully!";
+                return Ok(responseModel);
             }
-
-            await CreateUserProfile(Guid.Parse(user.Id));
-
-            return Ok(new ResponseModel { Message = "User created successfully!" });
         }
+
+        //[HttpPost]
+        //[Route("register")]
+        //public async Task<IActionResult> Register([FromBody] RegisterModel model)
+        //{
+        //    List<string> errors = new List<string>();
+
+        //    if (model.Username.Contains("@"))
+        //    {
+        //        errors.Add(localizer["Username should not contain @ character."]);
+        //        return StatusCode(StatusCodes.Status500InternalServerError,
+        //            new ResponseModel { Message = "Username has @ character.", Errors = errors });
+        //    }
+
+        //    if (!emailChecker.IsValid(model.Email))
+        //    {
+        //        errors.Add(localizer["Email is invalid."]);
+        //        return StatusCode(StatusCodes.Status500InternalServerError,
+        //            new ResponseModel { Message = "Invalid Email.", Errors = errors });
+        //    }
+
+        //    var userExistsWithUserName = await userManager.FindByNameAsync(model.Username);
+
+        //    var userExistsWithEmail = await userManager.FindByEmailAsync(model.Email);
+
+        //    if (userExistsWithEmail != null)
+        //    {
+        //        if (userExistsWithEmail.EmailConfirmed)
+        //        {
+        //            errors.Add(localizer["There is a user with this email."]);
+        //            if (userExistsWithUserName != null)
+        //                errors.Add(localizer["There is a user with this username."]);
+        //            return StatusCode(StatusCodes.Status500InternalServerError,
+        //                new ResponseModel { Message = "User already exists!", Errors = errors });
+        //        }
+        //        else
+        //        {
+        //            if (userExistsWithUserName != null)
+        //            {
+        //                errors.Add(localizer["There is a user with this username."]);
+        //                return StatusCode(StatusCodes.Status500InternalServerError,
+        //                    new ResponseModel { Message = "User already exists!", Errors = errors });
+        //            }
+        //            else
+        //            {
+        //                Guid userId = new Guid(userExistsWithEmail.Id);
+        //                await userManager.DeleteAsync(userExistsWithEmail);
+        //                vwsDbContext.DeleteUserProfile(await vwsDbContext.GetUserProfileAsync(userId));
+        //                vwsDbContext.Save();
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        if (userExistsWithUserName != null)
+        //        {
+        //            errors.Add(localizer["There is a user with this username."]);
+        //            return StatusCode(StatusCodes.Status500InternalServerError,
+        //                new ResponseModel { Message = "User already exists!", Errors = errors });
+        //        }
+        //    }
+
+        //    ApplicationUser user = new ApplicationUser()
+        //    {
+        //        Email = model.Email,
+        //        SecurityStamp = Guid.NewGuid().ToString(),
+        //        UserName = model.Username
+        //    };
+
+        //    var result = await userManager.CreateAsync(user, model.Password);
+        //    if (!result.Succeeded)
+        //    {
+        //        foreach (var error in result.Errors)
+        //        {
+        //            errors.Add(localizer[error.Description]);
+        //        }
+        //        return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "User creation failed!", Errors = errors });
+        //    }
+
+        //    await CreateUserProfile(Guid.Parse(user.Id));
+
+        //    return Ok(new ResponseModel { Message = "User created successfully!" });
+        //}
 
         [HttpPost]
         [Route("sso")]
@@ -283,13 +401,13 @@ namespace vws.web.Controllers._account
                             {
                                 await signInManager.SignInAsync(user, false);
                                 await CreateUserProfile(Guid.Parse(user.Id));
-                                return Ok(new ResponseModel<LoginResponseModel>(GenerateJWT(user).Result));
+                                return Ok(new ResponseModel<JwtTokenModel>(GenerateJWT(user).Result));
                             }
                         }
                     }
                     else
                     {
-                        return Ok(new ResponseModel<LoginResponseModel>(GenerateJWT(existedUser).Result));
+                        return Ok(new ResponseModel<JwtTokenModel>(GenerateJWT(existedUser).Result));
                     }
                     break;
                 default:
@@ -298,43 +416,43 @@ namespace vws.web.Controllers._account
             return Forbid();
         }
 
-        [HttpPost]
-        [Route("login")]
-        public async Task<IActionResult> Login([FromBody] LoginModel model)
-        {
-            bool rememberMe = true;
-            if (model.RememberMe.HasValue)
-                rememberMe = model.RememberMe.Value;
+        //[HttpPost]
+        //[Route("login")]
+        //public async Task<IActionResult> Login([FromBody] LoginModel model)
+        //{
+        //    bool rememberMe = true;
+        //    if (model.RememberMe.HasValue)
+        //        rememberMe = model.RememberMe.Value;
 
-            bool isEmail = false;
-            if (model.UsernameOrEmail.Contains("@"))
-                isEmail = true;
+        //    bool isEmail = false;
+        //    if (model.UsernameOrEmail.Contains("@"))
+        //        isEmail = true;
 
-            var user = isEmail ? await userManager.FindByEmailAsync(model.UsernameOrEmail) :
-                await userManager.FindByNameAsync(model.UsernameOrEmail);
+        //    var user = isEmail ? await userManager.FindByEmailAsync(model.UsernameOrEmail) :
+        //        await userManager.FindByNameAsync(model.UsernameOrEmail);
 
-            if (user != null && await userManager.CheckPasswordAsync(user, model.Password))
-            {
-                if (user.EmailConfirmed == false)
-                {
-                    var _response = new ResponseModel<string>
-                    {
-                        Message = "User login failed."
-                    };
-                    _response.AddError(localizer["Email is not confirmed yet."]);
-                    _response.Value = user.Email;
-                    return StatusCode(StatusCodes.Status401Unauthorized, _response);
-                }
+        //    if (user != null && await userManager.CheckPasswordAsync(user, model.Password))
+        //    {
+        //        if (user.EmailConfirmed == false)
+        //        {
+        //            var _response = new ResponseModel<string>
+        //            {
+        //                Message = "User login failed."
+        //            };
+        //            _response.AddError(localizer["Email is not confirmed yet."]);
+        //            _response.Value = user.Email;
+        //            return StatusCode(StatusCodes.Status401Unauthorized, _response);
+        //        }
 
-                return Ok(new ResponseModel<LoginResponseModel>(GenerateJWT(user).Result));
-            }
-            var response = new ResponseModel
-            {
-                Message = "User login failed."
-            };
-            response.AddError(localizer["Password or Username is wrong."]);
-            return StatusCode(StatusCodes.Status401Unauthorized, response);
-        }
+        //        return Ok(new ResponseModel<LoginResponseModel>(GenerateJWT(user).Result));
+        //    }
+        //    var response = new ResponseModel
+        //    {
+        //        Message = "User login failed."
+        //    };
+        //    response.AddError(localizer["Password or Username is wrong."]);
+        //    return StatusCode(StatusCodes.Status401Unauthorized, response);
+        //}
 
         [HttpPost]
         [Route("confirmEmail")]

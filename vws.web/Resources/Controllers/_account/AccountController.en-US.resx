@@ -198,4 +198,13 @@
   <data name="Email not verified." xml:space="preserve">
     <value>Email not verified.</value>
   </data>
+  <data name="Nick-Name can not be over 100 chars." xml:space="preserve">
+    <value>Nick-Name can not be over 100 chars.</value>
+  </data>
+  <data name="Email or password is wrong." xml:space="preserve">
+    <value>Email or password is wrong.</value>
+  </data>
+  <data name="User creation failed." xml:space="preserve">
+    <value>User creation failed.</value>
+  </data>
 </root>
