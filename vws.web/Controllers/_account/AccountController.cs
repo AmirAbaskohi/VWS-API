@@ -678,33 +678,33 @@ namespace vws.web.Controllers._account
             return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "Password changing failed!", Errors = errors });
         }
 
-        [HttpPost]
-        [Route("isUserNameInUse")]
-        public async Task<bool> IsUserNameInUse(string username)
-        {
-            var user = await userManager.FindByNameAsync(username);
-            if (user == null) return false;
-            return true;
-        }
+        //[HttpPost]
+        //[Route("isUserNameInUse")]
+        //public async Task<bool> IsUserNameInUse(string username)
+        //{
+        //    var user = await userManager.FindByNameAsync(username);
+        //    if (user == null) return false;
+        //    return true;
+        //}
 
-        [HttpPost]
-        [Route("isEmailInUse")]
-        public async Task<bool> IsEmailInUse(string email)
-        {
-            var user = await userManager.FindByEmailAsync(email);
-            if (user == null) return false;
-            if (user.EmailConfirmed)
-                return true;
-            return false;
-        }
+        //[HttpPost]
+        //[Route("isEmailInUse")]
+        //public async Task<bool> IsEmailInUse(string email)
+        //{
+        //    var user = await userManager.FindByEmailAsync(email);
+        //    if (user == null) return false;
+        //    if (user.EmailConfirmed)
+        //        return true;
+        //    return false;
+        //}
 
-        [HttpGet]
-        [Authorize]
-        [Route("getUserEmail")]
-        public string GetUserEmail()
-        {
-            return User.Claims.First(claim => claim.Type == "UserEmail").Value;
-        }
+        //[HttpGet]
+        //[Authorize]
+        //[Route("getUserEmail")]
+        //public string GetUserEmail()
+        //{
+        //    return User.Claims.First(claim => claim.Type == "UserEmail").Value;
+        //}
 
         [HttpGet]
         [Route("getEmailTimeWait")]
