@@ -108,22 +108,23 @@ namespace vws.web.Controllers._chat
                 int allMessagesCount;
                 Guid channelId = channelResponseModels[i].Guid;
 
-                if (channelResponseModels[i].ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
-                    readMessagesCount = vwsDbContext.MessageReads.Include(messageRead => messageRead.Message)
-                                                                 .Where(messageRead => messageRead.ChannelId == LoggedInUserId && messageRead.Message.FromUserName == userNames[i] && !messageRead.Message.IsDeleted)
-                                                                 .Count();
-                else
-                    readMessagesCount = vwsDbContext.MessageReads.Include(messageRead => messageRead.Message).Where(messageRead => messageRead.ChannelId == channelId && !messageRead.Message.IsDeleted)
-                                                                                                             .Count();
+                // todo: username
+                //if (channelResponseModels[i].ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+                //    readMessagesCount = vwsDbContext.MessageReads.Include(messageRead => messageRead.Message)
+                //                                                 .Where(messageRead => messageRead.ChannelId == LoggedInUserId && messageRead.Message.FromUserName == userNames[i] && !messageRead.Message.IsDeleted)
+                //                                                 .Count();
+                //else
+                //    readMessagesCount = vwsDbContext.MessageReads.Include(messageRead => messageRead.Message).Where(messageRead => messageRead.ChannelId == channelId && !messageRead.Message.IsDeleted)
+                //                                                                                             .Count();
 
-                if (channelResponseModels[i].ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
-                    allMessagesCount = vwsDbContext.Messages.Where(message => message.ChannelId == LoggedInUserId && message.FromUserName == userNames[i] && !message.IsDeleted)
-                                                             .Count();
-                else
-                    allMessagesCount = vwsDbContext.Messages.Where(message => message.ChannelId == channelId && !message.IsDeleted)
-                                                                 .Count();
+                //if (channelResponseModels[i].ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+                //    allMessagesCount = vwsDbContext.Messages.Where(message => message.ChannelId == LoggedInUserId && message.FromUserName == userNames[i] && !message.IsDeleted)
+                //                                             .Count();
+                //else
+                //    allMessagesCount = vwsDbContext.Messages.Where(message => message.ChannelId == channelId && !message.IsDeleted)
+                //                                                 .Count();
 
-                channelResponseModels[i].NumberOfUnreadMessages = allMessagesCount - readMessagesCount;
+                //channelResponseModels[i].NumberOfUnreadMessages = allMessagesCount - readMessagesCount;
             }
         }
 

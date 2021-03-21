@@ -45,7 +45,7 @@ namespace vws.web.Controllers._chat
                     Id = message.Id,
                     Body = message.Body,
                     SendOn = message.SendOn,
-                    FromUserName = message.FromUserName,
+                    //FromUserName = message.FromUserName,
                     //SendFromMe = message.FromUserName == LoggedInUserName ? true : false, // todo: username
                     ReplyTo = message.ReplyTo,
                     IsEdited = message.IsEdited,
@@ -86,7 +86,7 @@ namespace vws.web.Controllers._chat
                 //((message.ChannelId == channelId && message.FromUserName == LoggedInUserName) ||
                 var privateMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId &&
                                                                             ((message.ChannelId == channelId  /* && message.FromUserName == LoggedInUserName */ ) ||
-                                                                            (message.ChannelId == LoggedInUserId && message.FromUserName == directMessageContactUser.UserName)) &&
+                                                                            (message.ChannelId == LoggedInUserId /* && message.FromUserName == directMessageContactUser.UserName */ )) &&
                                                                             !message.IsDeleted);
                 messageResponseModels = FillMessageResponseModel(privateMessages);
             }
@@ -132,7 +132,7 @@ namespace vws.web.Controllers._chat
                 // todo: username
                 var privateMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId &&
                                                                             ((message.ChannelId == channelId /* && message.FromUserName == LoggedInUserName */ ) ||
-                                                                            (message.ChannelId == LoggedInUserId && message.FromUserName == directMessageContactUser.UserName)) &&
+                                                                            (message.ChannelId == LoggedInUserId /* && message.FromUserName == directMessageContactUser.UserName */ )) &&
                                                                             !message.IsDeleted && message.IsPinned);
                 privateMessages = privateMessages.OrderByDescending(message => message.PinEvenOrder);
                 messageResponseModels = FillMessageResponseModel(privateMessages);

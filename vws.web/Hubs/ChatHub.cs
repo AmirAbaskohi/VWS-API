@@ -162,7 +162,7 @@ namespace vws.web.Hubs
                 // todo: username
                 pinnedMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId &&
                                                                         ((message.ChannelId == channelId /* && message.FromUserName == LoggedInUserName*/ ) ||
-                                                                        (message.ChannelId == LoggedInUserId && message.FromUserName == directMessageContactUser.UserName)) &&
+                                                                        (message.ChannelId == LoggedInUserId /* && message.FromUserName == directMessageContactUser.UserName */)) &&
                                                                         !message.IsDeleted &&
                                                                         message.IsPinned).ToList();
             }
@@ -222,23 +222,23 @@ namespace vws.web.Hubs
             vwsDbContext.Save();
 
             UpdateChannelTransaction(channelId, channelTypeId, LoggedInUserId, newMessage.SendOn);
+            // todo: username
+            //if (newMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+            //{
+            //    var groupName = CombineTwoGuidsInOrder(LoggedInUserId, newMessage.ChannelId);
+            //    await Clients.OthersInGroup(groupName).ReceiveMessage(newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
+            //                                                                    false, newMessage.ChannelTypeId, LoggedInUserId,
+            //                                                                    newMessage.SendOn, newMessage.FromUserName, newMessage.ReplyTo);
 
-            if (newMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
-            {
-                var groupName = CombineTwoGuidsInOrder(LoggedInUserId, newMessage.ChannelId);
-                await Clients.OthersInGroup(groupName).ReceiveMessage(newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
-                                                                                false, newMessage.ChannelTypeId, LoggedInUserId,
-                                                                                newMessage.SendOn, newMessage.FromUserName, newMessage.ReplyTo);
+            //}
+            //else
+            //    await Clients.OthersInGroup(channelId.ToString()).ReceiveMessage(newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
+            //                                                                    false, newMessage.ChannelTypeId, newMessage.ChannelId,
+            //                                                                    newMessage.SendOn, newMessage.FromUserName, newMessage.ReplyTo);
 
-            }
-            else
-                await Clients.OthersInGroup(channelId.ToString()).ReceiveMessage(newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
-                                                                                false, newMessage.ChannelTypeId, newMessage.ChannelId,
-                                                                                newMessage.SendOn, newMessage.FromUserName, newMessage.ReplyTo);
-
-            await Clients.Caller.ReceiveMessage(newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
-                                                   true, newMessage.ChannelTypeId, newMessage.ChannelId,
-                                                   newMessage.SendOn, newMessage.FromUserName, newMessage.ReplyTo);
+            //await Clients.Caller.ReceiveMessage(newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
+            //                                       true, newMessage.ChannelTypeId, newMessage.ChannelId,
+            //                                       newMessage.SendOn, newMessage.FromUserName, newMessage.ReplyTo);
         }
 
         public async Task DeleteMessage(long messageId)
