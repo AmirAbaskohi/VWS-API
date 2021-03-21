@@ -388,7 +388,7 @@ namespace vws.web.Controllers._account
                         {
                             Email = payload.Email,
                             SecurityStamp = Guid.NewGuid().ToString(),
-                            UserName = payload.Email
+                            //UserName = payload.Email
                         };
                         IdentityResult identityResult = await userManager.CreateAsync(user);
                         user.EmailConfirmed = true;
