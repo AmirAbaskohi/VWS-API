@@ -412,13 +412,13 @@ namespace vws.web.Controllers._chat
                 {
                     ProfileImageGuid = userProfile.ProfileImageGuid,
                     UserId = userId,
-                    UserName = (await userManager.FindByIdAsync(userId.ToString())).UserName
+                    NickName = userProfile.NickName
                 });
                 members.Add(new UserModel()
                 {
                     ProfileImageGuid = otherUserProfile.ProfileImageGuid,
                     UserId = channelId,
-                    UserName = (await userManager.FindByIdAsync(channelId.ToString())).UserName
+                    NickName = otherUserProfile.NickName
                 });
 
                 response.Value = members;
@@ -475,7 +475,7 @@ namespace vws.web.Controllers._chat
                 members.Add(new UserModel()
                 {
                     UserId = user.UserId,
-                    UserName = (await userManager.FindByIdAsync(user.UserId.ToString())).UserName,
+                    NickName = user.NickName,
                     ProfileImageGuid = user.ProfileImageGuid
                 });
             }

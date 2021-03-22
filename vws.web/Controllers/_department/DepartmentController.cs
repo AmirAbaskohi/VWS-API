@@ -489,7 +489,7 @@ namespace vws.web.Controllers._department
                 var userName = (await userManager.FindByIdAsync(userCoDepartment.UserId.ToString())).UserName;
                 coDepartmentsList.Add(new UserModel()
                 {
-                    UserName = userName,
+                    NickName = userCoDepartment.NickName,
                     UserId = userCoDepartment.UserId,
                     ProfileImageGuid = userCoDepartment.ProfileImageGuid
                 });

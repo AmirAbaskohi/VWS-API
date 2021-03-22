@@ -55,7 +55,7 @@ namespace vws.web.Controllers._task
                 {
                     ProfileImageGuid = user.ProfileImageGuid,
                     UserId = user.UserId,
-                    UserName = (await userManager.FindByIdAsync(user.UserId.ToString())).UserName
+                    NickName = user.NickName
                 });
             }
 
@@ -369,6 +369,7 @@ namespace vws.web.Controllers._task
 
             foreach(var comment in comments)
             {
+                var userProfile = await vwsDbContext.GetUserProfileAsync(comment.CommentedBy);
                 result.Add(new CommentResponseModel()
                 {
                     Id = comment.Id,
@@ -376,8 +377,8 @@ namespace vws.web.Controllers._task
                     CommentedBy = new UserModel()
                     {
                         UserId = comment.CommentedBy,
-                        UserName = (await userManager.FindByIdAsync(comment.CommentedBy.ToString())).UserName,
-                        ProfileImageGuid = (await vwsDbContext.GetUserProfileAsync(comment.CommentedBy)).ProfileImageGuid
+                        NickName = userProfile.NickName,
+                        ProfileImageGuid = userProfile.ProfileImageGuid
                     },
                     CommentedOn = comment.CommentedOn,
                     MidifiedOn = comment.ModifiedOn,
@@ -1247,7 +1248,7 @@ namespace vws.web.Controllers._task
                 result.Add(new UserModel()
                 {
                     UserId = user,
-                    UserName = (await userManager.FindByIdAsync(user.ToString())).UserName,
+                    NickName = selectedUser.NickName,
                     ProfileImageGuid = selectedUser.ProfileImageGuid
                 });
             }
@@ -2255,6 +2256,7 @@ namespace vws.web.Controllers._task
             vwsDbContext.Save();
             AddCommentAttachments(newComment.Id, model.Attachments);
 
+            UserProfile userProfile = await vwsDbContext.GetUserProfileAsync(newComment.CommentedBy);
             response.Value = new CommentResponseModel()
             {
                 Id = newComment.Id,
@@ -2262,8 +2264,8 @@ namespace vws.web.Controllers._task
                 CommentedBy = new UserModel()
                 {
                     UserId = newComment.CommentedBy,
-                    UserName = (await userManager.FindByIdAsync(newComment.CommentedBy.ToString())).UserName,
-                    ProfileImageGuid = (await vwsDbContext.GetUserProfileAsync(newComment.CommentedBy)).ProfileImageGuid
+                    NickName = userProfile.NickName,
+                    ProfileImageGuid = userProfile.ProfileImageGuid
                 },
                 CommentedOn = newComment.CommentedOn,
                 MidifiedOn = newComment.ModifiedOn,

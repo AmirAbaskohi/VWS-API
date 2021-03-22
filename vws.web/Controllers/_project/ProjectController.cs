@@ -180,7 +180,7 @@ namespace vws.web.Controllers._project
                 {
                     UserId = user.UserId,
                     ProfileImageGuid = user.ProfileImageGuid,
-                    UserName = (await userManager.FindByIdAsync(user.UserId.ToString())).UserName
+                    NickName = user.NickName
                 });
             }
 
@@ -827,7 +827,7 @@ namespace vws.web.Controllers._project
                 {
                     UserId = availableUserId,
                     ProfileImageGuid = userProfile.ProfileImageGuid,
-                    UserName = user.UserName
+                    NickName = userProfile.NickName
                 });
             }
 
@@ -886,7 +886,7 @@ namespace vws.web.Controllers._project
                 members.Add(new UserModel()
                 {
                     UserId = user.UserId,
-                    UserName = (await userManager.FindByIdAsync(user.UserId.ToString())).UserName,
+                    NickName = user.NickName,
                     ProfileImageGuid = user.ProfileImageGuid
                 });
             }
@@ -1222,7 +1222,7 @@ namespace vws.web.Controllers._project
                     {
                         ProfileImageGuid = user.UserProfile.ProfileImageGuid,
                         UserId = user.UserProfileId,
-                        UserName = (await userManager.FindByIdAsync(user.UserProfileId.ToString())).UserName
+                        NickName = user.UserProfile.NickName
                     }
                 });
             }

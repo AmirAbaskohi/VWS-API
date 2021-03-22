@@ -668,12 +668,12 @@ namespace vws.web.Controllers._team
 
             foreach (var teamMate in userTeamMates)
             {
-                var userName = (await userManager.FindByIdAsync(teamMate.UserId.ToString())).UserName;
+                UserProfile userProfile = await vwsDbContext.GetUserProfileAsync(teamMate.UserId);
                 teammatesList.Add(new UserModel()
                 {
-                    UserName = userName,
                     UserId = teamMate.UserId,
-                    ProfileImageGuid = teamMate.ProfileImageGuid
+                    NickName = userProfile.NickName,
+                    ProfileImageGuid = userProfile.ProfileImageGuid
                 });
             }
 
@@ -799,7 +799,7 @@ namespace vws.web.Controllers._team
                 {
                     UserId = userId,
                     ProfileImageGuid = userProfile.ProfileImageGuid,
-                    UserName = user.UserName
+                    NickName = userProfile.NickName
                 });
             }
 

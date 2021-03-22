@@ -650,7 +650,7 @@ namespace vws.web.Controllers._account
         [Route("refresh")]
         public async Task<IActionResult> Refresh([FromBody] RefreshTokenModel model)
         {
-            var response = new ResponseModel<LoginResponseModel>();
+            var response = new ResponseModel<JwtTokenModel>();
             var principal = GetPrincipalFromExpiredToken(model.Token);
             Guid userId = new Guid(principal.Claims.First(claim => claim.Type == "UserId").Value);
             var varRefreshToken = await vwsDbContext.GetRefreshTokenAsync(userId, model.RefreshToken);
@@ -674,7 +674,7 @@ namespace vws.web.Controllers._account
 
             var newJWToken = GenerateToken(principal.Claims);
 
-            return Ok(new ResponseModel<LoginResponseModel>(new LoginResponseModel
+            return Ok(new ResponseModel<JwtTokenModel>(new JwtTokenModel
             {
                 Token = new JwtSecurityTokenHandler().WriteToken(newJWToken),
                 RefreshToken = newRefreshToken.Token,

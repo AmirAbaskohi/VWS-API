@@ -7,7 +7,7 @@ namespace vws.web.Models
 {
     public class UserModel : IEquatable<UserModel>
     {
-        public string UserName { get; set; }
+        public string NickName { get; set; }
         public Guid UserId { get; set; }
         public Guid? ProfileImageGuid { get; set; }
 

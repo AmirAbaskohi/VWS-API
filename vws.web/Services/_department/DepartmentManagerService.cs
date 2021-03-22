@@ -107,11 +107,12 @@ namespace vws.web.Services._department
 
             foreach (var member in members)
             {
+                UserProfile userProfile = await vwsDbContext.GetUserProfileAsync(member);
                 result.Add(new UserModel()
                 {
                     UserId = member,
-                    UserName = (await userManager.FindByIdAsync(member.ToString())).UserName,
-                    ProfileImageGuid = vwsDbContext.UserProfiles.FirstOrDefault(profile => profile.UserId == member).ProfileImageGuid
+                    NickName = userProfile.NickName,
+                    ProfileImageGuid = userProfile.ProfileImageGuid
                 });
             }
 

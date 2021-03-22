@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace vws.web.Models
+namespace vws.web.Models._account
 {
     public class JwtTokenModel
     {
