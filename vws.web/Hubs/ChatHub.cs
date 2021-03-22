@@ -71,7 +71,7 @@ namespace vws.web.Hubs
                         ConnectionIds = new List<string>() { connectionId },
                         ConnectionStart = DateTime.Now,
                         LatestTransaction = DateTime.Now,
-                        //UserName = LoggedInUserName
+                        NickName = LoggedInNickName
                     });
                 }
                 catch (Exception ex)
@@ -159,19 +159,17 @@ namespace vws.web.Hubs
             if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
             {
                 var directMessageContactUser = await userManager.FindByIdAsync(channelId.ToString());
-                // todo: username
                 pinnedMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId &&
-                                                                        ((message.ChannelId == channelId /* && message.FromUserName == LoggedInUserName*/ ) ||
-                                                                        (message.ChannelId == LoggedInUserId /* && message.FromUserName == directMessageContactUser.UserName */)) &&
-                                                                        !message.IsDeleted &&
+                                                                      ((message.ChannelId == channelId && message.FromUserId == LoggedInUserId) ||
+                                                                       (message.ChannelId == LoggedInUserId && message.FromUserId == Guid.Parse(directMessageContactUser.Id))) &&
+                                                                       !message.IsDeleted &&
                                                                         message.IsPinned).ToList();
             }
             else
             {
                 pinnedMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId &&
                                                                         message.ChannelId == channelId &&
-                                                                        !message.IsDeleted && message.IsPinned)
-                                                       .ToList();
+                                                                       !message.IsDeleted && message.IsPinned).ToList();
             }
 
             return pinnedMessages;
@@ -183,7 +181,7 @@ namespace vws.web.Hubs
             #region check channel existance and access
             if (!channelService.DoesChannelExist(channelId, channelTypeId) ||
                     !channelService.HasUserAccessToChannel(LoggedInUserId, channelId, channelTypeId))
-                return; 
+                return;
             #endregion
 
             if (message.Length > 4000)
@@ -214,7 +212,7 @@ namespace vws.web.Hubs
                 SendOn = DateTime.Now,
                 ChannelId = channelId,
                 ChannelTypeId = channelTypeId,
-                //FromUserName = LoggedInUserName, // todo: username
+                FromUserId = LoggedInUserId,
                 MessageTypeId = messageTypeId,
                 ReplyTo = replyTo,
             };
@@ -222,32 +220,33 @@ namespace vws.web.Hubs
             vwsDbContext.Save();
 
             UpdateChannelTransaction(channelId, channelTypeId, LoggedInUserId, newMessage.SendOn);
-            // todo: username
-            //if (newMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
-            //{
-            //    var groupName = CombineTwoGuidsInOrder(LoggedInUserId, newMessage.ChannelId);
-            //    await Clients.OthersInGroup(groupName).ReceiveMessage(newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
-            //                                                                    false, newMessage.ChannelTypeId, LoggedInUserId,
-            //                                                                    newMessage.SendOn, newMessage.FromUserName, newMessage.ReplyTo);
 
-            //}
-            //else
-            //    await Clients.OthersInGroup(channelId.ToString()).ReceiveMessage(newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
-            //                                                                    false, newMessage.ChannelTypeId, newMessage.ChannelId,
-            //                                                                    newMessage.SendOn, newMessage.FromUserName, newMessage.ReplyTo);
+            var fromUserProfile = await vwsDbContext.GetUserProfileAsync(newMessage.FromUserId);
 
-            //await Clients.Caller.ReceiveMessage(newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
-            //                                       true, newMessage.ChannelTypeId, newMessage.ChannelId,
-            //                                       newMessage.SendOn, newMessage.FromUserName, newMessage.ReplyTo);
+            if (newMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+            {
+                var groupName = CombineTwoGuidsInOrder(LoggedInUserId, newMessage.ChannelId);
+                await Clients.OthersInGroup(groupName).ReceiveMessage(newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
+                                                                                false, newMessage.ChannelTypeId, LoggedInUserId,
+                                                                                newMessage.SendOn, fromUserProfile.NickName, newMessage.ReplyTo);
+
+            }
+            else
+                await Clients.OthersInGroup(channelId.ToString()).ReceiveMessage(newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
+                                                                                false, newMessage.ChannelTypeId, newMessage.ChannelId,
+                                                                                newMessage.SendOn, fromUserProfile.NickName, newMessage.ReplyTo);
+
+            await Clients.Caller.ReceiveMessage(newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
+                                                   true, newMessage.ChannelTypeId, newMessage.ChannelId,
+                                                   newMessage.SendOn, fromUserProfile.NickName, newMessage.ReplyTo);
         }
 
         public async Task DeleteMessage(long messageId)
         {
             var selectedMessage = vwsDbContext.Messages.FirstOrDefault(message => message.Id == messageId);
 
-            // todo: username
-            //if (selectedMessage == null || selectedMessage.IsDeleted || selectedMessage.FromUserName != LoggedInUserName)
-            //    return;
+            if (selectedMessage == null || selectedMessage.IsDeleted || selectedMessage.FromUserId != LoggedInUserId)
+                return;
 
             #region check channel existance and access
             if (!channelService.DoesChannelExist(selectedMessage.ChannelId, selectedMessage.ChannelTypeId) ||
@@ -360,7 +359,7 @@ namespace vws.web.Hubs
             var selectedMessage = vwsDbContext.Messages.FirstOrDefault(message => message.Id == messageId);
 
             if (selectedMessage == null || selectedMessage.IsDeleted ||
-                //selectedMessage.FromUserName != LoggedInUserName || // todo: username
+                selectedMessage.FromUserId != LoggedInUserId ||
                 selectedMessage.MessageTypeId != (byte)SeedDataEnum.MessageTypes.Text)
                 return;
 
@@ -416,20 +415,20 @@ namespace vws.web.Hubs
             #endregion
 
             // todo: username
-            //var markedMessages = vwsDbContext.MarkMessagesAsRead(messageId, LoggedInUserId, LoggedInUserName).ToList();
-            //foreach (var markedMessage in markedMessages)
-            //{
-            //    if (markedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
-            //    {
-            //        var groupName = CombineTwoGuidsInOrder(LoggedInUserId, markedMessage.ChannelId);
-            //        await Clients.Caller.ReceiveReadMessage(messageId, markedMessage.ChannelId, markedMessage.ChannelTypeId);
-            //        await Clients.OthersInGroup(groupName).ReceiveReadMessage(messageId, LoggedInUserId, markedMessage.ChannelTypeId);
-            //    }
-            //    else
-            //    {
-            //        await Clients.Group(markedMessage.ChannelId.ToString()).ReceiveReadMessage(messageId, markedMessage.ChannelId, markedMessage.ChannelTypeId);
-            //    }
-            //}
+            var markedMessages = vwsDbContext.MarkMessagesAsRead(messageId, LoggedInUserId).ToList();
+            foreach (var markedMessage in markedMessages)
+            {
+                if (markedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+                {
+                    var groupName = CombineTwoGuidsInOrder(LoggedInUserId, markedMessage.ChannelId);
+                    await Clients.Caller.ReceiveReadMessage(messageId, markedMessage.ChannelId, markedMessage.ChannelTypeId);
+                    await Clients.OthersInGroup(groupName).ReceiveReadMessage(messageId, LoggedInUserId, markedMessage.ChannelTypeId);
+                }
+                else
+                {
+                    await Clients.Group(markedMessage.ChannelId.ToString()).ReceiveReadMessage(messageId, markedMessage.ChannelId, markedMessage.ChannelTypeId);
+                }
+            }
         }
 
         public async Task MarkMessageAsDeliver(long messageId)

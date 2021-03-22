@@ -220,15 +220,14 @@ namespace vws.web.Domain
             return channelTransaction;
         }
 
-        public IQueryable<MessageRead> MarkMessagesAsRead(long messageId, Guid userId, string userName)
+        public IQueryable<MessageRead> MarkMessagesAsRead(long messageId, Guid userId)
         {
             SqlParameter[] sqlParameters =
             {
                new SqlParameter("MessageId", messageId),
-               new SqlParameter("UserId", $"{userId.ToString()}"),
-               new SqlParameter("UserName", $"{userName}")
+               new SqlParameter("UserId", $"{userId.ToString()}")
             };
-            return MessageReads.FromSqlRaw<MessageRead>("MarkUnreadMessages @MessageId, @UserId, @UserName", sqlParameters);
+            return MessageReads.FromSqlRaw<MessageRead>("MarkUnreadMessages @MessageId, @UserId", sqlParameters);
         }
 
         #endregion

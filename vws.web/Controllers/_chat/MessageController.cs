@@ -38,6 +38,13 @@ namespace vws.web.Controllers._chat
         private List<MessageResponseModel> FillMessageResponseModel(IQueryable<Message> messages)
         {
             List<MessageResponseModel> messageResponseModels = new List<MessageResponseModel>();
+            HashSet<Guid> messageSenderUserIds = messages.Select(message => message.FromUserId).ToHashSet();
+            Dictionary<Guid, string> messageSenderNickNames = new Dictionary<Guid, string>();
+            foreach (var messageSenderUserId in messageSenderUserIds)
+            {
+                var userProfile = vwsDbContext.GetUserProfileAsync(messageSenderUserId).Result;
+                messageSenderNickNames.Add(messageSenderUserId, userProfile.NickName);
+            }
             foreach (var message in messages)
             {
                 messageResponseModels.Add(new MessageResponseModel
@@ -45,8 +52,8 @@ namespace vws.web.Controllers._chat
                     Id = message.Id,
                     Body = message.Body,
                     SendOn = message.SendOn,
-                    //FromUserName = message.FromUserName,
-                    //SendFromMe = message.FromUserName == LoggedInUserName ? true : false, // todo: username
+                    FromNickName = messageSenderNickNames[message.FromUserId],
+                    SendFromMe = message.FromUserId == LoggedInUserId ? true : false,
                     ReplyTo = message.ReplyTo,
                     IsEdited = message.IsEdited,
                     IsPinned = message.IsPinned,
@@ -83,10 +90,9 @@ namespace vws.web.Controllers._chat
             if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
             {
                 var directMessageContactUser = await userManager.FindByIdAsync(channelId.ToString());
-                //((message.ChannelId == channelId && message.FromUserName == LoggedInUserName) ||
                 var privateMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId &&
-                                                                            ((message.ChannelId == channelId  /* && message.FromUserName == LoggedInUserName */ ) ||
-                                                                            (message.ChannelId == LoggedInUserId /* && message.FromUserName == directMessageContactUser.UserName */ )) &&
+                                                                            ((message.ChannelId == channelId && message.FromUserId == LoggedInUserId) ||
+                                                                            (message.ChannelId == LoggedInUserId && message.FromUserId == Guid.Parse(directMessageContactUser.Id))) &&
                                                                             !message.IsDeleted);
                 messageResponseModels = FillMessageResponseModel(privateMessages);
             }
@@ -129,10 +135,9 @@ namespace vws.web.Controllers._chat
             if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
             {
                 var directMessageContactUser = await userManager.FindByIdAsync(channelId.ToString());
-                // todo: username
                 var privateMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId &&
-                                                                            ((message.ChannelId == channelId /* && message.FromUserName == LoggedInUserName */ ) ||
-                                                                            (message.ChannelId == LoggedInUserId /* && message.FromUserName == directMessageContactUser.UserName */ )) &&
+                                                                            ((message.ChannelId == channelId && message.FromUserId == LoggedInUserId) ||
+                                                                            (message.ChannelId == LoggedInUserId && message.FromUserId == Guid.Parse(directMessageContactUser.Id))) &&
                                                                             !message.IsDeleted && message.IsPinned);
                 privateMessages = privateMessages.OrderByDescending(message => message.PinEvenOrder);
                 messageResponseModels = FillMessageResponseModel(privateMessages);

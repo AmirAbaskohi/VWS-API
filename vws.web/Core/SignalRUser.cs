@@ -16,6 +16,6 @@ namespace vws.web.Core
 
         public DateTime LatestTransaction { get; set; }
 
-        public string UserName { get; set; }
+        public string NickName { get; set; }
     }
 }

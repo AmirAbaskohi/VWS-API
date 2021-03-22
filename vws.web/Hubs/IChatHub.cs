@@ -9,7 +9,8 @@ namespace vws.web.Hubs
     {
         Task ReceiveMessage(long messageId, string message, byte messageTypeId,
                            bool isSentFromMe, byte channelTypeId, Guid channelId,
-                           DateTime sentOn, string senderUserName, long? replyTo);
+                           DateTime sentOn, string senderNickName, long? replyTo);
+
         Task InformUserIsOnline(Guid userId);
 
         Task UnmuteChannel(Guid channelId, byte channelTypeId);
