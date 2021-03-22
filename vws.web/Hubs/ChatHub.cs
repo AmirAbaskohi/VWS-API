@@ -40,10 +40,10 @@ namespace vws.web.Hubs
             userManager = _userManager;
         }
 
-        //private string LoggedInUserName
-        //{
-        //    get { return Context.User.Claims.FirstOrDefault(c => c.Type == "UserName").Value; }
-        //}
+        private string LoggedInNickName
+        {
+            get { return Context.User.Claims.FirstOrDefault(c => c.Type == "NickName").Value; }
+        }
 
         private Guid LoggedInUserId
         {

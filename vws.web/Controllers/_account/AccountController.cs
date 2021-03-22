@@ -90,12 +90,12 @@ namespace vws.web.Controllers._account
             }
         }
 
-        private async Task<JwtTokenModel> GenerateJWT(IdentityUser user)
+        private async Task<JwtTokenModel> GenerateJWT(IdentityUser user, string nickName)
         {
             var authClaims = new List<Claim>
                 {
                     new Claim("UserEmail", user.Email),
-                    //new Claim("UserName", user.UserName),
+                    new Claim("NickName", nickName),
                     new Claim("UserId", user.Id),
                 };
 
@@ -231,7 +231,7 @@ namespace vws.web.Controllers._account
                         else
                         {
                             responseModel.Value.HasNickName = true;
-                            responseModel.Value.JwtToken = await GenerateJWT(user);
+                            responseModel.Value.JwtToken = await GenerateJWT(user, userProfile.NickName);
                             responseModel.Message = "Logged in successfully.";
                             return Ok(responseModel);
                         }
@@ -367,54 +367,54 @@ namespace vws.web.Controllers._account
         //    return Ok(new ResponseModel { Message = "User created successfully!" });
         //}
 
-        [HttpPost]
-        [Route("sso")]
-        public async Task<IActionResult> SSO([FromBody] ExternalLoginModel model)
-        {
-            var _response = new ResponseModel();
-            switch (model.ProviderName)
-            {
-                case "Google":
-                    var payload = await ValidateGoogleToken(model.Token);
-                    if (!payload.EmailVerified)
-                    {
-                        _response.AddError(localizer["Email not verified."]);
-                        return BadRequest(_response);
-                    }
-                    var existedUser = await userManager.FindByEmailAsync(payload.Email);
-                    if (existedUser == null)
-                    {
-                        ApplicationUser user = new ApplicationUser()
-                        {
-                            Email = payload.Email,
-                            SecurityStamp = Guid.NewGuid().ToString(),
-                            //UserName = payload.Email
-                        };
-                        IdentityResult identityResult = await userManager.CreateAsync(user);
-                        user.EmailConfirmed = true;
-                        vwsDbContext.Save();
-                        CreateUserTaskStatuses(Guid.Parse(user.Id));
-                        if (identityResult.Succeeded)
-                        {
-                            identityResult = await userManager.AddLoginAsync(user, new UserLoginInfo(model.ProviderName, payload.Subject, model.ProviderName));
-                            if (identityResult.Succeeded)
-                            {
-                                await signInManager.SignInAsync(user, false);
-                                await CreateUserProfile(Guid.Parse(user.Id));
-                                return Ok(new ResponseModel<JwtTokenModel>(GenerateJWT(user).Result));
-                            }
-                        }
-                    }
-                    else
-                    {
-                        return Ok(new ResponseModel<JwtTokenModel>(GenerateJWT(existedUser).Result));
-                    }
-                    break;
-                default:
-                    return BadRequest();
-            }
-            return Forbid();
-        }
+        //[HttpPost]
+        //[Route("sso")]
+        //public async Task<IActionResult> SSO([FromBody] ExternalLoginModel model)
+        //{
+        //    var _response = new ResponseModel();
+        //    switch (model.ProviderName)
+        //    {
+        //        case "Google":
+        //            var payload = await ValidateGoogleToken(model.Token);
+        //            if (!payload.EmailVerified)
+        //            {
+        //                _response.AddError(localizer["Email not verified."]);
+        //                return BadRequest(_response);
+        //            }
+        //            var existedUser = await userManager.FindByEmailAsync(payload.Email);
+        //            if (existedUser == null)
+        //            {
+        //                ApplicationUser user = new ApplicationUser()
+        //                {
+        //                    Email = payload.Email,
+        //                    SecurityStamp = Guid.NewGuid().ToString(),
+        //                    //UserName = payload.Email
+        //                };
+        //                IdentityResult identityResult = await userManager.CreateAsync(user);
+        //                user.EmailConfirmed = true;
+        //                vwsDbContext.Save();
+        //                CreateUserTaskStatuses(Guid.Parse(user.Id));
+        //                if (identityResult.Succeeded)
+        //                {
+        //                    identityResult = await userManager.AddLoginAsync(user, new UserLoginInfo(model.ProviderName, payload.Subject, model.ProviderName));
+        //                    if (identityResult.Succeeded)
+        //                    {
+        //                        await signInManager.SignInAsync(user, false);
+        //                        await CreateUserProfile(Guid.Parse(user.Id));
+        //                        return Ok(new ResponseModel<JwtTokenModel>(GenerateJWT(user).Result));
+        //                    }
+        //                }
+        //            }
+        //            else
+        //            {
+        //                return Ok(new ResponseModel<JwtTokenModel>(GenerateJWT(existedUser).Result));
+        //            }
+        //            break;
+        //        default:
+        //            return BadRequest();
+        //    }
+        //    return Forbid();
+        //}
 
         //[HttpPost]
         //[Route("login")]
