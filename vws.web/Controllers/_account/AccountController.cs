@@ -518,6 +518,12 @@ namespace vws.web.Controllers._account
                 return BadRequest(responseModel);
             }
 
+            if (string.IsNullOrWhiteSpace(model.NickName) || model.NickName.Length > 100)
+            {
+                responseModel.AddError(localizer["Nick-Name can not be over 100 chars and not empty."]);
+                responseModel.Message = "Invalid nick-name!";
+                return BadRequest(responseModel);
+            }
             userProfile.NickName = model.NickName;
             userProfile.NickNameSecurityStamp = Guid.NewGuid();
             vwsDbContext.Save();
