@@ -210,4 +210,7 @@
   <data name="User creation failed." xml:space="preserve">
     <value>خطا در ایجاد کاربر.</value>
   </data>
+  <data name="Invalid security stamp." xml:space="preserve">
+    <value>توکن نامعتبر. لطفا دوباره وارد شوید.</value>
+  </data>
 </root>

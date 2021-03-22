@@ -207,4 +207,7 @@
   <data name="User creation failed." xml:space="preserve">
     <value>User creation failed.</value>
   </data>
+  <data name="Invalid security stamp." xml:space="preserve">
+    <value>Invalid security stamp. Please login again.</value>
+  </data>
 </root>

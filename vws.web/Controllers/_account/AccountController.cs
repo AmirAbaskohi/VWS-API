@@ -176,15 +176,17 @@ namespace vws.web.Controllers._account
             return principal;
         }
 
-        private async Task CreateUserProfile(Guid userId)
+        private async Task<UserProfile> CreateUserProfile(Guid userId)
         {
             UserProfile userProfile = new UserProfile()
             {
                 UserId = userId,
-                ThemeColorCode = ""
+                ThemeColorCode = "",
+                NickNameSecurityStamp = Guid.NewGuid()
             };
-            await vwsDbContext.AddUserProfileAsync(userProfile);
+            var createdUserProfile = await vwsDbContext.AddUserProfileAsync(userProfile);
             vwsDbContext.Save();
+            return createdUserProfile;
         }
 
         private void CreateUserTaskStatuses(Guid userId)
@@ -219,12 +221,13 @@ namespace vws.web.Controllers._account
 
                 if (await userManager.CheckPasswordAsync(user, model.Password))
                 {
+                    var userProfile = await vwsDbContext.GetUserProfileAsync(new Guid(user.Id));
                     if (responseModel.Value.EmailConfirmed)
                     {
-                        var userProfile = await vwsDbContext.GetUserProfileAsync(new Guid(user.Id));
                         if (string.IsNullOrWhiteSpace(userProfile.NickName))
                         {
                             responseModel.Value.HasNickName = false;
+                            responseModel.Value.NickNameSecurityStamp = userProfile.NickNameSecurityStamp;
                             responseModel.Message = "User has not nick-name.";
                             return Ok(responseModel);
                         }
@@ -232,13 +235,14 @@ namespace vws.web.Controllers._account
                         {
                             responseModel.Value.HasNickName = true;
                             responseModel.Value.JwtToken = await GenerateJWT(user, userProfile.NickName);
-                            responseModel.Message = "Logged in successfully.";
+                            responseModel.Message = "Logged in successfully!";
                             return Ok(responseModel);
                         }
                     }
                     else
                     {
                         responseModel.Value.HasNickName = false;
+                        responseModel.Value.NickNameSecurityStamp = userProfile.NickNameSecurityStamp;
                         responseModel.Message = "Email is not confirmed";
                         return Ok(responseModel);
                     }
@@ -271,10 +275,12 @@ namespace vws.web.Controllers._account
                 #endregion
                 try
                 {
-                    await CreateUserProfile(Guid.Parse(applicationUser.Id));
+                    var createdUserProfile = await CreateUserProfile(Guid.Parse(applicationUser.Id));
+                    responseModel.Value.NickNameSecurityStamp = createdUserProfile.NickNameSecurityStamp;
                 }
                 catch
                 {
+                    await userManager.DeleteAsync(applicationUser);
                     responseModel.AddError(localizer["User creation failed."]);
                     responseModel.Message = "User creation failed!";
                     return StatusCode(StatusCodes.Status500InternalServerError, responseModel);
@@ -455,50 +461,6 @@ namespace vws.web.Controllers._account
         //}
 
         [HttpPost]
-        [Route("confirmEmail")]
-        public async Task<IActionResult> ConfirmEmail([FromBody] ValidationModel model)
-        {
-            List<string> errors = new List<string>();
-
-            if (!emailChecker.IsValid(model.Email))
-            {
-                errors.Add(localizer["Email is invalid."]);
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    new ResponseModel { Message = "Invalid Email.", Errors = errors });
-            }
-
-            var user = await userManager.FindByEmailAsync(model.Email);
-            if (user == null)
-            {
-                errors.Add(localizer["User does not exist."]);
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "User does not exist!", Errors = errors });
-            }
-
-            var timeDiff = user.EmailVerificationSendTime - DateTime.Now;
-
-            if (user.EmailConfirmed)
-            {
-                errors.Add(localizer["Email already confirmed."]);
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "Email already confirmed!", Errors = errors });
-            }
-
-            if (user.EmailVerificationCode == model.ValidationCode &&
-                timeDiff.TotalMinutes <= Int16.Parse(configuration["EmailCode:ValidDurationTimeInMinutes"]))
-            {
-                user.EmailConfirmed = true;
-                var result = await userManager.UpdateAsync(user);
-                if (result.Succeeded)
-                {
-                    CreateUserTaskStatuses(Guid.Parse(user.Id));
-                    return Ok(new ResponseModel { Message = "Email confirmed successfully!" });
-                }
-            }
-
-            errors.Add(localizer["Emil confirmation failed."]);
-            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "Email confirmation failed!", Errors = errors });
-        }
-
-        [HttpPost]
         [Route("sendConfirmEmail")]
         public async Task<IActionResult> SendConfirmEmail([FromBody] EmailModel model)
         {
@@ -563,6 +525,87 @@ namespace vws.web.Controllers._account
             }
             errors.Add(localizer["Problem happened in sending email."]);
             return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "Sending email failed!", Errors = errors });
+        }
+
+        [HttpPost]
+        [Route("confirmEmail")]
+        public async Task<IActionResult> ConfirmEmail([FromBody] ValidationModel model)
+        {
+            List<string> errors = new List<string>();
+
+            if (!emailChecker.IsValid(model.Email))
+            {
+                errors.Add(localizer["Email is invalid."]);
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new ResponseModel { Message = "Invalid Email.", Errors = errors });
+            }
+
+            var user = await userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                errors.Add(localizer["User does not exist."]);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "User does not exist!", Errors = errors });
+            }
+
+            var timeDiff = user.EmailVerificationSendTime - DateTime.Now;
+
+            if (user.EmailConfirmed)
+            {
+                errors.Add(localizer["Email already confirmed."]);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "Email already confirmed!", Errors = errors });
+            }
+
+            if (user.EmailVerificationCode == model.ValidationCode &&
+                timeDiff.TotalMinutes <= Int16.Parse(configuration["EmailCode:ValidDurationTimeInMinutes"]))
+            {
+                user.EmailConfirmed = true;
+                var result = await userManager.UpdateAsync(user);
+                if (result.Succeeded)
+                {
+                    CreateUserTaskStatuses(Guid.Parse(user.Id));
+                    return Ok(new ResponseModel { Message = "Email confirmed successfully!" });
+                }
+            }
+
+            errors.Add(localizer["Emil confirmation failed."]);
+            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "Email confirmation failed!", Errors = errors });
+        }
+
+        [HttpPost]
+        [Route("setNickName")]
+        public async Task<IActionResult> SetNickName([FromBody] NickNameModel model)
+        {
+            ResponseModel<JwtTokenModel> responseModel = new ResponseModel<JwtTokenModel>();
+
+            if (!emailChecker.IsValid(model.Email))
+            {
+                responseModel.AddError(localizer["Email is invalid."]);
+                responseModel.Message = "Invalid Email.";
+                return BadRequest(responseModel);
+            }
+
+            var user = await userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                responseModel.AddError(localizer["User does not exist."]);
+                responseModel.Message = "User does not exist!";
+                return BadRequest(responseModel);
+            }
+
+            var userProfile = await vwsDbContext.GetUserProfileAsync(Guid.Parse(user.Id));
+            if (userProfile.NickNameSecurityStamp != model.NickNameSecurityStamp)
+            {
+                responseModel.AddError(localizer["Invalid security stamp."]);
+                responseModel.Message = "Invalid security stamp!";
+                return BadRequest(responseModel);
+            }
+
+            userProfile.NickName = model.NickName;
+            userProfile.NickNameSecurityStamp = Guid.NewGuid();
+            vwsDbContext.Save();
+            responseModel.Value = await GenerateJWT(user, model.NickName);
+            responseModel.Message = "Logged in successfully!";
+            return Ok(responseModel);
         }
 
         [HttpPost]
