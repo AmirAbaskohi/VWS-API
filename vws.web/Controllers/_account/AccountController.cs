@@ -263,7 +263,8 @@ namespace vws.web.Controllers._account
                 ApplicationUser applicationUser = new ApplicationUser()
                 {
                     Email = model.Email,
-                    SecurityStamp = Guid.NewGuid().ToString()
+                    SecurityStamp = Guid.NewGuid().ToString(),
+                    UserName = model.Email
                 };
                 var result = await userManager.CreateAsync(applicationUser, model.Password);
                 if (!result.Succeeded)
@@ -313,6 +314,7 @@ namespace vws.web.Controllers._account
                         {
                             Email = payload.Email,
                             SecurityStamp = Guid.NewGuid().ToString(),
+                            UserName = payload.Email
                         };
                         IdentityResult identityResult = await userManager.CreateAsync(user);
                         user.EmailConfirmed = true;
