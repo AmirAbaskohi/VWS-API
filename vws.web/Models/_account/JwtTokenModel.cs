@@ -11,6 +11,6 @@ namespace vws.web.Models._account
 
         public string RefreshToken { get; set; }
 
-        public DateTime? ValidTo { get; set; }
+        public DateTime ValidTo { get; set; }
     }
 }
