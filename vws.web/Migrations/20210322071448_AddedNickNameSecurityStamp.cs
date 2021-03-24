@@ -14,7 +14,7 @@ namespace vws.web.Migrations
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
 
-            migrationBuilder.Sql("UPDATE dbo.Base_UserProfile SET db.Base_UserProfile.NickNameSecurityStamp = NEWID()");
+            migrationBuilder.Sql("UPDATE dbo.Base_UserProfile SET dbo.Base_UserProfile.NickNameSecurityStamp = NEWID()");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
