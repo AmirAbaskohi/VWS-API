@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Created new invite link by {0} with guid {1}." xml:space="preserve">
+    <value>Created new invite link by {0} with guid {1}.</value>
+  </data>
   <data name="Error in writing files." xml:space="preserve">
     <value>Error in writing files.</value>
   </data>
@@ -125,6 +128,9 @@
   </data>
   <data name="File size is not allowed." xml:space="preserve">
     <value>File size is not allowed.</value>
+  </data>
+  <data name="Invite link with id {0} revoked by {1}." xml:space="preserve">
+    <value>Invite link with id {0} revoked by {1}.</value>
   </data>
   <data name="Length of color is more than 6 characters." xml:space="preserve">
     <value>Length of color is more than 6 characters.</value>
@@ -140,6 +146,9 @@
   </data>
   <data name="Link is not valid" xml:space="preserve">
     <value>Link is not valid</value>
+  </data>
+  <data name="Team created by {0}." xml:space="preserve">
+    <value>Team created by {0}.</value>
   </data>
   <data name="There is more than one file." xml:space="preserve">
     <value>There is more than one file.</value>
@@ -167,5 +176,11 @@
   </data>
   <data name="Your file does not have extension." xml:space="preserve">
     <value>Your file does not have extension.</value>
+  </data>
+  <data name="{0} joined the group using {1} invite link." xml:space="preserve">
+    <value>{0} joined the group using {1} invite link.</value>
+  </data>
+  <data name="{0} updated team image." xml:space="preserve">
+    <value>{0} updated team image.</value>
   </data>
 </root>

@@ -1277,7 +1277,7 @@ namespace vws.web.Controllers._project
         public IActionResult GetProjectHistory(int id)
         {
             var userId = LoggedInUserId.Value;
-            var response = new ResponseModel<List<ProjectHistoryModel>>();
+            var response = new ResponseModel<List<HistoryModel>>();
 
             var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Id == id);
 
@@ -1302,12 +1302,12 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            var events = new List<ProjectHistoryModel>();
+            var events = new List<HistoryModel>();
             var projectEvents = vwsDbContext.ProjectHistories.Where(projectHistory => projectHistory.ProjectId == id);
             foreach (var projectEvent in projectEvents)
             {
                 var parameters = projectEvent.CommaSepratedParameters.Split(',');
-                events.Add(new ProjectHistoryModel()
+                events.Add(new HistoryModel()
                 {
                     Message = String.Format(localizer[projectEvent.Event], parameters),
                     Time = projectEvent.EventTime

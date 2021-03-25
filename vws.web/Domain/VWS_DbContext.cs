@@ -524,6 +524,10 @@ namespace vws.web.Domain
 
         public DbSet<TeamInviteLink> TeamInviteLinks { get; set; }
 
+        IQueryable<TeamHistory> IVWS_DbContext.TeamHistories { get => TeamHistories; }
+
+        public DbSet<TeamHistory> TeamHistories { get; set; }
+
         public async Task<Team> AddTeamAsync(Team team)
         {
             await Teams.AddAsync(team);
@@ -584,6 +588,11 @@ namespace vws.web.Domain
         {
             var selectedTeamType = TeamTypes.FirstOrDefault(teamType => teamType.Id == id);
             selectedTeamType.Name = newName;
+        }
+
+        public void AddTeamHistory(TeamHistory teamHistory)
+        {
+            TeamHistories.Add(teamHistory);
         }
 
         #endregion

@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Created new invite link by {0} with guid {1}." xml:space="preserve">
+    <value>لینک دعوت جدیدی با آی دی {1} توسط {0} ایجاد شد.</value>
+  </data>
   <data name="Error in writing files." xml:space="preserve">
     <value>در نوشتن فایل مشکلی پیش آمد.</value>
   </data>
@@ -125,6 +128,9 @@
   </data>
   <data name="File size is not allowed." xml:space="preserve">
     <value>حجم فایل معتبر نیست.</value>
+  </data>
+  <data name="Invite link with id {0} revoked by {1}." xml:space="preserve">
+    <value>لینک با آی دی {0} توسط {1} منقضی شد.</value>
   </data>
   <data name="Length of color is more than 6 characters." xml:space="preserve">
     <value>تعداد کاراکتر بخش رنگ بیشتر از 6 کاراکتر است.</value>
@@ -140,6 +146,9 @@
   </data>
   <data name="Link is not valid" xml:space="preserve">
     <value>لینک معتبر نیست.</value>
+  </data>
+  <data name="Team created by {0}." xml:space="preserve">
+    <value>تیم توسط {0} ساخته شد.</value>
   </data>
   <data name="There is more than one file." xml:space="preserve">
     <value>بیشتر از یک فایل وجود دارد.</value>
@@ -167,5 +176,11 @@
   </data>
   <data name="Your file does not have extension." xml:space="preserve">
     <value>فایل شما پسوند ندارد.</value>
+  </data>
+  <data name="{0} joined the group using {1} invite link." xml:space="preserve">
+    <value>{0} با استفاده از لینک {1} به تیم اضافه شد.</value>
+  </data>
+  <data name="{0} updated team image." xml:space="preserve">
+    <value>{0} تصویر تیم را به روز کرد.</value>
   </data>
 </root>

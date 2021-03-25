@@ -145,6 +145,7 @@ namespace vws.web.Domain
         #endregion
 
 
+
         #region project
 
         #region models
@@ -279,6 +280,8 @@ namespace vws.web.Domain
 
         public IQueryable<TeamInviteLink> TeamInviteLinks { get; }
 
+        public IQueryable<TeamHistory> TeamHistories { get; }
+
         #endregion
 
         #region methods
@@ -304,6 +307,8 @@ namespace vws.web.Domain
         public string GetTeamType(byte id);
 
         public void UpdateTeamType(byte id, string newName);
+
+        public void AddTeamHistory(TeamHistory teamHistory);
 
 
         #endregion
