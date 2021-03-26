@@ -45,7 +45,7 @@ namespace vws.web.Services._chat
                     Guid = userTeamMate.UserId,
                     ChannelTypeId = (byte)SeedDataEnum.ChannelTypes.Private,
                     LogoUrl = "http://app.seventask.com/assets/Images/Chat/DefaultAvatars/User.jpg",
-                    Title = (await userManager.FindByIdAsync(userTeamMate.UserId.ToString())).UserName,
+                    Title = (await vwsDbContext.GetUserProfileAsync(userTeamMate.UserId)).NickName,
                     IsMuted = false,
                     IsPinned = false,
                     EvenOrder = 0,

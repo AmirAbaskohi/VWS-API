@@ -117,8 +117,8 @@ namespace vws.web.Controllers._department
                 TeamId = addedDepartment.TeamId,
                 Guid = addedDepartment.Guid,
                 Description = addedDepartment.Description,
-                CreatedBy = (await userManager.FindByIdAsync(addedDepartment.CreatedBy.ToString())).UserName,
-                ModifiedBy = (await userManager.FindByIdAsync(addedDepartment.ModifiedBy.ToString())).UserName,
+                CreatedBy = (await vwsDbContext.GetUserProfileAsync(addedDepartment.CreatedBy)).NickName,
+                ModifiedBy = (await vwsDbContext.GetUserProfileAsync(addedDepartment.ModifiedBy)).NickName,
                 CreatedOn = addedDepartment.CreatedOn,
                 ModifiedOn = addedDepartment.ModifiedOn,
                 DepartmentImageGuid = addedDepartment.DepartmentImageGuid,
@@ -219,8 +219,8 @@ namespace vws.web.Controllers._department
                 TeamId = selectedDepartment.TeamId,
                 Guid = selectedDepartment.Guid,
                 Description = selectedDepartment.Description,
-                CreatedBy = (await userManager.FindByIdAsync(selectedDepartment.CreatedBy.ToString())).UserName,
-                ModifiedBy = (await userManager.FindByIdAsync(selectedDepartment.ModifiedBy.ToString())).UserName,
+                CreatedBy = (await vwsDbContext.GetUserProfileAsync(selectedDepartment.CreatedBy)).NickName,
+                ModifiedBy = (await vwsDbContext.GetUserProfileAsync(selectedDepartment.ModifiedBy)).NickName,
                 CreatedOn = selectedDepartment.CreatedOn,
                 ModifiedOn = selectedDepartment.ModifiedOn,
                 DepartmentImageGuid = selectedDepartment.DepartmentImageGuid
@@ -292,8 +292,8 @@ namespace vws.web.Controllers._department
                     TeamId = userDepartment.TeamId,
                     Guid = userDepartment.Guid,
                     Description = userDepartment.Description,
-                    CreatedBy = (await userManager.FindByIdAsync(userDepartment.CreatedBy.ToString())).UserName,
-                    ModifiedBy = (await userManager.FindByIdAsync(userDepartment.ModifiedBy.ToString())).UserName,
+                    CreatedBy = (await vwsDbContext.GetUserProfileAsync(userDepartment.CreatedBy)).NickName,
+                    ModifiedBy = (await vwsDbContext.GetUserProfileAsync(userDepartment.ModifiedBy)).NickName,
                     CreatedOn = userDepartment.CreatedOn,
                     ModifiedOn = userDepartment.ModifiedOn,
                     DepartmentImageGuid = userDepartment.DepartmentImageGuid,
@@ -486,7 +486,6 @@ namespace vws.web.Controllers._department
 
             foreach (var userCoDepartment in userCoDepartments)
             {
-                var userName = (await userManager.FindByIdAsync(userCoDepartment.UserId.ToString())).UserName;
                 coDepartmentsList.Add(new UserModel()
                 {
                     NickName = userCoDepartment.NickName,
@@ -536,8 +535,8 @@ namespace vws.web.Controllers._department
                 Color = selectedDepartment.Color,
                 Guid = selectedDepartment.Guid,
                 Description = selectedDepartment.Description,
-                CreatedBy = (await userManager.FindByIdAsync(selectedDepartment.CreatedBy.ToString())).UserName,
-                ModifiedBy = (await userManager.FindByIdAsync(selectedDepartment.ModifiedBy.ToString())).UserName,
+                CreatedBy = (await vwsDbContext.GetUserProfileAsync(selectedDepartment.CreatedBy)).NickName,
+                ModifiedBy = (await vwsDbContext.GetUserProfileAsync(selectedDepartment.ModifiedBy)).NickName,
                 CreatedOn = selectedDepartment.CreatedOn,
                 ModifiedOn = selectedDepartment.ModifiedOn,
                 DepartmentImageGuid = selectedDepartment.DepartmentImageGuid,

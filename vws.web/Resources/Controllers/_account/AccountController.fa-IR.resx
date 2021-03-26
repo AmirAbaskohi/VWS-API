@@ -144,9 +144,6 @@
   <data name="Last password is not true." xml:space="preserve">
     <value>پسورد قبلی درست نیست.</value>
   </data>
-  <data name="Password or Username is wrong." xml:space="preserve">
-    <value>نام کاربری یا رمز عبور اشتباه است.</value>
-  </data>
   <data name="Passwords must be at least 8 characters." xml:space="preserve">
     <value>رمز عبور باید حداقل 8 رقم داشته باشد.</value>
   </data>
@@ -171,9 +168,6 @@
   <data name="There is a user with this email." xml:space="preserve">
     <value>کاربری با این ایمیل وجود دارد.</value>
   </data>
-  <data name="There is a user with this username." xml:space="preserve">
-    <value>کاربری با این نام کاربری وجود دارد.</value>
-  </data>
   <data name="There is more than one file." xml:space="preserve">
     <value>بیش از یک فایل وجود دارد.</value>
   </data>
@@ -185,9 +179,6 @@
   </data>
   <data name="User does not exist." xml:space="preserve">
     <value>کاربری با این مشخصات وجود ندارد.</value>
-  </data>
-  <data name="Username should not contain @ character." xml:space="preserve">
-    <value>نام کاربری نباید شامل @ باشد.</value>
   </data>
   <data name="You did not upload an image." xml:space="preserve">
     <value>شما عکسی آپلود نکرده اید.</value>

@@ -357,7 +357,7 @@ namespace vws.web.Controllers._project
             {
                 ProjectId = newProject.Id,
                 Event = "Project created by {0}.",
-                CommaSepratedParameters = (await userManager.FindByIdAsync(userId.ToString())).UserName,
+                CommaSepratedParameters = (await vwsDbContext.GetUserProfileAsync(userId)).NickName,
                 EventTime = creationTime
             };
 
@@ -559,7 +559,7 @@ namespace vws.web.Controllers._project
                 ProjectId = model.Id,
                 Event = "Project updated by {0}.",
                 EventTime = modificationTime,
-                CommaSepratedParameters = (await userManager.FindByIdAsync(userId.ToString())).UserName
+                CommaSepratedParameters = (await vwsDbContext.GetUserProfileAsync(userId)).NickName
             };
 
             vwsDbContext.AddProjectHistory(newProjectHistory);
@@ -632,7 +632,7 @@ namespace vws.web.Controllers._project
                 ProjectId = id,
                 Event = "Project deleted by {0}.",
                 EventTime = modificationTime,
-                CommaSepratedParameters = (await userManager.FindByIdAsync(userId.ToString())).UserName
+                CommaSepratedParameters = (await vwsDbContext.GetUserProfileAsync(userId)).NickName
             };
 
             vwsDbContext.AddProjectHistory(newProjectHistory);
@@ -982,7 +982,7 @@ namespace vws.web.Controllers._project
                 ProjectId = model.ProjectId,
                 Event = "{0} added {1} to the project.",
                 EventTime = newPorjectMember.CreatedOn,
-                CommaSepratedParameters = (await userManager.FindByIdAsync(userId.ToString())).UserName + "," + (await userManager.FindByIdAsync(model.UserId.ToString())).UserName
+                CommaSepratedParameters = (await vwsDbContext.GetUserProfileAsync(userId)).NickName + "," + (await vwsDbContext.GetUserProfileAsync(model.UserId)).NickName
             };
 
             vwsDbContext.AddProjectHistory(newProjectHistory);
@@ -1093,7 +1093,7 @@ namespace vws.web.Controllers._project
                 ProjectId = projectId,
                 Event = "Added new project image for project by {0}.",
                 EventTime = selectedProject.ModifiedOn,
-                CommaSepratedParameters = (await userManager.FindByIdAsync(userId.ToString())).UserName
+                CommaSepratedParameters = (await vwsDbContext.GetUserProfileAsync(userId)).NickName
             };
 
             vwsDbContext.AddProjectHistory(newProjectHistory);
@@ -1157,7 +1157,7 @@ namespace vws.web.Controllers._project
                 EventTime = selectedProject.ModifiedOn,
                 CommaSepratedParameters = (SeedDataEnum.ProjectStatuses)lastStatus +
                                           "," + (SeedDataEnum.ProjectStatuses)selectedProject.StatusId +
-                                          "," + (await userManager.FindByIdAsync(userId.ToString())).UserName
+                                          "," + (await vwsDbContext.GetUserProfileAsync(userId)).NickName
             };
 
             vwsDbContext.AddProjectHistory(newProjectHistory);

@@ -414,7 +414,6 @@ namespace vws.web.Hubs
                 return;
             #endregion
 
-            // todo: username
             var markedMessages = vwsDbContext.MarkMessagesAsRead(messageId, LoggedInUserId).ToList();
             foreach (var markedMessage in markedMessages)
             {

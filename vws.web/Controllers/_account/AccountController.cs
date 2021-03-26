@@ -7,6 +7,7 @@ using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Authorization;
@@ -117,34 +118,6 @@ namespace vws.web.Controllers._account
                 ValidTo = token.ValidTo
             };
         }
-
-        //private async Task<LoginResponseModel> GenerateJWT(IdentityUser user)
-        //{
-        //    var authClaims = new List<Claim>
-        //        {
-        //            new Claim("UserEmail", user.Email),
-        //            new Claim("UserName", user.UserName),
-        //            new Claim("UserId", user.Id),
-        //        };
-
-        //    var token = GenerateToken(authClaims);
-
-        //    var refreshToken = new RefreshToken()
-        //    {
-        //        IsValid = true,
-        //        Token = GenerateRefreshToken(),
-        //        UserId = new Guid(user.Id)
-        //    };
-        //    await vwsDbContext.AddRefreshTokenAsync(refreshToken);
-        //    vwsDbContext.Save();
-
-        //    return new LoginResponseModel
-        //    {
-        //        Token = new JwtSecurityTokenHandler().WriteToken(token),
-        //        RefreshToken = refreshToken.Token,
-        //        ValidTo = token.ValidTo
-        //    };
-        //}
 
         private async Task<GoogleJsonWebSignature.Payload> ValidateGoogleToken(string googleTokenId)
         {
