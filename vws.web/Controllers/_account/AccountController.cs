@@ -171,6 +171,74 @@ namespace vws.web.Controllers._account
             vwsDbContext.Save();
         }
 
+        private async Task<ResponseModel<Guid>> UploadProfileImage(Guid userId, IFormFile image, IFormFileCollection formFiles)
+        {
+            ResponseModel<Guid> response = new ResponseModel<Guid>();
+            string[] types = { "png", "jpg", "jpeg" };
+            if (formFiles.Count > 1)
+            {
+                response.AddError(localizer["There is more than one file."]);
+                response.Message = "Too many files passed";
+                return response;
+            }
+            if (formFiles.Count == 0 && image == null)
+            {
+                response.AddError(localizer["You did not upload an image."]);
+                response.Message = "There is no image";
+                return response;
+            }
+            var uploadedImage = formFiles.Count == 0 ? image : formFiles[0];
+
+            ResponseModel<File> fileResponse;
+            UserProfile userProfile = await vwsDbContext.GetUserProfileAsync(userId);
+            if (userProfile.ProfileImage != null)
+            {
+                fileResponse = await fileManager.WriteFile(uploadedImage, userId, "profileImages", (int)userProfile.ProfileImageId, types.ToList());
+                if (fileResponse.HasError)
+                {
+                    foreach (var error in fileResponse.Errors)
+                        response.AddError(localizer[error]);
+                    response.Message = "Error in writing file";
+                    return response;
+                }
+                userProfile.ProfileImage.RecentFileId = fileResponse.Value.Id;
+                userProfile.ProfileImageSecurityStamp = Guid.NewGuid();
+                vwsDbContext.Save();
+            }
+            else
+            {
+                var time = DateTime.Now;
+                var newFileContainer = new FileContainer
+                {
+                    ModifiedOn = time,
+                    CreatedOn = time,
+                    CreatedBy = userId,
+                    ModifiedBy = userId,
+                    Guid = Guid.NewGuid()
+                };
+                await vwsDbContext.AddFileContainerAsync(newFileContainer);
+                vwsDbContext.Save();
+                fileResponse = await fileManager.WriteFile(uploadedImage, userId, "profileImages", newFileContainer.Id, types.ToList());
+                if (fileResponse.HasError)
+                {
+                    foreach (var error in fileResponse.Errors)
+                        response.AddError(localizer[error]);
+                    response.Message = "Error in writing file";
+                    vwsDbContext.DeleteFileContainer(newFileContainer);
+                    vwsDbContext.Save();
+                    return response;
+                }
+                newFileContainer.RecentFileId = fileResponse.Value.Id;
+                userProfile.ProfileImageId = newFileContainer.Id;
+                userProfile.ProfileImageGuid = newFileContainer.Guid;
+                userProfile.ProfileImageSecurityStamp = Guid.NewGuid();
+                vwsDbContext.Save();
+            }
+            response.Value = fileResponse.Value.FileContainerGuid;
+            response.Message = "User image added successfully!";
+            return response;
+        }
+
         #endregion
 
         [HttpPost]
@@ -202,6 +270,7 @@ namespace vws.web.Controllers._account
                         {
                             responseModel.Value.HasNickName = false;
                             responseModel.Value.NickNameSecurityStamp = userProfile.NickNameSecurityStamp;
+                            responseModel.Value.ProfileImageSecurityStamp = userProfile.ProfileImageSecurityStamp;
                             responseModel.Message = "User has not nick-name.";
                             return Ok(responseModel);
                         }
@@ -217,6 +286,7 @@ namespace vws.web.Controllers._account
                     {
                         responseModel.Value.HasNickName = false;
                         responseModel.Value.NickNameSecurityStamp = userProfile.NickNameSecurityStamp;
+                        responseModel.Value.ProfileImageSecurityStamp = userProfile.ProfileImageSecurityStamp;
                         responseModel.Message = "Email is not confirmed";
                         return Ok(responseModel);
                     }
@@ -252,6 +322,7 @@ namespace vws.web.Controllers._account
                 {
                     var createdUserProfile = await CreateUserProfile(Guid.Parse(applicationUser.Id));
                     responseModel.Value.NickNameSecurityStamp = createdUserProfile.NickNameSecurityStamp;
+                    responseModel.Value.ProfileImageSecurityStamp = createdUserProfile.ProfileImageSecurityStamp;
                 }
                 catch
                 {
@@ -303,6 +374,7 @@ namespace vws.web.Controllers._account
                                     UserProfile createdUserProfile = await CreateUserProfile(Guid.Parse(user.Id));
                                     CreateUserTaskStatuses(Guid.Parse(user.Id));
                                     responseModel.Value.NickNameSecurityStamp = createdUserProfile.NickNameSecurityStamp;
+                                    responseModel.Value.ProfileImageSecurityStamp = createdUserProfile.ProfileImageSecurityStamp;
                                 }
                                 catch
                                 {
@@ -329,6 +401,7 @@ namespace vws.web.Controllers._account
                         {
                             responseModel.Value.HasNickName = false;
                             responseModel.Value.NickNameSecurityStamp = userProfile.NickNameSecurityStamp;
+                            responseModel.Value.ProfileImageSecurityStamp = userProfile.ProfileImageSecurityStamp;
                             responseModel.Message = "User has not nick-name.";
                             return Ok(responseModel);
                         }
@@ -663,83 +736,54 @@ namespace vws.web.Controllers._account
             }));
         }
 
+        /// <summary>
+        /// If user is authorized, he can upload his image by bearer header content;
+        /// else if user is not authorized (eg: while onboarding),
+        /// he can upload his image by passing {email} and {securityStamp} in Request.Form
+        /// </summary>
+        /// <param name="image"></param>
+        /// <returns></returns>
         [HttpPost]
-        [Authorize]
         [Route("uploadProfileImage")]
         public async Task<IActionResult> UploadProfileImage(IFormFile image)
         {
-            var response = new ResponseModel<Guid>();
-
-            string[] types = { "png", "jpg", "jpeg" };
-
-            var files = Request.Form.Files.ToList();
-
-            Guid userId = LoggedInUserId.Value;
-            var userProfile = await vwsDbContext.GetUserProfileAsync(userId);
-
-            if (files.Count > 1)
-            {
-                response.AddError(localizer["There is more than one file."]);
-                response.Message = "Too many files passed";
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-            if (files.Count == 0 && image == null)
-            {
-                response.AddError(localizer["You did not upload an image."]);
-                response.Message = "There is no image";
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-            var uploadedImage = files.Count == 0 ? image : files[0];
-
-            ResponseModel<File> fileResponse;
-
-            if (userProfile.ProfileImage != null)
-            {
-                fileResponse = await fileManager.WriteFile(uploadedImage, userId, "profileImages", (int)userProfile.ProfileImageId, types.ToList());
-                if (fileResponse.HasError)
-                {
-                    foreach (var error in fileResponse.Errors)
-                        response.AddError(localizer[error]);
-                    response.Message = "Error in writing file";
-                    return StatusCode(StatusCodes.Status500InternalServerError, response);
-                }
-                userProfile.ProfileImage.RecentFileId = fileResponse.Value.Id;
-                vwsDbContext.Save();
-            }
+            if (LoggedInUserId.HasValue)
+                return Ok(await UploadProfileImage(LoggedInUserId.Value, image, Request.Form.Files));
             else
             {
-                var time = DateTime.Now;
-                var newFileContainer = new FileContainer
+                var response = new ResponseModel<Guid>();
+                var email = Request.Form.First(e => e.Key == "email");
+                var securityStamp = Request.Form.First(e => e.Key == "securityStamp");
+
+                if (!emailChecker.IsValid(email.Value.ToString()))
                 {
-                    ModifiedOn = time,
-                    CreatedOn = time,
-                    CreatedBy = userId,
-                    ModifiedBy = userId,
-                    Guid = Guid.NewGuid()
-                };
-                await vwsDbContext.AddFileContainerAsync(newFileContainer);
-                vwsDbContext.Save();
-                fileResponse = await fileManager.WriteFile(uploadedImage, userId, "profileImages", newFileContainer.Id, types.ToList());
-                if (fileResponse.HasError)
-                {
-                    foreach (var error in fileResponse.Errors)
-                        response.AddError(localizer[error]);
-                    response.Message = "Error in writing file";
-                    vwsDbContext.DeleteFileContainer(newFileContainer);
-                    vwsDbContext.Save();
-                    return StatusCode(StatusCodes.Status500InternalServerError, response);
+                    response.AddError(localizer["Email is invalid."]);
+                    response.Message = "Invalid Email.";
+                    return BadRequest(response);
                 }
-                newFileContainer.RecentFileId = fileResponse.Value.Id;
-                userProfile.ProfileImageId = newFileContainer.Id;
-                userProfile.ProfileImageGuid = newFileContainer.Guid;
-                vwsDbContext.Save();
+
+                var user = await userManager.FindByEmailAsync(email.Value.ToString());
+                if (user == null)
+                {
+                    response.AddError(localizer["User does not exist."]);
+                    response.Message = "User does not exist.";
+                    return BadRequest(response);
+                }
+
+                var userProfile = await vwsDbContext.GetUserProfileAsync(Guid.Parse(user.Id));
+                if (userProfile.ProfileImageSecurityStamp != Guid.Parse(securityStamp.Value.ToString()))
+                {
+                    response.AddError(localizer["Invalid security stamp."]);
+                    response.Message = "Invalid security stamp!";
+                    return BadRequest(response);
+                }
+                else
+                {
+                    return Ok(await UploadProfileImage(userProfile.UserId, image, Request.Form.Files));
+                }
             }
-
-            response.Value = fileResponse.Value.FileContainerGuid;
-            response.Message = "User image added successfully!";
-            return Ok(response);
         }
-
+    
         [HttpPut]
         [Authorize]
         [Route("changePassword")]

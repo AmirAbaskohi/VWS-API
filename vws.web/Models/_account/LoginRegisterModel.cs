@@ -23,6 +23,8 @@ namespace vws.web.Models._account
 
         public Guid? NickNameSecurityStamp { get; set; }
 
+        public Guid? ProfileImageSecurityStamp { get; set; }
+
         // if user was registered and his email is confirmed and has nickName, Then JwtToken(Token, RefreshToken, ValidTo) has valid values
 
         public JwtTokenModel JwtToken { get; set; }
