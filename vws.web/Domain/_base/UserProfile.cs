@@ -32,6 +32,8 @@ namespace vws.web.Domain._base
 
         public Guid? ProfileImageGuid { get; set; }
 
+        public Guid ProfileImageSecurityStamp { get; set; }
+
         public virtual Culture Culture { get; set; }
 
         public virtual FileContainer ProfileImage { get; set; }
