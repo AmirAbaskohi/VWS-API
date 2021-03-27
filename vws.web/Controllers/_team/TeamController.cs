@@ -19,6 +19,10 @@ using vws.web.Enums;
 using vws.web.Models._department;
 using vws.web.Services._department;
 using vws.web.Services._team;
+using static vws.web.EmailTemplates.EmailTemplateTypes;
+using vws.web.EmailTemplates;
+using Microsoft.Extensions.Configuration;
+using System.Net;
 
 namespace vws.web.Controllers._team
 {
@@ -32,10 +36,13 @@ namespace vws.web.Controllers._team
         private readonly IVWS_DbContext vwsDbContext;
         private readonly IFileManager fileManager;
         private readonly ITeamManagerService teamManager;
+        private readonly IEmailSender _emailSender;
+        private readonly IConfiguration _configuration;
+
 
         public TeamController(UserManager<ApplicationUser> _userManager, IStringLocalizer<TeamController> _localizer,
             IVWS_DbContext _vwsDbContext, IFileManager _fileManager, IDepartmentManagerService _departmentManager,
-            ITeamManagerService _teamManager)
+            ITeamManagerService _teamManager, IEmailSender emailSender, IConfiguration configuration)
         {
             userManager = _userManager;
             localizer = _localizer;
@@ -43,6 +50,8 @@ namespace vws.web.Controllers._team
             fileManager = _fileManager;
             departmentManager = _departmentManager;
             teamManager = _teamManager;
+            _emailSender = emailSender;
+            _configuration = configuration;
         }
 
         private void CreateTeamTaskStatuses(int teamId)
@@ -94,7 +103,7 @@ namespace vws.web.Controllers._team
         {
             foreach (var model in models)
             {
-                DepartmentModel departmentModel = new DepartmentModel() 
+                DepartmentModel departmentModel = new DepartmentModel()
                 {
                     Color = model.Color,
                     Description = model.Description,
@@ -105,6 +114,45 @@ namespace vws.web.Controllers._team
                 departmentModel.TeamId = teamId;
                 await departmentManager.CreateDepartment(departmentModel, LoggedInUserId.Value);
             }
+        }
+
+        private async Task SendJoinTeamInvitaionLinks(List<string> emails, int teamId)
+        {
+            string emailErrorMessage;
+            Guid linkGuid = Guid.NewGuid();
+            var newInviteLink = new TeamInviteLink()
+            {
+                TeamId = teamId,
+                CreatedBy = LoggedInUserId.Value,
+                ModifiedBy = LoggedInUserId.Value,
+                CreatedOn = DateTime.Now,
+                ModifiedOn = DateTime.Now,
+                LinkGuid = linkGuid,
+                IsRevoked = false
+            };
+
+            await vwsDbContext.AddTeamInviteLinkAsync(newInviteLink);
+            vwsDbContext.Save();
+            SendEmailModel emailModelTemplate = new SendEmailModel
+            {
+                FromEmail = _configuration["EmailSender:RegistrationEmail:EmailAddress"],
+                ToEmail = "",
+                Subject = "Join Team",
+                Body = "https://app.seventask.com/en-US/inviteTeam?invitationCode=" + linkGuid.ToString(),
+                //Body = EmailTemplateUtility.GetEmailTemplate((int)EmailTemplateEnum.EmailVerificationCode).Replace("{0}", randomCode),
+                Credential = new NetworkCredential
+                {
+                    UserName = _configuration["EmailSender:RegistrationEmail:UserName"],
+                    Password = _configuration["EmailSender:RegistrationEmail:Password"]
+                },
+                IsBodyHtml = false
+            };
+            foreach (var email in emails)
+            {
+                emailModelTemplate.ToEmail = email;
+                await _emailSender.SendEmailAsync(emailModelTemplate, out emailErrorMessage);
+            }
+
         }
 
         [HttpPost]
@@ -165,10 +213,12 @@ namespace vws.web.Controllers._team
             #endregion
 
             var newTeam = await teamManager.CreateTeam(model, userId);
-            
+
             await CreateTeamDepartments(model.Departments, newTeam.Id);
 
             CreateTeamTaskStatuses(newTeam.Id);
+
+            SendJoinTeamInvitaionLinks(model.EmailsForInvite, newTeam.Id);
 
             vwsDbContext.AddTeamHistory(new TeamHistory()
             {
@@ -767,7 +817,7 @@ namespace vws.web.Controllers._team
                 NumberOfTasks = vwsDbContext.GeneralTasks.Where(task => task.TeamId == selectedTeam.Id && !task.IsDeleted).Count(),
                 NumberOfProjects = vwsDbContext.Projects.Where(project => project.TeamId == selectedTeam.Id && !project.IsDeleted).Count(),
                 Users = await teamManager.GetTeamMembers(selectedTeam.Id),
-                Departments = await GetDepartments(selectedTeam.Id) 
+                Departments = await GetDepartments(selectedTeam.Id)
             };
             response.Message = "Team retured successfully!";
             return Ok(response);

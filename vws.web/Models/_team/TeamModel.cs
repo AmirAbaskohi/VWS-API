@@ -16,6 +16,8 @@ namespace vws.web.Models._team
         [Required]
         public List<Guid> Users { get; set; }
         [Required]
-        public List<DepartmentBaseModel> Departments {get; set;}
+        public List<DepartmentBaseModel> Departments { get; set; }
+        [Required]
+        public List<string> EmailsForInvite { get; set; }
     }
 }
