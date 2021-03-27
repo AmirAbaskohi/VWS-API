@@ -155,7 +155,8 @@ namespace vws.web.Controllers._account
             {
                 UserId = userId,
                 ThemeColorCode = "",
-                NickNameSecurityStamp = Guid.NewGuid()
+                NickNameSecurityStamp = Guid.NewGuid(),
+                ProfileImageSecurityStamp = Guid.NewGuid()
             };
             var createdUserProfile = await vwsDbContext.AddUserProfileAsync(userProfile);
             vwsDbContext.Save();
@@ -396,6 +397,7 @@ namespace vws.web.Controllers._account
                     }
                     else
                     {
+                        responseModel.Value.EmailConfirmed = true;
                         UserProfile userProfile = await vwsDbContext.GetUserProfileAsync(Guid.Parse(existedUser.Id));
                         if (string.IsNullOrWhiteSpace(userProfile.NickName))
                         {
