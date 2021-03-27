@@ -126,6 +126,9 @@
   <data name="Deleting personal project just can be done by creator." xml:space="preserve">
     <value>حذف پروژه شخصی تنها توسط سازنده پروژه امکان پذیر است.</value>
   </data>
+  <data name="Deleting user is just for personal projects." xml:space="preserve">
+    <value>حذف کاربر تنها برای پروژه های شخصی می باشد.</value>
+  </data>
   <data name="Department with name {0} is not for selected team." xml:space="preserve">
     <value>دپارتمان با نام {0} زیر مجموعه تیم انتخاب شده نیست.</value>
   </data>
@@ -150,17 +153,38 @@
   <data name="Length of title is more than 500 characters." xml:space="preserve">
     <value>تعداد کاراکتر های بخش نام بیشتر از 500 کاراکتر است.</value>
   </data>
+  <data name="Name can not be empty." xml:space="preserve">
+    <value>نام نمی تواند خالی باشد.</value>
+  </data>
+  <data name="Project color updated by {0}." xml:space="preserve">
+    <value>رنگ پروژه توسط {0} به روز شد.</value>
+  </data>
   <data name="Project created by {0}." xml:space="preserve">
     <value>پروژه توسط {0} ساخته شد.</value>
   </data>
   <data name="Project deleted by {0}." xml:space="preserve">
     <value>پروژه توسط {0} حذف شد.</value>
   </data>
+  <data name="Project description updated by {0}." xml:space="preserve">
+    <value>توضیحات پروژه توسط {0} به روز شد.</value>
+  </data>
+  <data name="Project end date updated by {0}." xml:space="preserve">
+    <value>تاریخ پایان پروژه توسط {0} به روز شد.</value>
+  </data>
   <data name="Project is not personal." xml:space="preserve">
     <value>پروژه شخصی نیست.</value>
   </data>
+  <data name="Project name updated to {0} by {1}." xml:space="preserve">
+    <value>نام پروژه توسط {1} به {0} تغییر پیدا کرد.</value>
+  </data>
+  <data name="Project start date updated by {0}." xml:space="preserve">
+    <value>تاریخ شروع پروژه توسط {0} به روز شد.</value>
+  </data>
   <data name="Project status changed from {0} to {1} by {2}." xml:space="preserve">
     <value>وضعیت پروژه از {0} به {1} توسط {2} تغییر پیدا کرد.</value>
+  </data>
+  <data name="Project team and departments updated by {0}." xml:space="preserve">
+    <value>تیم و دپارتمان های پروژه توسط {0} آپدیت شد.</value>
   </data>
   <data name="Project updated by {0}." xml:space="preserve">
     <value>پروژه توسط {0} آپدیت شد.</value>
@@ -182,6 +206,9 @@
   </data>
   <data name="There is no department with id {0}." xml:space="preserve">
     <value>دپارتمانی با آی دی {0} وجود ندارد.</value>
+  </data>
+  <data name="There is no member with such id in given project." xml:space="preserve">
+    <value>عضوی با آی دی داده شده در پروژه حضور ندارد.</value>
   </data>
   <data name="There is no project with given Id." xml:space="preserve">
     <value>پروژه ای با آی دی داده شده وجود ندارد.</value>
@@ -239,5 +266,8 @@
   </data>
   <data name="{0} added {1} to the project." xml:space="preserve">
     <value>{0} {1} را به پروژه اضافه کرد.</value>
+  </data>
+  <data name="{0} removed from project by {1}." xml:space="preserve">
+    <value>{0} توسط {1} از پروژه حذف شد.</value>
   </data>
 </root>

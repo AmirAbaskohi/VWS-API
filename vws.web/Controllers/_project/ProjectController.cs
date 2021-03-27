@@ -51,7 +51,10 @@ namespace vws.web.Controllers._project
             if (!String.IsNullOrEmpty(model.Description) && model.Description.Length > 2000)
                 result.Add(localizer["Length of description is more than 2000 characters."]);
 
-            if (model.Name.Length > 500)
+            if (String.IsNullOrEmpty(model.Name))
+                result.Add(localizer["Name can not be empty."]);
+
+            if (!String.IsNullOrEmpty(model.Name) && model.Name.Length > 500)
                 result.Add(localizer["Length of title is more than 500 characters."]);
 
             if (!String.IsNullOrEmpty(model.Color) && model.Color.Length > 6)
@@ -131,7 +134,7 @@ namespace vws.web.Controllers._project
             return availableUsers;
         }
 
-        private async Task<List<UserModel>> GetProjectUsers(int projectId)
+        private List<UserModel> GetProjectUsers(int projectId)
         {
             var selectedProject = vwsDbContext.Projects.Include(project => project.ProjectDepartments)
                                                        .FirstOrDefault(project => project.Id == projectId);
@@ -390,7 +393,7 @@ namespace vws.web.Controllers._project
                 ProjectImageGuid = newProject.ProjectImageGuid,
                 DepartmentIds = model.DepartmentIds,
                 NumberOfUpdates = vwsDbContext.ProjectHistories.Where(history => history.ProjectId == newProject.Id).Count(),
-                Users = await GetProjectUsers(newProject.Id),
+                Users = GetProjectUsers(newProject.Id),
                 NumberOfTasks = GetNumberOfProjectTasks(newProject.Id)
             };
 
@@ -401,19 +404,302 @@ namespace vws.web.Controllers._project
 
         [HttpPut]
         [Authorize]
-        [Route("update")]
-        public async Task<IActionResult> UpdateProject([FromBody] UpdateProjectModel model)
+        [Route("updateName")]
+        public IActionResult UpdateName(int id, string newName)
         {
-            var response = new ResponseModel<ProjectResponseModel>();
+            var response = new ResponseModel();
+            var userId = LoggedInUserId.Value;
 
-            var checkModelResult = CheckProjectModel(model);
-
-            if (checkModelResult.Count != 0)
+            var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Id == id);
+            if (selectedProject == null || selectedProject.IsDeleted)
             {
-                response.Message = "Invalid project model";
-                response.AddErrors(checkModelResult);
+                response.Message = "Project not found";
+                response.AddError(localizer["There is no project with given Id."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
+
+            if (!permissionService.HasAccessToProject(userId, id))
+            {
+                response.Message = "Project access denied";
+                response.AddError(localizer["You are not a memeber of project."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            if (String.IsNullOrEmpty(newName))
+                response.AddError(localizer["Name can not be empty."]);
+
+            if (!String.IsNullOrEmpty(newName) && newName.Length > 500)
+                response.AddError(localizer["Length of title is more than 500 characters."]);
+
+            if (response.HasError)
+            {
+                response.Message = "Invalid model.";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            selectedProject.Name = newName;
+            selectedProject.ModifiedOn = DateTime.Now;
+            selectedProject.ModifiedBy = userId;
+            var newProjectHistory = new ProjectHistory()
+            {
+                ProjectId = selectedProject.Id,
+                Event = "Project name updated to {0} by {1}.",
+                CommaSepratedParameters = selectedProject.Name + "," + LoggedInNickName,
+                EventTime = selectedProject.ModifiedOn
+            };
+            vwsDbContext.AddProjectHistory(newProjectHistory);
+            vwsDbContext.Save();
+
+            response.Message = "Name updated successfully!";
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("updateDescription")]
+        public IActionResult UpdateDescription(int id, string newDescription)
+        {
+            var response = new ResponseModel();
+            var userId = LoggedInUserId.Value;
+
+            var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Id == id);
+            if (selectedProject == null || selectedProject.IsDeleted)
+            {
+                response.Message = "Project not found";
+                response.AddError(localizer["There is no project with given Id."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!permissionService.HasAccessToProject(userId, id))
+            {
+                response.Message = "Project access denied";
+                response.AddError(localizer["You are not a memeber of project."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            if (!String.IsNullOrEmpty(newDescription) && newDescription.Length > 2000)
+            {
+                response.AddError(localizer["Length of description is more than 2000 characters."]);
+                response.Message = "Invalid model.";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            selectedProject.Description = newDescription;
+            selectedProject.ModifiedOn = DateTime.Now;
+            selectedProject.ModifiedBy = userId;
+            var newProjectHistory = new ProjectHistory()
+            {
+                ProjectId = selectedProject.Id,
+                Event = "Project description updated by {0}.",
+                CommaSepratedParameters = LoggedInNickName,
+                EventTime = selectedProject.ModifiedOn
+            };
+            vwsDbContext.AddProjectHistory(newProjectHistory);
+            vwsDbContext.Save();
+
+            response.Message = "Description updated successfully!";
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("updateColor")]
+        public IActionResult UpdateColor(int id, string newColor)
+        {
+            var response = new ResponseModel();
+            var userId = LoggedInUserId.Value;
+
+            var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Id == id);
+            if (selectedProject == null || selectedProject.IsDeleted)
+            {
+                response.Message = "Project not found";
+                response.AddError(localizer["There is no project with given Id."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!permissionService.HasAccessToProject(userId, id))
+            {
+                response.Message = "Project access denied";
+                response.AddError(localizer["You are not a memeber of project."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            if (!String.IsNullOrEmpty(newColor) && newColor.Length > 6)
+            {
+                response.AddError(localizer["Length of color is more than 6 characters."]);
+                response.Message = "Invalid model.";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            selectedProject.Color = newColor;
+            selectedProject.ModifiedOn = DateTime.Now;
+            selectedProject.ModifiedBy = userId;
+            var newProjectHistory = new ProjectHistory()
+            {
+                ProjectId = selectedProject.Id,
+                Event = "Project color updated by {0}.",
+                CommaSepratedParameters = LoggedInNickName,
+                EventTime = selectedProject.ModifiedOn
+            };
+            vwsDbContext.AddProjectHistory(newProjectHistory);
+            vwsDbContext.Save();
+
+            response.Message = "Color updated successfully!";
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("updateStartDate")]
+        public IActionResult UpdateStartDate(int id, DateTime? newStartDate)
+        {
+            var response = new ResponseModel();
+            var userId = LoggedInUserId.Value;
+
+            var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Id == id);
+            if (selectedProject == null || selectedProject.IsDeleted)
+            {
+                response.Message = "Project not found";
+                response.AddError(localizer["There is no project with given Id."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!permissionService.HasAccessToProject(userId, id))
+            {
+                response.Message = "Project access denied";
+                response.AddError(localizer["You are not a memeber of project."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            if (newStartDate.HasValue && selectedProject.EndDate.HasValue && newStartDate > selectedProject.EndDate)
+            {
+                response.Message = "Invalid model";
+                response.AddError(localizer["Start Date should be before End Date."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            selectedProject.StartDate = newStartDate;
+            selectedProject.ModifiedOn = DateTime.Now;
+            selectedProject.ModifiedBy = userId;
+            var newProjectHistory = new ProjectHistory()
+            {
+                ProjectId = selectedProject.Id,
+                Event = "Project start date updated by {0}.",
+                CommaSepratedParameters = LoggedInNickName,
+                EventTime = selectedProject.ModifiedOn
+            };
+            vwsDbContext.AddProjectHistory(newProjectHistory);
+            vwsDbContext.Save();
+
+            response.Message = "Start date updated successfully!";
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("updateEndDate")]
+        public IActionResult UpdateEndDate(int id, DateTime? newEndDate)
+        {
+            var response = new ResponseModel();
+            var userId = LoggedInUserId.Value;
+
+            var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Id == id);
+            if (selectedProject == null || selectedProject.IsDeleted)
+            {
+                response.Message = "Project not found";
+                response.AddError(localizer["There is no project with given Id."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!permissionService.HasAccessToProject(userId, id))
+            {
+                response.Message = "Project access denied";
+                response.AddError(localizer["You are not a memeber of project."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            if (newEndDate.HasValue && selectedProject.StartDate.HasValue && selectedProject.StartDate > newEndDate)
+            {
+                response.Message = "Invalid model";
+                response.AddError(localizer["Start Date should be before End Date."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            selectedProject.EndDate = newEndDate;
+            selectedProject.ModifiedOn = DateTime.Now;
+            selectedProject.ModifiedBy = userId;
+            var newProjectHistory = new ProjectHistory()
+            {
+                ProjectId = selectedProject.Id,
+                Event = "Project end date updated by {0}.",
+                CommaSepratedParameters = LoggedInNickName,
+                EventTime = selectedProject.ModifiedOn
+            };
+            vwsDbContext.AddProjectHistory(newProjectHistory);
+            vwsDbContext.Save();
+
+            response.Message = "End date updated successfully!";
+            return Ok(response);
+        }
+
+        [HttpDelete]
+        [Authorize]
+        [Route("removeUserFromProject")]
+        public async Task<IActionResult> RemoveUserFromProject(int id, Guid userId)
+        {
+            var response = new ResponseModel();
+
+            var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Id == id);
+            if (selectedProject == null || selectedProject.IsDeleted)
+            {
+                response.Message = "Project not found";
+                response.AddError(localizer["There is no project with given Id."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!permissionService.HasAccessToProject(LoggedInUserId.Value, id))
+            {
+                response.Message = "Project access denied";
+                response.AddError(localizer["You are not a memeber of project."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+            
+            if (selectedProject.TeamId != null)
+            {
+                response.AddError(localizer["Deleting user is just for personal projects."]);
+                response.Message = "Non-Personal project";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var selectedProjectMember = vwsDbContext.ProjectMembers.FirstOrDefault(projectMember => projectMember.ProjectId == id && projectMember.UserProfileId == userId);
+            if (selectedProjectMember == null || selectedProject.IsDeleted)
+            {
+                response.AddError(localizer["There is no member with such id in given project."]);
+                response.Message = "Project member not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            vwsDbContext.DeleteProjectMember(selectedProjectMember);
+            var newProjectHistory = new ProjectHistory()
+            {
+                ProjectId = selectedProject.Id,
+                Event = "{0} removed from project by {1}.",
+                CommaSepratedParameters = (await vwsDbContext.GetUserProfileAsync(userId)).NickName + "," + LoggedInNickName,
+                EventTime = selectedProject.ModifiedOn
+            };
+            vwsDbContext.AddProjectHistory(newProjectHistory);
+            vwsDbContext.Save();
+
+            response.Message = "User deleted successfully!";
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("updateTeamAndDepartments")]
+        public async Task<IActionResult> UpdateTeamAndDepartments([FromBody] UpdateTeamAndDepartmentsModel model)
+        {
+            var response = new ResponseModel();
 
             Guid userId = LoggedInUserId.Value;
 
@@ -476,9 +762,6 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            bool isProjectPersonal = selectedProject.TeamId == null ? true : false;
-            bool willBeProjectPersonal = model.TeamId == null ? true : false;
-
             if (!permissionService.HasAccessToProject(userId, model.Id))
             {
                 response.Message = "Project access denied";
@@ -486,31 +769,8 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            if (isProjectPersonal && userId != selectedProject.CreateBy)
-            {
-                response.AddError(localizer["Updating personal project just can be done by creator."]);
-                response.Message = "Update project access denied";
-                return StatusCode(StatusCodes.Status403Forbidden, response);
-            }
-
-            if (model.StartDate.HasValue && !(model.EndDate.HasValue) && selectedProject.EndDate.HasValue)
-            {
-                if (model.StartDate > selectedProject.EndDate)
-                {
-                    response.Message = "Project model data has problem";
-                    response.AddError(localizer["Start Date should be before End Date."]);
-                    return StatusCode(StatusCodes.Status500InternalServerError, response);
-                }
-            }
-            if (model.EndDate.HasValue && !(model.StartDate.HasValue) && selectedProject.StartDate.HasValue)
-            {
-                if (model.EndDate < selectedProject.StartDate)
-                {
-                    response.Message = "Project model data has problem";
-                    response.AddError(localizer["Start Date should be before End Date."]);
-                    return StatusCode(StatusCodes.Status500InternalServerError, response);
-                }
-            }
+            bool isProjectPersonal = selectedProject.TeamId == null ? true : false;
+            bool willBeProjectPersonal = model.TeamId == null ? true : false;
 
             if (!isProjectPersonal && willBeProjectPersonal)
             {
@@ -523,17 +783,6 @@ namespace vws.web.Controllers._project
 
             List<int> shouldBeRemoved = projectDepartmentsIds.Except(model.DepartmentIds).ToList();
             List<int> shouldBeAdded = model.DepartmentIds.Except(projectDepartmentsIds).ToList();
-
-            var modificationTime = DateTime.Now;
-
-            selectedProject.Name = model.Name;
-            selectedProject.Description = model.Description;
-            selectedProject.EndDate = model.EndDate;
-            selectedProject.StartDate = model.StartDate;
-            selectedProject.Color = model.Color;
-            selectedProject.ModifiedOn = modificationTime;
-            selectedProject.ModifiedBy = userId;
-            selectedProject.TeamId = model.TeamId;
 
             foreach (var rmProjectDepartment in shouldBeRemoved)
             {
@@ -554,39 +803,20 @@ namespace vws.web.Controllers._project
                     vwsDbContext.DeleteProjectMember(projectMember);
             }
 
+            selectedProject.TeamId = model.TeamId;
+            selectedProject.ModifiedOn = DateTime.Now;
+            selectedProject.ModifiedBy = userId;
             var newProjectHistory = new ProjectHistory()
             {
-                ProjectId = model.Id,
-                Event = "Project updated by {0}.",
-                EventTime = modificationTime,
-                CommaSepratedParameters = (await vwsDbContext.GetUserProfileAsync(userId)).NickName
+                ProjectId = selectedProject.Id,
+                Event = "Project team and departments updated by {0}.",
+                CommaSepratedParameters = LoggedInNickName,
+                EventTime = selectedProject.ModifiedOn
             };
-
             vwsDbContext.AddProjectHistory(newProjectHistory);
-
             vwsDbContext.Save();
 
-            var newProjectResponse = new ProjectResponseModel()
-            {
-                Id = selectedProject.Id,
-                StatusId = selectedProject.StatusId,
-                Name = selectedProject.Name,
-                Description = selectedProject.Description,
-                Color = selectedProject.Color,
-                StartDate = selectedProject.StartDate,
-                EndDate = selectedProject.EndDate,
-                Guid = selectedProject.Guid,
-                TeamId = selectedProject.TeamId,
-                TeamName = selectedProject.TeamId == null ? null : vwsDbContext.Teams.FirstOrDefault(team => team.Id == selectedProject.TeamId).Name,
-                ProjectImageGuid = selectedProject.ProjectImageGuid,
-                DepartmentIds = model.DepartmentIds,
-                NumberOfUpdates = vwsDbContext.ProjectHistories.Where(history => history.ProjectId == selectedProject.Id).Count(),
-                Users = await GetProjectUsers(selectedProject.Id),
-                NumberOfTasks = GetNumberOfProjectTasks(selectedProject.Id)
-            };
-
-            response.Value = newProjectResponse;
-            response.Message = "Project updated successfully!";
+            response.Message = "Project team and departments updated successfully!";
             return Ok(response);
         }
 
@@ -646,7 +876,7 @@ namespace vws.web.Controllers._project
         [HttpGet]
         [Authorize]
         [Route("get")]
-        public async Task<ProjectResponseModel> Get(int Id)
+        public ProjectResponseModel Get(int Id)
         {
             Guid userId = LoggedInUserId.Value;
 
@@ -669,7 +899,7 @@ namespace vws.web.Controllers._project
                 ProjectImageGuid = project.ProjectImageGuid,
                 DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
                 NumberOfUpdates = vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
-                Users = await GetProjectUsers(project.Id),
+                Users = GetProjectUsers(project.Id),
                 NumberOfTasks = GetNumberOfProjectTasks(project.Id)
             };
 
@@ -679,7 +909,7 @@ namespace vws.web.Controllers._project
         [HttpGet]
         [Authorize]
         [Route("getActive")]
-        public async Task<IEnumerable<ProjectResponseModel>> GetActiveProject()
+        public IEnumerable<ProjectResponseModel> GetActiveProject()
         {
             var response = new List<ProjectResponseModel>();
             Guid userId = LoggedInUserId.Value;
@@ -703,7 +933,7 @@ namespace vws.web.Controllers._project
                     ProjectImageGuid = project.ProjectImageGuid,
                     DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
                     NumberOfUpdates = vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
-                    Users = await GetProjectUsers(project.Id),
+                    Users = GetProjectUsers(project.Id),
                     NumberOfTasks = GetNumberOfProjectTasks(project.Id)
                 });
             }
@@ -714,7 +944,7 @@ namespace vws.web.Controllers._project
         [HttpGet]
         [Authorize]
         [Route("getHold")]
-        public async Task<IEnumerable<ProjectResponseModel>> GetHoldProject()
+        public IEnumerable<ProjectResponseModel> GetHoldProject()
         {
             var response = new List<ProjectResponseModel>();
             Guid userId = LoggedInUserId.Value;
@@ -738,7 +968,7 @@ namespace vws.web.Controllers._project
                     ProjectImageGuid = project.ProjectImageGuid,
                     DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
                     NumberOfUpdates = vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
-                    Users = await GetProjectUsers(project.Id),
+                    Users = GetProjectUsers(project.Id),
                     NumberOfTasks = GetNumberOfProjectTasks(project.Id)
                 });
             }
@@ -749,7 +979,7 @@ namespace vws.web.Controllers._project
         [HttpGet]
         [Authorize]
         [Route("getDoneOrArchived")]
-        public async Task<IEnumerable<ProjectResponseModel>> GetDoneOrArchivedProject()
+        public IEnumerable<ProjectResponseModel> GetDoneOrArchivedProject()
         {
             var response = new List<ProjectResponseModel>();
             Guid userId = LoggedInUserId.Value;
@@ -772,7 +1002,7 @@ namespace vws.web.Controllers._project
                     TeamName = project.TeamId == null ? null : vwsDbContext.Teams.FirstOrDefault(team => team.Id == project.TeamId).Name,
                     ProjectImageGuid = project.ProjectImageGuid,
                     DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
-                    Users = await GetProjectUsers(project.Id),
+                    Users = GetProjectUsers(project.Id),
                     NumberOfTasks = GetNumberOfProjectTasks(project.Id)
                 });
             }
@@ -839,7 +1069,7 @@ namespace vws.web.Controllers._project
         [HttpGet]
         [Authorize]
         [Route("getProjectMembers")]
-        public async Task<IActionResult> GetProjectMembers(int projectId)
+        public IActionResult GetProjectMembers(int projectId)
         {
             var response = new ResponseModel<List<UserModel>>();
             var members = new List<UserModel>();
@@ -1171,7 +1401,7 @@ namespace vws.web.Controllers._project
         [HttpGet]
         [Authorize]
         [Route("getProjectUserRequests")]
-        public async Task<IActionResult> GetProjectUserRequests(int id)
+        public IActionResult GetProjectUserRequests(int id)
         {
             var response = new ResponseModel<List<Object>>();
             var users = new List<Object>();
