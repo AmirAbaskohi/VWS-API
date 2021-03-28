@@ -16,23 +16,21 @@ namespace vws.web.Services._chat
 {
     public class ChannelService : IChannelService
     {
-        private readonly IVWS_DbContext vwsDbContext;
-        private readonly UserManager<ApplicationUser> userManager;
-        public ChannelService(IVWS_DbContext _vwsDbContext, UserManager<ApplicationUser> _userManager)
+        private readonly IVWS_DbContext _vwsDbContext;
+        public ChannelService(IVWS_DbContext vwsDbContext)
         {
-            userManager = _userManager;
-            vwsDbContext = _vwsDbContext;
+            _vwsDbContext = vwsDbContext;
         }
 
         public async Task<List<ChannelResponseModel>> GetUserChannels(Guid userId)
         {
             List<ChannelResponseModel> channelResponseModels = new List<ChannelResponseModel>();
 
-            List<Team> userTeams = vwsDbContext.GetUserTeams(userId).ToList();
-            List<Project> userProjects = vwsDbContext.GetUserPrivateProjects(userId).ToList();
-            List<Department> userDepartments = vwsDbContext.GetUserDepartments(userId).ToList();
+            List<Team> userTeams = _vwsDbContext.GetUserTeams(userId).ToList();
+            List<Project> userProjects = _vwsDbContext.GetUserPrivateProjects(userId).ToList();
+            List<Department> userDepartments = _vwsDbContext.GetUserDepartments(userId).ToList();
 
-            var userProjectsUnderTeams = vwsDbContext.Projects.Include(project => project.ProjectDepartments)
+            var userProjectsUnderTeams = _vwsDbContext.Projects.Include(project => project.ProjectDepartments)
                                                              .Where(project => project.TeamId != null && userTeams.Select(userTeam => userTeam.Id).Contains((int)project.TeamId));
             foreach (var userProjectUnderTeams in userProjectsUnderTeams)
             {
@@ -42,11 +40,11 @@ namespace vws.web.Services._chat
                     userProjects.Add(userProjectUnderTeams);
             }
 
-            List<UserProfile> userTeamMates = vwsDbContext.TeamMembers
+            List<UserProfile> userTeamMates = _vwsDbContext.TeamMembers
                 .Include(teamMember => teamMember.UserProfile)
                 .Where(teamMember => userTeams.Select(userTeam => userTeam.Id).Contains(teamMember.TeamId) && !teamMember.IsDeleted)
                 .Select(teamMember => teamMember.UserProfile).Distinct().ToList();
-            userTeamMates.Remove(await vwsDbContext.GetUserProfileAsync(userId));
+            userTeamMates.Remove(await _vwsDbContext.GetUserProfileAsync(userId));
 
             foreach (var userTeamMate in userTeamMates)
             {
@@ -55,7 +53,7 @@ namespace vws.web.Services._chat
                     Guid = userTeamMate.UserId,
                     ChannelTypeId = (byte)SeedDataEnum.ChannelTypes.Private,
                     LogoUrl = "http://app.seventask.com/assets/Images/Chat/DefaultAvatars/User.jpg",
-                    Title = (await vwsDbContext.GetUserProfileAsync(userTeamMate.UserId)).NickName,
+                    Title = (await _vwsDbContext.GetUserProfileAsync(userTeamMate.UserId)).NickName,
                     IsMuted = false,
                     IsPinned = false,
                     EvenOrder = 0,
@@ -102,11 +100,11 @@ namespace vws.web.Services._chat
 
         public bool HasUserAccessToChannel(Guid userId, Guid channelId, byte channelTypeId)
         {
-            List<Team> userTeams = vwsDbContext.GetUserTeams(userId).ToList();
+            List<Team> userTeams = _vwsDbContext.GetUserTeams(userId).ToList();
 
             if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
             {
-                List<Guid> userTeamMates = vwsDbContext.TeamMembers
+                List<Guid> userTeamMates = _vwsDbContext.TeamMembers
                 .Where(teamMember => userTeams.Select(userTeam => userTeam.Id).Contains(teamMember.TeamId) && !teamMember.IsDeleted)
                 .Select(teamMember => teamMember.UserProfileId).Distinct().ToList();
                 userTeamMates.Remove(userId);
@@ -119,9 +117,9 @@ namespace vws.web.Services._chat
 
             else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Project)
             {
-                List<Project> userProjects = vwsDbContext.GetUserPrivateProjects(userId).ToList();
-                List<Department> userDepartments = vwsDbContext.GetUserDepartments(userId).ToList();
-                var userProjectsUnderTeams = vwsDbContext.Projects.Include(project => project.ProjectDepartments)
+                List<Project> userProjects = _vwsDbContext.GetUserPrivateProjects(userId).ToList();
+                List<Department> userDepartments = _vwsDbContext.GetUserDepartments(userId).ToList();
+                var userProjectsUnderTeams = _vwsDbContext.Projects.Include(project => project.ProjectDepartments)
                                                                   .Where(project => project.TeamId != null && userTeams.Select(userTeam => userTeam.Id).Contains((int)project.TeamId));
                 foreach (var userProjectUnderTeams in userProjectsUnderTeams)
                 {
@@ -134,7 +132,7 @@ namespace vws.web.Services._chat
             }
 
             else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Department)
-                return vwsDbContext.GetUserDepartments(userId).Select(project => project.Guid).Contains(channelId);
+                return _vwsDbContext.GetUserDepartments(userId).Select(project => project.Guid).Contains(channelId);
 
             return false;
         }
@@ -142,16 +140,16 @@ namespace vws.web.Services._chat
         public bool DoesChannelExist(Guid channelId, byte channelTypeId)
         {
             if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
-                return vwsDbContext.UserProfiles.Any(user => user.UserId == channelId);
+                return _vwsDbContext.UserProfiles.Any(user => user.UserId == channelId);
 
             else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Team)
-                return vwsDbContext.Teams.Any(team => team.Guid == channelId && !team.IsDeleted);
+                return _vwsDbContext.Teams.Any(team => team.Guid == channelId && !team.IsDeleted);
 
             else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Project)
-                return vwsDbContext.Projects.Any(project => project.Guid == channelId && !project.IsDeleted);
+                return _vwsDbContext.Projects.Any(project => project.Guid == channelId && !project.IsDeleted);
 
             else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Department)
-                return vwsDbContext.Departments.Any(department => department.Guid == channelId && !department.IsDeleted);
+                return _vwsDbContext.Departments.Any(department => department.Guid == channelId && !department.IsDeleted);
 
             return false;
         }
