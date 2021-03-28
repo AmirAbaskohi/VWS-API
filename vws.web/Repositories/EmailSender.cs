@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Net.Mail;
+using System.Threading;
 using System.Threading.Tasks;
 using vws.web.Models;
 
@@ -9,10 +11,12 @@ namespace vws.web.Repositories
     public class EmailSender : IEmailSender
     {
         private readonly ILogger<EmailSender> _logger;
+        private readonly IConfiguration _configuration;
 
-        public EmailSender(ILogger<EmailSender> logger)
+        public EmailSender(ILogger<EmailSender> logger, IConfiguration configuration)
         {
             _logger = logger;
+            _configuration = configuration;
         }
 
         public Task SendEmailAsync(SendEmailModel emailModel, out string errorMessage)
@@ -23,7 +27,7 @@ namespace vws.web.Repositories
                 using (var client = new SmtpClient())
                 {
                     client.Credentials = emailModel.Credential;
-                    client.Host = "smtp.zoho.com";
+                    client.Host = _configuration["EmailSender:SMTPHost"];
                     client.Port = 587;
                     client.EnableSsl = true;
 

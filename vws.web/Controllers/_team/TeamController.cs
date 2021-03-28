@@ -147,11 +147,14 @@ namespace vws.web.Controllers._team
                 },
                 IsBodyHtml = false
             };
-            foreach (var email in emails)
+            Task.Run(async () => 
             {
-                emailModelTemplate.ToEmail = email;
-                await _emailSender.SendEmailAsync(emailModelTemplate, out emailErrorMessage);
-            }
+                foreach (var email in emails)
+                {
+                    emailModelTemplate.ToEmail = email;
+                    await _emailSender.SendEmailAsync(emailModelTemplate, out emailErrorMessage);
+                }
+            });
 
         }
 

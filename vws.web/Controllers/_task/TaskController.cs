@@ -8,15 +8,18 @@ using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using vws.web.Domain;
 using vws.web.Domain._base;
 using vws.web.Domain._task;
+using vws.web.EmailTemplates;
 using vws.web.Enums;
 using vws.web.Models;
 using vws.web.Models._task;
 using vws.web.Repositories;
 using vws.web.Services;
+using static vws.web.EmailTemplates.EmailTemplateTypes;
 
 namespace vws.web.Controllers._task
 {
@@ -30,9 +33,11 @@ namespace vws.web.Controllers._task
         private readonly IPermissionService permissionService;
         private readonly IConfiguration configuration;
         private readonly IFileManager fileManager;
+        private readonly IEmailSender emailSender;
 
         public TaskController(UserManager<ApplicationUser> _userManager, IStringLocalizer<TaskController> _localizer,
-            IVWS_DbContext _vwsDbContext, IPermissionService _permissionService, IConfiguration _configuration, IFileManager _fileManager)
+            IVWS_DbContext _vwsDbContext, IPermissionService _permissionService, IConfiguration _configuration, IFileManager _fileManager,
+            IEmailSender _emailSender)
         {
             userManager = _userManager;
             localizer = _localizer;
@@ -40,9 +45,10 @@ namespace vws.web.Controllers._task
             permissionService = _permissionService;
             configuration = _configuration;
             fileManager = _fileManager;
+            emailSender = _emailSender;
         }
 
-        private async Task<List<UserModel>> GetAssignedTo(long taskId)
+        private List<UserModel> GetAssignedTo(long taskId)
         {
             var result = new List<UserModel>();
             var assignedUsers = vwsDbContext.TaskAssigns.Include(taskAssign => taskAssign.UserProfile)
@@ -389,6 +395,35 @@ namespace vws.web.Controllers._task
             return result;
         }
 
+        private async Task SendTaskAssignEmail(List<Guid> userIds, string taskTitle)
+        {
+            ApplicationUser selectedUser;
+            SendEmailModel emailModel;
+            string emailErrorMessage;
+
+            Task.Run(async () =>
+            {
+                foreach (var userId in userIds)
+                {
+                    selectedUser = await userManager.FindByIdAsync(userId.ToString());
+                    emailModel = new SendEmailModel
+                    {
+                        FromEmail = configuration["EmailSender:NotificationEmail:EmailAddress"],
+                        ToEmail = selectedUser.Email,
+                        Subject = "Task Assign",
+                        Body = EmailTemplateUtility.GetEmailTemplate((int)EmailTemplateEnum.TaskAssign).Replace("{0}", String.Format(localizer["Task Assign Email Message"], taskTitle)),
+                        Credential = new NetworkCredential
+                        {
+                            UserName = configuration["EmailSender:NotificationEmail:UserName"],
+                            Password = configuration["EmailSender:NotificationEmail:Password"]
+                        },
+                        IsBodyHtml = true
+                    };
+                    await emailSender.SendEmailAsync(emailModel, out emailErrorMessage);
+                }
+            });
+        }
+
         [HttpPost]
         [Authorize]
         [Route("create")]
@@ -484,6 +519,7 @@ namespace vws.web.Controllers._task
 
             if (GetUsersCanBeAddedToTask(model.TeamId, model.ProjectId).Intersect(model.Users).Count() != model.Users.Count)
             {
+                
                 response.Message = "Users do not have access";
                 response.AddError(localizer["Some of users you want to add do not have access to team or project."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
@@ -537,6 +573,8 @@ namespace vws.web.Controllers._task
             await AddUsersToTask(newTask.Id, model.Users);
             AddCheckLists(newTask.Id, model.CheckLists);
 
+            await SendTaskAssignEmail(model.Users, newTask.Title);
+
             var newTaskResponseModel = new TaskResponseModel()
             {
                 Id = newTask.Id,
@@ -551,7 +589,7 @@ namespace vws.web.Controllers._task
                 CreatedBy = (await vwsDbContext.GetUserProfileAsync(newTask.CreatedBy)).NickName,
                 PriorityId = newTask.TaskPriorityId,
                 PriorityTitle = localizer[((SeedDataEnum.TaskPriority)newTask.TaskPriorityId).ToString()],
-                UsersAssignedTo = await GetAssignedTo(newTask.Id),
+                UsersAssignedTo = GetAssignedTo(newTask.Id),
                 ProjectId = newTask.ProjectId,
                 TeamId = newTask.TeamId,
                 TeamName = newTask.TeamId == null ? null : vwsDbContext.Teams.FirstOrDefault(team => team.Id == newTask.TeamId).Name,
@@ -855,7 +893,7 @@ namespace vws.web.Controllers._task
                     Guid = userTask.Guid,
                     PriorityId = userTask.TaskPriorityId,
                     PriorityTitle = localizer[((SeedDataEnum.TaskPriority)userTask.TaskPriorityId).ToString()],
-                    UsersAssignedTo = await GetAssignedTo(userTask.Id),
+                    UsersAssignedTo = GetAssignedTo(userTask.Id),
                     ProjectId = userTask.ProjectId,
                     TeamId = userTask.TeamId,
                     TeamName = userTask.TeamId == null ? null : vwsDbContext.Teams.FirstOrDefault(team => team.Id == userTask.TeamId).Name,
@@ -911,7 +949,7 @@ namespace vws.web.Controllers._task
                     Guid = projectTask.Guid,
                     PriorityId = projectTask.TaskPriorityId,
                     PriorityTitle = localizer[((SeedDataEnum.TaskPriority)projectTask.TaskPriorityId).ToString()],
-                    UsersAssignedTo = await GetAssignedTo(projectTask.Id),
+                    UsersAssignedTo = GetAssignedTo(projectTask.Id),
                     ProjectId = projectTask.ProjectId,
                     TeamId = projectTask.TeamId,
                     TeamName = projectTask.TeamId == null ? null : vwsDbContext.Teams.FirstOrDefault(team => team.Id == projectTask.TeamId).Name,
@@ -956,7 +994,7 @@ namespace vws.web.Controllers._task
                         Guid = userTask.Guid,
                         PriorityId = userTask.TaskPriorityId,
                         PriorityTitle = localizer[((SeedDataEnum.TaskPriority)userTask.TaskPriorityId).ToString()],
-                        UsersAssignedTo = await GetAssignedTo(userTask.Id),
+                        UsersAssignedTo = GetAssignedTo(userTask.Id),
                         ProjectId = userTask.ProjectId,
                         TeamId = userTask.TeamId,
                         TeamName = userTask.TeamId == null ? null : vwsDbContext.Teams.FirstOrDefault(team => team.Id == userTask.TeamId).Name,
@@ -1106,6 +1144,23 @@ namespace vws.web.Controllers._task
             await vwsDbContext.AddTaskAssignAsync(newTaskAssign);
             vwsDbContext.Save();
 
+            var selectedUser = await userManager.FindByIdAsync(model.UserId.ToString());
+            string emailErrorMessage;
+            SendEmailModel emailModel = new SendEmailModel
+            {
+                FromEmail = configuration["EmailSender:NotificationEmail:EmailAddress"],
+                ToEmail = selectedUser.Email,
+                Subject = "Task Assign",
+                Body = EmailTemplateUtility.GetEmailTemplate((int)EmailTemplateEnum.TaskAssign).Replace("{0}", String.Format(localizer["Task Assign Email Message"], selectedTask.Title)),
+                Credential = new NetworkCredential
+                {
+                    UserName = configuration["EmailSender:NotificationEmail:UserName"],
+                    Password = configuration["EmailSender:NotificationEmail:Password"]
+                },
+                IsBodyHtml = true
+            };
+            Task.Run(async() => await emailSender.SendEmailAsync(emailModel, out emailErrorMessage));
+
             response.Message = "Task assigned successfully!";
             return Ok(response);
         }
@@ -1136,7 +1191,7 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            assignedUsersList = await GetAssignedTo(id);
+            assignedUsersList = GetAssignedTo(id);
 
             response.Message = "Users returned successfully!";
             response.Value = assignedUsersList;

@@ -7,7 +7,8 @@ namespace vws.web.EmailTemplates
         {
             EmailVerificationCode = 1,
             ResetPassword = 2,
-            ChangePasswordAlert = 3
+            ChangePasswordAlert = 3,
+            TaskAssign = 4
         };
     }
 }

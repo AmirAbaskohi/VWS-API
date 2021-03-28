@@ -177,6 +177,9 @@
   <data name="Task already has the tag." xml:space="preserve">
     <value>تسک در حال حاضر این تگ را دارد.</value>
   </data>
+  <data name="Task Assign Email Message" xml:space="preserve">
+    <value>تسک جدیدی با عنوان {0} به شما اختصاص یافته است.</value>
+  </data>
   <data name="Task comment access denied." xml:space="preserve">
     <value>شما به کامنت دسترسی ندارید.</value>
   </data>

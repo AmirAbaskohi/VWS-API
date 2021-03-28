@@ -180,6 +180,9 @@
   <data name="Task already has the tag." xml:space="preserve">
     <value>Task already has the tag.</value>
   </data>
+  <data name="Task Assign Email Message" xml:space="preserve">
+    <value>New task with title {0} has been assigned to you.</value>
+  </data>
   <data name="Task comment access denied." xml:space="preserve">
     <value>Task comment access denied.</value>
   </data>

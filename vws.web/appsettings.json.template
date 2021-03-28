@@ -66,7 +66,8 @@
       "UserName": "seventasktest",
       "Password": "@dmin123321",
       "EmailAddress": "seventasktest@gmail.com"
-    }
+    },
+    "SMTPHost": "smtp.gmail.com"
   },
   "Security": {
     "PasswordLength": 8,

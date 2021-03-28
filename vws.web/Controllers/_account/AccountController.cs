@@ -35,8 +35,6 @@ namespace vws.web.Controllers._account
     public class AccountController : BaseController
     {
         private readonly UserManager<ApplicationUser> userManager;
-        private readonly RoleManager<IdentityRole> roleManager;
-        private readonly SignInManager<ApplicationUser> signInManager;
         private readonly IEmailSender emailSender;
         private readonly IConfiguration configuration;
         private readonly IPasswordHasher<ApplicationUser> passwordHasher;
@@ -46,14 +44,11 @@ namespace vws.web.Controllers._account
         private readonly IVWS_DbContext vwsDbContext;
         private readonly IFileManager fileManager;
 
-        public AccountController(UserManager<ApplicationUser> _userManager, RoleManager<IdentityRole> _roleManager,
-            SignInManager<ApplicationUser> _signInManager, IConfiguration _configuration, IEmailSender _emailSender,
+        public AccountController(UserManager<ApplicationUser> _userManager, IConfiguration _configuration, IEmailSender _emailSender,
             IPasswordHasher<ApplicationUser> _passwordHasher, IStringLocalizer<AccountController> _localizer,
             IVWS_DbContext _vwsDbContext, IFileManager _fileManager)
         {
             userManager = _userManager;
-            roleManager = _roleManager;
-            signInManager = _signInManager;
             configuration = _configuration;
             emailSender = _emailSender;
             passwordHasher = _passwordHasher;
