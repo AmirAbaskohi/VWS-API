@@ -401,17 +401,22 @@ namespace vws.web.Controllers._task
             SendEmailModel emailModel;
             string emailErrorMessage;
 
-            Task.Run(async () =>
+            List<string> emails = new List<string>();
+            foreach (var userId in userIds)
             {
-                foreach (var userId in userIds)
+                emails.Add((await userManager.FindByIdAsync(userId.ToString())).Email);
+            }
+            await Task.Run(async () =>
+            {
+                foreach (var email in emails)
                 {
-                    selectedUser = await userManager.FindByIdAsync(userId.ToString());
+                    
                     emailModel = new SendEmailModel
                     {
                         FromEmail = configuration["EmailSender:NotificationEmail:EmailAddress"],
-                        ToEmail = selectedUser.Email,
+                        ToEmail = email,
                         Subject = "Task Assign",
-                        Body = EmailTemplateUtility.GetEmailTemplate((int)EmailTemplateEnum.TaskAssign).Replace("{0}", String.Format(localizer["Task Assign Email Message"], taskTitle)),
+                        Body = EmailTemplateUtility.GetEmailTemplate((int)EmailTemplateEnum.TaskAssign).Replace("{0}", string.Format(localizer["Task Assign Email Message"], taskTitle)),
                         Credential = new NetworkCredential
                         {
                             UserName = configuration["EmailSender:NotificationEmail:UserName"],
@@ -421,7 +426,7 @@ namespace vws.web.Controllers._task
                     };
                     await emailSender.SendEmailAsync(emailModel, out emailErrorMessage);
                 }
-            });
+            }).ConfigureAwait(false);
         }
 
         [HttpPost]
