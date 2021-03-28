@@ -29,7 +29,8 @@ namespace vws.web.Services._chat
             List<ChannelResponseModel> channelResponseModels = new List<ChannelResponseModel>();
 
             List<Team> userTeams = vwsDbContext.GetUserTeams(userId).ToList();
-            List<Project> userProjects = vwsDbContext.GetUserProjects(userId).ToList();
+            List<Project> userProjects = vwsDbContext.GetUserPrivateProjects(userId).ToList();
+            userProjects.AddRange(vwsDbContext.Projects.Where(project => project.TeamId != null && userTeams.Select(userTeam => userTeam.Id).Contains((int)project.TeamId)));
             List<Department> userDepartments = vwsDbContext.GetUserDepartments(userId).ToList();
 
             List<UserProfile> userTeamMates = vwsDbContext.TeamMembers
@@ -108,7 +109,11 @@ namespace vws.web.Services._chat
                 return userTeams.Select(team => team.Guid).Contains(channelId);
 
             else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Project)
-                return vwsDbContext.GetUserProjects(userId).Select(project => project.Guid).Contains(channelId);
+            {
+                List<Project> userProjects = vwsDbContext.GetUserPrivateProjects(userId).ToList();
+                userProjects.AddRange(vwsDbContext.Projects.Where(project => project.TeamId != null && userTeams.Select(userTeam => userTeam.Id).Contains((int)project.TeamId)));
+                return userProjects.Select(project => project.Guid).Contains(channelId);
+            }
 
             else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Department)
                 return vwsDbContext.GetUserDepartments(userId).Select(project => project.Guid).Contains(channelId);
