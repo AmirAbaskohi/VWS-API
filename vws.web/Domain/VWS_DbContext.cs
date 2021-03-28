@@ -289,7 +289,7 @@ namespace vws.web.Domain
 
         public DbSet<ProjectHistory> ProjectHistories { get; set; }
 
-        public IQueryable<Project> GetUserProjects(Guid userId)
+        public IQueryable<Project> GetUserPrivateProjects(Guid userId)
         {
             return ProjectMembers.Include(projectMember => projectMember.Project)
                 .Where(projectMember => projectMember.UserProfileId == userId && projectMember.Project.IsDeleted == false && projectMember.IsDeleted == false)

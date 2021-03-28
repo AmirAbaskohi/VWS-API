@@ -164,7 +164,7 @@ namespace vws.web.Domain
 
         #region methods
 
-        public IQueryable<Project> GetUserProjects(Guid userId);
+        public IQueryable<Project> GetUserPrivateProjects(Guid userId);
 
         public void AddProjectStatus(ProjectStatus projectStatus);
 
