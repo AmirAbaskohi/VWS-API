@@ -30,8 +30,17 @@ namespace vws.web.Services._chat
 
             List<Team> userTeams = vwsDbContext.GetUserTeams(userId).ToList();
             List<Project> userProjects = vwsDbContext.GetUserPrivateProjects(userId).ToList();
-            userProjects.AddRange(vwsDbContext.Projects.Where(project => project.TeamId != null && userTeams.Select(userTeam => userTeam.Id).Contains((int)project.TeamId)));
             List<Department> userDepartments = vwsDbContext.GetUserDepartments(userId).ToList();
+
+            var userProjectsUnderTeams = vwsDbContext.Projects.Include(project => project.ProjectDepartments)
+                                                             .Where(project => project.TeamId != null && userTeams.Select(userTeam => userTeam.Id).Contains((int)project.TeamId));
+            foreach (var userProjectUnderTeams in userProjectsUnderTeams)
+            {
+                if (userProjectUnderTeams.ProjectDepartments.Count == 0)
+                    userProjects.Add(userProjectUnderTeams);
+                else if (userProjectUnderTeams.ProjectDepartments.Select(pd => pd.DepartmentId).Intersect(userDepartments.Select(department => department.Id)).Count() != 0)
+                    userProjects.Add(userProjectUnderTeams);
+            }
 
             List<UserProfile> userTeamMates = vwsDbContext.TeamMembers
                 .Include(teamMember => teamMember.UserProfile)
@@ -111,7 +120,16 @@ namespace vws.web.Services._chat
             else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Project)
             {
                 List<Project> userProjects = vwsDbContext.GetUserPrivateProjects(userId).ToList();
-                userProjects.AddRange(vwsDbContext.Projects.Where(project => project.TeamId != null && userTeams.Select(userTeam => userTeam.Id).Contains((int)project.TeamId)));
+                List<Department> userDepartments = vwsDbContext.GetUserDepartments(userId).ToList();
+                var userProjectsUnderTeams = vwsDbContext.Projects.Include(project => project.ProjectDepartments)
+                                                                  .Where(project => project.TeamId != null && userTeams.Select(userTeam => userTeam.Id).Contains((int)project.TeamId));
+                foreach (var userProjectUnderTeams in userProjectsUnderTeams)
+                {
+                    if (userProjectUnderTeams.ProjectDepartments.Count == 0)
+                        userProjects.Add(userProjectUnderTeams);
+                    else if (userProjectUnderTeams.ProjectDepartments.Select(pd => pd.DepartmentId).Intersect(userDepartments.Select(department => department.Id)).Count() != 0)
+                        userProjects.Add(userProjectUnderTeams);
+                }
                 return userProjects.Select(project => project.Guid).Contains(channelId);
             }
 
