@@ -395,9 +395,8 @@ namespace vws.web.Controllers._task
             return result;
         }
 
-        private async Task SendTaskAssignEmail(List<Guid> userIds, string taskTitle)
+        private async Task SendMultipleEmails(List<Guid> userIds, string emailMessage, string emailSubject)
         {
-            ApplicationUser selectedUser;
             SendEmailModel emailModel;
             string emailErrorMessage;
 
@@ -410,13 +409,12 @@ namespace vws.web.Controllers._task
             {
                 foreach (var email in emails)
                 {
-                    
                     emailModel = new SendEmailModel
                     {
                         FromEmail = configuration["EmailSender:NotificationEmail:EmailAddress"],
                         ToEmail = email,
-                        Subject = "Task Assign",
-                        Body = EmailTemplateUtility.GetEmailTemplate((int)EmailTemplateEnum.TaskAssign).Replace("{0}", string.Format(localizer["Task Assign Email Message"], taskTitle)),
+                        Subject = emailSubject,
+                        Body = EmailTemplateUtility.GetEmailTemplate((int)EmailTemplateEnum.TaskAssign).Replace("{0}", emailMessage),
                         Credential = new NetworkCredential
                         {
                             UserName = configuration["EmailSender:NotificationEmail:UserName"],
@@ -427,6 +425,27 @@ namespace vws.web.Controllers._task
                     await emailSender.SendEmailAsync(emailModel, out emailErrorMessage);
                 }
             }).ConfigureAwait(false);
+        }
+
+        private async Task SendSingleEmail(string emailMessage, string subject, Guid sendToUserId)
+        {
+            string userEmail = (await userManager.FindByIdAsync(sendToUserId.ToString())).Email;
+            string emailErrorMessage;
+
+            var emailModel = new SendEmailModel
+            {
+                FromEmail = configuration["EmailSender:NotificationEmail:EmailAddress"],
+                ToEmail = userEmail,
+                Subject = subject,
+                Body = EmailTemplateUtility.GetEmailTemplate((int)EmailTemplateEnum.TaskAssign).Replace("{0}", emailMessage),
+                Credential = new NetworkCredential
+                {
+                    UserName = configuration["EmailSender:NotificationEmail:UserName"],
+                    Password = configuration["EmailSender:NotificationEmail:Password"]
+                },
+                IsBodyHtml = true
+            };
+            await Task.Run(async () => await emailSender.SendEmailAsync(emailModel, out emailErrorMessage));
         }
 
         [HttpPost]
@@ -578,7 +597,8 @@ namespace vws.web.Controllers._task
             await AddUsersToTask(newTask.Id, model.Users);
             AddCheckLists(newTask.Id, model.CheckLists);
 
-            await SendTaskAssignEmail(model.Users, newTask.Title);
+            model.Users.Remove(userId);
+            await SendMultipleEmails(model.Users, string.Format(localizer["New task with title <b>«{0}»</b> has been assigned to you."], newTask), "Task Assign");
 
             var newTaskResponseModel = new TaskResponseModel()
             {
@@ -641,8 +661,16 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
+            string lastTitle = selectedTask.Title;
+
             selectedTask.Title = newTitle;
             vwsDbContext.Save();
+
+            var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedTask.CreatedBy);
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            await SendMultipleEmails(usersAssignedTo, string.Format(localizer["Your task title has been updated from <b>«{0}»</b> to <b>«{1}»</b> by <b>«{2}»</b>."], lastTitle, newTitle, LoggedInNickName), "Task Update");
 
             response.Message = "Task title updated successfully!";
             return Ok(response);
@@ -680,6 +708,12 @@ namespace vws.web.Controllers._task
             selectedTask.Description = newDescription;
             vwsDbContext.Save();
 
+            var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedTask.CreatedBy);
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            await SendMultipleEmails(usersAssignedTo, string.Format(localizer["Your task desciption with title <b>«{0}»</b> has been updated by <b>«{1}»</b>."], selectedTask.Title, LoggedInNickName), "Task Update");
+
             response.Message = "Task title updated successfully!";
             return Ok(response);
         }
@@ -713,8 +747,19 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            selectedTask.ProjectId = newPriority;
+            var lastPriority = selectedTask.TaskPriorityId;
+
+            selectedTask.TaskPriorityId = newPriority;
             vwsDbContext.Save();
+
+            var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedTask.CreatedBy);
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            await SendMultipleEmails(usersAssignedTo, string.Format(localizer["Your task priority with title <b>«{0}»</b> has been updated from <b>«{1}»</b>. to <b>«{2}»</b>. by <b>«{3}»</b>."]
+                                                    , selectedTask.Title, localizer[((SeedDataEnum.TaskPriority)lastPriority).ToString()]
+                                                    , localizer[((SeedDataEnum.TaskPriority)newPriority).ToString()], LoggedInNickName),
+                                                    "Task Update");
 
             response.Message = "Task priority updated successfully!";
             return Ok(response);
@@ -1149,22 +1194,7 @@ namespace vws.web.Controllers._task
             await vwsDbContext.AddTaskAssignAsync(newTaskAssign);
             vwsDbContext.Save();
 
-            var selectedUser = await userManager.FindByIdAsync(model.UserId.ToString());
-            string emailErrorMessage;
-            SendEmailModel emailModel = new SendEmailModel
-            {
-                FromEmail = configuration["EmailSender:NotificationEmail:EmailAddress"],
-                ToEmail = selectedUser.Email,
-                Subject = "Task Assign",
-                Body = EmailTemplateUtility.GetEmailTemplate((int)EmailTemplateEnum.TaskAssign).Replace("{0}", String.Format(localizer["Task Assign Email Message"], selectedTask.Title)),
-                Credential = new NetworkCredential
-                {
-                    UserName = configuration["EmailSender:NotificationEmail:UserName"],
-                    Password = configuration["EmailSender:NotificationEmail:Password"]
-                },
-                IsBodyHtml = true
-            };
-            Task.Run(async() => await emailSender.SendEmailAsync(emailModel, out emailErrorMessage));
+            await SendSingleEmail(String.Format(localizer["New task with title <b>«{0}»</b> has been assigned to you."], selectedTask.Title), "Task Assign", selectedUserId) ;
 
             response.Message = "Task assigned successfully!";
             return Ok(response);
