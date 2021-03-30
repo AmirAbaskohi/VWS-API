@@ -12,7 +12,9 @@ using System.Net;
 using System.Threading.Tasks;
 using vws.web.Domain;
 using vws.web.Domain._base;
+using vws.web.Domain._project;
 using vws.web.Domain._task;
+using vws.web.Domain._team;
 using vws.web.EmailTemplates;
 using vws.web.Enums;
 using vws.web.Models;
@@ -303,6 +305,11 @@ namespace vws.web.Controllers._task
 
         private List<FileModel> AddCommentAttachments(long commentId, List<Guid> attachments)
         {
+            var fileAlreadyAttachments = vwsDbContext.TaskCommentAttachments.Where(commentAttachment => commentAttachment.TaskCommentId == commentId)
+                                                                            .Select(commentAttachment => commentAttachment.FileContainerGuid);
+
+            attachments = attachments.Except(fileAlreadyAttachments).ToList();
+
             var result = new List<FileModel>();
             foreach(var attachment in attachments)
             {
@@ -664,12 +671,14 @@ namespace vws.web.Controllers._task
             string lastTitle = selectedTask.Title;
 
             selectedTask.Title = newTitle;
+            selectedTask.ModifiedBy = LoggedInUserId.Value;
+            selectedTask.ModifiedOn = DateTime.Now;
             vwsDbContext.Save();
 
             var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
-            usersAssignedTo.Remove(LoggedInUserId.Value);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
             await SendMultipleEmails(usersAssignedTo, string.Format(localizer["Your task title has been updated from <b>«{0}»</b> to <b>«{1}»</b> by <b>«{2}»</b>."], lastTitle, newTitle, LoggedInNickName), "Task Update");
 
             response.Message = "Task title updated successfully!";
@@ -706,12 +715,14 @@ namespace vws.web.Controllers._task
             }
 
             selectedTask.Description = newDescription;
+            selectedTask.ModifiedBy = LoggedInUserId.Value;
+            selectedTask.ModifiedOn = DateTime.Now;
             vwsDbContext.Save();
 
             var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
-            usersAssignedTo.Remove(LoggedInUserId.Value);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
             await SendMultipleEmails(usersAssignedTo, string.Format(localizer["Your task desciption with title <b>«{0}»</b> has been updated by <b>«{1}»</b>."], selectedTask.Title, LoggedInNickName), "Task Update");
 
             response.Message = "Task title updated successfully!";
@@ -750,12 +761,14 @@ namespace vws.web.Controllers._task
             var lastPriority = selectedTask.TaskPriorityId;
 
             selectedTask.TaskPriorityId = newPriority;
+            selectedTask.ModifiedBy = LoggedInUserId.Value;
+            selectedTask.ModifiedOn = DateTime.Now;
             vwsDbContext.Save();
 
             var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
-            usersAssignedTo.Remove(LoggedInUserId.Value);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
             await SendMultipleEmails(usersAssignedTo, string.Format(localizer["Your task priority with title <b>«{0}»</b> has been updated from <b>«{1}»</b>. to <b>«{2}»</b>. by <b>«{3}»</b>."]
                                                     , selectedTask.Title, localizer[((SeedDataEnum.TaskPriority)lastPriority).ToString()]
                                                     , localizer[((SeedDataEnum.TaskPriority)newPriority).ToString()], LoggedInNickName),
@@ -807,7 +820,7 @@ namespace vws.web.Controllers._task
             }
             #endregion
 
-            var selectedTask = await vwsDbContext.GetTaskAsync(id);
+            var selectedTask = vwsDbContext.GeneralTasks.Include(task => task.Team).Include(task => task.Project).FirstOrDefault(task => task.Id == id);
 
             if (selectedTask == null || selectedTask.IsDeleted)
             {
@@ -822,16 +835,64 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
+            #region CreatingEmailMessage
+            var selectedProject = projectId == null ? (Project)null : vwsDbContext.Projects.FirstOrDefault(project => project.Id == projectId);
+            var selectedTeam = teamId == null ? (Team)null : vwsDbContext.Teams.FirstOrDefault(team => team.Id == teamId);
+            List<string> emailMessageArguments = new List<string>();
+            emailMessageArguments.Add(selectedTask.Title);
+            string emailMessage = "Your task with title <b>«{0}»</b> which was ";
+            if (selectedTask.ProjectId == null && selectedTask.TeamId == null)
+            {
+                emailMessage += "<b>«{1}»</b> ";
+                emailMessageArguments.Add(localizer["Personal"]);
+            }
+            else if (selectedTask.Project != null)
+            {
+                emailMessage += "under <b>«{1}»</b> project ";
+                emailMessageArguments.Add(selectedTask.Project.Name);
+            }
+            else
+            {
+                emailMessage += "under <b>«{1}»</b> team ";
+                emailMessageArguments.Add(selectedTask.Team.Name);
+            }
+            emailMessage += "updated to ";
+            if (selectedProject == null && selectedTeam == null)
+            {
+                emailMessage += "<b>«{2}»</b> ";
+                emailMessageArguments.Add(localizer["Personal"]);
+            }
+            else if (selectedProject != null)
+            {
+                emailMessage += "under <b>«{2}»</b> project ";
+                emailMessageArguments.Add(selectedProject.Name);
+            }
+            else
+            {
+                emailMessage += "under <b>«{2}»</b> team ";
+                emailMessageArguments.Add(selectedTeam.Name);
+            }
+            emailMessage += "by <b>«{3}»</b>.";
+            emailMessageArguments.Add(LoggedInNickName);
+            #endregion
+
             selectedTask.TeamId = teamId;
             selectedTask.ProjectId = projectId;
             if (selectedTask.TeamId == null && projectId != null)
             {
-                var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Id == projectId);
-                selectedTask.TeamId = selectedProject.TeamId;
+                var selectedProj = vwsDbContext.Projects.FirstOrDefault(project => project.Id == projectId);
+                selectedTask.TeamId = selectedProj.TeamId;
             }
+            selectedTask.ModifiedBy = userId;
+            selectedTask.ModifiedOn = DateTime.Now;
             vwsDbContext.Save();
 
-            
+            var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedTask.CreatedBy);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            await SendMultipleEmails(usersAssignedTo, String.Format(localizer[emailMessage], emailMessageArguments.ToArray()), "Task Update");
+
             response.Message = "Task team and project updated successfully!";
             return Ok(response);
         }
@@ -867,8 +928,20 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
             }
 
+            var lastStartDate = selectedTask.StartDate;
+
             selectedTask.StartDate = newStartDate;
+            selectedTask.ModifiedBy = userId;
+            selectedTask.ModifiedOn = DateTime.Now;
             vwsDbContext.Save();
+
+            var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedTask.CreatedBy);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            await SendMultipleEmails(usersAssignedTo, string.Format(localizer["Your task start date with title <b>«{0}»</b> has been updated from <b>«{1}»</b> to <b>«{2}»</b> by <b>«{3}»</b>."]
+                                                    , selectedTask.Title, lastStartDate == null ? localizer["No Time"] : lastStartDate.ToString()
+                                                    , selectedTask.StartDate == null ? localizer["No Time"] : selectedTask.StartDate.ToString(), LoggedInNickName), "Task Update");
 
 
             response.Message = "Task start date updated successfully!";
@@ -878,7 +951,7 @@ namespace vws.web.Controllers._task
         [HttpPut]
         [Authorize]
         [Route("updateEndDate")]
-        public async Task<IActionResult> UWpdateEndDate(long id, DateTime? newEndDate)
+        public async Task<IActionResult> UpdateEndDate(long id, DateTime? newEndDate)
         {
             var response = new ResponseModel();
 
@@ -906,9 +979,20 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
             }
 
+            var lastEndDate = selectedTask.EndDate;
+
             selectedTask.EndDate = newEndDate;
+            selectedTask.ModifiedBy = userId;
+            selectedTask.ModifiedOn = DateTime.Now;
             vwsDbContext.Save();
 
+            var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedTask.CreatedBy);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            await SendMultipleEmails(usersAssignedTo, string.Format(localizer["Your task end date with title <b>«{0}»</b> has been updated from <b>«{1}»</b> to <b>«{2}»</b> by <b>«{3}»</b>."]
+                                                    , selectedTask.Title, lastEndDate == null ? localizer["No Time"] : lastEndDate.ToString()
+                                                    , selectedTask.EndDate == null ? localizer["No Time"] : selectedTask.EndDate.ToString(), LoggedInNickName), "Task Update");
 
             response.Message = "Task start date updated successfully!";
             return Ok(response);
@@ -1063,7 +1147,7 @@ namespace vws.web.Controllers._task
         [HttpDelete]
         [Authorize]
         [Route("delete")]
-        public IActionResult DeleteTask(long taskId)
+        public async Task<IActionResult> DeleteTask(long taskId)
         {
             var response = new ResponseModel();
 
@@ -1105,6 +1189,13 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedOn = DateTime.Now;
             vwsDbContext.Save();
 
+            var usersAssignedTo = GetAssignedTo(taskId).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedTask.CreatedBy);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            await SendMultipleEmails(usersAssignedTo, string.Format(localizer["Your task with title <b>«{0}»</b> has been deleted by <b>«{1}»</b>."]
+                                                    , selectedTask.Title, LoggedInNickName), "Task Update");
+
             response.Message = "Task deleted successfully!";
             return Ok(response);
         }
@@ -1134,8 +1225,16 @@ namespace vws.web.Controllers._task
             }
 
             selectedTask.IsArchived = true;
-
+            selectedTask.ModifiedBy = userId;
+            selectedTask.ModifiedOn = DateTime.Now;
             vwsDbContext.Save();
+
+            var usersAssignedTo = GetAssignedTo(taskId).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedTask.CreatedBy);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            await SendMultipleEmails(usersAssignedTo, string.Format(localizer["Your task with title <b>«{0}»</b> has been archived by <b>«{1}»</b>."]
+                                                    , selectedTask.Title, LoggedInNickName), "Task Update");
 
             response.Message = "Task archived successfully!";
             return Ok(response);
@@ -1270,8 +1369,9 @@ namespace vws.web.Controllers._task
             selectedUserAssignedTask.IsDeleted = true;
             selectedUserAssignedTask.DeletedBy = LoggedInUserId.Value;
             selectedUserAssignedTask.DeletedOn = DateTime.Now;
-
             vwsDbContext.Save();
+
+            await SendSingleEmail(String.Format(localizer["You have been unassigned from task with title <b>«{0}»</b>."], selectedTask.Title), "Task Assign", userId);
 
             response.Message = "User unassigned from task successfully!";
             return Ok(response);
@@ -1293,7 +1393,7 @@ namespace vws.web.Controllers._task
         [HttpGet]
         [Authorize]
         [Route("getUsersCanBeAssigned")]
-        public async Task<IActionResult> GetUsersCanBeAssigned(int? teamId, int? projectId)
+        public IActionResult GetUsersCanBeAssigned(int? teamId, int? projectId)
         {
             var response = new ResponseModel<List<UserModel>>();
             var result = new List<UserModel>();
@@ -1572,7 +1672,7 @@ namespace vws.web.Controllers._task
         [HttpPost]
         [Authorize]
         [Route("addCheckList")]
-        public IActionResult AddCheckList(long id, [FromBody] CheckListModel model)
+        public async Task<IActionResult> AddCheckList(long id, [FromBody] CheckListModel model)
         {
             var response = new ResponseModel<CheckListResponseModel>();
             var userId = LoggedInUserId.Value;
@@ -1618,7 +1718,16 @@ namespace vws.web.Controllers._task
                 Title = model.Title
             };
             vwsDbContext.AddCheckList(newCheckList);
+            selectedTask.ModifiedOn = DateTime.Now;
+            selectedTask.ModifiedBy = userId;
             vwsDbContext.Save();
+
+            var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedTask.CreatedBy);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            await SendMultipleEmails(usersAssignedTo, string.Format(localizer["<b>«{0}»</b> added new check list with title <b>«{1}»</b> to your task with title <b>«{2}»</b>."]
+                                                    , LoggedInNickName, newCheckList.Title, selectedTask.Title), "Task Update");
 
             var itemsResponse = AddCheckListItems(newCheckList.Id, model.Items);
 
@@ -1640,7 +1749,7 @@ namespace vws.web.Controllers._task
         [HttpPost]
         [Authorize]
         [Route("addCheckListItem")]
-        public IActionResult AddCheckListItem(long checkListId, [FromBody] CheckListItemModel model)
+        public async Task<IActionResult> AddCheckListItem(long checkListId, [FromBody] CheckListItemModel model)
         {
             var response = new ResponseModel<CheckListItemResponseModel>();
             var userId = LoggedInUserId.Value;
@@ -1689,7 +1798,18 @@ namespace vws.web.Controllers._task
                 Title = model.Title
             };
             vwsDbContext.AddCheckListItem(newCheckListItem);
+            selectedCheckList.GeneralTask.ModifiedOn = DateTime.Now;
+            selectedCheckList.GeneralTask.ModifiedBy = userId;
+            selectedCheckList.ModifiedBy = userId;
+            selectedCheckList.ModifiedOn = DateTime.Now;
             vwsDbContext.Save();
+
+            var usersAssignedTo = GetAssignedTo(selectedCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedCheckList.GeneralTask.CreatedBy);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            await SendMultipleEmails(usersAssignedTo, string.Format(localizer["<b>«{0}»</b> added new check list item with title <b>«{1}»</b> to check list with title <b>«{2}»</b> in your task with title <b>«{3}»</b>."]
+                                                    , LoggedInNickName, newCheckListItem.Title, selectedCheckList.Title, selectedCheckList.GeneralTask.Title), "Task Update");
 
             response.Value = new CheckListItemResponseModel()
             {
@@ -1709,7 +1829,7 @@ namespace vws.web.Controllers._task
         [HttpPost]
         [Authorize]
         [Route("updateCheckListTitle")]
-        public IActionResult UpdateCheckListTitle(long checkListId, string newTitle)
+        public async Task<IActionResult> UpdateCheckListTitle(long checkListId, string newTitle)
         {
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
@@ -1745,8 +1865,21 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
+            var lastTitle = selectedCheckList.Title;
+
             selectedCheckList.Title = newTitle;
+            selectedCheckList.GeneralTask.ModifiedOn = DateTime.Now;
+            selectedCheckList.GeneralTask.ModifiedBy = userId;
+            selectedCheckList.ModifiedBy = userId;
+            selectedCheckList.ModifiedOn = DateTime.Now;
             vwsDbContext.Save();
+
+            var usersAssignedTo = GetAssignedTo(selectedCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedCheckList.GeneralTask.CreatedBy);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            await SendMultipleEmails(usersAssignedTo, string.Format(localizer["<b>«{0}»</b> updated check list title from <b>«{1}»</b> to <b>«{2}»</b> in your task with title <b>«{3}»</b>."]
+                                                    , LoggedInNickName, lastTitle, selectedCheckList.Title, selectedCheckList.GeneralTask.Title), "Task Update");
 
             response.Message = "Check list title updated successfully!";
             return Ok(response);
@@ -1755,7 +1888,7 @@ namespace vws.web.Controllers._task
         [HttpDelete]
         [Authorize]
         [Route("deleteCheckLists")]
-        public IActionResult DeleteCheckList(long checkListId)
+        public async Task<IActionResult> DeleteCheckList(long checkListId)
         {
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
@@ -1785,7 +1918,19 @@ namespace vws.web.Controllers._task
             }
 
             selectedCheckList.IsDeleted = true;
+            selectedCheckList.GeneralTask.ModifiedOn = DateTime.Now;
+            selectedCheckList.GeneralTask.ModifiedBy = userId;
+            selectedCheckList.ModifiedBy = userId;
+            selectedCheckList.ModifiedOn = DateTime.Now;
             vwsDbContext.Save();
+
+            var usersAssignedTo = GetAssignedTo(selectedCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedCheckList.GeneralTask.CreatedBy);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            await SendMultipleEmails(usersAssignedTo, string.Format(localizer["<b>«{0}»</b> deleted check list with title <b>«{1}»</b> in your task with title <b>«{2}»</b>."]
+                                                    , LoggedInNickName, selectedCheckList.Title, selectedCheckList.GeneralTask.Title), "Task Update");
+
 
             response.Message = "Check list deleted successfully!";
             return Ok(response);
@@ -1794,7 +1939,7 @@ namespace vws.web.Controllers._task
         [HttpPost]
         [Authorize]
         [Route("updateCheckListItemTitle")]
-        public IActionResult UpdateCheckListItemTitle(long checkListItemId, string newTitle)
+        public async Task<IActionResult> UpdateCheckListItemTitle(long checkListItemId, string newTitle)
         {
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
@@ -1831,8 +1976,23 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
+            var lastTitle = selectedCheckListItem.Title;
+
             selectedCheckListItem.Title = newTitle;
+            selectedCheckListItem.ModifiedOn = DateTime.Now;
+            selectedCheckListItem.ModifiedBy = userId;
+            selectedCheckListItem.TaskCheckList.ModifiedOn = DateTime.Now;
+            selectedCheckListItem.TaskCheckList.CreatedBy = userId;
+            selectedCheckListItem.TaskCheckList.GeneralTask.ModifiedOn = DateTime.Now;
+            selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy = userId;
             vwsDbContext.Save();
+
+            var usersAssignedTo = GetAssignedTo(selectedCheckListItem.TaskCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            await SendMultipleEmails(usersAssignedTo, string.Format(localizer["<b>«{0}»</b> updated check list item title from <b>«{1}»</b> to <b>«{2}»</b> in check list with title <b>«{3}»</b> of your task with title <b>«{4}»</b>."]
+                                                    , LoggedInNickName, lastTitle, selectedCheckListItem.Title, selectedCheckListItem.TaskCheckList.Title, selectedCheckListItem.TaskCheckList.GeneralTask.Title), "Task Update");
 
             response.Message = "Check list item title updated successfully!";
             return Ok(response);
@@ -1841,7 +2001,7 @@ namespace vws.web.Controllers._task
         [HttpDelete]
         [Authorize]
         [Route("deleteCheckListItem")]
-        public IActionResult DeleteCheckListItem(long checkListItemId)
+        public async Task<IActionResult> DeleteCheckListItem(long checkListItemId)
         {
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
@@ -1872,7 +2032,20 @@ namespace vws.web.Controllers._task
             }
 
             selectedCheckListItem.IsDeleted = true;
+            selectedCheckListItem.ModifiedOn = DateTime.Now;
+            selectedCheckListItem.ModifiedBy = userId;
+            selectedCheckListItem.TaskCheckList.ModifiedOn = DateTime.Now;
+            selectedCheckListItem.TaskCheckList.CreatedBy = userId;
+            selectedCheckListItem.TaskCheckList.GeneralTask.ModifiedOn = DateTime.Now;
+            selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy = userId;
             vwsDbContext.Save();
+
+            var usersAssignedTo = GetAssignedTo(selectedCheckListItem.TaskCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            await SendMultipleEmails(usersAssignedTo, string.Format(localizer["<b>«{0}»</b> deleted check list item with title <b>«{1}»</b> in your check list with title <b>«{2}»</b> of <b>«{3}»</b> task."]
+                                                    , LoggedInNickName, selectedCheckListItem.Title, selectedCheckListItem.TaskCheckList.Title, selectedCheckListItem.TaskCheckList.GeneralTask.Title), "Task Update");
 
             response.Message = "Check list item delete successfully!";
             return Ok(response);
@@ -1881,7 +2054,7 @@ namespace vws.web.Controllers._task
         [HttpPost]
         [Authorize]
         [Route("updateListItemIsChecked")]
-        public IActionResult UpdateListItemIsChecked(long checkListItemId, bool isChecked)
+        public async Task<IActionResult> UpdateListItemIsChecked(long checkListItemId, bool isChecked)
         {
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
@@ -1911,8 +2084,24 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
+            var lastStatus = selectedCheckListItem.IsChecked;
+
             selectedCheckListItem.IsChecked = isChecked;
+            selectedCheckListItem.ModifiedOn = DateTime.Now;
+            selectedCheckListItem.ModifiedBy = userId;
+            selectedCheckListItem.TaskCheckList.ModifiedOn = DateTime.Now;
+            selectedCheckListItem.TaskCheckList.CreatedBy = userId;
+            selectedCheckListItem.TaskCheckList.GeneralTask.ModifiedOn = DateTime.Now;
+            selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy = userId;
             vwsDbContext.Save();
+
+            var usersAssignedTo = GetAssignedTo(selectedCheckListItem.TaskCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            await SendMultipleEmails(usersAssignedTo, string.Format(localizer["<b>«{0}»</b> updated check list item status from <b>«{1}»</b> to <b>«{2}»</b> in check list with title <b>«{3}»</b> of your task with title <b>«{4}»</b>."]
+                                                    , LoggedInNickName, lastStatus? localizer["Done"] : localizer["UnderDone"], selectedCheckListItem.IsChecked? localizer["Done"] : localizer["UnderDone"],
+                                                    selectedCheckListItem.TaskCheckList.Title, selectedCheckListItem.TaskCheckList.GeneralTask.Title), "Task Update");
 
             response.Message = "Check list item is checked updated successfully!";
             return Ok(response);
@@ -1921,12 +2110,12 @@ namespace vws.web.Controllers._task
         [HttpPut]
         [Authorize]
         [Route("updateStatus")]
-        public IActionResult UpdateTaskStatus(long id, int newStatusId)
+        public async Task<IActionResult> UpdateTaskStatus(long id, int newStatusId)
         {
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
 
-            var selectedTask = vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == id);
+            var selectedTask = vwsDbContext.GeneralTasks.Include(task => task.Status).FirstOrDefault(task => task.Id == id);
             if (selectedTask == null || selectedTask.IsDeleted)
             {
                 response.Message = "Task not found";
@@ -1949,8 +2138,20 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
+            var lastStatus = selectedTask.Status.Title;
+
             selectedTask.TaskStatusId = newStatusId;
+            selectedTask.ModifiedBy = userId;
+            selectedTask.ModifiedOn = DateTime.Now;
             vwsDbContext.Save();
+
+            var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedTask.CreatedBy);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            await SendMultipleEmails(usersAssignedTo, string.Format(localizer["Status of your task with title <b>«{0}»</b> has been updated from <b>«{1}»</b> to <b>«{2}»</b> by <b>«{3}»</b>."]
+                                                    , selectedTask.Title, lastStatus, vwsDbContext.TaskStatuses.FirstOrDefault(status => status.Id == selectedTask.TaskStatusId).Title
+                                                    , LoggedInNickName), "Task Update");
 
             response.Message = "Task status changed";
             return Ok(response);
@@ -2141,7 +2342,7 @@ namespace vws.web.Controllers._task
         [HttpPost]
         [Authorize]
         [Route("addTagToTask")]
-        public IActionResult AddTagToTask(long id, int tagId)
+        public async Task<IActionResult> AddTagToTask(long id, int tagId)
         {
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
@@ -2196,6 +2397,16 @@ namespace vws.web.Controllers._task
             }
 
             AddTaskTags(id, tagArray);
+            selectedTask.ModifiedOn = DateTime.Now;
+            selectedTask.ModifiedBy = userId;
+            vwsDbContext.Save();
+
+            var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedTask.CreatedBy);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            await SendMultipleEmails(usersAssignedTo, string.Format(localizer["<b>«{0}»</b> added new tag <b>«{1}»</b> to your task with title <b>«{2}»</b>."]
+                                                    , LoggedInNickName, selectedTag.Title, selectedTask.Title), "Task Update");
 
             response.Message = "New tag added to task";
             return Ok(response);
@@ -2204,7 +2415,7 @@ namespace vws.web.Controllers._task
         [HttpPost]
         [Authorize]
         [Route("deleteTagOfTask")]
-        public IActionResult DeleteTagOfTask(long id, int tagId)
+        public async Task<IActionResult> DeleteTagOfTask(long id, int tagId)
         {
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
@@ -2251,7 +2462,20 @@ namespace vws.web.Controllers._task
                 response.AddError(localizer["Task does not have the tag."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
+
+            var tagName = selectedTag.Title;
+
             vwsDbContext.DeleteTaskTag(selectedTaskTag.GeneralTaskId, selectedTaskTag.TagId);
+            selectedTask.ModifiedBy = userId;
+            selectedTask.ModifiedOn = DateTime.Now;
+            vwsDbContext.Save();
+
+            var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedTask.CreatedBy);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            await SendMultipleEmails(usersAssignedTo, string.Format(localizer["<b>«{0}»</b> deleted tag <b>«{1}»</b> from your task with title <b>«{2}»</b>."]
+                                                    , LoggedInNickName, selectedTag.Title, selectedTask.Title), "Task Update");
 
             response.Message = "Task tag deleted";
             return Ok(response);
@@ -2343,8 +2567,17 @@ namespace vws.web.Controllers._task
                 GeneralTaskId = selectedTask.Id
             };
             vwsDbContext.AddTaskComment(newComment);
+            selectedTask.ModifiedOn = DateTime.Now;
+            selectedTask.ModifiedBy = userId;
             vwsDbContext.Save();
             AddCommentAttachments(newComment.Id, model.Attachments);
+
+            var usersAssignedTo = GetAssignedTo(model.Id).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedTask.CreatedBy);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            await SendMultipleEmails(usersAssignedTo, string.Format(localizer["<b>«{0}»</b> added new comment <b>«{1}»</b> to your task with title <b>«{2}»</b>."]
+                                                    , LoggedInNickName, newComment.Body, selectedTask.Title), "Task Update");
 
             UserProfile userProfile = await vwsDbContext.GetUserProfileAsync(newComment.CommentedBy);
             response.Value = new CommentResponseModel()
@@ -2368,7 +2601,7 @@ namespace vws.web.Controllers._task
         [HttpPut]
         [Authorize]
         [Route("editComment")]
-        public IActionResult EditComment(long commentId, string newBody)
+        public async Task<IActionResult> EditComment(long commentId, string newBody)
         {
             var response = new ResponseModel();
 
@@ -2381,7 +2614,7 @@ namespace vws.web.Controllers._task
 
             var userId = LoggedInUserId.Value;
 
-            var selectedComment = vwsDbContext.TaskComments.FirstOrDefault(comment => comment.Id == commentId);
+            var selectedComment = vwsDbContext.TaskComments.Include(comment => comment.GeneralTask).FirstOrDefault(comment => comment.Id == commentId);
             if (selectedComment == null)
             {
                 response.AddError(localizer["Task comment not found."]);
@@ -2402,9 +2635,20 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
+            string lastBody = selectedComment.Body;
+
             selectedComment.Body = newBody;
             selectedComment.ModifiedOn = DateTime.Now;
+            selectedComment.GeneralTask.ModifiedOn = DateTime.Now;
+            selectedComment.GeneralTask.ModifiedBy = userId;
             vwsDbContext.Save();
+
+            var usersAssignedTo = GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedComment.GeneralTask.CreatedBy);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            await SendMultipleEmails(usersAssignedTo, string.Format(localizer["<b>«{0}»</b> updated comment from <b>«{1}»</b> to <b>«{2}»</b> in your task with title <b>«{3}»</b>."]
+                                                    , LoggedInNickName, lastBody, selectedComment.Body, selectedComment.GeneralTask.Title), "Task Update");
 
             response.Message = "Comment body updated successfully";
             return Ok(response);
@@ -2413,13 +2657,13 @@ namespace vws.web.Controllers._task
         [HttpDelete]
         [Authorize]
         [Route("deleteComment")]
-        public IActionResult DeleteComment(long commentId)
+        public async Task<IActionResult> DeleteComment(long commentId)
         {
             var response = new ResponseModel();
 
             var userId = LoggedInUserId.Value;
 
-            var selectedComment = vwsDbContext.TaskComments.FirstOrDefault(comment => comment.Id == commentId);
+            var selectedComment = vwsDbContext.TaskComments.Include(comment => comment.GeneralTask).FirstOrDefault(comment => comment.Id == commentId);
             if (selectedComment == null)
             {
                 response.AddError(localizer["Task comment not found."]);
@@ -2441,6 +2685,17 @@ namespace vws.web.Controllers._task
             }
 
             DeleteTaskComment(commentId);
+            selectedComment.ModifiedOn = DateTime.Now;
+            selectedComment.GeneralTask.ModifiedOn = DateTime.Now;
+            selectedComment.GeneralTask.ModifiedBy = userId;
+            vwsDbContext.Save();
+
+            var usersAssignedTo = GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedComment.GeneralTask.CreatedBy);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            await SendMultipleEmails(usersAssignedTo, string.Format(localizer["<b>«{0}»</b> deleted comment <b>«{1}»</b> in your task with title <b>«{2}»</b>."]
+                                                    , LoggedInNickName, selectedComment.Body, selectedComment.GeneralTask.Title), "Task Update");
 
             response.Message = "Comment body deleted successfully";
             return Ok(response);
@@ -2449,13 +2704,13 @@ namespace vws.web.Controllers._task
         [HttpPost]
         [Authorize]
         [Route("addAtachmentToComment")]
-        public IActionResult AddAtachmentToComment([FromBody] AddAtachmentModel model)
+        public async Task<IActionResult> AddAtachmentToComment([FromBody] AddAtachmentModel model)
         {
             var response = new ResponseModel<List<FileModel>>();
 
             var userId = LoggedInUserId.Value;
 
-            var selectedComment = vwsDbContext.TaskComments.FirstOrDefault(comment => comment.Id == model.CommentId);
+            var selectedComment = vwsDbContext.TaskComments.Include(comment => comment.GeneralTask).FirstOrDefault(comment => comment.Id == model.CommentId);
             if (selectedComment == null)
             {
                 response.AddError(localizer["Task comment not found."]);
@@ -2471,6 +2726,24 @@ namespace vws.web.Controllers._task
 
             response.Value = AddCommentAttachments(selectedComment.Id, model.Attachments);
             response.Message = "Attachments added successfully";
+            selectedComment.ModifiedOn = DateTime.Now;
+            selectedComment.GeneralTask.ModifiedOn = DateTime.Now;
+            selectedComment.GeneralTask.ModifiedBy = userId;
+            vwsDbContext.Save();
+
+            if (response.Value.Count() != 0)
+            {
+                string emailMessage = localizer["<b>«{0}»</b> added below attachments to comment <b>«{1}»</b> in your task with title <b>«{2}»</b>"];
+                emailMessage += ":\n <br>";
+                foreach (var file in response.Value)
+                    emailMessage += $"<a href='{Request.Scheme}://{Request.Host}/en-US/File/get?id={file.FileContainerGuid}'>{file.Name}</a>\n<br>\n";
+
+                var usersAssignedTo = GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
+                usersAssignedTo.Add(selectedComment.GeneralTask.CreatedBy);
+                usersAssignedTo = usersAssignedTo.Distinct().ToList();
+                usersAssignedTo.Remove(LoggedInUserId.Value);
+                await SendMultipleEmails(usersAssignedTo, string.Format(emailMessage, LoggedInNickName, selectedComment.Body, selectedComment.GeneralTask.Title), "Task Update");
+            }
 
             return Ok(response);
         }
@@ -2478,13 +2751,13 @@ namespace vws.web.Controllers._task
         [HttpDelete]
         [Authorize]
         [Route("deleteAttachmentFromComment")]
-        public IActionResult DeleteAttachmentFromComment(long commentId, Guid attachmentGuid)
+        public async Task<IActionResult> DeleteAttachmentFromComment(long commentId, Guid attachmentGuid)
         {
             var response = new ResponseModel();
 
             var userId = LoggedInUserId.Value;
 
-            var selectedComment = vwsDbContext.TaskComments.FirstOrDefault(comment => comment.Id == commentId);
+            var selectedComment = vwsDbContext.TaskComments.Include(comment => comment.GeneralTask).FirstOrDefault(comment => comment.Id == commentId);
             if (selectedComment == null)
             {
                 response.AddError(localizer["Task comment not found."]);
@@ -2513,7 +2786,17 @@ namespace vws.web.Controllers._task
 
             var selectedContainer = vwsDbContext.FileContainers.FirstOrDefault(container => container.Id == selectedAttachment.FileContainerId);
             vwsDbContext.DeleteFileContainer(selectedContainer);
+            selectedComment.ModifiedOn = DateTime.Now;
+            selectedComment.GeneralTask.ModifiedOn = DateTime.Now;
+            selectedComment.GeneralTask.ModifiedBy = userId;
             vwsDbContext.Save();
+
+            var usersAssignedTo = GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedComment.GeneralTask.CreatedBy);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            await SendMultipleEmails(usersAssignedTo, string.Format(localizer["<b>«{0}»</b> deleted attachment <b>«{1}»</b> from comment <b>«{2}»</b> in your task with title <b>«{3}»</b>."]
+                                                    , LoggedInNickName, selectedAttachment.FileContainerGuid, selectedComment.Body, selectedComment.GeneralTask.Title), "Task Update");
 
             return Ok(response);
         }
