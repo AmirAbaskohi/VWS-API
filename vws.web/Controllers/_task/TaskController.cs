@@ -30,31 +30,31 @@ namespace vws.web.Controllers._task
     [ApiController]
     public class TaskController : BaseController
     {
-        private readonly UserManager<ApplicationUser> userManager;
-        private readonly IStringLocalizer<TaskController> localizer;
-        private readonly IVWS_DbContext vwsDbContext;
-        private readonly IPermissionService permissionService;
-        private readonly IConfiguration configuration;
-        private readonly IFileManager fileManager;
-        private readonly IEmailSender emailSender;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IStringLocalizer<TaskController> _localizer;
+        private readonly IVWS_DbContext _vwsDbContext;
+        private readonly IPermissionService _permissionService;
+        private readonly IConfiguration _configuration;
+        private readonly IFileManager _fileManager;
+        private readonly IEmailSender _emailSender;
 
-        public TaskController(UserManager<ApplicationUser> _userManager, IStringLocalizer<TaskController> _localizer,
-            IVWS_DbContext _vwsDbContext, IPermissionService _permissionService, IConfiguration _configuration, IFileManager _fileManager,
-            IEmailSender _emailSender)
+        public TaskController(UserManager<ApplicationUser> userManager, IStringLocalizer<TaskController> localizer,
+            IVWS_DbContext vwsDbContext, IPermissionService permissionService, IConfiguration configuration, IFileManager fileManager,
+            IEmailSender emailSender)
         {
-            userManager = _userManager;
-            localizer = _localizer;
-            vwsDbContext = _vwsDbContext;
-            permissionService = _permissionService;
-            configuration = _configuration;
-            fileManager = _fileManager;
-            emailSender = _emailSender;
+            _userManager = userManager;
+            _localizer = localizer;
+            _vwsDbContext = vwsDbContext;
+            _permissionService = permissionService;
+            _configuration = configuration;
+            _fileManager = fileManager;
+            _emailSender = emailSender;
         }
 
         private List<UserModel> GetAssignedTo(long taskId)
         {
             var result = new List<UserModel>();
-            var assignedUsers = vwsDbContext.TaskAssigns.Include(taskAssign => taskAssign.UserProfile)
+            var assignedUsers = _vwsDbContext.TaskAssigns.Include(taskAssign => taskAssign.UserProfile)
                                                         .Where(taskAssign => taskAssign.GeneralTaskId == taskId && !taskAssign.IsDeleted)
                                                         .Select(taskAssign => taskAssign.UserProfile);
 
@@ -73,12 +73,12 @@ namespace vws.web.Controllers._task
 
         private List<GeneralTask> GetUserTasks(Guid userId)
         {
-            var assignedTasks = vwsDbContext.TaskAssigns.Include(taskAssign => taskAssign.GeneralTask)
+            var assignedTasks = _vwsDbContext.TaskAssigns.Include(taskAssign => taskAssign.GeneralTask)
                                                         .Where(taskAssign => taskAssign.UserProfileId == userId && !taskAssign.IsDeleted && taskAssign.CreatedBy != userId)
                                                         .Select(taskAssign => taskAssign.GeneralTask)
                                                         .ToList();
 
-            assignedTasks.AddRange(vwsDbContext.GeneralTasks.Where(task => task.CreatedBy == userId && !task.IsDeleted));
+            assignedTasks.AddRange(_vwsDbContext.GeneralTasks.Where(task => task.CreatedBy == userId && !task.IsDeleted));
 
             return assignedTasks;
         }
@@ -88,7 +88,7 @@ namespace vws.web.Controllers._task
             var creationTime = DateTime.Now;
             foreach (var user in users)
             {
-                await vwsDbContext.AddTaskAssignAsync(new TaskAssign()
+                await _vwsDbContext.AddTaskAssignAsync(new TaskAssign()
                 {
                     CreatedBy = LoggedInUserId.Value,
                     IsDeleted = false,
@@ -98,7 +98,7 @@ namespace vws.web.Controllers._task
                     GeneralTaskId = taskId
                 });
             }
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
         }
 
         private List<Guid> GetUsersCanBeAddedToTask(int? teamId, int? projectId)
@@ -107,9 +107,9 @@ namespace vws.web.Controllers._task
                 teamId = null;
 
             if (teamId != null)
-                return permissionService.GetUsersHaveAccessToTeam((int)teamId);
+                return _permissionService.GetUsersHaveAccessToTeam((int)teamId);
             else if (projectId != null)
-                return permissionService.GetUsersHaveAccessToProject((int)projectId);
+                return _permissionService.GetUsersHaveAccessToProject((int)projectId);
 
             return new List<Guid>();
         }
@@ -118,19 +118,19 @@ namespace vws.web.Controllers._task
         {
             if (projectId != null)
             {
-                return vwsDbContext.TaskStatuses.Where(status => status.ProjectId == projectId)
+                return _vwsDbContext.TaskStatuses.Where(status => status.ProjectId == projectId)
                                                           .OrderBy(status => status.EvenOrder)
                                                           .Select(status => new TaskStatusResponseModel() { Id = status.Id, Title = status.Title })
                                                           .ToList();
             }
             else if (teamId != null)
             {
-                return vwsDbContext.TaskStatuses.Where(status => status.TeamId == teamId)
+                return _vwsDbContext.TaskStatuses.Where(status => status.TeamId == teamId)
                                                           .OrderBy(status => status.EvenOrder)
                                                           .Select(status => new TaskStatusResponseModel() { Id = status.Id, Title = status.Title })
                                                           .ToList();
             }
-            return vwsDbContext.TaskStatuses.Where(status => status.UserProfileId == LoggedInUserId.Value)
+            return _vwsDbContext.TaskStatuses.Where(status => status.UserProfileId == LoggedInUserId.Value)
                                                       .OrderBy(status => status.EvenOrder)
                                                       .Select(status => new TaskStatusResponseModel() { Id = status.Id, Title = status.Title })
                                                       .ToList();
@@ -140,17 +140,17 @@ namespace vws.web.Controllers._task
         {
             if (projectId != null)
             {
-                return vwsDbContext.Tags.Where(tag => tag.ProjectId == projectId)
+                return _vwsDbContext.Tags.Where(tag => tag.ProjectId == projectId)
                                         .Select(tag => new TagResponseModel() { Id = tag.Id, Title = tag.Title, Color = tag.Color })
                                         .ToList();
             }
             else if (teamId != null)
             {
-                return vwsDbContext.Tags.Where(tag => tag.TeamId == teamId)
+                return _vwsDbContext.Tags.Where(tag => tag.TeamId == teamId)
                                         .Select(tag => new TagResponseModel() { Id = tag.Id, Title = tag.Title, Color = tag.Color })
                                         .ToList();
             }
-            return vwsDbContext.Tags.Where(tag => tag.UserProfileId == LoggedInUserId.Value)
+            return _vwsDbContext.Tags.Where(tag => tag.UserProfileId == LoggedInUserId.Value)
                                     .Select(tag => new TagResponseModel() { Id = tag.Id, Title = tag.Title, Color = tag.Color })
                                     .ToList();
         }
@@ -159,7 +159,7 @@ namespace vws.web.Controllers._task
         {
             var result = new List<CheckListResponseModel>();
 
-            var checkLists = vwsDbContext.TaskCheckLists.Where(checkList => checkList.GeneralTaskId == taskId && !checkList.IsDeleted);
+            var checkLists = _vwsDbContext.TaskCheckLists.Where(checkList => checkList.GeneralTaskId == taskId && !checkList.IsDeleted);
             foreach (var checkList in checkLists)
             {
                 result.Add(new CheckListResponseModel()
@@ -171,7 +171,7 @@ namespace vws.web.Controllers._task
                     ModifiedBy = checkList.ModifiedBy,
                     ModifiedOn = checkList.ModifiedOn,
                     Title = checkList.Title,
-                    Items = vwsDbContext.TaskCheckListItems.Where(item => item.TaskCheckListId == checkList.Id && !item.IsDeleted)
+                    Items = _vwsDbContext.TaskCheckListItems.Where(item => item.TaskCheckListId == checkList.Id && !item.IsDeleted)
                                                            .Select(item => new CheckListItemResponseModel()
                                                            {
                                                                Id = item.Id,
@@ -213,11 +213,11 @@ namespace vws.web.Controllers._task
                     ModifiedOn = DateTime.Now,
                     Title = checkList.Title
                 };
-                vwsDbContext.AddCheckList(newCheckList);
-                vwsDbContext.Save();
+                _vwsDbContext.AddCheckList(newCheckList);
+                _vwsDbContext.Save();
 
                 var itemsResponse = AddCheckListItems(newCheckList.Id, checkList.Items);
-                vwsDbContext.Save();
+                _vwsDbContext.Save();
             }
         }
 
@@ -238,8 +238,8 @@ namespace vws.web.Controllers._task
                 ModifiedOn = creationTime
             }).ToList();
 
-            vwsDbContext.AddCheckListItems(taskCheckListItems);
-            vwsDbContext.Save();
+            _vwsDbContext.AddCheckListItems(taskCheckListItems);
+            _vwsDbContext.Save();
 
             return taskCheckListItems.Select(item => new CheckListItemResponseModel()
             {
@@ -263,7 +263,7 @@ namespace vws.web.Controllers._task
             if (projectId != null || teamId != null)
                 userId = null;
 
-            var validTagIds = vwsDbContext.Tags.Where(tag => tag.ProjectId == projectId && tag.TeamId == teamId && tag.UserProfileId == userId)
+            var validTagIds = _vwsDbContext.Tags.Where(tag => tag.ProjectId == projectId && tag.TeamId == teamId && tag.UserProfileId == userId)
                                                .Select(tag => tag.Id).ToList();
 
             return tagIds.Except(validTagIds).Count() == 0;
@@ -278,7 +278,7 @@ namespace vws.web.Controllers._task
                 userId = null;
 
             int startOrder = 2;
-            var statuses = vwsDbContext.TaskStatuses.Where(status => status.TeamId == teamId && status.ProjectId == projectId && status.UserProfileId == userId)
+            var statuses = _vwsDbContext.TaskStatuses.Where(status => status.TeamId == teamId && status.ProjectId == projectId && status.UserProfileId == userId)
                                                     .OrderBy(status => status.EvenOrder);
             foreach (var status in statuses)
             {
@@ -286,19 +286,19 @@ namespace vws.web.Controllers._task
                 startOrder += 2;
             }
 
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
         }
 
         private void AddTaskTags(long taskId, ICollection<int> tagIds)
         {
             foreach (var tagId in tagIds)
-                vwsDbContext.AddTaskTag(new TaskTag() { GeneralTaskId = taskId, TagId = tagId });
-            vwsDbContext.Save();
+                _vwsDbContext.AddTaskTag(new TaskTag() { GeneralTaskId = taskId, TagId = tagId });
+            _vwsDbContext.Save();
         }
 
         private List<TagResponseModel> GetTaskTags(long taskId)
         {
-            return vwsDbContext.TaskTags.Include(taskTag => taskTag.Tag)
+            return _vwsDbContext.TaskTags.Include(taskTag => taskTag.Tag)
                                         .Where(taskTag => taskTag.GeneralTaskId == taskId)
                                         .Select(taskTag => new TagResponseModel() { Id = taskTag.Tag.Id, Title = taskTag.Tag.Title, Color = taskTag.Tag.Color })
                                         .ToList();
@@ -306,7 +306,7 @@ namespace vws.web.Controllers._task
 
         private List<FileModel> AddCommentAttachments(long commentId, List<Guid> attachments)
         {
-            var fileAlreadyAttachments = vwsDbContext.TaskCommentAttachments.Where(commentAttachment => commentAttachment.TaskCommentId == commentId)
+            var fileAlreadyAttachments = _vwsDbContext.TaskCommentAttachments.Where(commentAttachment => commentAttachment.TaskCommentId == commentId)
                                                                             .Select(commentAttachment => commentAttachment.FileContainerGuid);
 
             attachments = attachments.Except(fileAlreadyAttachments).ToList();
@@ -314,16 +314,16 @@ namespace vws.web.Controllers._task
             var result = new List<FileModel>();
             foreach(var attachment in attachments)
             {
-                var selectedFileContainer = vwsDbContext.FileContainers.FirstOrDefault(container => container.Guid == attachment);
+                var selectedFileContainer = _vwsDbContext.FileContainers.FirstOrDefault(container => container.Guid == attachment);
                 if (selectedFileContainer == null || selectedFileContainer.CreatedBy != LoggedInUserId.Value)
                     continue;
-                vwsDbContext.AddTaskCommentAttachment(new TaskCommentAttachment()
+                _vwsDbContext.AddTaskCommentAttachment(new TaskCommentAttachment()
                 {
                     FileContainerId = selectedFileContainer.Id,
                     FileContainerGuid = selectedFileContainer.Guid,
                     TaskCommentId = commentId
                 });
-                var recentFile = vwsDbContext.Files.FirstOrDefault(file => file.Id == selectedFileContainer.RecentFileId);
+                var recentFile = _vwsDbContext.Files.FirstOrDefault(file => file.Id == selectedFileContainer.RecentFileId);
                 result.Add(new FileModel() 
                 {
                     FileContainerGuid = selectedFileContainer.Guid,
@@ -333,37 +333,37 @@ namespace vws.web.Controllers._task
                 });
             }
 
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
             return result;
         }
 
         private void DeleteTaskComment(long commentId)
         {
-            var attachments = vwsDbContext.TaskCommentAttachments.Include(attachment => attachment.FileContainer)
+            var attachments = _vwsDbContext.TaskCommentAttachments.Include(attachment => attachment.FileContainer)
                                                                  .ThenInclude(container => container.Files)
                                                                  .Where(attachment => attachment.TaskCommentId == commentId)
                                                                  .Select(attachment => attachment.FileContainer);
             foreach (var attachment in attachments)
             {
                 foreach (var file in attachment.Files)
-                    fileManager.DeleteFile(file.Address);
-                vwsDbContext.DeleteFileContainer(attachment);
+                    _fileManager.DeleteFile(file.Address);
+                _vwsDbContext.DeleteFileContainer(attachment);
             }
-            vwsDbContext.DeleteTaskComment(commentId);
-            vwsDbContext.Save();
+            _vwsDbContext.DeleteTaskComment(commentId);
+            _vwsDbContext.Save();
         }
 
         private List<FileModel> GetCommentAttachments(long commentId)
         {
             var result = new List<FileModel>();
             
-            var attachments = vwsDbContext.TaskCommentAttachments.Include(attachment => attachment.FileContainer)
+            var attachments = _vwsDbContext.TaskCommentAttachments.Include(attachment => attachment.FileContainer)
                                                                  .Where(attachment => attachment.TaskCommentId == commentId)
                                                                  .Select(attachment => attachment.FileContainer);
 
             foreach (var attachment in attachments)
             {
-                var recentFile = vwsDbContext.Files.FirstOrDefault(file => file.Id == attachment.RecentFileId);
+                var recentFile = _vwsDbContext.Files.FirstOrDefault(file => file.Id == attachment.RecentFileId);
                 result.Add(new FileModel()
                 {
                     FileContainerGuid = attachment.Guid,
@@ -379,11 +379,11 @@ namespace vws.web.Controllers._task
         private async Task<List<CommentResponseModel>> GetTaskComments(long taskId)
         {
             var result = new List<CommentResponseModel>();
-            var comments = vwsDbContext.TaskComments.Where(comment => comment.GeneralTaskId == taskId);
+            var comments = _vwsDbContext.TaskComments.Where(comment => comment.GeneralTaskId == taskId);
 
             foreach(var comment in comments)
             {
-                var userProfile = await vwsDbContext.GetUserProfileAsync(comment.CommentedBy);
+                var userProfile = await _vwsDbContext.GetUserProfileAsync(comment.CommentedBy);
                 result.Add(new CommentResponseModel()
                 {
                     Id = comment.Id,
@@ -409,7 +409,7 @@ namespace vws.web.Controllers._task
 
             for (int i = 0; i < values.Length; i++)
             {
-                result.Add(localizeOrNot[i] ? localizer.WithCulture(new CultureInfo(culture))[values[i]]  : values[i]);
+                result.Add(localizeOrNot[i] ? _localizer.WithCulture(new CultureInfo(culture))[values[i]]  : values[i]);
             }
             return result.ToArray();
         }
@@ -426,8 +426,8 @@ namespace vws.web.Controllers._task
 
             foreach (var userId in userIds)
             {
-                var user = await userManager.FindByIdAsync(userId.ToString());
-                var profile = vwsDbContext.UserProfiles.Include(profile => profile.Culture).FirstOrDefault(profile => profile.UserId == userId);
+                var user = await _userManager.FindByIdAsync(userId.ToString());
+                var profile = _vwsDbContext.UserProfiles.Include(profile => profile.Culture).FirstOrDefault(profile => profile.UserId == userId);
                 emails.Add(user.Email);
                 cultures.Add(profile.CultureId == null ? "en-US" : profile.Culture.CultureAbbreviation);
             }
@@ -437,27 +437,27 @@ namespace vws.web.Controllers._task
                 {
                     emailModel = new SendEmailModel
                     {
-                        FromEmail = configuration["EmailSender:NotificationEmail:EmailAddress"],
+                        FromEmail = _configuration["EmailSender:NotificationEmail:EmailAddress"],
                         ToEmail = emails[i],
                         Subject = emailSubject,
-                        Body = EmailTemplateUtility.GetEmailTemplate((int)EmailTemplateEnum.TaskAssign).Replace("{0}", String.Format(localizer.WithCulture(new CultureInfo(cultures[i]))[emailMessage],
+                        Body = EmailTemplateUtility.GetEmailTemplate((int)EmailTemplateEnum.TaskAssign).Replace("{0}", String.Format(_localizer.WithCulture(new CultureInfo(cultures[i]))[emailMessage],
                                                                                                                        shouldLocalizeArguments ? LocalizeList(cultures[i], arguments, argumentsLocalize) : arguments)),
                         Credential = new NetworkCredential
                         {
-                            UserName = configuration["EmailSender:NotificationEmail:UserName"],
-                            Password = configuration["EmailSender:NotificationEmail:Password"]
+                            UserName = _configuration["EmailSender:NotificationEmail:UserName"],
+                            Password = _configuration["EmailSender:NotificationEmail:Password"]
                         },
                         IsBodyHtml = true
                     };
-                    await emailSender.SendEmailAsync(emailModel, out emailErrorMessage);
+                    await _emailSender.SendEmailAsync(emailModel, out emailErrorMessage);
                 }
             }).ConfigureAwait(false);
         }
 
         private async Task SendSingleEmail(string emailMessage, string subject, Guid sendToUserId, string[] arguments, bool[] argumentsLocalize = null)
         {
-            string userEmail = (await userManager.FindByIdAsync(sendToUserId.ToString())).Email;
-            var profile = vwsDbContext.UserProfiles.Include(profile => profile.Culture).FirstOrDefault(profile => profile.UserId == sendToUserId); ;
+            string userEmail = (await _userManager.FindByIdAsync(sendToUserId.ToString())).Email;
+            var profile = _vwsDbContext.UserProfiles.Include(profile => profile.Culture).FirstOrDefault(profile => profile.UserId == sendToUserId); ;
             string culture = profile.CultureId == null ? "en-US" : profile.Culture.CultureAbbreviation;
             string emailErrorMessage;
 
@@ -465,19 +465,19 @@ namespace vws.web.Controllers._task
 
             var emailModel = new SendEmailModel
             {
-                FromEmail = configuration["EmailSender:NotificationEmail:EmailAddress"],
+                FromEmail = _configuration["EmailSender:NotificationEmail:EmailAddress"],
                 ToEmail = userEmail,
                 Subject = subject,
-                Body = EmailTemplateUtility.GetEmailTemplate((int)EmailTemplateEnum.TaskAssign).Replace("{0}", String.Format(localizer.WithCulture(new CultureInfo(culture))[emailMessage]
+                Body = EmailTemplateUtility.GetEmailTemplate((int)EmailTemplateEnum.TaskAssign).Replace("{0}", String.Format(_localizer.WithCulture(new CultureInfo(culture))[emailMessage]
                                                                                                              , shouldLocalizeArguments ? LocalizeList(culture, arguments, argumentsLocalize) : arguments)),
                 Credential = new NetworkCredential
                 {
-                    UserName = configuration["EmailSender:NotificationEmail:UserName"],
-                    Password = configuration["EmailSender:NotificationEmail:Password"]
+                    UserName = _configuration["EmailSender:NotificationEmail:UserName"],
+                    Password = _configuration["EmailSender:NotificationEmail:Password"]
                 },
                 IsBodyHtml = true
             };
-            await Task.Run(async () => await emailSender.SendEmailAsync(emailModel, out emailErrorMessage));
+            await Task.Run(async () => await _emailSender.SendEmailAsync(emailModel, out emailErrorMessage));
         }
 
         [HttpPost]
@@ -493,37 +493,37 @@ namespace vws.web.Controllers._task
             if (!String.IsNullOrEmpty(model.Description) && model.Description.Length > 2000)
             {
                 response.Message = "Task model data has problem.";
-                response.AddError(localizer["Length of description is more than 2000 characters."]);
+                response.AddError(_localizer["Length of description is more than 2000 characters."]);
             }
             if (model.Title.Length > 500)
             {
                 response.Message = "Task model data has problem.";
-                response.AddError(localizer["Length of title is more than 500 characters."]);
+                response.AddError(_localizer["Length of title is more than 500 characters."]);
             }
             if (model.StartDate.HasValue && model.EndDate.HasValue)
             {
                 if (model.StartDate > model.EndDate)
                 {
                     response.Message = "Task model data has problem.";
-                    response.AddError(localizer["Start Date should be before End Date."]);
+                    response.AddError(_localizer["Start Date should be before End Date."]);
                 }
             }
             if (!Enum.IsDefined(typeof(SeedDataEnum.TaskPriority), model.PriorityId))
             {
                 response.Message = "Task model data has problem.";
-                response.AddError(localizer["Priority id is not defined."]);
+                response.AddError(_localizer["Priority id is not defined."]);
             }
             if (HasCheckListsTitleMoreCharacters(model.CheckLists))
             {
                 response.Message = "Task model data has problem.";
-                response.AddError(localizer["Check list title can not have more than 250 characters."]);
+                response.AddError(_localizer["Check list title can not have more than 250 characters."]);
             }
             foreach (var checkList in model.CheckLists)
             {
                 if (HasCheckListsTitleItemMoreCharacters(checkList.Items))
                 {
                     response.Message = "Task model data has problem.";
-                    response.AddError(localizer["Check list item title can not have more than 500 characters."]);
+                    response.AddError(_localizer["Check list item title can not have more than 500 characters."]);
                     break;
                 }
             }
@@ -533,31 +533,31 @@ namespace vws.web.Controllers._task
             Guid userId = LoggedInUserId.Value;
 
             #region CheckTeamAndProjectExistance
-            if (model.ProjectId != null && !vwsDbContext.Projects.Any(p => p.Id == model.ProjectId && !p.IsDeleted))
+            if (model.ProjectId != null && !_vwsDbContext.Projects.Any(p => p.Id == model.ProjectId && !p.IsDeleted))
             {
                 response.Message = "Project not found";
-                response.AddError(localizer["Project not found."]);
+                response.AddError(_localizer["Project not found."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
-            if (model.TeamId != null && !vwsDbContext.Teams.Any(t => t.Id == model.TeamId && !t.IsDeleted))
+            if (model.TeamId != null && !_vwsDbContext.Teams.Any(t => t.Id == model.TeamId && !t.IsDeleted))
             {
                 response.Message = "Team not found";
-                response.AddError(localizer["Team not found."]);
+                response.AddError(_localizer["Team not found."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
             #endregion
 
             #region CheckTeamAndProjectAccess
-            if (model.ProjectId != null && !permissionService.HasAccessToProject(userId, (int)model.ProjectId))
+            if (model.ProjectId != null && !_permissionService.HasAccessToProject(userId, (int)model.ProjectId))
             {
                 response.Message = "Project access denied";
-                response.AddError(localizer["You do not have access to project."]);
+                response.AddError(_localizer["You do not have access to project."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
-            if (model.TeamId != null && !permissionService.HasAccessToTeam(userId, (int)model.TeamId))
+            if (model.TeamId != null && !_permissionService.HasAccessToTeam(userId, (int)model.TeamId))
             {
                 response.Message = "Team access denied";
-                response.AddError(localizer["You do not have access to team."]);
+                response.AddError(_localizer["You do not have access to team."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
             #endregion
@@ -569,7 +569,7 @@ namespace vws.web.Controllers._task
             if (!AreTagsValid(model.Tags, model.ProjectId, model.TeamId))
             {
                 response.Message = "Invalid tags";
-                response.AddError(localizer["Invalid tags."]);
+                response.AddError(_localizer["Invalid tags."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }    
 
@@ -577,7 +577,7 @@ namespace vws.web.Controllers._task
             {
                 
                 response.Message = "Users do not have access";
-                response.AddError(localizer["Some of users you want to add do not have access to team or project."]);
+                response.AddError(_localizer["Some of users you want to add do not have access to team or project."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
@@ -585,7 +585,7 @@ namespace vws.web.Controllers._task
             if (statuses.Count() == 0)
             {
                 response.Message = "No status";
-                response.AddError(localizer["There is no status to give task."]);
+                response.AddError(_localizer["There is no status to give task."]);
                 return StatusCode(StatusCodes.Status424FailedDependency, response);
             }
             if (model.StatusId == null)
@@ -594,7 +594,7 @@ namespace vws.web.Controllers._task
             if (!statuses.Contains((int)model.StatusId))
             {
                 response.Message = "Invalid status";
-                response.AddError(localizer["Invalid status."]);
+                response.AddError(_localizer["Invalid status."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
@@ -616,13 +616,13 @@ namespace vws.web.Controllers._task
 
             if (newTask.TeamId == null && model.ProjectId != null)
             {
-                var selectedProject = vwsDbContext.Projects.FirstOrDefault(project => project.Id == model.ProjectId);
+                var selectedProject = _vwsDbContext.Projects.FirstOrDefault(project => project.Id == model.ProjectId);
                 newTask.ProjectId = model.ProjectId;
                 newTask.TeamId = selectedProject.TeamId;
             }
 
-            await vwsDbContext.AddTaskAsync(newTask);
-            vwsDbContext.Save();
+            await _vwsDbContext.AddTaskAsync(newTask);
+            _vwsDbContext.Save();
 
             AddTaskTags(newTask.Id, model.Tags);
 
@@ -642,17 +642,17 @@ namespace vws.web.Controllers._task
                 StartDate = newTask.StartDate,
                 Guid = newTask.Guid,
                 ModifiedOn = newTask.ModifiedOn,
-                ModifiedBy = (await vwsDbContext.GetUserProfileAsync(newTask.ModifiedBy)).NickName,
-                CreatedBy = (await vwsDbContext.GetUserProfileAsync(newTask.CreatedBy)).NickName,
+                ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(newTask.ModifiedBy)).NickName,
+                CreatedBy = (await _vwsDbContext.GetUserProfileAsync(newTask.CreatedBy)).NickName,
                 PriorityId = newTask.TaskPriorityId,
-                PriorityTitle = localizer[((SeedDataEnum.TaskPriority)newTask.TaskPriorityId).ToString()],
+                PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)newTask.TaskPriorityId).ToString()],
                 UsersAssignedTo = GetAssignedTo(newTask.Id),
                 ProjectId = newTask.ProjectId,
                 TeamId = newTask.TeamId,
-                TeamName = newTask.TeamId == null ? null : vwsDbContext.Teams.FirstOrDefault(team => team.Id == newTask.TeamId).Name,
-                ProjectName = newTask.ProjectId == null ? null : vwsDbContext.Projects.FirstOrDefault(project => project.Id == newTask.ProjectId).Name,
+                TeamName = newTask.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == newTask.TeamId).Name,
+                ProjectName = newTask.ProjectId == null ? null : _vwsDbContext.Projects.FirstOrDefault(project => project.Id == newTask.ProjectId).Name,
                 StatusId = newTask.TaskStatusId,
-                StatusTitle = vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == newTask.TaskStatusId).Title,
+                StatusTitle = _vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == newTask.TaskStatusId).Title,
                 CheckLists = GetCheckLists(newTask.Id),
                 Tags = GetTaskTags(newTask.Id),
                 Comments = await GetTaskComments(newTask.Id)
@@ -674,21 +674,21 @@ namespace vws.web.Controllers._task
             if (String.IsNullOrEmpty(newTitle) || newTitle.Length > 500)
             {
                 response.Message = "Task model data has problem";
-                response.AddError(localizer["Title can not be empty or with more than 500 characters."]);
+                response.AddError(_localizer["Title can not be empty or with more than 500 characters."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var selectedTask = await vwsDbContext.GetTaskAsync(id);
+            var selectedTask = await _vwsDbContext.GetTaskAsync(id);
             if (selectedTask == null || selectedTask.IsDeleted)
             {
                 response.Message = "Task not found";
-                response.AddError(localizer["Task does not exist."]);
+                response.AddError(_localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!permissionService.HasAccessToTask(LoggedInUserId.Value, id))
+            if (!_permissionService.HasAccessToTask(LoggedInUserId.Value, id))
             {
-                response.AddError(localizer["You don't have access to this task."]);
+                response.AddError(_localizer["You don't have access to this task."]);
                 response.Message = "Task access forbidden";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
@@ -698,7 +698,7 @@ namespace vws.web.Controllers._task
             selectedTask.Title = newTitle;
             selectedTask.ModifiedBy = LoggedInUserId.Value;
             selectedTask.ModifiedOn = DateTime.Now;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
@@ -721,21 +721,21 @@ namespace vws.web.Controllers._task
             if (newDescription.Length > 2000)
             {
                 response.Message = "Task model data has problem";
-                response.AddError(localizer["Length of description is more than 2000 characters."]);
+                response.AddError(_localizer["Length of description is more than 2000 characters."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var selectedTask = await vwsDbContext.GetTaskAsync(id);
+            var selectedTask = await _vwsDbContext.GetTaskAsync(id);
             if (selectedTask == null || selectedTask.IsDeleted)
             {
                 response.Message = "Task not found";
-                response.AddError(localizer["Task does not exist."]);
+                response.AddError(_localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!permissionService.HasAccessToTask(LoggedInUserId.Value, id))
+            if (!_permissionService.HasAccessToTask(LoggedInUserId.Value, id))
             {
-                response.AddError(localizer["You don't have access to this task."]);
+                response.AddError(_localizer["You don't have access to this task."]);
                 response.Message = "Task access forbidden";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
@@ -745,7 +745,7 @@ namespace vws.web.Controllers._task
             selectedTask.Description = newDescription;
             selectedTask.ModifiedBy = LoggedInUserId.Value;
             selectedTask.ModifiedOn = DateTime.Now;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
@@ -768,21 +768,21 @@ namespace vws.web.Controllers._task
             if (!Enum.IsDefined(typeof(SeedDataEnum.TaskPriority), newPriority))
             {
                 response.Message = "Task model data has problem.";
-                response.AddError(localizer["Priority id is not defined."]);
+                response.AddError(_localizer["Priority id is not defined."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var selectedTask = await vwsDbContext.GetTaskAsync(id);
+            var selectedTask = await _vwsDbContext.GetTaskAsync(id);
             if (selectedTask == null || selectedTask.IsDeleted)
             {
                 response.Message = "Task not found";
-                response.AddError(localizer["Task does not exist."]);
+                response.AddError(_localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!permissionService.HasAccessToTask(LoggedInUserId.Value, id))
+            if (!_permissionService.HasAccessToTask(LoggedInUserId.Value, id))
             {
-                response.AddError(localizer["You don't have access to this task."]);
+                response.AddError(_localizer["You don't have access to this task."]);
                 response.Message = "Task access forbidden";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
@@ -792,7 +792,7 @@ namespace vws.web.Controllers._task
             selectedTask.TaskPriorityId = newPriority;
             selectedTask.ModifiedBy = LoggedInUserId.Value;
             selectedTask.ModifiedOn = DateTime.Now;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
@@ -819,53 +819,53 @@ namespace vws.web.Controllers._task
             Guid userId = LoggedInUserId.Value;
 
             #region CheckTeamAndProjectExistance
-            if (projectId != null && !vwsDbContext.Projects.Any(p => p.Id == projectId && !p.IsDeleted))
+            if (projectId != null && !_vwsDbContext.Projects.Any(p => p.Id == projectId && !p.IsDeleted))
             {
                 response.Message = "Project not found";
-                response.AddError(localizer["Project not found."]);
+                response.AddError(_localizer["Project not found."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
-            if (teamId != null && !vwsDbContext.Teams.Any(t => t.Id == teamId && !t.IsDeleted))
+            if (teamId != null && !_vwsDbContext.Teams.Any(t => t.Id == teamId && !t.IsDeleted))
             {
                 response.Message = "Team not found";
-                response.AddError(localizer["Team not found."]);
+                response.AddError(_localizer["Team not found."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
             #endregion
 
             #region CheckTeamAndProjectAccess
-            if (projectId != null && !permissionService.HasAccessToProject(userId, (int)projectId))
+            if (projectId != null && !_permissionService.HasAccessToProject(userId, (int)projectId))
             {
                 response.Message = "Project access denied";
-                response.AddError(localizer["You do not have access to project."]);
+                response.AddError(_localizer["You do not have access to project."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
-            if (teamId != null && !permissionService.HasAccessToTeam(userId, (int)teamId))
+            if (teamId != null && !_permissionService.HasAccessToTeam(userId, (int)teamId))
             {
                 response.Message = "Team access denied";
-                response.AddError(localizer["You do not have access to team."]);
+                response.AddError(_localizer["You do not have access to team."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
             #endregion
 
-            var selectedTask = vwsDbContext.GeneralTasks.Include(task => task.Team).Include(task => task.Project).FirstOrDefault(task => task.Id == id);
+            var selectedTask = _vwsDbContext.GeneralTasks.Include(task => task.Team).Include(task => task.Project).FirstOrDefault(task => task.Id == id);
 
             if (selectedTask == null || selectedTask.IsDeleted)
             {
                 response.Message = "Task not found";
-                response.AddError(localizer["Task does not exist."]);
+                response.AddError(_localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
-            if (!permissionService.HasAccessToTask(userId, id))
+            if (!_permissionService.HasAccessToTask(userId, id))
             {
                 response.Message = "Task access forbidden";
-                response.AddError(localizer["You don't have access to this task."]);
+                response.AddError(_localizer["You don't have access to this task."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
             #region CreatingEmailMessage
-            var selectedProject = projectId == null ? (Project)null : vwsDbContext.Projects.FirstOrDefault(project => project.Id == projectId);
-            var selectedTeam = teamId == null ? (Team)null : vwsDbContext.Teams.FirstOrDefault(team => team.Id == teamId);
+            var selectedProject = projectId == null ? (Project)null : _vwsDbContext.Projects.FirstOrDefault(project => project.Id == projectId);
+            var selectedTeam = teamId == null ? (Team)null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == teamId);
             List<string> emailMessageArguments = new List<string>();
             List<bool> emailMessageArgumentsLocalize = new List<bool>();
             emailMessageArguments.Add(selectedTask.Title);
@@ -917,12 +917,12 @@ namespace vws.web.Controllers._task
             selectedTask.ProjectId = projectId;
             if (selectedTask.TeamId == null && projectId != null)
             {
-                var selectedProj = vwsDbContext.Projects.FirstOrDefault(project => project.Id == projectId);
+                var selectedProj = _vwsDbContext.Projects.FirstOrDefault(project => project.Id == projectId);
                 selectedTask.TeamId = selectedProj.TeamId;
             }
             selectedTask.ModifiedBy = userId;
             selectedTask.ModifiedOn = DateTime.Now;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
@@ -943,25 +943,25 @@ namespace vws.web.Controllers._task
 
             Guid userId = LoggedInUserId.Value;
 
-            var selectedTask = await vwsDbContext.GetTaskAsync(id);
+            var selectedTask = await _vwsDbContext.GetTaskAsync(id);
 
             if (selectedTask == null || selectedTask.IsDeleted)
             {
                 response.Message = "Task not found";
-                response.AddError(localizer["Task does not exist."]);
+                response.AddError(_localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
-            if (!permissionService.HasAccessToTask(userId, id))
+            if (!_permissionService.HasAccessToTask(userId, id))
             {
                 response.Message = "Task access forbidden";
-                response.AddError(localizer["You don't have access to this task."]);
+                response.AddError(_localizer["You don't have access to this task."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
             if (selectedTask.EndDate.HasValue && newStartDate.HasValue && newStartDate > selectedTask.EndDate)
             {
                 response.Message = "Task model data has problem";
-                response.AddError(localizer["Start Date should be before End Date."]);
+                response.AddError(_localizer["Start Date should be before End Date."]);
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
             }
 
@@ -970,7 +970,7 @@ namespace vws.web.Controllers._task
             selectedTask.StartDate = newStartDate;
             selectedTask.ModifiedBy = userId;
             selectedTask.ModifiedOn = DateTime.Now;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
@@ -993,25 +993,25 @@ namespace vws.web.Controllers._task
 
             Guid userId = LoggedInUserId.Value;
 
-            var selectedTask = await vwsDbContext.GetTaskAsync(id);
+            var selectedTask = await _vwsDbContext.GetTaskAsync(id);
 
             if (selectedTask == null || selectedTask.IsDeleted)
             {
                 response.Message = "Task not found";
-                response.AddError(localizer["Task does not exist."]);
+                response.AddError(_localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
-            if (!permissionService.HasAccessToTask(userId, id))
+            if (!_permissionService.HasAccessToTask(userId, id))
             {
                 response.Message = "Task access forbidden";
-                response.AddError(localizer["You don't have access to this task."]);
+                response.AddError(_localizer["You don't have access to this task."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
             if (selectedTask.StartDate.HasValue && newEndDate.HasValue && selectedTask.StartDate > newEndDate)
             {
                 response.Message = "Task model data has problem";
-                response.AddError(localizer["Start Date should be before End Date."]);
+                response.AddError(_localizer["Start Date should be before End Date."]);
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
             }
 
@@ -1020,7 +1020,7 @@ namespace vws.web.Controllers._task
             selectedTask.EndDate = newEndDate;
             selectedTask.ModifiedBy = userId;
             selectedTask.ModifiedOn = DateTime.Now;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
@@ -1058,18 +1058,18 @@ namespace vws.web.Controllers._task
                     EndDate = userTask.EndDate,
                     CreatedOn = userTask.CreatedOn,
                     ModifiedOn = userTask.ModifiedOn,
-                    CreatedBy = (await vwsDbContext.GetUserProfileAsync(userTask.CreatedBy)).NickName,
-                    ModifiedBy = (await vwsDbContext.GetUserProfileAsync(userTask.ModifiedBy)).NickName,
+                    CreatedBy = (await _vwsDbContext.GetUserProfileAsync(userTask.CreatedBy)).NickName,
+                    ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(userTask.ModifiedBy)).NickName,
                     Guid = userTask.Guid,
                     PriorityId = userTask.TaskPriorityId,
-                    PriorityTitle = localizer[((SeedDataEnum.TaskPriority)userTask.TaskPriorityId).ToString()],
+                    PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)userTask.TaskPriorityId).ToString()],
                     UsersAssignedTo = GetAssignedTo(userTask.Id),
                     ProjectId = userTask.ProjectId,
                     TeamId = userTask.TeamId,
-                    TeamName = userTask.TeamId == null ? null : vwsDbContext.Teams.FirstOrDefault(team => team.Id == userTask.TeamId).Name,
-                    ProjectName = userTask.ProjectId == null ? null : vwsDbContext.Projects.FirstOrDefault(project => project.Id == userTask.ProjectId).Name,
+                    TeamName = userTask.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == userTask.TeamId).Name,
+                    ProjectName = userTask.ProjectId == null ? null : _vwsDbContext.Projects.FirstOrDefault(project => project.Id == userTask.ProjectId).Name,
                     StatusId = userTask.TaskStatusId,
-                    StatusTitle = vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == userTask.TaskStatusId).Title,
+                    StatusTitle = _vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == userTask.TaskStatusId).Title,
                     CheckLists = GetCheckLists(userTask.Id),
                     Tags = GetTaskTags(userTask.Id),
                     Comments = await GetTaskComments(userTask.Id)
@@ -1088,21 +1088,21 @@ namespace vws.web.Controllers._task
             var response = new ResponseModel<List<TaskResponseModel>>();
             List<TaskResponseModel> result = new List<TaskResponseModel>();
 
-            if (!vwsDbContext.Projects.Any(p => p.Id == projectId && !p.IsDeleted))
+            if (!_vwsDbContext.Projects.Any(p => p.Id == projectId && !p.IsDeleted))
             {
                 response.Message = "Project not found";
-                response.AddError(localizer["Project not found."]);
+                response.AddError(_localizer["Project not found."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!permissionService.HasAccessToProject(userId, projectId))
+            if (!_permissionService.HasAccessToProject(userId, projectId))
             {
                 response.Message = "Project access denied";
-                response.AddError(localizer["You do not have access to project."]);
+                response.AddError(_localizer["You do not have access to project."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            var projectTasks = vwsDbContext.GeneralTasks.Where(task => task.ProjectId == projectId && !task.IsArchived && !task.IsDeleted);
+            var projectTasks = _vwsDbContext.GeneralTasks.Where(task => task.ProjectId == projectId && !task.IsArchived && !task.IsDeleted);
             foreach (var projectTask in projectTasks)
             {
                 result.Add(new TaskResponseModel()
@@ -1114,18 +1114,18 @@ namespace vws.web.Controllers._task
                     EndDate = projectTask.EndDate,
                     CreatedOn = projectTask.CreatedOn,
                     ModifiedOn = projectTask.ModifiedOn,
-                    CreatedBy = (await vwsDbContext.GetUserProfileAsync(projectTask.CreatedBy)).NickName,
-                    ModifiedBy = (await vwsDbContext.GetUserProfileAsync(projectTask.ModifiedBy)).NickName,
+                    CreatedBy = (await _vwsDbContext.GetUserProfileAsync(projectTask.CreatedBy)).NickName,
+                    ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(projectTask.ModifiedBy)).NickName,
                     Guid = projectTask.Guid,
                     PriorityId = projectTask.TaskPriorityId,
-                    PriorityTitle = localizer[((SeedDataEnum.TaskPriority)projectTask.TaskPriorityId).ToString()],
+                    PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)projectTask.TaskPriorityId).ToString()],
                     UsersAssignedTo = GetAssignedTo(projectTask.Id),
                     ProjectId = projectTask.ProjectId,
                     TeamId = projectTask.TeamId,
-                    TeamName = projectTask.TeamId == null ? null : vwsDbContext.Teams.FirstOrDefault(team => team.Id == projectTask.TeamId).Name,
-                    ProjectName = projectTask.ProjectId == null ? null : vwsDbContext.Projects.FirstOrDefault(project => project.Id == projectTask.ProjectId).Name,
+                    TeamName = projectTask.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == projectTask.TeamId).Name,
+                    ProjectName = projectTask.ProjectId == null ? null : _vwsDbContext.Projects.FirstOrDefault(project => project.Id == projectTask.ProjectId).Name,
                     StatusId = projectTask.TaskStatusId,
-                    StatusTitle = vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == projectTask.TaskStatusId).Title,
+                    StatusTitle = _vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == projectTask.TaskStatusId).Title,
                     CheckLists = GetCheckLists(projectTask.Id),
                     Tags = GetTaskTags(projectTask.Id),
                     Comments = await GetTaskComments(projectTask.Id)
@@ -1159,18 +1159,18 @@ namespace vws.web.Controllers._task
                         EndDate = userTask.EndDate,
                         CreatedOn = userTask.CreatedOn,
                         ModifiedOn = userTask.ModifiedOn,
-                        CreatedBy = (await vwsDbContext.GetUserProfileAsync(userTask.CreatedBy)).NickName,
-                        ModifiedBy = (await vwsDbContext.GetUserProfileAsync(userTask.ModifiedBy)).NickName,
+                        CreatedBy = (await _vwsDbContext.GetUserProfileAsync(userTask.CreatedBy)).NickName,
+                        ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(userTask.ModifiedBy)).NickName,
                         Guid = userTask.Guid,
                         PriorityId = userTask.TaskPriorityId,
-                        PriorityTitle = localizer[((SeedDataEnum.TaskPriority)userTask.TaskPriorityId).ToString()],
+                        PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)userTask.TaskPriorityId).ToString()],
                         UsersAssignedTo = GetAssignedTo(userTask.Id),
                         ProjectId = userTask.ProjectId,
                         TeamId = userTask.TeamId,
-                        TeamName = userTask.TeamId == null ? null : vwsDbContext.Teams.FirstOrDefault(team => team.Id == userTask.TeamId).Name,
-                        ProjectName = userTask.ProjectId == null ? null : vwsDbContext.Projects.FirstOrDefault(project => project.Id == userTask.ProjectId).Name,
+                        TeamName = userTask.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == userTask.TeamId).Name,
+                        ProjectName = userTask.ProjectId == null ? null : _vwsDbContext.Projects.FirstOrDefault(project => project.Id == userTask.ProjectId).Name,
                         StatusId = userTask.TaskStatusId,
-                        StatusTitle = vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == userTask.TaskStatusId).Title,
+                        StatusTitle = _vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == userTask.TaskStatusId).Title,
                         CheckLists = GetCheckLists(userTask.Id),
                         Tags = GetTaskTags(userTask.Id),
                         Comments = await GetTaskComments(userTask.Id)
@@ -1189,7 +1189,7 @@ namespace vws.web.Controllers._task
 
             Guid userId = LoggedInUserId.Value;
 
-            var selectedTask = vwsDbContext.GeneralTasks.Include(task => task.TaskComments)
+            var selectedTask = _vwsDbContext.GeneralTasks.Include(task => task.TaskComments)
                                                         .ThenInclude(comment => comment.Attachments)
                                                         .ThenInclude(attachment => attachment.FileContainer)
                                                         .ThenInclude(container => container.Files)
@@ -1198,13 +1198,13 @@ namespace vws.web.Controllers._task
             if (selectedTask == null || selectedTask.IsDeleted)
             {
                 response.Message = "Task not found";
-                response.AddError(localizer["Task does not exist."]);
+                response.AddError(_localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
-            if (!permissionService.HasAccessToTask(userId, taskId))
+            if (!_permissionService.HasAccessToTask(userId, taskId))
             {
                 response.Message = "Task access forbidden";
-                response.AddError(localizer["You don't have access to this task."]);
+                response.AddError(_localizer["You don't have access to this task."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
@@ -1214,16 +1214,16 @@ namespace vws.web.Controllers._task
                 foreach (var attachment in comment.Attachments)
                 {
                     foreach (var file in attachment.FileContainer.Files)
-                        fileManager.DeleteFile(file.Address);
+                        _fileManager.DeleteFile(file.Address);
 
-                    var selectedContainer = vwsDbContext.FileContainers.FirstOrDefault(container => container.Id == attachment.FileContainerId);
-                    vwsDbContext.DeleteFileContainer(selectedContainer);
+                    var selectedContainer = _vwsDbContext.FileContainers.FirstOrDefault(container => container.Id == attachment.FileContainerId);
+                    _vwsDbContext.DeleteFileContainer(selectedContainer);
                 }
             }
             selectedTask.IsDeleted = true;
             selectedTask.ModifiedBy = userId;
             selectedTask.ModifiedOn = DateTime.Now;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             var usersAssignedTo = GetAssignedTo(taskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
@@ -1245,25 +1245,25 @@ namespace vws.web.Controllers._task
 
             Guid userId = LoggedInUserId.Value;
 
-            var selectedTask = await vwsDbContext.GetTaskAsync(taskId);
+            var selectedTask = await _vwsDbContext.GetTaskAsync(taskId);
 
             if (selectedTask == null || selectedTask.IsDeleted)
             {
                 response.Message = "Task not found";
-                response.AddError(localizer["Task does not exist."]);
+                response.AddError(_localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
             if (selectedTask.CreatedBy != userId)
             {
                 response.Message = "Task access forbidden";
-                response.AddError(localizer["You don't have access to this task."]);
+                response.AddError(_localizer["You don't have access to this task."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
             selectedTask.IsArchived = true;
             selectedTask.ModifiedBy = userId;
             selectedTask.ModifiedOn = DateTime.Now;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             var usersAssignedTo = GetAssignedTo(taskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
@@ -1285,33 +1285,33 @@ namespace vws.web.Controllers._task
             var response = new ResponseModel();
             var selectedUserId = new Guid(model.UserId);
 
-            var selectedTask = await vwsDbContext.GetTaskAsync(model.TaskId);
+            var selectedTask = await _vwsDbContext.GetTaskAsync(model.TaskId);
             if (selectedTask == null || selectedTask.IsDeleted)
             {
-                response.AddError(localizer["Task does not exist."]);
+                response.AddError(_localizer["Task does not exist."]);
                 response.Message = "Task not found";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!permissionService.HasAccessToTask(userId, model.TaskId))
+            if (!_permissionService.HasAccessToTask(userId, model.TaskId))
             {
-                response.AddError(localizer["You don't have access to this task."]);
+                response.AddError(_localizer["You don't have access to this task."]);
                 response.Message = "Task access forbidden";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            if (!vwsDbContext.UserProfiles.Any(profile => profile.UserId == selectedUserId))
+            if (!_vwsDbContext.UserProfiles.Any(profile => profile.UserId == selectedUserId))
             {
-                response.AddError(localizer["User does not exist."]);
+                response.AddError(_localizer["User does not exist."]);
                 response.Message = "User not found";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (vwsDbContext.TaskAssigns.Any(taskAssign => taskAssign.UserProfileId == selectedUserId &&
+            if (_vwsDbContext.TaskAssigns.Any(taskAssign => taskAssign.UserProfileId == selectedUserId &&
                                               taskAssign.GeneralTaskId == model.TaskId &&
                                               taskAssign.IsDeleted == false))
             {
-                response.AddError(localizer["Task is assigned to user before."]);
+                response.AddError(_localizer["Task is assigned to user before."]);
                 response.Message = "Task assigned before";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
@@ -1326,8 +1326,8 @@ namespace vws.web.Controllers._task
                 CreatedOn = DateTime.Now
             };
 
-            await vwsDbContext.AddTaskAssignAsync(newTaskAssign);
-            vwsDbContext.Save();
+            await _vwsDbContext.AddTaskAssignAsync(newTaskAssign);
+            _vwsDbContext.Save();
 
             string[] arguments = { selectedTask.Title, LoggedInNickName };
             await SendSingleEmail("New task with title <b>«{0}»</b> has been assigned to you by <b>«{1}»</b>.", "Task Assign", selectedUserId, arguments) ;
@@ -1346,19 +1346,19 @@ namespace vws.web.Controllers._task
 
             var userId = LoggedInUserId.Value;
 
-            var selectedTask = await vwsDbContext.GetTaskAsync(id);
+            var selectedTask = await _vwsDbContext.GetTaskAsync(id);
 
             if (selectedTask == null || selectedTask.IsDeleted)
             {
                 response.Message = "Task not found";
-                response.AddError(localizer["Task does not exist."]);
+                response.AddError(_localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!permissionService.HasAccessToTask(userId, id))
+            if (!_permissionService.HasAccessToTask(userId, id))
             {
                 response.Message = "Task access forbidden";
-                response.AddError(localizer["You don't have access to this task."]);
+                response.AddError(_localizer["You don't have access to this task."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
@@ -1376,37 +1376,37 @@ namespace vws.web.Controllers._task
         {
             var response = new ResponseModel();
 
-            var selectedTask = await vwsDbContext.GetTaskAsync(taskId);
+            var selectedTask = await _vwsDbContext.GetTaskAsync(taskId);
 
             if (selectedTask == null || selectedTask.IsDeleted)
             {
                 response.Message = "Task not found";
-                response.AddError(localizer["Task does not exist."]);
+                response.AddError(_localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!permissionService.HasAccessToTask(userId, taskId))
+            if (!_permissionService.HasAccessToTask(userId, taskId))
             {
                 response.Message = "Task access forbidden";
-                response.AddError(localizer["You don't have access to this task."]);
+                response.AddError(_localizer["You don't have access to this task."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            var selectedUserAssignedTask = vwsDbContext.TaskAssigns.FirstOrDefault(taskAssign => taskAssign.UserProfileId == userId &&
+            var selectedUserAssignedTask = _vwsDbContext.TaskAssigns.FirstOrDefault(taskAssign => taskAssign.UserProfileId == userId &&
                                                                                    taskAssign.GeneralTaskId == taskId &&
                                                                                    taskAssign.IsDeleted == false);
 
             if (selectedUserAssignedTask == null)
             {
                 response.Message = "User does not have access already!";
-                response.AddError(localizer["User you selected does not have access to task already."]);
+                response.AddError(_localizer["User you selected does not have access to task already."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             selectedUserAssignedTask.IsDeleted = true;
             selectedUserAssignedTask.DeletedBy = LoggedInUserId.Value;
             selectedUserAssignedTask.DeletedOn = DateTime.Now;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             string[] arguments = { selectedTask.Title, LoggedInNickName };
             await SendSingleEmail("You have been unassigned from task with title <b>«{0}»</b> by <b>«{1}»</b>.", "Task Assign", userId, arguments);
@@ -1440,31 +1440,31 @@ namespace vws.web.Controllers._task
                 teamId = null;
 
             #region CheckTeamAndProjectExistance
-            if (projectId != null && !vwsDbContext.Projects.Any(p => p.Id == projectId && !p.IsDeleted))
+            if (projectId != null && !_vwsDbContext.Projects.Any(p => p.Id == projectId && !p.IsDeleted))
             {
                 response.Message = "Project not found";
-                response.AddError(localizer["Project not found."]);
+                response.AddError(_localizer["Project not found."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
-            if (teamId != null && !vwsDbContext.Teams.Any(t => t.Id == teamId && !t.IsDeleted))
+            if (teamId != null && !_vwsDbContext.Teams.Any(t => t.Id == teamId && !t.IsDeleted))
             {
                 response.Message = "Team not found";
-                response.AddError(localizer["Team not found."]);
+                response.AddError(_localizer["Team not found."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
             #endregion
 
             #region CheckTeamAndProjectAccess
-            if (projectId != null && !permissionService.HasAccessToProject(LoggedInUserId.Value, (int)projectId))
+            if (projectId != null && !_permissionService.HasAccessToProject(LoggedInUserId.Value, (int)projectId))
             {
                 response.Message = "Project access denied";
-                response.AddError(localizer["You do not have access to project."]);
+                response.AddError(_localizer["You do not have access to project."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
-            if (teamId != null && !permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)teamId))
+            if (teamId != null && !_permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)teamId))
             {
                 response.Message = "Team access denied";
-                response.AddError(localizer["You do not have access to team."]);
+                response.AddError(_localizer["You do not have access to team."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
             #endregion
@@ -1472,7 +1472,7 @@ namespace vws.web.Controllers._task
             var users = GetUsersCanBeAddedToTask(teamId, projectId);
             foreach (var user in users)
             {
-                var selectedUser = vwsDbContext.UserProfiles.FirstOrDefault(profile => profile.UserId == user);
+                var selectedUser = _vwsDbContext.UserProfiles.FirstOrDefault(profile => profile.UserId == user);
                 result.Add(new UserModel()
                 {
                     UserId = user,
@@ -1497,31 +1497,31 @@ namespace vws.web.Controllers._task
                 teamId = null;
 
             #region CheckTeamAndProjectExistance
-            if (projectId != null && !vwsDbContext.Projects.Any(p => p.Id == projectId && !p.IsDeleted))
+            if (projectId != null && !_vwsDbContext.Projects.Any(p => p.Id == projectId && !p.IsDeleted))
             {
                 response.Message = "Project not found";
-                response.AddError(localizer["Project not found."]);
+                response.AddError(_localizer["Project not found."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
-            if (teamId != null && !vwsDbContext.Teams.Any(t => t.Id == teamId && !t.IsDeleted))
+            if (teamId != null && !_vwsDbContext.Teams.Any(t => t.Id == teamId && !t.IsDeleted))
             {
                 response.Message = "Team not found";
-                response.AddError(localizer["Team not found."]);
+                response.AddError(_localizer["Team not found."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
             #endregion
 
             #region CheckTeamAndProjectAccess
-            if (projectId != null && !permissionService.HasAccessToProject(LoggedInUserId.Value, (int)projectId))
+            if (projectId != null && !_permissionService.HasAccessToProject(LoggedInUserId.Value, (int)projectId))
             {
                 response.Message = "Project access denied";
-                response.AddError(localizer["You do not have access to project."]);
+                response.AddError(_localizer["You do not have access to project."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
-            if (teamId != null && !permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)teamId))
+            if (teamId != null && !_permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)teamId))
             {
                 response.Message = "Team access denied";
-                response.AddError(localizer["You do not have access to team."]);
+                response.AddError(_localizer["You do not have access to team."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
             #endregion
@@ -1540,7 +1540,7 @@ namespace vws.web.Controllers._task
 
             if (!String.IsNullOrEmpty(title) && title.Length > 100)
             {
-                response.AddError(localizer["Length of title is more than 100 characters."]);
+                response.AddError(_localizer["Length of title is more than 100 characters."]);
                 response.Message = "Tag model data has problem.";
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
@@ -1549,31 +1549,31 @@ namespace vws.web.Controllers._task
                 teamId = null;
 
             #region CheckTeamAndProjectExistance
-            if (projectId != null && !vwsDbContext.Projects.Any(p => p.Id == projectId && !p.IsDeleted))
+            if (projectId != null && !_vwsDbContext.Projects.Any(p => p.Id == projectId && !p.IsDeleted))
             {
                 response.Message = "Project not found";
-                response.AddError(localizer["Project not found."]);
+                response.AddError(_localizer["Project not found."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
-            if (teamId != null && !vwsDbContext.Teams.Any(t => t.Id == teamId && !t.IsDeleted))
+            if (teamId != null && !_vwsDbContext.Teams.Any(t => t.Id == teamId && !t.IsDeleted))
             {
                 response.Message = "Team not found";
-                response.AddError(localizer["Team not found."]);
+                response.AddError(_localizer["Team not found."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
             #endregion
 
             #region CheckTeamAndProjectAccess
-            if (projectId != null && !permissionService.HasAccessToProject(LoggedInUserId.Value, (int)projectId))
+            if (projectId != null && !_permissionService.HasAccessToProject(LoggedInUserId.Value, (int)projectId))
             {
                 response.Message = "Project access denied";
-                response.AddError(localizer["You do not have access to project."]);
+                response.AddError(_localizer["You do not have access to project."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
-            if (teamId != null && !permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)teamId))
+            if (teamId != null && !_permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)teamId))
             {
                 response.Message = "Team access denied";
-                response.AddError(localizer["You do not have access to team."]);
+                response.AddError(_localizer["You do not have access to team."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
             #endregion
@@ -1583,15 +1583,15 @@ namespace vws.web.Controllers._task
 
             if (teamId != null)
             {
-                var teamStatuses = vwsDbContext.TaskStatuses.Where(status => status.TeamId == teamId)
+                var teamStatuses = _vwsDbContext.TaskStatuses.Where(status => status.TeamId == teamId)
                                                             .OrderByDescending(status => status.EvenOrder);
                 
                 if (teamStatuses.Count() != 0)
                     lastStatus = teamStatuses.First().EvenOrder;
 
                 newStatus = new Domain._task.TaskStatus() { EvenOrder = lastStatus + 2, TeamId = teamId, ProjectId = null, Title = title, UserProfileId = null };
-                vwsDbContext.AddTaskStatus(newStatus);
-                vwsDbContext.Save();
+                _vwsDbContext.AddTaskStatus(newStatus);
+                _vwsDbContext.Save();
 
                 response.Value = new TaskStatusResponseModel() { Id = newStatus.Id, Title = newStatus.Title };
                 response.Message = "New status added successfully!";
@@ -1599,7 +1599,7 @@ namespace vws.web.Controllers._task
             }
             else if (projectId != null)
             {
-                var projectStatuses = vwsDbContext.TaskStatuses.Where(status => status.ProjectId == projectId)
+                var projectStatuses = _vwsDbContext.TaskStatuses.Where(status => status.ProjectId == projectId)
                                                                .OrderByDescending(status => status.EvenOrder);
 
                 if (projectStatuses.Count() != 0)
@@ -1607,19 +1607,19 @@ namespace vws.web.Controllers._task
 
 
                 newStatus = new Domain._task.TaskStatus() { EvenOrder = lastStatus + 2, TeamId = null, ProjectId = projectId, Title = title, UserProfileId = null };
-                vwsDbContext.AddTaskStatus(newStatus);
-                vwsDbContext.Save();
+                _vwsDbContext.AddTaskStatus(newStatus);
+                _vwsDbContext.Save();
 
                 response.Value = new TaskStatusResponseModel() { Id = newStatus.Id, Title = newStatus.Title };
                 response.Message = "New status added successfully!";
                 return Ok(response);
             }
-            var userStatuses = vwsDbContext.TaskStatuses.Where(status => status.UserProfileId == LoggedInUserId.Value)
+            var userStatuses = _vwsDbContext.TaskStatuses.Where(status => status.UserProfileId == LoggedInUserId.Value)
                                                         .OrderByDescending(status => status.EvenOrder);
 
             newStatus = new Domain._task.TaskStatus() { EvenOrder = lastStatus + 2, TeamId = null, ProjectId = null, Title = title, UserProfileId = LoggedInUserId.Value };
-            vwsDbContext.AddTaskStatus(newStatus);
-            vwsDbContext.Save();
+            _vwsDbContext.AddTaskStatus(newStatus);
+            _vwsDbContext.Save();
 
             response.Value = new TaskStatusResponseModel() { Id = newStatus.Id, Title = newStatus.Title };
             response.Message = "New status added successfully!";
@@ -1635,32 +1635,32 @@ namespace vws.web.Controllers._task
 
             if (!String.IsNullOrEmpty(newTitle) && newTitle.Length > 100)
             {
-                response.AddError(localizer["Length of title is more than 100 characters."]);
+                response.AddError(_localizer["Length of title is more than 100 characters."]);
                 response.Message = "Status model data has problem.";
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            var selectedStatus = vwsDbContext.TaskStatuses.FirstOrDefault(status => status.Id == statusId);
+            var selectedStatus = _vwsDbContext.TaskStatuses.FirstOrDefault(status => status.Id == statusId);
             if (selectedStatus == null)
             {
                 response.Message = "Status not found!";
-                response.AddError(localizer["Status not found."]);
+                response.AddError(_localizer["Status not found."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             #region CheckAccess
-            if ((selectedStatus.ProjectId != null && !permissionService.HasAccessToProject(LoggedInUserId.Value, (int)selectedStatus.ProjectId)) ||
-                (selectedStatus.TeamId != null && !permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)selectedStatus.TeamId)) ||
+            if ((selectedStatus.ProjectId != null && !_permissionService.HasAccessToProject(LoggedInUserId.Value, (int)selectedStatus.ProjectId)) ||
+                (selectedStatus.TeamId != null && !_permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)selectedStatus.TeamId)) ||
                 selectedStatus.UserProfileId != null && selectedStatus.UserProfileId != LoggedInUserId.Value)
             {
                 response.Message = "Task Status access denied";
-                response.AddError(localizer["You do not have access to task status."]);
+                response.AddError(_localizer["You do not have access to task status."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
             #endregion
 
             selectedStatus.Title = newTitle;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             response.Message = "Status title updated successfull!";
             return Ok(response);
@@ -1673,34 +1673,34 @@ namespace vws.web.Controllers._task
         {
             var response = new ResponseModel();
 
-            var selectedStatus = vwsDbContext.TaskStatuses.FirstOrDefault(status => status.Id == statusId);
+            var selectedStatus = _vwsDbContext.TaskStatuses.FirstOrDefault(status => status.Id == statusId);
             if (selectedStatus == null)
             {
                 response.Message = "Status not found!";
-                response.AddError(localizer["Status not found."]);
+                response.AddError(_localizer["Status not found."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             #region CheckAccess
-            if ((selectedStatus.ProjectId != null && !permissionService.HasAccessToProject(LoggedInUserId.Value, (int)selectedStatus.ProjectId)) ||
-                (selectedStatus.TeamId != null && !permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)selectedStatus.TeamId)) ||
+            if ((selectedStatus.ProjectId != null && !_permissionService.HasAccessToProject(LoggedInUserId.Value, (int)selectedStatus.ProjectId)) ||
+                (selectedStatus.TeamId != null && !_permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)selectedStatus.TeamId)) ||
                 selectedStatus.UserProfileId != null && selectedStatus.UserProfileId != LoggedInUserId.Value)
             {
                 response.Message = "Task Status access denied";
-                response.AddError(localizer["You do not have access to task status."]);
+                response.AddError(_localizer["You do not have access to task status."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
             #endregion
 
-            if (vwsDbContext.GeneralTasks.Any(task => task.TaskStatusId == statusId && !task.IsDeleted))
+            if (_vwsDbContext.GeneralTasks.Any(task => task.TaskStatusId == statusId && !task.IsDeleted))
             {
                 response.Message = "You can not delete status";
-                response.AddError(localizer["You can not delete status which has task."]);
+                response.AddError(_localizer["You can not delete status which has task."]);
                 return Ok(response);
             }
 
-            vwsDbContext.DeleteTaskStatus(statusId);
-            vwsDbContext.Save();
+            _vwsDbContext.DeleteTaskStatus(statusId);
+            _vwsDbContext.Save();
             ReorderStatuses(selectedStatus.TeamId, selectedStatus.ProjectId);
 
             response.Message = "Status deleted successfully!";
@@ -1718,30 +1718,30 @@ namespace vws.web.Controllers._task
             if (model.Title.Length > 250)
             {
                 response.Message = "Task check list model has problem.";
-                response.AddError(localizer["Check list title can not have more than 250 characters."]);
+                response.AddError(_localizer["Check list title can not have more than 250 characters."]);
             }
             if (HasCheckListsTitleItemMoreCharacters(model.Items))
             {
                 response.Message = "Task check list model has problem.";
-                response.AddError(localizer["Check list item title can not have more than 500 characters."]);
+                response.AddError(_localizer["Check list item title can not have more than 500 characters."]);
             }
             if (response.HasError)
                 return StatusCode(StatusCodes.Status400BadRequest);
 
 
-            var selectedTask = vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == id);
+            var selectedTask = _vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == id);
 
             if (selectedTask == null || selectedTask.IsDeleted)
             {
                 response.Message = "Task not found";
-                response.AddError(localizer["Task does not exist."]);
+                response.AddError(_localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!permissionService.HasAccessToTask(userId, id))
+            if (!_permissionService.HasAccessToTask(userId, id))
             {
                 response.Message = "Task access forbidden";
-                response.AddError(localizer["You don't have access to this task."]);
+                response.AddError(_localizer["You don't have access to this task."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
@@ -1755,10 +1755,10 @@ namespace vws.web.Controllers._task
                 ModifiedOn = DateTime.Now,
                 Title = model.Title
             };
-            vwsDbContext.AddCheckList(newCheckList);
+            _vwsDbContext.AddCheckList(newCheckList);
             selectedTask.ModifiedOn = DateTime.Now;
             selectedTask.ModifiedBy = userId;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
@@ -1795,16 +1795,16 @@ namespace vws.web.Controllers._task
             if (model.Title.Length > 250)
             {
                 response.Message = "Task check list item title has problem.";
-                response.AddError(localizer["Check list title can not have more than 250 characters."]);
+                response.AddError(_localizer["Check list title can not have more than 250 characters."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var selectedCheckList = vwsDbContext.TaskCheckLists.Include(checkList => checkList.GeneralTask)
+            var selectedCheckList = _vwsDbContext.TaskCheckLists.Include(checkList => checkList.GeneralTask)
                                                                .FirstOrDefault(checkList => checkList.Id == checkListId && !checkList.IsDeleted);
 
             if (selectedCheckList == null || selectedCheckList.IsDeleted)
             {
-                response.AddError(localizer["Check list with given id does not exist."]);
+                response.AddError(_localizer["Check list with given id does not exist."]);
                 response.Message = "Check list not found";
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
@@ -1812,14 +1812,14 @@ namespace vws.web.Controllers._task
             if (selectedCheckList.GeneralTask.IsDeleted)
             {
                 response.Message = "Task not found";
-                response.AddError(localizer["Task does not exist."]);
+                response.AddError(_localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!permissionService.HasAccessToTask(userId, selectedCheckList.GeneralTaskId))
+            if (!_permissionService.HasAccessToTask(userId, selectedCheckList.GeneralTaskId))
             {
                 response.Message = "Task access forbidden";
-                response.AddError(localizer["You don't have access to this task."]);
+                response.AddError(_localizer["You don't have access to this task."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
@@ -1835,12 +1835,12 @@ namespace vws.web.Controllers._task
                 ModifiedOn = creationTime,
                 Title = model.Title
             };
-            vwsDbContext.AddCheckListItem(newCheckListItem);
+            _vwsDbContext.AddCheckListItem(newCheckListItem);
             selectedCheckList.GeneralTask.ModifiedOn = DateTime.Now;
             selectedCheckList.GeneralTask.ModifiedBy = userId;
             selectedCheckList.ModifiedBy = userId;
             selectedCheckList.ModifiedOn = DateTime.Now;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             var usersAssignedTo = GetAssignedTo(selectedCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedCheckList.GeneralTask.CreatedBy);
@@ -1875,16 +1875,16 @@ namespace vws.web.Controllers._task
             if (newTitle.Length > 250)
             {
                 response.Message = "Task check list title has problem.";
-                response.AddError(localizer["Check list title can not have more than 250 characters."]);
+                response.AddError(_localizer["Check list title can not have more than 250 characters."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var selectedCheckList = vwsDbContext.TaskCheckLists.Include(checkList => checkList.GeneralTask)
+            var selectedCheckList = _vwsDbContext.TaskCheckLists.Include(checkList => checkList.GeneralTask)
                                                                .FirstOrDefault(checkList => checkList.Id == checkListId && !checkList.IsDeleted);
 
             if (selectedCheckList == null || selectedCheckList.IsDeleted)
             {
-                response.AddError(localizer["Check list with given id does not exist."]);
+                response.AddError(_localizer["Check list with given id does not exist."]);
                 response.Message = "Check list not found";
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
@@ -1892,14 +1892,14 @@ namespace vws.web.Controllers._task
             if (selectedCheckList.GeneralTask.IsDeleted)
             {
                 response.Message = "Task not found";
-                response.AddError(localizer["Task does not exist."]);
+                response.AddError(_localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!permissionService.HasAccessToTask(userId, selectedCheckList.GeneralTaskId))
+            if (!_permissionService.HasAccessToTask(userId, selectedCheckList.GeneralTaskId))
             {
                 response.Message = "Task access forbidden";
-                response.AddError(localizer["You don't have access to this task."]);
+                response.AddError(_localizer["You don't have access to this task."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
@@ -1910,7 +1910,7 @@ namespace vws.web.Controllers._task
             selectedCheckList.GeneralTask.ModifiedBy = userId;
             selectedCheckList.ModifiedBy = userId;
             selectedCheckList.ModifiedOn = DateTime.Now;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             var usersAssignedTo = GetAssignedTo(selectedCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedCheckList.GeneralTask.CreatedBy);
@@ -1931,12 +1931,12 @@ namespace vws.web.Controllers._task
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
 
-            var selectedCheckList = vwsDbContext.TaskCheckLists.Include(checkList => checkList.GeneralTask)
+            var selectedCheckList = _vwsDbContext.TaskCheckLists.Include(checkList => checkList.GeneralTask)
                                                                .FirstOrDefault(checkList => checkList.Id == checkListId && !checkList.IsDeleted);
 
             if (selectedCheckList == null || selectedCheckList.IsDeleted)
             {
-                response.AddError(localizer["Check list with given id does not exist."]);
+                response.AddError(_localizer["Check list with given id does not exist."]);
                 response.Message = "Check list not found";
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
@@ -1944,14 +1944,14 @@ namespace vws.web.Controllers._task
             if (selectedCheckList.GeneralTask.IsDeleted)
             {
                 response.Message = "Task not found";
-                response.AddError(localizer["Task does not exist."]);
+                response.AddError(_localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!permissionService.HasAccessToTask(userId, selectedCheckList.GeneralTaskId))
+            if (!_permissionService.HasAccessToTask(userId, selectedCheckList.GeneralTaskId))
             {
                 response.Message = "Task access forbidden";
-                response.AddError(localizer["You don't have access to this task."]);
+                response.AddError(_localizer["You don't have access to this task."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
@@ -1960,7 +1960,7 @@ namespace vws.web.Controllers._task
             selectedCheckList.GeneralTask.ModifiedBy = userId;
             selectedCheckList.ModifiedBy = userId;
             selectedCheckList.ModifiedOn = DateTime.Now;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             var usersAssignedTo = GetAssignedTo(selectedCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedCheckList.GeneralTask.CreatedBy);
@@ -1985,17 +1985,17 @@ namespace vws.web.Controllers._task
             if (newTitle.Length > 500)
             {
                 response.Message = "Task check list item title has problem.";
-                response.AddError(localizer["Check list item title can not have more than 500 characters."]);
+                response.AddError(_localizer["Check list item title can not have more than 500 characters."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var selectedCheckListItem = vwsDbContext.TaskCheckListItems.Include(checkListItem => checkListItem.TaskCheckList)
+            var selectedCheckListItem = _vwsDbContext.TaskCheckListItems.Include(checkListItem => checkListItem.TaskCheckList)
                                                                        .ThenInclude(checkList => checkList.GeneralTask)
                                                                        .FirstOrDefault(checkListItem => checkListItem.Id == checkListItemId && !checkListItem.IsDeleted);
 
             if (selectedCheckListItem == null || selectedCheckListItem.IsDeleted)
             {
-                response.AddError(localizer["Check list item with given id does not exist."]);
+                response.AddError(_localizer["Check list item with given id does not exist."]);
                 response.Message = "Check list not found";
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
@@ -2003,14 +2003,14 @@ namespace vws.web.Controllers._task
             if (selectedCheckListItem.TaskCheckList.GeneralTask.IsDeleted)
             {
                 response.Message = "Task not found";
-                response.AddError(localizer["Task does not exist."]);
+                response.AddError(_localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!permissionService.HasAccessToTask(userId, selectedCheckListItem.TaskCheckList.GeneralTask.Id))
+            if (!_permissionService.HasAccessToTask(userId, selectedCheckListItem.TaskCheckList.GeneralTask.Id))
             {
                 response.Message = "Task access forbidden";
-                response.AddError(localizer["You don't have access to this task."]);
+                response.AddError(_localizer["You don't have access to this task."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
@@ -2023,7 +2023,7 @@ namespace vws.web.Controllers._task
             selectedCheckListItem.TaskCheckList.CreatedBy = userId;
             selectedCheckListItem.TaskCheckList.GeneralTask.ModifiedOn = DateTime.Now;
             selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy = userId;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             var usersAssignedTo = GetAssignedTo(selectedCheckListItem.TaskCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy);
@@ -2044,13 +2044,13 @@ namespace vws.web.Controllers._task
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
 
-            var selectedCheckListItem = vwsDbContext.TaskCheckListItems.Include(checkListItem => checkListItem.TaskCheckList)
+            var selectedCheckListItem = _vwsDbContext.TaskCheckListItems.Include(checkListItem => checkListItem.TaskCheckList)
                                                                        .ThenInclude(checkList => checkList.GeneralTask)
                                                                        .FirstOrDefault(checkListItem => checkListItem.Id == checkListItemId && !checkListItem.IsDeleted);
 
             if (selectedCheckListItem == null || selectedCheckListItem.IsDeleted)
             {
-                response.AddError(localizer["Check list item with given id does not exist."]);
+                response.AddError(_localizer["Check list item with given id does not exist."]);
                 response.Message = "Check list not found";
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
@@ -2058,14 +2058,14 @@ namespace vws.web.Controllers._task
             if (selectedCheckListItem.TaskCheckList.GeneralTask.IsDeleted)
             {
                 response.Message = "Task not found";
-                response.AddError(localizer["Task does not exist."]);
+                response.AddError(_localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!permissionService.HasAccessToTask(userId, selectedCheckListItem.TaskCheckList.GeneralTask.Id))
+            if (!_permissionService.HasAccessToTask(userId, selectedCheckListItem.TaskCheckList.GeneralTask.Id))
             {
                 response.Message = "Task access forbidden";
-                response.AddError(localizer["You don't have access to this task."]);
+                response.AddError(_localizer["You don't have access to this task."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
@@ -2076,7 +2076,7 @@ namespace vws.web.Controllers._task
             selectedCheckListItem.TaskCheckList.CreatedBy = userId;
             selectedCheckListItem.TaskCheckList.GeneralTask.ModifiedOn = DateTime.Now;
             selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy = userId;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             var usersAssignedTo = GetAssignedTo(selectedCheckListItem.TaskCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy);
@@ -2097,13 +2097,13 @@ namespace vws.web.Controllers._task
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
 
-            var selectedCheckListItem = vwsDbContext.TaskCheckListItems.Include(checkListItem => checkListItem.TaskCheckList)
+            var selectedCheckListItem = _vwsDbContext.TaskCheckListItems.Include(checkListItem => checkListItem.TaskCheckList)
                                                                        .ThenInclude(checkList => checkList.GeneralTask)
                                                                        .FirstOrDefault(checkListItem => checkListItem.Id == checkListItemId && !checkListItem.IsDeleted);
 
             if (selectedCheckListItem == null || selectedCheckListItem.IsDeleted)
             {
-                response.AddError(localizer["Check list item with given id does not exist."]);
+                response.AddError(_localizer["Check list item with given id does not exist."]);
                 response.Message = "Check list not found";
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
@@ -2111,14 +2111,14 @@ namespace vws.web.Controllers._task
             if (selectedCheckListItem.TaskCheckList.GeneralTask.IsDeleted)
             {
                 response.Message = "Task not found";
-                response.AddError(localizer["Task does not exist."]);
+                response.AddError(_localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!permissionService.HasAccessToTask(userId, selectedCheckListItem.TaskCheckList.GeneralTask.Id))
+            if (!_permissionService.HasAccessToTask(userId, selectedCheckListItem.TaskCheckList.GeneralTask.Id))
             {
                 response.Message = "Task access forbidden";
-                response.AddError(localizer["You don't have access to this task."]);
+                response.AddError(_localizer["You don't have access to this task."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
@@ -2131,7 +2131,7 @@ namespace vws.web.Controllers._task
             selectedCheckListItem.TaskCheckList.CreatedBy = userId;
             selectedCheckListItem.TaskCheckList.GeneralTask.ModifiedOn = DateTime.Now;
             selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy = userId;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             var usersAssignedTo = GetAssignedTo(selectedCheckListItem.TaskCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy);
@@ -2153,17 +2153,17 @@ namespace vws.web.Controllers._task
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
 
-            var selectedTask = vwsDbContext.GeneralTasks.Include(task => task.Status).FirstOrDefault(task => task.Id == id);
+            var selectedTask = _vwsDbContext.GeneralTasks.Include(task => task.Status).FirstOrDefault(task => task.Id == id);
             if (selectedTask == null || selectedTask.IsDeleted)
             {
                 response.Message = "Task not found";
-                response.AddError(localizer["Task does not exist."]);
+                response.AddError(_localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!permissionService.HasAccessToTask(userId, id))
+            if (!_permissionService.HasAccessToTask(userId, id))
             {
-                response.AddError(localizer["You don't have access to this task."]);
+                response.AddError(_localizer["You don't have access to this task."]);
                 response.Message = "Task access forbidden";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
@@ -2172,7 +2172,7 @@ namespace vws.web.Controllers._task
             if (!statuses.Contains(newStatusId))
             {
                 response.Message = "Invalid status";
-                response.AddError(localizer["Invalid status."]);
+                response.AddError(_localizer["Invalid status."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
@@ -2181,13 +2181,13 @@ namespace vws.web.Controllers._task
             selectedTask.TaskStatusId = newStatusId;
             selectedTask.ModifiedBy = userId;
             selectedTask.ModifiedOn = DateTime.Now;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
-            string[] arguments = { selectedTask.Title, lastStatus, vwsDbContext.TaskStatuses.FirstOrDefault(status => status.Id == selectedTask.TaskStatusId).Title, LoggedInNickName };
+            string[] arguments = { selectedTask.Title, lastStatus, _vwsDbContext.TaskStatuses.FirstOrDefault(status => status.Id == selectedTask.TaskStatusId).Title, LoggedInNickName };
             await SendMultipleEmails(usersAssignedTo, "Status of your task with title <b>«{0}»</b> has been updated from <b>«{1}»</b> to <b>«{2}»</b> by <b>«{3}»</b>.", "Task Update", arguments);
 
             response.Message = "Task status changed";
@@ -2203,9 +2203,9 @@ namespace vws.web.Controllers._task
             var userId = LoggedInUserId.Value;
 
             if (!String.IsNullOrEmpty(model.Color) && model.Color.Length > 6)  
-                response.AddError(localizer["Length of color is more than 6 characters."]);
+                response.AddError(_localizer["Length of color is more than 6 characters."]);
             if (!String.IsNullOrEmpty(model.Title) && model.Title.Length > 100)
-                response.AddError(localizer["Length of title is more than 100 characters."]);
+                response.AddError(_localizer["Length of title is more than 100 characters."]);
             if (response.HasError)
             {
                 response.Message = "Tag model data has problem.";
@@ -2216,31 +2216,31 @@ namespace vws.web.Controllers._task
                 model.TeamId = null;
 
             #region CheckTeamAndProjectExistance
-            if (model.ProjectId != null && !vwsDbContext.Projects.Any(p => p.Id == model.ProjectId && !p.IsDeleted))
+            if (model.ProjectId != null && !_vwsDbContext.Projects.Any(p => p.Id == model.ProjectId && !p.IsDeleted))
             {
                 response.Message = "Project not found";
-                response.AddError(localizer["Project not found."]);
+                response.AddError(_localizer["Project not found."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
-            if (model.TeamId != null && !vwsDbContext.Teams.Any(t => t.Id == model.TeamId && !t.IsDeleted))
+            if (model.TeamId != null && !_vwsDbContext.Teams.Any(t => t.Id == model.TeamId && !t.IsDeleted))
             {
                 response.Message = "Team not found";
-                response.AddError(localizer["Team not found."]);
+                response.AddError(_localizer["Team not found."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
             #endregion
 
             #region CheckTeamAndProjectAccess
-            if (model.ProjectId != null && !permissionService.HasAccessToProject(LoggedInUserId.Value, (int)model.ProjectId))
+            if (model.ProjectId != null && !_permissionService.HasAccessToProject(LoggedInUserId.Value, (int)model.ProjectId))
             {
                 response.Message = "Project access denied";
-                response.AddError(localizer["You do not have access to project."]);
+                response.AddError(_localizer["You do not have access to project."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
-            if (model.TeamId != null && !permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)model.TeamId))
+            if (model.TeamId != null && !_permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)model.TeamId))
             {
                 response.Message = "Team access denied";
-                response.AddError(localizer["You do not have access to team."]);
+                response.AddError(_localizer["You do not have access to team."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
             #endregion
@@ -2255,8 +2255,8 @@ namespace vws.web.Controllers._task
                 Title = model.Title,
                 Color = model.Color
             };
-            vwsDbContext.AddTag(newTag);
-            vwsDbContext.Save();
+            _vwsDbContext.AddTag(newTag);
+            _vwsDbContext.Save();
 
             response.Value = new TagResponseModel() { Id = newTag.Id, Title = newTag.Title, Color = newTag.Color };
             response.Message = "New tag added successfully!";
@@ -2272,32 +2272,32 @@ namespace vws.web.Controllers._task
 
             if (!String.IsNullOrEmpty(newTitle) && newTitle.Length > 100)
             {
-                response.AddError(localizer["Length of title is more than 100 characters."]);
+                response.AddError(_localizer["Length of title is more than 100 characters."]);
                 response.Message = "Tag model data has problem.";
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            var selectedTag = vwsDbContext.Tags.FirstOrDefault(tag => tag.Id == tagId);
+            var selectedTag = _vwsDbContext.Tags.FirstOrDefault(tag => tag.Id == tagId);
             if (selectedTag == null)
             {
                 response.Message = "Status not found!";
-                response.AddError(localizer["Status not found."]);
+                response.AddError(_localizer["Status not found."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             #region CheckAccess
-            if ((selectedTag.ProjectId != null && !permissionService.HasAccessToProject(LoggedInUserId.Value, (int)selectedTag.ProjectId)) ||
-                (selectedTag.TeamId != null && !permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)selectedTag.TeamId)) ||
+            if ((selectedTag.ProjectId != null && !_permissionService.HasAccessToProject(LoggedInUserId.Value, (int)selectedTag.ProjectId)) ||
+                (selectedTag.TeamId != null && !_permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)selectedTag.TeamId)) ||
                 selectedTag.UserProfileId != null && selectedTag.UserProfileId != LoggedInUserId.Value)
             {
                 response.Message = "Task tag access denied";
-                response.AddError(localizer["You do not have access to task tag."]);
+                response.AddError(_localizer["You do not have access to task tag."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
             #endregion
 
             selectedTag.Title = newTitle;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             response.Message = "Tag title updated successfully!";
             return Ok(response);
@@ -2312,32 +2312,32 @@ namespace vws.web.Controllers._task
 
             if (!String.IsNullOrEmpty(newColor) && newColor.Length > 6)
             {
-                response.AddError(localizer["Length of color is more than 6 characters."]);
+                response.AddError(_localizer["Length of color is more than 6 characters."]);
                 response.Message = "Tag model data has problem.";
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
-            var selectedTag = vwsDbContext.Tags.FirstOrDefault(tag => tag.Id == tagId);
+            var selectedTag = _vwsDbContext.Tags.FirstOrDefault(tag => tag.Id == tagId);
             if (selectedTag == null)
             {
                 response.Message = "Status not found!";
-                response.AddError(localizer["Status not found."]);
+                response.AddError(_localizer["Status not found."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             #region CheckAccess
-            if ((selectedTag.ProjectId != null && !permissionService.HasAccessToProject(LoggedInUserId.Value, (int)selectedTag.ProjectId)) ||
-                (selectedTag.TeamId != null && !permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)selectedTag.TeamId)) ||
+            if ((selectedTag.ProjectId != null && !_permissionService.HasAccessToProject(LoggedInUserId.Value, (int)selectedTag.ProjectId)) ||
+                (selectedTag.TeamId != null && !_permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)selectedTag.TeamId)) ||
                 selectedTag.UserProfileId != null && selectedTag.UserProfileId != LoggedInUserId.Value)
             {
                 response.Message = "Task tag access denied";
-                response.AddError(localizer["You do not have access to task tag."]);
+                response.AddError(_localizer["You do not have access to task tag."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
             #endregion
 
             selectedTag.Color = newColor;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             response.Message = "Tag color updated successfully!";
             return Ok(response);
@@ -2350,27 +2350,27 @@ namespace vws.web.Controllers._task
         {
             var response = new ResponseModel();
 
-            var selectedTag = vwsDbContext.Tags.FirstOrDefault(tag => tag.Id == tagId);
+            var selectedTag = _vwsDbContext.Tags.FirstOrDefault(tag => tag.Id == tagId);
             if (selectedTag == null)
             {
                 response.Message = "Status not found!";
-                response.AddError(localizer["Status not found."]);
+                response.AddError(_localizer["Status not found."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             #region CheckAccess
-            if ((selectedTag.ProjectId != null && !permissionService.HasAccessToProject(LoggedInUserId.Value, (int)selectedTag.ProjectId)) ||
-                (selectedTag.TeamId != null && !permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)selectedTag.TeamId)) ||
+            if ((selectedTag.ProjectId != null && !_permissionService.HasAccessToProject(LoggedInUserId.Value, (int)selectedTag.ProjectId)) ||
+                (selectedTag.TeamId != null && !_permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)selectedTag.TeamId)) ||
                 selectedTag.UserProfileId != null && selectedTag.UserProfileId != LoggedInUserId.Value)
             {
                 response.Message = "Task tag access denied";
-                response.AddError(localizer["You do not have access to task tag."]);
+                response.AddError(_localizer["You do not have access to task tag."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
             #endregion
 
-            vwsDbContext.DeleteTag(tagId);
-            vwsDbContext.Save();
+            _vwsDbContext.DeleteTag(tagId);
+            _vwsDbContext.Save();
 
             response.Message = "Tag deleted successfully!";
             return Ok(response);
@@ -2384,36 +2384,36 @@ namespace vws.web.Controllers._task
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
 
-            var selectedTask = vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == id);
+            var selectedTask = _vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == id);
             if (selectedTask == null || selectedTask.IsDeleted)
             {
                 response.Message = "Task not found";
-                response.AddError(localizer["Task does not exist."]);
+                response.AddError(_localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!permissionService.HasAccessToTask(userId, id))
+            if (!_permissionService.HasAccessToTask(userId, id))
             {
                 response.Message = "Task access forbidden";
-                response.AddError(localizer["You don't have access to this task."]);
+                response.AddError(_localizer["You don't have access to this task."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            var selectedTag = vwsDbContext.Tags.FirstOrDefault(tag => tag.Id == tagId);
+            var selectedTag = _vwsDbContext.Tags.FirstOrDefault(tag => tag.Id == tagId);
             if (selectedTag == null)
             {
                 response.Message = "Status not found!";
-                response.AddError(localizer["Status not found."]);
+                response.AddError(_localizer["Status not found."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             #region CheckAccess
-            if ((selectedTag.ProjectId != null && !permissionService.HasAccessToProject(LoggedInUserId.Value, (int)selectedTag.ProjectId)) ||
-                (selectedTag.TeamId != null && !permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)selectedTag.TeamId)) ||
+            if ((selectedTag.ProjectId != null && !_permissionService.HasAccessToProject(LoggedInUserId.Value, (int)selectedTag.ProjectId)) ||
+                (selectedTag.TeamId != null && !_permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)selectedTag.TeamId)) ||
                 selectedTag.UserProfileId != null && selectedTag.UserProfileId != LoggedInUserId.Value)
             {
                 response.Message = "Task tag access denied";
-                response.AddError(localizer["You do not have access to task tag."]);
+                response.AddError(_localizer["You do not have access to task tag."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
             #endregion
@@ -2422,21 +2422,21 @@ namespace vws.web.Controllers._task
             if (!AreTagsValid(tagArray, selectedTask.ProjectId, selectedTask.TeamId))
             {
                 response.Message = "Invalid tags";
-                response.AddError(localizer["Invalid tags."]);
+                response.AddError(_localizer["Invalid tags."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (vwsDbContext.TaskTags.Any(taskTag => taskTag.GeneralTaskId == id && taskTag.TagId == tagId))
+            if (_vwsDbContext.TaskTags.Any(taskTag => taskTag.GeneralTaskId == id && taskTag.TagId == tagId))
             {
                 response.Message = "Tag was assigned before";
-                response.AddError(localizer["Task already has the tag."]);
+                response.AddError(_localizer["Task already has the tag."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             AddTaskTags(id, tagArray);
             selectedTask.ModifiedOn = DateTime.Now;
             selectedTask.ModifiedBy = userId;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
@@ -2457,55 +2457,55 @@ namespace vws.web.Controllers._task
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
 
-            var selectedTask = vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == id);
+            var selectedTask = _vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == id);
             if (selectedTask == null || selectedTask.IsDeleted)
             {
                 response.Message = "Task not found";
-                response.AddError(localizer["Task does not exist."]);
+                response.AddError(_localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!permissionService.HasAccessToTask(userId, id))
+            if (!_permissionService.HasAccessToTask(userId, id))
             {
                 response.Message = "Task access forbidden";
-                response.AddError(localizer["You don't have access to this task."]);
+                response.AddError(_localizer["You don't have access to this task."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            var selectedTag = vwsDbContext.Tags.FirstOrDefault(tag => tag.Id == tagId);
+            var selectedTag = _vwsDbContext.Tags.FirstOrDefault(tag => tag.Id == tagId);
             if (selectedTag == null)
             {
                 response.Message = "Status not found!";
-                response.AddError(localizer["Status not found."]);
+                response.AddError(_localizer["Status not found."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             #region CheckAccess
-            if ((selectedTag.ProjectId != null && !permissionService.HasAccessToProject(LoggedInUserId.Value, (int)selectedTag.ProjectId)) ||
-                (selectedTag.TeamId != null && !permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)selectedTag.TeamId)) ||
+            if ((selectedTag.ProjectId != null && !_permissionService.HasAccessToProject(LoggedInUserId.Value, (int)selectedTag.ProjectId)) ||
+                (selectedTag.TeamId != null && !_permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)selectedTag.TeamId)) ||
                 selectedTag.UserProfileId != null && selectedTag.UserProfileId != LoggedInUserId.Value)
             {
                 response.Message = "Task tag access denied";
-                response.AddError(localizer["You do not have access to task tag."]);
+                response.AddError(_localizer["You do not have access to task tag."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
             #endregion
 
-            var selectedTaskTag = vwsDbContext.TaskTags.FirstOrDefault(taskTag => taskTag.GeneralTaskId == id && taskTag.TagId == tagId);
+            var selectedTaskTag = _vwsDbContext.TaskTags.FirstOrDefault(taskTag => taskTag.GeneralTaskId == id && taskTag.TagId == tagId);
 
             if (selectedTag == null)
             {
                 response.Message = "Tag was not assigned before";
-                response.AddError(localizer["Task does not have the tag."]);
+                response.AddError(_localizer["Task does not have the tag."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             var tagName = selectedTag.Title;
 
-            vwsDbContext.DeleteTaskTag(selectedTaskTag.GeneralTaskId, selectedTaskTag.TagId);
+            _vwsDbContext.DeleteTaskTag(selectedTaskTag.GeneralTaskId, selectedTaskTag.TagId);
             selectedTask.ModifiedBy = userId;
             selectedTask.ModifiedOn = DateTime.Now;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
@@ -2529,31 +2529,31 @@ namespace vws.web.Controllers._task
                 teamId = null;
 
             #region CheckTeamAndProjectExistance
-            if (projectId != null && !vwsDbContext.Projects.Any(p => p.Id == projectId && !p.IsDeleted))
+            if (projectId != null && !_vwsDbContext.Projects.Any(p => p.Id == projectId && !p.IsDeleted))
             {
                 response.Message = "Project not found";
-                response.AddError(localizer["Project not found."]);
+                response.AddError(_localizer["Project not found."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
-            if (teamId != null && !vwsDbContext.Teams.Any(t => t.Id == teamId && !t.IsDeleted))
+            if (teamId != null && !_vwsDbContext.Teams.Any(t => t.Id == teamId && !t.IsDeleted))
             {
                 response.Message = "Team not found";
-                response.AddError(localizer["Team not found."]);
+                response.AddError(_localizer["Team not found."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
             #endregion
 
             #region CheckTeamAndProjectAccess
-            if (projectId != null && !permissionService.HasAccessToProject(LoggedInUserId.Value, (int)projectId))
+            if (projectId != null && !_permissionService.HasAccessToProject(LoggedInUserId.Value, (int)projectId))
             {
                 response.Message = "Project access denied";
-                response.AddError(localizer["You do not have access to project."]);
+                response.AddError(_localizer["You do not have access to project."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
-            if (teamId != null && !permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)teamId))
+            if (teamId != null && !_permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)teamId))
             {
                 response.Message = "Team access denied";
-                response.AddError(localizer["You do not have access to team."]);
+                response.AddError(_localizer["You do not have access to team."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
             #endregion
@@ -2572,25 +2572,25 @@ namespace vws.web.Controllers._task
 
             if (String.IsNullOrEmpty(model.Body) || model.Body.Length > 1000)
             {
-                response.AddError(localizer["Comment body can not be emty or have more than 1000 characters."]);
+                response.AddError(_localizer["Comment body can not be emty or have more than 1000 characters."]);
                 response.Message = "Invalid comment body";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             var userId = LoggedInUserId.Value;
 
-            var selectedTask = vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == model.Id);
+            var selectedTask = _vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == model.Id);
             if (selectedTask == null || selectedTask.IsDeleted)
             {
                 response.Message = "Task not found";
-                response.AddError(localizer["Task does not exist."]);
+                response.AddError(_localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!permissionService.HasAccessToTask(userId, model.Id))
+            if (!_permissionService.HasAccessToTask(userId, model.Id))
             {
                 response.Message = "Task access forbidden";
-                response.AddError(localizer["You don't have access to this task."]);
+                response.AddError(_localizer["You don't have access to this task."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
@@ -2603,10 +2603,10 @@ namespace vws.web.Controllers._task
                 ModifiedOn = creationTime,
                 GeneralTaskId = selectedTask.Id
             };
-            vwsDbContext.AddTaskComment(newComment);
+            _vwsDbContext.AddTaskComment(newComment);
             selectedTask.ModifiedOn = DateTime.Now;
             selectedTask.ModifiedBy = userId;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
             AddCommentAttachments(newComment.Id, model.Attachments);
 
             var usersAssignedTo = GetAssignedTo(model.Id).Select(user => user.UserId).ToList();
@@ -2616,7 +2616,7 @@ namespace vws.web.Controllers._task
             string[] arguments = { LoggedInNickName, newComment.Body, selectedTask.Title };
             await SendMultipleEmails(usersAssignedTo, "<b>«{0}»</b> added new comment <b>«{1}»</b> to your task with title <b>«{2}»</b>.", "Task Update", arguments);
 
-            UserProfile userProfile = await vwsDbContext.GetUserProfileAsync(newComment.CommentedBy);
+            UserProfile userProfile = await _vwsDbContext.GetUserProfileAsync(newComment.CommentedBy);
             response.Value = new CommentResponseModel()
             {
                 Id = newComment.Id,
@@ -2644,30 +2644,30 @@ namespace vws.web.Controllers._task
 
             if (String.IsNullOrEmpty(newBody) || newBody.Length > 1000)
             {
-                response.AddError(localizer["Comment body can not be emty or have more than 1000 characters."]);
+                response.AddError(_localizer["Comment body can not be emty or have more than 1000 characters."]);
                 response.Message = "Invalid comment body";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             var userId = LoggedInUserId.Value;
 
-            var selectedComment = vwsDbContext.TaskComments.Include(comment => comment.GeneralTask).FirstOrDefault(comment => comment.Id == commentId);
+            var selectedComment = _vwsDbContext.TaskComments.Include(comment => comment.GeneralTask).FirstOrDefault(comment => comment.Id == commentId);
             if (selectedComment == null)
             {
-                response.AddError(localizer["Task comment not found."]);
+                response.AddError(_localizer["Task comment not found."]);
                 response.Message = "Task comment not found";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
             if (selectedComment.CommentedBy != userId)
             {
-                response.AddError(localizer["Task comment access denied."]);
+                response.AddError(_localizer["Task comment access denied."]);
                 response.Message = "Task comment access denied";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if ((DateTime.Now - selectedComment.ModifiedOn).TotalMinutes < Int16.Parse(configuration["TimeDifference:EditTaskComment"]))
+            if ((DateTime.Now - selectedComment.ModifiedOn).TotalMinutes < Int16.Parse(_configuration["TimeDifference:EditTaskComment"]))
             {
-                response.AddError(localizer["You can not edit and delete comment before 5 minutes of your last change."]);
+                response.AddError(_localizer["You can not edit and delete comment before 5 minutes of your last change."]);
                 response.Message = "Can not edit and delete comment before 5 minutes of your last change";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
@@ -2678,7 +2678,7 @@ namespace vws.web.Controllers._task
             selectedComment.ModifiedOn = DateTime.Now;
             selectedComment.GeneralTask.ModifiedOn = DateTime.Now;
             selectedComment.GeneralTask.ModifiedBy = userId;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             var usersAssignedTo = GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedComment.GeneralTask.CreatedBy);
@@ -2700,23 +2700,23 @@ namespace vws.web.Controllers._task
 
             var userId = LoggedInUserId.Value;
 
-            var selectedComment = vwsDbContext.TaskComments.Include(comment => comment.GeneralTask).FirstOrDefault(comment => comment.Id == commentId);
+            var selectedComment = _vwsDbContext.TaskComments.Include(comment => comment.GeneralTask).FirstOrDefault(comment => comment.Id == commentId);
             if (selectedComment == null)
             {
-                response.AddError(localizer["Task comment not found."]);
+                response.AddError(_localizer["Task comment not found."]);
                 response.Message = "Task comment not found";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
             if (selectedComment.CommentedBy != userId)
             {
-                response.AddError(localizer["Task comment access denied."]);
+                response.AddError(_localizer["Task comment access denied."]);
                 response.Message = "Task comment access denied";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if ((DateTime.Now - selectedComment.ModifiedOn).TotalMinutes < Int16.Parse(configuration["TimeDifference:EditTaskComment"]))
+            if ((DateTime.Now - selectedComment.ModifiedOn).TotalMinutes < Int16.Parse(_configuration["TimeDifference:EditTaskComment"]))
             {
-                response.AddError(localizer["You can not edit and delete comment before 5 minutes of your last change."]);
+                response.AddError(_localizer["You can not edit and delete comment before 5 minutes of your last change."]);
                 response.Message = "Can not edit and delete comment before 5 minutes of your last change";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
@@ -2725,7 +2725,7 @@ namespace vws.web.Controllers._task
             selectedComment.ModifiedOn = DateTime.Now;
             selectedComment.GeneralTask.ModifiedOn = DateTime.Now;
             selectedComment.GeneralTask.ModifiedBy = userId;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             var usersAssignedTo = GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedComment.GeneralTask.CreatedBy);
@@ -2747,16 +2747,16 @@ namespace vws.web.Controllers._task
 
             var userId = LoggedInUserId.Value;
 
-            var selectedComment = vwsDbContext.TaskComments.Include(comment => comment.GeneralTask).FirstOrDefault(comment => comment.Id == model.CommentId);
+            var selectedComment = _vwsDbContext.TaskComments.Include(comment => comment.GeneralTask).FirstOrDefault(comment => comment.Id == model.CommentId);
             if (selectedComment == null)
             {
-                response.AddError(localizer["Task comment not found."]);
+                response.AddError(_localizer["Task comment not found."]);
                 response.Message = "Task comment not found";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
             if (selectedComment.CommentedBy != userId)
             {
-                response.AddError(localizer["Task comment access denied."]);
+                response.AddError(_localizer["Task comment access denied."]);
                 response.Message = "Task comment access denied";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
@@ -2766,11 +2766,11 @@ namespace vws.web.Controllers._task
             selectedComment.ModifiedOn = DateTime.Now;
             selectedComment.GeneralTask.ModifiedOn = DateTime.Now;
             selectedComment.GeneralTask.ModifiedBy = userId;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             if (response.Value.Count() != 0)
             {
-                string emailMessage = localizer["<b>«{0}»</b> added below attachments to comment <b>«{1}»</b> in your task with title <b>«{2}»</b>"];
+                string emailMessage = _localizer["<b>«{0}»</b> added below attachments to comment <b>«{1}»</b> in your task with title <b>«{2}»</b>"];
                 emailMessage += ":\n <br>";
                 foreach (var file in response.Value)
                     emailMessage += $"<a href='{Request.Scheme}://{Request.Host}/en-US/File/get?id={file.FileContainerGuid}'>{file.Name}</a>\n<br>\n";
@@ -2795,39 +2795,39 @@ namespace vws.web.Controllers._task
 
             var userId = LoggedInUserId.Value;
 
-            var selectedComment = vwsDbContext.TaskComments.Include(comment => comment.GeneralTask).FirstOrDefault(comment => comment.Id == commentId);
+            var selectedComment = _vwsDbContext.TaskComments.Include(comment => comment.GeneralTask).FirstOrDefault(comment => comment.Id == commentId);
             if (selectedComment == null)
             {
-                response.AddError(localizer["Task comment not found."]);
+                response.AddError(_localizer["Task comment not found."]);
                 response.Message = "Task comment not found";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
             if (selectedComment.CommentedBy != userId)
             {
-                response.AddError(localizer["Task comment access denied."]);
+                response.AddError(_localizer["Task comment access denied."]);
                 response.Message = "Task comment access denied";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var selectedAttachment = vwsDbContext.TaskCommentAttachments.Include(attachment => attachment.FileContainer)
+            var selectedAttachment = _vwsDbContext.TaskCommentAttachments.Include(attachment => attachment.FileContainer)
                                                                         .ThenInclude(attachment => attachment.Files)
                                                                         .FirstOrDefault(attachment => attachment.FileContainerGuid == attachmentGuid && attachment.TaskCommentId == commentId);
             if (selectedAttachment == null)
             {
-                response.AddError(localizer["There is no attachment with such information for given comment."]);
+                response.AddError(_localizer["There is no attachment with such information for given comment."]);
                 response.Message = "Attachment not found";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             foreach (var file in selectedAttachment.FileContainer.Files)
-                fileManager.DeleteFile(file.Address);
+                _fileManager.DeleteFile(file.Address);
 
-            var selectedContainer = vwsDbContext.FileContainers.FirstOrDefault(container => container.Id == selectedAttachment.FileContainerId);
-            vwsDbContext.DeleteFileContainer(selectedContainer);
+            var selectedContainer = _vwsDbContext.FileContainers.FirstOrDefault(container => container.Id == selectedAttachment.FileContainerId);
+            _vwsDbContext.DeleteFileContainer(selectedContainer);
             selectedComment.ModifiedOn = DateTime.Now;
             selectedComment.GeneralTask.ModifiedOn = DateTime.Now;
             selectedComment.GeneralTask.ModifiedBy = userId;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             var usersAssignedTo = GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedComment.GeneralTask.CreatedBy);
