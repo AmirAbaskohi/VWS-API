@@ -22,29 +22,30 @@ namespace vws.web.Controllers._chat
     [ApiController]
     public class ChannelController : BaseController
     {
-        private readonly IStringLocalizer<ChannelController> localizer;
-        private readonly IVWS_DbContext vwsDbContext;
-        private readonly IChannelService channelService;
-        private readonly UserManager<ApplicationUser> userManager;
+        #region Feilds
+        private readonly IStringLocalizer<ChannelController> _localizer;
+        private readonly IVWS_DbContext _vwsDbContext;
+        private readonly IChannelService _channelService;
+        #endregion
 
-        public ChannelController(IStringLocalizer<ChannelController> _localizer,
-                                 IVWS_DbContext _vwsDbContext,
-                                 IChannelService _channelService,
-                                 UserManager<ApplicationUser> _userManager)
+        #region Ctor
+        public ChannelController(IStringLocalizer<ChannelController> localizer,
+                                 IVWS_DbContext vwsDbContext, IChannelService channelService)
         {
-            localizer = _localizer;
-            vwsDbContext = _vwsDbContext;
-            channelService = _channelService;
-            userManager = _userManager;
+            _localizer = localizer;
+            _vwsDbContext = vwsDbContext;
+            _channelService = channelService;
         }
+        #endregion
 
+        #region PrivateMethods
         private void SetChannelsIsMuted(ref List<ChannelResponseModel> channelResponseModels)
         {
             var userId = LoggedInUserId.Value;
 
             foreach (var channelResponseModel in channelResponseModels)
             {
-                var mutedChannel = vwsDbContext.MutedChannels.FirstOrDefault(mChannel => mChannel.ChannelTypeId == channelResponseModel.ChannelTypeId &&
+                var mutedChannel = _vwsDbContext.MutedChannels.FirstOrDefault(mChannel => mChannel.ChannelTypeId == channelResponseModel.ChannelTypeId &&
                                                                                     mChannel.ChannelId == channelResponseModel.Guid &&
                                                                                     mChannel.UserId == userId);
 
@@ -57,7 +58,7 @@ namespace vws.web.Controllers._chat
                 }
             }
 
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
         }
 
         private void SetChannelIsPinned(ref List<ChannelResponseModel> channelResponseModels)
@@ -66,7 +67,7 @@ namespace vws.web.Controllers._chat
 
             foreach (var channelResponseModel in channelResponseModels)
             {
-                var pinnedChannel = vwsDbContext.PinnedChannels.FirstOrDefault(pChannel => pChannel.ChannelTypeId == channelResponseModel.ChannelTypeId &&
+                var pinnedChannel = _vwsDbContext.PinnedChannels.FirstOrDefault(pChannel => pChannel.ChannelTypeId == channelResponseModel.ChannelTypeId &&
                                                                                            pChannel.ChannelId == channelResponseModel.Guid &&
                                                                                            pChannel.UserId == userId);
 
@@ -87,12 +88,12 @@ namespace vws.web.Controllers._chat
                 ChannelTransaction channelTransaction;
 
                 if (channelResponseModel.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
-                    channelTransaction = vwsDbContext.ChannelTransactions.FirstOrDefault(transaction => transaction.ChannelTypeId == channelResponseModel.ChannelTypeId &&
+                    channelTransaction = _vwsDbContext.ChannelTransactions.FirstOrDefault(transaction => transaction.ChannelTypeId == channelResponseModel.ChannelTypeId &&
                                                                                                         transaction.ChannelId == channelResponseModel.Guid &&
                                                                                                         transaction.UserProfileId == userId);
 
                 else
-                    channelTransaction = vwsDbContext.ChannelTransactions.FirstOrDefault(transaction => transaction.ChannelTypeId == channelResponseModel.ChannelTypeId &&
+                    channelTransaction = _vwsDbContext.ChannelTransactions.FirstOrDefault(transaction => transaction.ChannelTypeId == channelResponseModel.ChannelTypeId &&
                                                                                                         transaction.ChannelId == channelResponseModel.Guid);
 
                 if (channelTransaction != null)
@@ -109,18 +110,18 @@ namespace vws.web.Controllers._chat
                 Guid channelId = channelResponseModels[i].Guid;
 
                 if (channelResponseModels[i].ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
-                    readMessagesCount = vwsDbContext.MessageReads.Include(messageRead => messageRead.Message)
+                    readMessagesCount = _vwsDbContext.MessageReads.Include(messageRead => messageRead.Message)
                                                                  .Where(messageRead => messageRead.ChannelId == LoggedInUserId && messageRead.Message.FromUserId == userIds[i] && !messageRead.Message.IsDeleted)
                                                                  .Count();
                 else
-                    readMessagesCount = vwsDbContext.MessageReads.Include(messageRead => messageRead.Message).Where(messageRead => messageRead.ChannelId == channelId && !messageRead.Message.IsDeleted)
+                    readMessagesCount = _vwsDbContext.MessageReads.Include(messageRead => messageRead.Message).Where(messageRead => messageRead.ChannelId == channelId && !messageRead.Message.IsDeleted)
                                                                                                              .Count();
 
                 if (channelResponseModels[i].ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
-                    allMessagesCount = vwsDbContext.Messages.Where(message => message.ChannelId == LoggedInUserId && message.FromUserId == userIds[i] && !message.IsDeleted)
+                    allMessagesCount = _vwsDbContext.Messages.Where(message => message.ChannelId == LoggedInUserId && message.FromUserId == userIds[i] && !message.IsDeleted)
                                                              .Count();
                 else
-                    allMessagesCount = vwsDbContext.Messages.Where(message => message.ChannelId == channelId && !message.IsDeleted)
+                    allMessagesCount = _vwsDbContext.Messages.Where(message => message.ChannelId == channelId && !message.IsDeleted)
                                                                  .Count();
 
                 channelResponseModels[i].NumberOfUnreadMessages = allMessagesCount - readMessagesCount;
@@ -153,8 +154,9 @@ namespace vws.web.Controllers._chat
                 evenOrder += 2;
             }
 
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
         }
+        #endregion
 
         [HttpGet]
         [Authorize]
@@ -165,7 +167,7 @@ namespace vws.web.Controllers._chat
 
             var userId = LoggedInUserId.Value;
 
-            channelResponseModels = await channelService.GetUserChannels(userId);
+            channelResponseModels = await _channelService.GetUserChannels(userId);
 
             SetChannelsIsMuted(ref channelResponseModels);
 
@@ -192,21 +194,21 @@ namespace vws.web.Controllers._chat
 
             var muteUntil = DateTime.Now.AddMinutes(model.MuteMinutes);
 
-            if (!channelService.DoesChannelExist(model.ChannelId, model.ChannelTypeId))
+            if (!_channelService.DoesChannelExist(model.ChannelId, model.ChannelTypeId))
             {
-                response.AddError(localizer["There is no channel with given information."]);
+                response.AddError(_localizer["There is no channel with given information."]);
                 response.Message = "Channel not found";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!channelService.HasUserAccessToChannel(userId, model.ChannelId, model.ChannelTypeId))
+            if (!_channelService.HasUserAccessToChannel(userId, model.ChannelId, model.ChannelTypeId))
             {
-                response.AddError(localizer["You do not have access to this channel."]);
+                response.AddError(_localizer["You do not have access to this channel."]);
                 response.Message = "Channel access denied";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            var selectedMutedChannel = vwsDbContext.MutedChannels.FirstOrDefault(mutedChannels => mutedChannels.ChannelId == model.ChannelId &&
+            var selectedMutedChannel = _vwsDbContext.MutedChannels.FirstOrDefault(mutedChannels => mutedChannels.ChannelId == model.ChannelId &&
                                                                                                   mutedChannels.UserId == userId &&
                                                                                                   mutedChannels.ChannelTypeId == model.ChannelTypeId);
 
@@ -227,9 +229,9 @@ namespace vws.web.Controllers._chat
                     UserId = userId,
                     MuteUntil = muteUntil
                 };
-                await vwsDbContext.AddMutedChannelAsync(newMutedChannel);
+                await _vwsDbContext.AddMutedChannelAsync(newMutedChannel);
             }
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             response.Message = "Channel muted successfully!";
             return Ok(response);
@@ -243,34 +245,34 @@ namespace vws.web.Controllers._chat
             var userId = LoggedInUserId.Value;
             var response = new ResponseModel();
 
-            if (!channelService.DoesChannelExist(model.ChannelId, model.ChannelTypeId))
+            if (!_channelService.DoesChannelExist(model.ChannelId, model.ChannelTypeId))
             {
-                response.AddError(localizer["There is no channel with given information."]);
+                response.AddError(_localizer["There is no channel with given information."]);
                 response.Message = "Channel not found";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!channelService.HasUserAccessToChannel(userId, model.ChannelId, model.ChannelTypeId))
+            if (!_channelService.HasUserAccessToChannel(userId, model.ChannelId, model.ChannelTypeId))
             {
-                response.AddError(localizer["You do not have access to this channel."]);
+                response.AddError(_localizer["You do not have access to this channel."]);
                 response.Message = "Channel access denied";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            var selectedMutedChannel = vwsDbContext.MutedChannels.FirstOrDefault(mutedChannels => mutedChannels.ChannelId == model.ChannelId &&
+            var selectedMutedChannel = _vwsDbContext.MutedChannels.FirstOrDefault(mutedChannels => mutedChannels.ChannelId == model.ChannelId &&
                                                                                                   mutedChannels.UserId == userId &&
                                                                                                   mutedChannels.ChannelTypeId == model.ChannelTypeId);
 
             if (selectedMutedChannel == null)
             {
-                response.AddError(localizer["Channel is not muted."]);
+                response.AddError(_localizer["Channel is not muted."]);
                 response.Message = "Channel is not muted";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             selectedMutedChannel.IsMuted = false;
             selectedMutedChannel.ForEver = false;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             response.Message = "Channel unmuted successfully!";
             return Ok(response);
@@ -284,32 +286,32 @@ namespace vws.web.Controllers._chat
             var userId = LoggedInUserId.Value;
             var response = new ResponseModel();
 
-            if (!channelService.DoesChannelExist(model.ChannelId, model.ChannelTypeId))
+            if (!_channelService.DoesChannelExist(model.ChannelId, model.ChannelTypeId))
             {
-                response.AddError(localizer["There is no channel with given information."]);
+                response.AddError(_localizer["There is no channel with given information."]);
                 response.Message = "Channel not found";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!channelService.HasUserAccessToChannel(userId, model.ChannelId, model.ChannelTypeId))
+            if (!_channelService.HasUserAccessToChannel(userId, model.ChannelId, model.ChannelTypeId))
             {
-                response.AddError(localizer["You do not have access to this channel."]);
+                response.AddError(_localizer["You do not have access to this channel."]);
                 response.Message = "Channel access denied";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            var selectedPinnedChannel = vwsDbContext.PinnedChannels.FirstOrDefault(pinnedChannel => pinnedChannel.ChannelId == model.ChannelId &&
+            var selectedPinnedChannel = _vwsDbContext.PinnedChannels.FirstOrDefault(pinnedChannel => pinnedChannel.ChannelId == model.ChannelId &&
                                                                                                     pinnedChannel.ChannelTypeId == model.ChannelTypeId &&
                                                                                                     pinnedChannel.UserId == userId);
 
             if(selectedPinnedChannel != null)
             {
-                response.AddError(localizer["Channel is already pinned."]);
+                response.AddError(_localizer["Channel is already pinned."]);
                 response.Message = "Channel is already pinned";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var userPinnedChannels = vwsDbContext.PinnedChannels.Where(pinnedChannel => pinnedChannel.UserId == userId)
+            var userPinnedChannels = _vwsDbContext.PinnedChannels.Where(pinnedChannel => pinnedChannel.UserId == userId)
                                                                 .OrderByDescending(userPinnedChannel => userPinnedChannel.EvenOrder).
                                                                 ToList();
 
@@ -325,8 +327,8 @@ namespace vws.web.Controllers._chat
                 UserId = userId
             };
 
-            vwsDbContext.AddPinnedChannel(newPinnedChannel);
-            vwsDbContext.Save();
+            _vwsDbContext.AddPinnedChannel(newPinnedChannel);
+            _vwsDbContext.Save();
 
             response.Message = "Channel pinned successfully!";
             return Ok(response);
@@ -340,35 +342,35 @@ namespace vws.web.Controllers._chat
             var userId = LoggedInUserId.Value;
             var response = new ResponseModel();
 
-            if (!channelService.DoesChannelExist(model.ChannelId, model.ChannelTypeId))
+            if (!_channelService.DoesChannelExist(model.ChannelId, model.ChannelTypeId))
             {
-                response.AddError(localizer["There is no channel with given information."]);
+                response.AddError(_localizer["There is no channel with given information."]);
                 response.Message = "Channel not found";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!channelService.HasUserAccessToChannel(userId, model.ChannelId, model.ChannelTypeId))
+            if (!_channelService.HasUserAccessToChannel(userId, model.ChannelId, model.ChannelTypeId))
             {
-                response.AddError(localizer["You do not have access to this channel."]);
+                response.AddError(_localizer["You do not have access to this channel."]);
                 response.Message = "Channel access denied";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            var selectedPinnedChannel = vwsDbContext.PinnedChannels.FirstOrDefault(pinnedChannel => pinnedChannel.ChannelId == model.ChannelId &&
+            var selectedPinnedChannel = _vwsDbContext.PinnedChannels.FirstOrDefault(pinnedChannel => pinnedChannel.ChannelId == model.ChannelId &&
                                                                                                     pinnedChannel.ChannelTypeId == model.ChannelTypeId &&
                                                                                                     pinnedChannel.UserId == userId);
 
             if (selectedPinnedChannel == null)
             {
-                response.AddError(localizer["Channel have not been pinned."]);
+                response.AddError(_localizer["Channel have not been pinned."]);
                 response.Message = "Channel have not been pinned.";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            vwsDbContext.DeletePinnedChannel(selectedPinnedChannel);
-            vwsDbContext.Save();
+            _vwsDbContext.DeletePinnedChannel(selectedPinnedChannel);
+            _vwsDbContext.Save();
 
-            var userPinnedChannels = vwsDbContext.PinnedChannels.Where(pinnedChannel => pinnedChannel.UserId == userId)
+            var userPinnedChannels = _vwsDbContext.PinnedChannels.Where(pinnedChannel => pinnedChannel.UserId == userId)
                                                                 .OrderByDescending(userPinnedChannel => userPinnedChannel.EvenOrder).
                                                                 ToList();
 
@@ -388,16 +390,16 @@ namespace vws.web.Controllers._chat
 
             var userId = LoggedInUserId.Value;
 
-            if (!channelService.DoesChannelExist(channelId, channelTypeId))
+            if (!_channelService.DoesChannelExist(channelId, channelTypeId))
             {
-                response.AddError(localizer["There is no channel with given information."]);
+                response.AddError(_localizer["There is no channel with given information."]);
                 response.Message = "Channel not found";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!channelService.HasUserAccessToChannel(userId, channelId, channelTypeId))
+            if (!_channelService.HasUserAccessToChannel(userId, channelId, channelTypeId))
             {
-                response.AddError(localizer["You do not have access to this channel."]);
+                response.AddError(_localizer["You do not have access to this channel."]);
                 response.Message = "Channel access denied";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
@@ -406,8 +408,8 @@ namespace vws.web.Controllers._chat
 
             if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
             {
-                var userProfile = await vwsDbContext.GetUserProfileAsync(userId);
-                var otherUserProfile = await vwsDbContext.GetUserProfileAsync(channelId);
+                var userProfile = await _vwsDbContext.GetUserProfileAsync(userId);
+                var otherUserProfile = await _vwsDbContext.GetUserProfileAsync(channelId);
                 members.Add(new UserModel()
                 {
                     ProfileImageGuid = userProfile.ProfileImageGuid,
@@ -428,33 +430,33 @@ namespace vws.web.Controllers._chat
 
             else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Team)
             {
-                var selectedTeam = vwsDbContext.Teams.FirstOrDefault(team => team.Guid == channelId);
-                users = vwsDbContext.TeamMembers.Include(teamMember => teamMember.UserProfile)
+                var selectedTeam = _vwsDbContext.Teams.FirstOrDefault(team => team.Guid == channelId);
+                users = _vwsDbContext.TeamMembers.Include(teamMember => teamMember.UserProfile)
                                                 .Where(teamMember => teamMember.TeamId == selectedTeam.Id && !teamMember.IsDeleted)
                                                 .Select(teamMember => teamMember.UserProfile).ToList();
             }
 
             else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Department)
             {
-                var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Guid == channelId);
-                users = vwsDbContext.DepartmentMembers.Include(departmentMember => departmentMember.UserProfile)
+                var selectedDepartment = _vwsDbContext.Departments.FirstOrDefault(department => department.Guid == channelId);
+                users = _vwsDbContext.DepartmentMembers.Include(departmentMember => departmentMember.UserProfile)
                                                       .Where(departmentMember => departmentMember.DepartmentId == selectedDepartment.Id && !departmentMember.IsDeleted)
                                                       .Select(departmentMember => departmentMember.UserProfile).ToList();
             }
 
             else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Project)
             {
-                var selectedProject = vwsDbContext.Projects.Include(project => project.ProjectDepartments).FirstOrDefault(project => project.Guid == channelId);
+                var selectedProject = _vwsDbContext.Projects.Include(project => project.ProjectDepartments).FirstOrDefault(project => project.Guid == channelId);
                 if (selectedProject.TeamId == null)
                 {
-                    users = vwsDbContext.ProjectMembers.Include(projectMember => projectMember.UserProfile)
+                    users = _vwsDbContext.ProjectMembers.Include(projectMember => projectMember.UserProfile)
                                                        .Where(projectMember => projectMember.ProjectId == selectedProject.Id && !projectMember.IsDeleted)
                                                        .Select(projectMember => projectMember.UserProfile).ToList();
 
                 }
                 else if(selectedProject.ProjectDepartments.Count == 0)
                 {
-                    users = vwsDbContext.TeamMembers.Include(teamMember => teamMember.UserProfile)
+                    users = _vwsDbContext.TeamMembers.Include(teamMember => teamMember.UserProfile)
                                                     .Where(teamMember => teamMember.TeamId == selectedProject.TeamId && !teamMember.IsDeleted)
                                                     .Select(teamMember => teamMember.UserProfile).ToList();
                 }
@@ -462,8 +464,8 @@ namespace vws.web.Controllers._chat
                 {
                     foreach (var projectDepartment in selectedProject.ProjectDepartments)
                     {
-                        var selectedDepartment = vwsDbContext.Departments.FirstOrDefault(department => department.Id == projectDepartment.DepartmentId);
-                        users.AddRange(vwsDbContext.DepartmentMembers.Include(departmentMember => departmentMember.UserProfile)
+                        var selectedDepartment = _vwsDbContext.Departments.FirstOrDefault(department => department.Id == projectDepartment.DepartmentId);
+                        users.AddRange(_vwsDbContext.DepartmentMembers.Include(departmentMember => departmentMember.UserProfile)
                                                                      .Where(departmentMember => departmentMember.DepartmentId == selectedDepartment.Id && !departmentMember.IsDeleted)
                                                                      .Select(departmentMember => departmentMember.UserProfile));
                     }

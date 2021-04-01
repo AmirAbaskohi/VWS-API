@@ -30,6 +30,7 @@ namespace vws.web.Controllers._task
     [ApiController]
     public class TaskController : BaseController
     {
+        #region Feilds
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IStringLocalizer<TaskController> _localizer;
         private readonly IVWS_DbContext _vwsDbContext;
@@ -37,7 +38,9 @@ namespace vws.web.Controllers._task
         private readonly IConfiguration _configuration;
         private readonly IFileManager _fileManager;
         private readonly IEmailSender _emailSender;
+        #endregion
 
+        #region Ctor
         public TaskController(UserManager<ApplicationUser> userManager, IStringLocalizer<TaskController> localizer,
             IVWS_DbContext vwsDbContext, IPermissionService permissionService, IConfiguration configuration, IFileManager fileManager,
             IEmailSender emailSender)
@@ -50,7 +53,9 @@ namespace vws.web.Controllers._task
             _fileManager = fileManager;
             _emailSender = emailSender;
         }
+        #endregion
 
+        #region PrivateMethods
         private List<UserModel> GetAssignedTo(long taskId)
         {
             var result = new List<UserModel>();
@@ -479,6 +484,7 @@ namespace vws.web.Controllers._task
             };
             await Task.Run(async () => await _emailSender.SendEmailAsync(emailModel, out emailErrorMessage));
         }
+        #endregion
 
         [HttpPost]
         [Authorize]

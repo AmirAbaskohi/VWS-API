@@ -21,20 +21,25 @@ namespace vws.web.Controllers._chat
     [ApiController]
     public class MessageController : BaseController
     {
-        private readonly IVWS_DbContext vwsDbContext;
-        private readonly UserManager<ApplicationUser> userManager;
-        private readonly IChannelService channelService;
-        private readonly IStringLocalizer<MessageController> localizer;
+        #region Feilds
+        private readonly IVWS_DbContext _vwsDbContext;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IChannelService _channelService;
+        private readonly IStringLocalizer<MessageController> _localizer;
+        #endregion
 
-        public MessageController(IVWS_DbContext _vwsDbContext, UserManager<ApplicationUser> _userManager,
-                                 IChannelService _channelService, IStringLocalizer<MessageController> _localizer)
+        #region Ctor
+        public MessageController(IVWS_DbContext vwsDbContext, UserManager<ApplicationUser> userManager,
+                                 IChannelService channelService, IStringLocalizer<MessageController> localizer)
         {
-            vwsDbContext = _vwsDbContext;
-            userManager = _userManager;
-            channelService = _channelService;
-            localizer = _localizer;
+            _vwsDbContext = vwsDbContext;
+            _userManager = userManager;
+            _channelService = channelService;
+            _localizer = localizer;
         }
+        #endregion
 
+        #region PrivateMethods
         private List<MessageResponseModel> FillMessageResponseModel(IQueryable<Message> messages)
         {
             List<MessageResponseModel> messageResponseModels = new List<MessageResponseModel>();
@@ -42,7 +47,7 @@ namespace vws.web.Controllers._chat
             Dictionary<Guid, string> messageSenderNickNames = new Dictionary<Guid, string>();
             foreach (var messageSenderUserId in messageSenderUserIds)
             {
-                var userProfile = vwsDbContext.GetUserProfileAsync(messageSenderUserId).Result;
+                var userProfile = _vwsDbContext.GetUserProfileAsync(messageSenderUserId).Result;
                 messageSenderNickNames.Add(messageSenderUserId, userProfile.NickName);
             }
             foreach (var message in messages)
@@ -62,6 +67,7 @@ namespace vws.web.Controllers._chat
             }
             return messageResponseModels;
         }
+        #endregion
 
         [HttpGet]
         [Authorize]
@@ -73,24 +79,24 @@ namespace vws.web.Controllers._chat
 
             List<MessageResponseModel> messageResponseModels = new List<MessageResponseModel>();
 
-            if (!channelService.DoesChannelExist(channelId, channelTypeId))
+            if (!_channelService.DoesChannelExist(channelId, channelTypeId))
             {
-                response.AddError(localizer["There is no channel with given information."]);
+                response.AddError(_localizer["There is no channel with given information."]);
                 response.Message = "Channel not found";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!channelService.HasUserAccessToChannel(userId, channelId, channelTypeId))
+            if (!_channelService.HasUserAccessToChannel(userId, channelId, channelTypeId))
             {
-                response.AddError(localizer["You do not have access to this channel."]);
+                response.AddError(_localizer["You do not have access to this channel."]);
                 response.Message = "Channel access denied";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
             if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
             {
-                var directMessageContactUser = await userManager.FindByIdAsync(channelId.ToString());
-                var privateMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId &&
+                var directMessageContactUser = await _userManager.FindByIdAsync(channelId.ToString());
+                var privateMessages = _vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId &&
                                                                             ((message.ChannelId == channelId && message.FromUserId == LoggedInUserId) ||
                                                                             (message.ChannelId == LoggedInUserId && message.FromUserId == Guid.Parse(directMessageContactUser.Id))) &&
                                                                             !message.IsDeleted);
@@ -98,7 +104,7 @@ namespace vws.web.Controllers._chat
             }
             else
             {
-                var publicMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId && message.ChannelId == channelId && !message.IsDeleted);
+                var publicMessages = _vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId && message.ChannelId == channelId && !message.IsDeleted);
                 messageResponseModels = FillMessageResponseModel(publicMessages);
             }
 
@@ -118,24 +124,24 @@ namespace vws.web.Controllers._chat
 
             List<MessageResponseModel> messageResponseModels = new List<MessageResponseModel>();
 
-            if (!channelService.DoesChannelExist(channelId, channelTypeId))
+            if (!_channelService.DoesChannelExist(channelId, channelTypeId))
             {
-                response.AddError(localizer["There is no channel with given information."]);
+                response.AddError(_localizer["There is no channel with given information."]);
                 response.Message = "Channel not found";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!channelService.HasUserAccessToChannel(userId, channelId, channelTypeId))
+            if (!_channelService.HasUserAccessToChannel(userId, channelId, channelTypeId))
             {
-                response.AddError(localizer["You do not have access to this channel."]);
+                response.AddError(_localizer["You do not have access to this channel."]);
                 response.Message = "Channel access denied";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
             if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
             {
-                var directMessageContactUser = await userManager.FindByIdAsync(channelId.ToString());
-                var privateMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId &&
+                var directMessageContactUser = await _userManager.FindByIdAsync(channelId.ToString());
+                var privateMessages = _vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId &&
                                                                             ((message.ChannelId == channelId && message.FromUserId == LoggedInUserId) ||
                                                                             (message.ChannelId == LoggedInUserId && message.FromUserId == Guid.Parse(directMessageContactUser.Id))) &&
                                                                             !message.IsDeleted && message.IsPinned);
@@ -144,7 +150,7 @@ namespace vws.web.Controllers._chat
             }
             else
             {
-                var publicMessages = vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId && message.ChannelId == channelId && !message.IsDeleted && message.IsPinned);
+                var publicMessages = _vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelTypeId && message.ChannelId == channelId && !message.IsDeleted && message.IsPinned);
                 publicMessages = publicMessages.OrderByDescending(message => message.PinEvenOrder);
                 messageResponseModels = FillMessageResponseModel(publicMessages);
             }

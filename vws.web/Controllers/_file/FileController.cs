@@ -20,17 +20,21 @@ namespace vws.web.Controllers._file
     [ApiController]
     public class FileController : BaseController
     {
-        private readonly IStringLocalizer<FileController> localizer;
-        private readonly IVWS_DbContext vwsDbContext;
-        private readonly IFileManager fileManager;
-
-        public FileController(IStringLocalizer<FileController> _localizer,
-            IVWS_DbContext _vwsDbContext, IFileManager _fileManager)
+        #region Feilds
+        private readonly IStringLocalizer<FileController> _localizer;
+        private readonly IVWS_DbContext _vwsDbContext;
+        private readonly IFileManager _fileManager;
+        #endregion
+        
+        #region Ctor
+        public FileController(IStringLocalizer<FileController> localizer,
+            IVWS_DbContext vwsDbContext, IFileManager fileManager)
         {
-            localizer = _localizer;
-            vwsDbContext = _vwsDbContext;
-            fileManager = _fileManager;
+            _localizer = localizer;
+            _vwsDbContext = vwsDbContext;
+            _fileManager = fileManager;
         }
+        #endregion
 
         [HttpPost]
         [Authorize]
@@ -42,7 +46,7 @@ namespace vws.web.Controllers._file
 
             if ((channelId == null && channelTypeId != null) && (channelId != null && channelTypeId == null))
             {
-                response.AddError(localizer["Invalid parameters."]);
+                response.AddError(_localizer["Invalid parameters."]);
                 response.Message = "Invalid parameters.";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
@@ -72,13 +76,13 @@ namespace vws.web.Controllers._file
                     ModifiedOn = time,
                     Guid = Guid.NewGuid()
                 };
-                await vwsDbContext.AddFileContainerAsync(newFileContainer);
-                vwsDbContext.Save();
-                var result = await fileManager.WriteFile(file, LoggedInUserId.Value, location, newFileContainer.Id);
+                await _vwsDbContext.AddFileContainerAsync(newFileContainer);
+                _vwsDbContext.Save();
+                var result = await _fileManager.WriteFile(file, LoggedInUserId.Value, location, newFileContainer.Id);
                 if (result.HasError)
                 {
                     foreach (var error in result.Errors)
-                        response.AddError(localizer[error]);
+                        response.AddError(_localizer[error]);
                     unsuccessfullyFileContainers.Add(newFileContainer);
                     unsuccessfullyUploadedFiles.Add(file.FileName);
                 }
@@ -86,7 +90,7 @@ namespace vws.web.Controllers._file
                 {
                     successfullyUploadedFiles.Add(result.Value);
                     newFileContainer.RecentFileId = result.Value.Id;
-                    vwsDbContext.Save();
+                    _vwsDbContext.Save();
                 }
             }
 
@@ -95,9 +99,9 @@ namespace vws.web.Controllers._file
             if (unsuccessfullyFileContainers.Count != 0)
             {
                 foreach(var unsuccessfullFileContainer in unsuccessfullyFileContainers)
-                    vwsDbContext.DeleteFileContainer(unsuccessfullFileContainer);
+                    _vwsDbContext.DeleteFileContainer(unsuccessfullFileContainer);
 
-                vwsDbContext.Save();          
+                _vwsDbContext.Save();          
             }
             response.Value = new FileUploadResponseModel() { SuccessfulFileUpload = successfulFiles, UnsuccessfulFileUpload = unsuccessfullyUploadedFiles };
             response.Message = "Successful writing";
@@ -110,14 +114,14 @@ namespace vws.web.Controllers._file
         public async Task<IActionResult> GetFile(Guid id)
         {
             var response = new ResponseModel();
-            var fileContainer = await vwsDbContext.GetFileContainerAsync(id);
+            var fileContainer = await _vwsDbContext.GetFileContainerAsync(id);
             if (fileContainer == null)
             {
-                response.AddError(localizer["There is no such file."]);
+                response.AddError(_localizer["There is no such file."]);
                 response.Message = "File not found";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
-            var selectedFile = (await vwsDbContext.GetFileAsync(fileContainer.RecentFileId));
+            var selectedFile = (await _vwsDbContext.GetFileAsync(fileContainer.RecentFileId));
             string address = selectedFile.Address;
             string fileName = selectedFile.Name;
 

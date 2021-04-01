@@ -30,43 +30,47 @@ namespace vws.web.Controllers._team
     [ApiController]
     public class TeamController : BaseController
     {
-        private readonly UserManager<ApplicationUser> userManager;
-        private readonly IDepartmentManagerService departmentManager;
-        private readonly IStringLocalizer<TeamController> localizer;
-        private readonly IVWS_DbContext vwsDbContext;
-        private readonly IFileManager fileManager;
-        private readonly ITeamManagerService teamManager;
+        #region Feilds
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IDepartmentManagerService _departmentManager;
+        private readonly IStringLocalizer<TeamController> _localizer;
+        private readonly IVWS_DbContext _vwsDbContext;
+        private readonly IFileManager _fileManager;
+        private readonly ITeamManagerService _teamManager;
         private readonly IEmailSender _emailSender;
         private readonly IConfiguration _configuration;
+        #endregion
 
-
-        public TeamController(UserManager<ApplicationUser> _userManager, IStringLocalizer<TeamController> _localizer,
-            IVWS_DbContext _vwsDbContext, IFileManager _fileManager, IDepartmentManagerService _departmentManager,
-            ITeamManagerService _teamManager, IEmailSender emailSender, IConfiguration configuration)
+        #region Ctor
+        public TeamController(UserManager<ApplicationUser> userManager, IStringLocalizer<TeamController> localizer,
+            IVWS_DbContext vwsDbContext, IFileManager fileManager, IDepartmentManagerService departmentManager,
+            ITeamManagerService teamManager, IEmailSender emailSender, IConfiguration configuration)
         {
-            userManager = _userManager;
-            localizer = _localizer;
-            vwsDbContext = _vwsDbContext;
-            fileManager = _fileManager;
-            departmentManager = _departmentManager;
-            teamManager = _teamManager;
+            _userManager = userManager;
+            _localizer = localizer;
+            _vwsDbContext = vwsDbContext;
+            _fileManager = fileManager;
+            _departmentManager = departmentManager;
+            _teamManager = teamManager;
             _emailSender = emailSender;
             _configuration = configuration;
         }
+        #endregion
 
+        #region PrivateMethods
         private void CreateTeamTaskStatuses(int teamId)
         {
-            vwsDbContext.AddTaskStatus(new Domain._task.TaskStatus() { EvenOrder = 2, ProjectId = null, UserProfileId = null, TeamId = teamId, Title = "To Do" });
-            vwsDbContext.AddTaskStatus(new Domain._task.TaskStatus() { EvenOrder = 4, ProjectId = null, UserProfileId = null, TeamId = teamId, Title = "Doing" });
-            vwsDbContext.AddTaskStatus(new Domain._task.TaskStatus() { EvenOrder = 6, ProjectId = null, UserProfileId = null, TeamId = teamId, Title = "Done" });
+            _vwsDbContext.AddTaskStatus(new Domain._task.TaskStatus() { EvenOrder = 2, ProjectId = null, UserProfileId = null, TeamId = teamId, Title = "To Do" });
+            _vwsDbContext.AddTaskStatus(new Domain._task.TaskStatus() { EvenOrder = 4, ProjectId = null, UserProfileId = null, TeamId = teamId, Title = "Doing" });
+            _vwsDbContext.AddTaskStatus(new Domain._task.TaskStatus() { EvenOrder = 6, ProjectId = null, UserProfileId = null, TeamId = teamId, Title = "Done" });
 
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
         }
 
         private List<Guid> GetUserTeammates()
         {
-            List<Team> userTeams = vwsDbContext.GetUserTeams(LoggedInUserId.Value).ToList();
-            return vwsDbContext.TeamMembers
+            List<Team> userTeams = _vwsDbContext.GetUserTeams(LoggedInUserId.Value).ToList();
+            return _vwsDbContext.TeamMembers
                                .Where(teamMember => userTeams.Select(userTeam => userTeam.Id).Contains(teamMember.TeamId) && !teamMember.IsDeleted)
                                .Select(teamMember => teamMember.UserProfileId).Distinct().Where(id => id != LoggedInUserId.Value).ToList();
         }
@@ -75,7 +79,7 @@ namespace vws.web.Controllers._team
         {
             var result = new List<DepartmentResponseModel>();
 
-            var departments = vwsDbContext.Departments.Where(department => department.TeamId == teamId && !department.IsDeleted);
+            var departments = _vwsDbContext.Departments.Where(department => department.TeamId == teamId && !department.IsDeleted);
 
             foreach (var department in departments)
             {
@@ -83,16 +87,16 @@ namespace vws.web.Controllers._team
                 {
                     Id = department.Id,
                     Color = department.Color,
-                    CreatedBy = (await vwsDbContext.GetUserProfileAsync(department.CreatedBy)).NickName,
+                    CreatedBy = (await _vwsDbContext.GetUserProfileAsync(department.CreatedBy)).NickName,
                     DepartmentImageGuid = department.DepartmentImageGuid,
                     Description = department.Description,
                     CreatedOn = department.CreatedOn,
                     Guid = department.Guid,
-                    ModifiedBy = (await vwsDbContext.GetUserProfileAsync(department.ModifiedBy)).NickName,
+                    ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(department.ModifiedBy)).NickName,
                     ModifiedOn = department.ModifiedOn,
                     Name = department.Name,
                     TeamId = department.TeamId,
-                    DepartmentMembers = await departmentManager.GetDepartmentMembers(department.Id)
+                    DepartmentMembers = await _departmentManager.GetDepartmentMembers(department.Id)
                 });
             }
 
@@ -112,7 +116,7 @@ namespace vws.web.Controllers._team
                     Users = model.Users
                 };
                 departmentModel.TeamId = teamId;
-                await departmentManager.CreateDepartment(departmentModel, LoggedInUserId.Value);
+                await _departmentManager.CreateDepartment(departmentModel, LoggedInUserId.Value);
             }
         }
 
@@ -131,8 +135,8 @@ namespace vws.web.Controllers._team
                 IsRevoked = false
             };
 
-            await vwsDbContext.AddTeamInviteLinkAsync(newInviteLink);
-            vwsDbContext.Save();
+            await _vwsDbContext.AddTeamInviteLinkAsync(newInviteLink);
+            _vwsDbContext.Save();
             SendEmailModel emailModelTemplate = new SendEmailModel
             {
                 FromEmail = _configuration["EmailSender:RegistrationEmail:EmailAddress"],
@@ -155,8 +159,8 @@ namespace vws.web.Controllers._team
                     await _emailSender.SendEmailAsync(emailModelTemplate, out emailErrorMessage);
                 }
             });
-
         }
+        #endregion
 
         [HttpPost]
         [Authorize]
@@ -179,43 +183,43 @@ namespace vws.web.Controllers._team
             if (!String.IsNullOrEmpty(model.Description) && model.Description.Length > 2000)
             {
                 response.Message = "Team model data has problem.";
-                response.AddError(localizer["Length of description is more than 2000 characters."]);
+                response.AddError(_localizer["Length of description is more than 2000 characters."]);
             }
             if (model.Name.Length > 500)
             {
                 response.Message = "Team model data has problem.";
-                response.AddError(localizer["Length of title is more than 500 characters."]);
+                response.AddError(_localizer["Length of title is more than 500 characters."]);
             }
             if (!String.IsNullOrEmpty(model.Color) && model.Color.Length > 6)
             {
                 response.Message = "Team model data has problem.";
-                response.AddError(localizer["Length of color is more than 6 characters."]);
+                response.AddError(_localizer["Length of color is more than 6 characters."]);
             }
             var teammates = GetUserTeammates();
             if (teammates.Intersect(model.Users).Count() != model.Users.Count)
             {
                 response.Message = "Team model data has problem.";
-                response.AddError(localizer["Invalid team users."]);
+                response.AddError(_localizer["Invalid team users."]);
             }
             if (allDepartmentUsers.Intersect(model.Users).Count() != allDepartmentUsers.Count)
             {
                 response.Message = "Team model data has problem.";
-                response.AddError(localizer["Invalid department users."]);
+                response.AddError(_localizer["Invalid department users."]);
             }
-            var hasTeamWithSameName = vwsDbContext.TeamMembers.Any(teamMember => teamMember.UserProfileId == userId &&
+            var hasTeamWithSameName = _vwsDbContext.TeamMembers.Any(teamMember => teamMember.UserProfileId == userId &&
                                                                     teamMember.Team.Name == model.Name &&
                                                                     teamMember.Team.IsDeleted == false &&
                                                                     teamMember.IsDeleted == false);
             if (hasTeamWithSameName)
             {
                 response.Message = "Team model data has problem.";
-                response.AddError(localizer["You are a member of a team with that name."]);
+                response.AddError(_localizer["You are a member of a team with that name."]);
             }
             if (response.HasError)
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             #endregion
 
-            var newTeam = await teamManager.CreateTeam(model, userId);
+            var newTeam = await _teamManager.CreateTeam(model, userId);
 
             await CreateTeamDepartments(model.Departments, newTeam.Id);
 
@@ -223,14 +227,14 @@ namespace vws.web.Controllers._team
 
             SendJoinTeamInvitaionLinks(model.EmailsForInvite, newTeam.Id);
 
-            vwsDbContext.AddTeamHistory(new TeamHistory()
+            _vwsDbContext.AddTeamHistory(new TeamHistory()
             {
                 TeamId = newTeam.Id,
                 EventTime = newTeam.CreatedOn,
-                CommaSepratedParameters = (await vwsDbContext.GetUserProfileAsync(newTeam.CreatedBy)).NickName,
+                CommaSepratedParameters = (await _vwsDbContext.GetUserProfileAsync(newTeam.CreatedBy)).NickName,
                 Event = "Team created by {0}."
             });
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             var newTeamResponse = new TeamResponseModel()
             {
@@ -239,16 +243,16 @@ namespace vws.web.Controllers._team
                 Name = newTeam.Name,
                 Description = newTeam.Description,
                 Color = newTeam.Color,
-                CreatedBy = (await vwsDbContext.GetUserProfileAsync(newTeam.CreatedBy)).NickName,
-                ModifiedBy = (await vwsDbContext.GetUserProfileAsync(newTeam.ModifiedBy)).NickName,
+                CreatedBy = (await _vwsDbContext.GetUserProfileAsync(newTeam.CreatedBy)).NickName,
+                ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(newTeam.ModifiedBy)).NickName,
                 CreatedOn = newTeam.CreatedOn,
                 ModifiedOn = newTeam.ModifiedOn,
                 Guid = newTeam.Guid,
                 TeamImageGuid = newTeam.TeamImageGuid,
-                NumberOfDepartments = vwsDbContext.Departments.Where(department => department.TeamId == newTeam.Id && !department.IsDeleted).Count(),
-                NumberOfMembers = vwsDbContext.TeamMembers.Where(teamMember => teamMember.TeamId == newTeam.Id && !teamMember.IsDeleted).Count(),
-                NumberOfTasks = vwsDbContext.GeneralTasks.Where(task => task.TeamId == newTeam.Id && !task.IsDeleted).Count(),
-                NumberOfProjects = vwsDbContext.Projects.Where(project => project.TeamId == newTeam.Id && !project.IsDeleted).Count()
+                NumberOfDepartments = _vwsDbContext.Departments.Where(department => department.TeamId == newTeam.Id && !department.IsDeleted).Count(),
+                NumberOfMembers = _vwsDbContext.TeamMembers.Where(teamMember => teamMember.TeamId == newTeam.Id && !teamMember.IsDeleted).Count(),
+                NumberOfTasks = _vwsDbContext.GeneralTasks.Where(task => task.TeamId == newTeam.Id && !task.IsDeleted).Count(),
+                NumberOfProjects = _vwsDbContext.Projects.Where(project => project.TeamId == newTeam.Id && !project.IsDeleted).Count()
             };
 
             response.Value = newTeamResponse;
@@ -263,21 +267,21 @@ namespace vws.web.Controllers._team
         {
             var response = new ResponseModel<TeamInviteLinkResponseModel>();
 
-            var selectedTeam = await vwsDbContext.GetTeamAsync(teamId);
+            var selectedTeam = await _vwsDbContext.GetTeamAsync(teamId);
             if (selectedTeam == null || selectedTeam.IsDeleted)
             {
                 response.Message = "Team not found";
-                response.AddError(localizer["There is no team with given Id."]);
+                response.AddError(_localizer["There is no team with given Id."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             Guid userId = LoggedInUserId.Value;
 
-            var teamMember = await vwsDbContext.GetTeamMemberAsync(teamId, userId);
+            var teamMember = await _vwsDbContext.GetTeamMemberAsync(teamId, userId);
             if (teamMember == null)
             {
                 response.Message = "You are not member of team";
-                response.AddError(localizer["You are not a member of team."]);
+                response.AddError(_localizer["You are not a member of team."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
@@ -296,26 +300,26 @@ namespace vws.web.Controllers._team
                 IsRevoked = false
             };
 
-            await vwsDbContext.AddTeamInviteLinkAsync(newInviteLink);
-            vwsDbContext.Save();
+            await _vwsDbContext.AddTeamInviteLinkAsync(newInviteLink);
+            _vwsDbContext.Save();
 
-            vwsDbContext.AddTeamHistory(new TeamHistory()
+            _vwsDbContext.AddTeamHistory(new TeamHistory()
             {
                 TeamId = teamId,
                 EventTime = creationTime,
-                CommaSepratedParameters = (await vwsDbContext.GetUserProfileAsync(newInviteLink.CreatedBy)).NickName + "," + newInviteLink.LinkGuid.ToString(),
+                CommaSepratedParameters = (await _vwsDbContext.GetUserProfileAsync(newInviteLink.CreatedBy)).NickName + "," + newInviteLink.LinkGuid.ToString(),
                 Event = "Created new invite link by {0} with id {1}."
             });
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             response.Value = new TeamInviteLinkResponseModel()
             {
                 Id = newInviteLink.Id,
-                TeamName = (await vwsDbContext.GetTeamAsync(newInviteLink.TeamId)).Name,
+                TeamName = (await _vwsDbContext.GetTeamAsync(newInviteLink.TeamId)).Name,
                 IsRevoked = newInviteLink.IsRevoked,
                 LinkGuid = newInviteLink.LinkGuid.ToString(),
-                CreatedBy = (await vwsDbContext.GetUserProfileAsync(newInviteLink.CreatedBy)).NickName,
-                ModifiedBy = (await vwsDbContext.GetUserProfileAsync(newInviteLink.ModifiedBy)).NickName,
+                CreatedBy = (await _vwsDbContext.GetUserProfileAsync(newInviteLink.CreatedBy)).NickName,
+                ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(newInviteLink.ModifiedBy)).NickName,
                 CreatedOn = newInviteLink.CreatedOn,
                 ModifiedOn = newInviteLink.ModifiedOn
             };
@@ -335,19 +339,19 @@ namespace vws.web.Controllers._team
 
             Guid userId = LoggedInUserId.Value;
 
-            var selectedTeamLink = await vwsDbContext.GetTeamInviteLinkByLinkGuidAsync(linkGuid);
+            var selectedTeamLink = await _vwsDbContext.GetTeamInviteLinkByLinkGuidAsync(linkGuid);
 
             if (selectedTeamLink == null || selectedTeamLink.Team.IsDeleted || selectedTeamLink.IsRevoked)
             {
                 response.Message = "Invalid link";
-                response.AddError(localizer["Link is not valid."]);
+                response.AddError(_localizer["Link is not valid."]);
                 return StatusCode(StatusCodes.Status406NotAcceptable, response);
             }
 
-            if ((await vwsDbContext.GetTeamMemberAsync(selectedTeamLink.TeamId, userId)) != null)
+            if ((await _vwsDbContext.GetTeamMemberAsync(selectedTeamLink.TeamId, userId)) != null)
             {
                 response.Message = "User already joined";
-                response.AddError(localizer["You are already joined the team."]);
+                response.AddError(_localizer["You are already joined the team."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
@@ -357,17 +361,17 @@ namespace vws.web.Controllers._team
                 CreatedOn = DateTime.Now,
                 UserProfileId = userId
             };
-            await vwsDbContext.AddTeamMemberAsync(newTeamMember);
-            vwsDbContext.Save();
+            await _vwsDbContext.AddTeamMemberAsync(newTeamMember);
+            _vwsDbContext.Save();
 
-            vwsDbContext.AddTeamHistory(new TeamHistory()
+            _vwsDbContext.AddTeamHistory(new TeamHistory()
             {
                 TeamId = newTeamMember.TeamId,
                 EventTime = newTeamMember.CreatedOn,
                 CommaSepratedParameters = LoggedInNickName + "," + guid.ToString(),
                 Event = "{0} joined the group using {1} invite link."
             });
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             response.Message = "User added to team successfully!";
             return Ok(response);
@@ -382,12 +386,12 @@ namespace vws.web.Controllers._team
 
             List<TeamInviteLinkResponseModel> response = new List<TeamInviteLinkResponseModel>();
 
-            var userTeamInviteLinks = vwsDbContext.TeamInviteLinks.Include(teamInviteLink => teamInviteLink.Team)
+            var userTeamInviteLinks = _vwsDbContext.TeamInviteLinks.Include(teamInviteLink => teamInviteLink.Team)
                                                                   .Where(teamInviteLink => teamInviteLink.CreatedBy == userId &&
                                                                             teamInviteLink.IsRevoked == false &&
                                                                             teamInviteLink.Team.IsDeleted == false);
 
-            var teamMembers = vwsDbContext.TeamMembers.Where(teamMemeber => teamMemeber.UserProfileId == userId && teamMemeber.IsDeleted == false);
+            var teamMembers = _vwsDbContext.TeamMembers.Where(teamMemeber => teamMemeber.UserProfileId == userId && teamMemeber.IsDeleted == false);
 
             foreach (var userTeamInviteLink in userTeamInviteLinks)
             {
@@ -396,11 +400,11 @@ namespace vws.web.Controllers._team
                     response.Add(new TeamInviteLinkResponseModel()
                     {
                         Id = userTeamInviteLink.Id,
-                        TeamName = (await vwsDbContext.GetTeamAsync(userTeamInviteLink.TeamId)).Name,
+                        TeamName = (await _vwsDbContext.GetTeamAsync(userTeamInviteLink.TeamId)).Name,
                         IsRevoked = userTeamInviteLink.IsRevoked,
                         LinkGuid = userTeamInviteLink.LinkGuid.ToString(),
-                        CreatedBy = (await vwsDbContext.GetUserProfileAsync(userTeamInviteLink.CreatedBy)).NickName,
-                        ModifiedBy = (await vwsDbContext.GetUserProfileAsync(userTeamInviteLink.ModifiedBy)).NickName,
+                        CreatedBy = (await _vwsDbContext.GetUserProfileAsync(userTeamInviteLink.CreatedBy)).NickName,
+                        ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(userTeamInviteLink.ModifiedBy)).NickName,
                         CreatedOn = userTeamInviteLink.CreatedOn,
                         ModifiedOn = userTeamInviteLink.ModifiedOn
                     });
@@ -418,7 +422,7 @@ namespace vws.web.Controllers._team
 
             List<TeamResponseModel> response = new List<TeamResponseModel>();
 
-            var userTeams = vwsDbContext.GetUserTeams(userId);
+            var userTeams = _vwsDbContext.GetUserTeams(userId);
 
             foreach (var userTeam in userTeams)
             {
@@ -429,16 +433,16 @@ namespace vws.web.Controllers._team
                     Name = userTeam.Name,
                     Description = userTeam.Description,
                     Color = userTeam.Color,
-                    CreatedBy = (await vwsDbContext.GetUserProfileAsync(userTeam.CreatedBy)).NickName,
-                    ModifiedBy = (await vwsDbContext.GetUserProfileAsync(userTeam.ModifiedBy)).NickName,
+                    CreatedBy = (await _vwsDbContext.GetUserProfileAsync(userTeam.CreatedBy)).NickName,
+                    ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(userTeam.ModifiedBy)).NickName,
                     CreatedOn = userTeam.CreatedOn,
                     ModifiedOn = userTeam.ModifiedOn,
                     Guid = userTeam.Guid,
                     TeamImageGuid = userTeam.TeamImageGuid,
-                    NumberOfDepartments = vwsDbContext.Departments.Where(department => department.TeamId == userTeam.Id && !department.IsDeleted).Count(),
-                    NumberOfMembers = vwsDbContext.TeamMembers.Where(teamMember => teamMember.TeamId == userTeam.Id && !teamMember.IsDeleted).Count(),
-                    NumberOfTasks = vwsDbContext.GeneralTasks.Where(task => task.TeamId == userTeam.Id && !task.IsDeleted).Count(),
-                    NumberOfProjects = vwsDbContext.Projects.Where(project => project.TeamId == userTeam.Id && !project.IsDeleted).Count()
+                    NumberOfDepartments = _vwsDbContext.Departments.Where(department => department.TeamId == userTeam.Id && !department.IsDeleted).Count(),
+                    NumberOfMembers = _vwsDbContext.TeamMembers.Where(teamMember => teamMember.TeamId == userTeam.Id && !teamMember.IsDeleted).Count(),
+                    NumberOfTasks = _vwsDbContext.GeneralTasks.Where(task => task.TeamId == userTeam.Id && !task.IsDeleted).Count(),
+                    NumberOfProjects = _vwsDbContext.Projects.Where(project => project.TeamId == userTeam.Id && !project.IsDeleted).Count()
                 });
             }
             return response;
@@ -453,32 +457,32 @@ namespace vws.web.Controllers._team
 
             Guid userId = LoggedInUserId.Value;
 
-            var selectedInviteLink = await vwsDbContext.GetTeamInviteLinkByIdAsync(id);
+            var selectedInviteLink = await _vwsDbContext.GetTeamInviteLinkByIdAsync(id);
 
             if (selectedInviteLink == null || selectedInviteLink.Team.IsDeleted || selectedInviteLink.IsRevoked)
             {
                 response.Message = "Link not found";
-                response.AddError(localizer["Link does not exist."]);
+                response.AddError(_localizer["Link does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
-            if (selectedInviteLink.CreatedBy != userId || !vwsDbContext.TeamMembers.Any(teamMember => teamMember.UserProfileId == userId && teamMember.IsDeleted == false))
+            if (selectedInviteLink.CreatedBy != userId || !_vwsDbContext.TeamMembers.Any(teamMember => teamMember.UserProfileId == userId && teamMember.IsDeleted == false))
             {
                 response.Message = "Team access forbidden";
-                response.AddError(localizer["You don't have access to this team."]);
+                response.AddError(_localizer["You don't have access to this team."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
             selectedInviteLink.IsRevoked = true;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
-            vwsDbContext.AddTeamHistory(new TeamHistory()
+            _vwsDbContext.AddTeamHistory(new TeamHistory()
             {
                 TeamId = selectedInviteLink.TeamId,
                 EventTime = DateTime.Now,
                 CommaSepratedParameters = selectedInviteLink.LinkGuid + "," + LoggedInNickName,
                 Event = "Invite link with id {0} revoked by {1}."
             });
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             response.Message = "Task updated successfully!";
             return Ok(response);
@@ -491,7 +495,7 @@ namespace vws.web.Controllers._team
         {
             Guid userId = LoggedInUserId.Value;
 
-            return vwsDbContext.TeamMembers.Any(teamMember => teamMember.UserProfileId == userId &&
+            return _vwsDbContext.TeamMembers.Any(teamMember => teamMember.UserProfileId == userId &&
                                                 teamMember.Team.Name == name &&
                                                 teamMember.Team.IsDeleted == false &&
                                                 teamMember.IsDeleted == false);
@@ -507,17 +511,17 @@ namespace vws.web.Controllers._team
             if (!String.IsNullOrEmpty(model.Description) && model.Description.Length > 2000)
             {
                 response.Message = "Team model data has problem.";
-                response.AddError(localizer["Length of description is more than 2000 characters."]);
+                response.AddError(_localizer["Length of description is more than 2000 characters."]);
             }
             if (model.Name.Length > 500)
             {
                 response.Message = "Team model data has problem.";
-                response.AddError(localizer["Length of title is more than 500 characters."]);
+                response.AddError(_localizer["Length of title is more than 500 characters."]);
             }
             if (!String.IsNullOrEmpty(model.Color) && model.Color.Length > 6)
             {
                 response.Message = "Team model data has problem.";
-                response.AddError(localizer["Length of color is more than 6 characters."]);
+                response.AddError(_localizer["Length of color is more than 6 characters."]);
             }
 
             if (response.HasError)
@@ -525,18 +529,18 @@ namespace vws.web.Controllers._team
 
             Guid userId = LoggedInUserId.Value;
 
-            var selectedTeam = await vwsDbContext.GetTeamAsync(model.Id);
+            var selectedTeam = await _vwsDbContext.GetTeamAsync(model.Id);
             if (selectedTeam == null || selectedTeam.IsDeleted)
             {
                 response.Message = "Team not found";
-                response.AddError(localizer["There is no team with given Id."]);
+                response.AddError(_localizer["There is no team with given Id."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
-            var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync(model.Id, userId);
+            var selectedTeamMember = await _vwsDbContext.GetTeamMemberAsync(model.Id, userId);
             if (selectedTeamMember == null)
             {
                 response.Message = "Access team is forbidden";
-                response.AddError(localizer["You are not a member of team."]);
+                response.AddError(_localizer["You are not a member of team."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
@@ -545,7 +549,7 @@ namespace vws.web.Controllers._team
             selectedTeam.ModifiedBy = userId;
             selectedTeam.ModifiedOn = DateTime.Now;
             selectedTeam.Name = model.Name;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             var updatedTeamResponse = new TeamResponseModel()
             {
@@ -554,16 +558,16 @@ namespace vws.web.Controllers._team
                 Name = selectedTeam.Name,
                 Description = selectedTeam.Description,
                 Color = selectedTeam.Color,
-                CreatedBy = (await vwsDbContext.GetUserProfileAsync(selectedTeam.CreatedBy)).NickName,
-                ModifiedBy = (await vwsDbContext.GetUserProfileAsync(selectedTeam.ModifiedBy)).NickName,
+                CreatedBy = (await _vwsDbContext.GetUserProfileAsync(selectedTeam.CreatedBy)).NickName,
+                ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(selectedTeam.ModifiedBy)).NickName,
                 CreatedOn = selectedTeam.CreatedOn,
                 ModifiedOn = selectedTeam.ModifiedOn,
                 Guid = selectedTeam.Guid,
                 TeamImageGuid = selectedTeam.TeamImageGuid,
-                NumberOfDepartments = vwsDbContext.Departments.Where(department => department.TeamId == selectedTeam.Id && !department.IsDeleted).Count(),
-                NumberOfMembers = vwsDbContext.TeamMembers.Where(teamMember => teamMember.TeamId == selectedTeam.Id && !teamMember.IsDeleted).Count(),
-                NumberOfTasks = vwsDbContext.GeneralTasks.Where(task => task.TeamId == selectedTeam.Id && !task.IsDeleted).Count(),
-                NumberOfProjects = vwsDbContext.Projects.Where(project => project.TeamId == selectedTeam.Id && !project.IsDeleted).Count()
+                NumberOfDepartments = _vwsDbContext.Departments.Where(department => department.TeamId == selectedTeam.Id && !department.IsDeleted).Count(),
+                NumberOfMembers = _vwsDbContext.TeamMembers.Where(teamMember => teamMember.TeamId == selectedTeam.Id && !teamMember.IsDeleted).Count(),
+                NumberOfTasks = _vwsDbContext.GeneralTasks.Where(task => task.TeamId == selectedTeam.Id && !task.IsDeleted).Count(),
+                NumberOfProjects = _vwsDbContext.Projects.Where(project => project.TeamId == selectedTeam.Id && !project.IsDeleted).Count()
             };
 
             response.Message = "Team updated successfully";
@@ -586,30 +590,30 @@ namespace vws.web.Controllers._team
 
             if (files.Count > 1)
             {
-                response.AddError(localizer["There is more than one file."]);
+                response.AddError(_localizer["There is more than one file."]);
                 response.Message = "Too many files passed";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
             if (files.Count == 0 && image == null)
             {
-                response.AddError(localizer["You did not upload an image."]);
+                response.AddError(_localizer["You did not upload an image."]);
                 response.Message = "There is no image";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
             var uploadedImage = files.Count == 0 ? image : files[0];
 
-            var selectedTeam = await vwsDbContext.GetTeamAsync(teamId);
+            var selectedTeam = await _vwsDbContext.GetTeamAsync(teamId);
             if (selectedTeam == null || selectedTeam.IsDeleted)
             {
-                response.AddError(localizer["There is no team with given Id."]);
+                response.AddError(_localizer["There is no team with given Id."]);
                 response.Message = "Team not found";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync(teamId, userId);
+            var selectedTeamMember = await _vwsDbContext.GetTeamMemberAsync(teamId, userId);
             if (selectedTeamMember == null)
             {
-                response.AddError(localizer["You are not a member of team."]);
+                response.AddError(_localizer["You are not a member of team."]);
                 response.Message = "Not member of team";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
@@ -618,11 +622,11 @@ namespace vws.web.Controllers._team
 
             if (selectedTeam.TeamImage != null)
             {
-                fileResponse = await fileManager.WriteFile(uploadedImage, userId, "profileImages", (int)selectedTeam.TeamImageId, types.ToList());
+                fileResponse = await _fileManager.WriteFile(uploadedImage, userId, "profileImages", (int)selectedTeam.TeamImageId, types.ToList());
                 if (fileResponse.HasError)
                 {
                     foreach (var error in fileResponse.Errors)
-                        response.AddError(localizer[error]);
+                        response.AddError(_localizer[error]);
                     response.Message = "Error in writing file";
                     return StatusCode(StatusCodes.Status500InternalServerError, response);
                 }
@@ -639,16 +643,16 @@ namespace vws.web.Controllers._team
                     ModifiedBy = userId,
                     Guid = Guid.NewGuid()
                 };
-                await vwsDbContext.AddFileContainerAsync(newFileContainer);
-                vwsDbContext.Save();
-                fileResponse = await fileManager.WriteFile(uploadedImage, userId, "profileImages", newFileContainer.Id, types.ToList());
+                await _vwsDbContext.AddFileContainerAsync(newFileContainer);
+                _vwsDbContext.Save();
+                fileResponse = await _fileManager.WriteFile(uploadedImage, userId, "profileImages", newFileContainer.Id, types.ToList());
                 if (fileResponse.HasError)
                 {
                     foreach (var error in fileResponse.Errors)
-                        response.AddError(localizer[error]);
+                        response.AddError(_localizer[error]);
                     response.Message = "Error in writing file";
-                    vwsDbContext.DeleteFileContainer(newFileContainer);
-                    vwsDbContext.Save();
+                    _vwsDbContext.DeleteFileContainer(newFileContainer);
+                    _vwsDbContext.Save();
                     return StatusCode(StatusCodes.Status500InternalServerError, response);
                 }
                 newFileContainer.RecentFileId = fileResponse.Value.Id;
@@ -657,7 +661,7 @@ namespace vws.web.Controllers._team
             }
             selectedTeam.ModifiedBy = LoggedInUserId.Value;
             selectedTeam.ModifiedOn = DateTime.Now;
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             response.Value = fileResponse.Value.FileContainerGuid;
             response.Message = "Team image added successfully!";
@@ -673,18 +677,18 @@ namespace vws.web.Controllers._team
 
             Guid userId = LoggedInUserId.Value;
 
-            var selectedTeam = await vwsDbContext.GetTeamAsync(teamId);
+            var selectedTeam = await _vwsDbContext.GetTeamAsync(teamId);
             if (selectedTeam == null || selectedTeam.IsDeleted)
             {
-                response.AddError(localizer["There is no team with given Id."]);
+                response.AddError(_localizer["There is no team with given Id."]);
                 response.Message = "Team not found";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync(teamId, userId);
+            var selectedTeamMember = await _vwsDbContext.GetTeamMemberAsync(teamId, userId);
             if (selectedTeamMember == null)
             {
-                response.AddError(localizer["You are not a member of team."]);
+                response.AddError(_localizer["You are not a member of team."]);
                 response.Message = "Not member of team";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
@@ -695,10 +699,10 @@ namespace vws.web.Controllers._team
             selectedTeam.ModifiedBy = userId;
             selectedTeam.ModifiedOn = deletionTime;
 
-            var teamProjects = vwsDbContext.Projects.Where(project => project.TeamId == teamId &&
+            var teamProjects = _vwsDbContext.Projects.Where(project => project.TeamId == teamId &&
                                                                       !project.IsDeleted);
 
-            var teamDepartments = vwsDbContext.Departments.Where(department => department.TeamId == teamId &&
+            var teamDepartments = _vwsDbContext.Departments.Where(department => department.TeamId == teamId &&
                                                                                !department.IsDeleted);
 
             foreach (var teamProject in teamProjects)
@@ -714,16 +718,16 @@ namespace vws.web.Controllers._team
                 teamDepartment.ModifiedBy = userId;
                 teamDepartment.ModifiedOn = deletionTime;
             }
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
-            vwsDbContext.AddTeamHistory(new TeamHistory()
+            _vwsDbContext.AddTeamHistory(new TeamHistory()
             {
                 TeamId = selectedTeam.Id,
                 EventTime = selectedTeam.ModifiedOn,
                 CommaSepratedParameters = LoggedInNickName,
                 Event = "{0} updated team image."
             });
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             response.Message = "Team deleted successfully!";
             return Ok(response);
@@ -737,32 +741,32 @@ namespace vws.web.Controllers._team
             var response = new ResponseModel<List<UserModel>>();
             var teammatesList = new List<UserModel>();
 
-            var selectedTeam = await vwsDbContext.GetTeamAsync(id);
+            var selectedTeam = await _vwsDbContext.GetTeamAsync(id);
             var userId = LoggedInUserId.Value;
 
             if (selectedTeam == null || selectedTeam.IsDeleted)
             {
                 response.Message = "Team not found";
-                response.AddError(localizer["There is no team with given Id."]);
+                response.AddError(_localizer["There is no team with given Id."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync(id, userId);
+            var selectedTeamMember = await _vwsDbContext.GetTeamMemberAsync(id, userId);
             if (selectedTeamMember == null)
             {
                 response.Message = "Access team is forbidden";
-                response.AddError(localizer["You are not a member of team."]);
+                response.AddError(_localizer["You are not a member of team."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            List<UserProfile> userTeamMates = vwsDbContext.TeamMembers
+            List<UserProfile> userTeamMates = _vwsDbContext.TeamMembers
                 .Include(teamMember => teamMember.UserProfile)
                 .Where(teamMember => teamMember.TeamId == id && teamMember.IsDeleted == false)
                 .Select(teamMember => teamMember.UserProfile).Distinct().ToList();
 
             foreach (var teamMate in userTeamMates)
             {
-                UserProfile userProfile = await vwsDbContext.GetUserProfileAsync(teamMate.UserId);
+                UserProfile userProfile = await _vwsDbContext.GetUserProfileAsync(teamMate.UserId);
                 teammatesList.Add(new UserModel()
                 {
                     UserId = teamMate.UserId,
@@ -785,19 +789,19 @@ namespace vws.web.Controllers._team
 
             var response = new ResponseModel<TeamResponseModel>();
 
-            var selectedTeam = await vwsDbContext.GetTeamAsync(id);
+            var selectedTeam = await _vwsDbContext.GetTeamAsync(id);
 
             if (selectedTeam == null || selectedTeam.IsDeleted)
             {
-                response.AddError(localizer["There is no team with given Id."]);
+                response.AddError(_localizer["There is no team with given Id."]);
                 response.Message = "Team not found";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var teamMember = vwsDbContext.GetTeamMemberAsync(id, userId);
+            var teamMember = _vwsDbContext.GetTeamMemberAsync(id, userId);
             if (teamMember == null)
             {
-                response.AddError(localizer["You are not a member of team."]);
+                response.AddError(_localizer["You are not a member of team."]);
                 response.Message = "Team access denied";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
@@ -809,17 +813,17 @@ namespace vws.web.Controllers._team
                 Name = selectedTeam.Name,
                 Description = selectedTeam.Description,
                 Color = selectedTeam.Color,
-                CreatedBy = (await vwsDbContext.GetUserProfileAsync(selectedTeam.CreatedBy)).NickName,
+                CreatedBy = (await _vwsDbContext.GetUserProfileAsync(selectedTeam.CreatedBy)).NickName,
                 Guid = selectedTeam.Guid,
-                ModifiedBy = (await vwsDbContext.GetUserProfileAsync(selectedTeam.ModifiedBy)).NickName,
+                ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(selectedTeam.ModifiedBy)).NickName,
                 CreatedOn = selectedTeam.CreatedOn,
                 ModifiedOn = selectedTeam.ModifiedOn,
                 TeamImageGuid = selectedTeam.TeamImageGuid,
-                NumberOfDepartments = vwsDbContext.Departments.Where(department => department.TeamId == selectedTeam.Id && !department.IsDeleted).Count(),
-                NumberOfMembers = vwsDbContext.TeamMembers.Where(teamMember => teamMember.TeamId == selectedTeam.Id && !teamMember.IsDeleted).Count(),
-                NumberOfTasks = vwsDbContext.GeneralTasks.Where(task => task.TeamId == selectedTeam.Id && !task.IsDeleted).Count(),
-                NumberOfProjects = vwsDbContext.Projects.Where(project => project.TeamId == selectedTeam.Id && !project.IsDeleted).Count(),
-                Users = await teamManager.GetTeamMembers(selectedTeam.Id),
+                NumberOfDepartments = _vwsDbContext.Departments.Where(department => department.TeamId == selectedTeam.Id && !department.IsDeleted).Count(),
+                NumberOfMembers = _vwsDbContext.TeamMembers.Where(teamMember => teamMember.TeamId == selectedTeam.Id && !teamMember.IsDeleted).Count(),
+                NumberOfTasks = _vwsDbContext.GeneralTasks.Where(task => task.TeamId == selectedTeam.Id && !task.IsDeleted).Count(),
+                NumberOfProjects = _vwsDbContext.Projects.Where(project => project.TeamId == selectedTeam.Id && !project.IsDeleted).Count(),
+                Users = await _teamManager.GetTeamMembers(selectedTeam.Id),
                 Departments = await GetDepartments(selectedTeam.Id)
             };
             response.Message = "Team retured successfully!";
@@ -835,24 +839,24 @@ namespace vws.web.Controllers._team
             var departments = new List<DepartmentResponseModel>();
             var userId = LoggedInUserId.Value;
 
-            var selectedTeam = await vwsDbContext.GetTeamAsync(id);
+            var selectedTeam = await _vwsDbContext.GetTeamAsync(id);
 
             if (selectedTeam == null || selectedTeam.IsDeleted)
             {
                 response.Message = "Team not found";
-                response.AddError(localizer["There is no team with given Id."]);
+                response.AddError(_localizer["There is no team with given Id."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync(id, userId);
+            var selectedTeamMember = await _vwsDbContext.GetTeamMemberAsync(id, userId);
             if (selectedTeamMember == null)
             {
                 response.Message = "Access team is forbidden";
-                response.AddError(localizer["You are not a member of team."]);
+                response.AddError(_localizer["You are not a member of team."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var teamDepartments = vwsDbContext.Departments.Where(department => department.TeamId == id && !department.IsDeleted);
+            var teamDepartments = _vwsDbContext.Departments.Where(department => department.TeamId == id && !department.IsDeleted);
 
             foreach (var teamDepartment in teamDepartments)
                 departments.Add(new DepartmentResponseModel()
@@ -862,13 +866,13 @@ namespace vws.web.Controllers._team
                     DepartmentImageGuid = teamDepartment.DepartmentImageGuid,
                     Description = teamDepartment.Description,
                     Color = teamDepartment.Color,
-                    CreatedBy = (await vwsDbContext.GetUserProfileAsync(teamDepartment.CreatedBy)).NickName,
+                    CreatedBy = (await _vwsDbContext.GetUserProfileAsync(teamDepartment.CreatedBy)).NickName,
                     CreatedOn = teamDepartment.CreatedOn,
                     Guid = teamDepartment.Guid,
-                    ModifiedBy = (await vwsDbContext.GetUserProfileAsync(teamDepartment.ModifiedBy)).NickName,
+                    ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(teamDepartment.ModifiedBy)).NickName,
                     ModifiedOn = teamDepartment.ModifiedOn,
                     TeamId = teamDepartment.TeamId,
-                    DepartmentMembers = await departmentManager.GetDepartmentMembers(teamDepartment.Id)
+                    DepartmentMembers = await _departmentManager.GetDepartmentMembers(teamDepartment.Id)
                 });
 
             response.Value = departments;
@@ -887,8 +891,8 @@ namespace vws.web.Controllers._team
 
             foreach (var userId in userTeamMates)
             {
-                var user = await userManager.FindByIdAsync(userId.ToString());
-                var userProfile = await vwsDbContext.GetUserProfileAsync(userId);
+                var user = await _userManager.FindByIdAsync(userId.ToString());
+                var userProfile = await _vwsDbContext.GetUserProfileAsync(userId);
                 result.Add(new UserModel()
                 {
                     UserId = userId,
@@ -908,31 +912,31 @@ namespace vws.web.Controllers._team
             var userId = LoggedInUserId.Value;
             var response = new ResponseModel<List<HistoryModel>>();
 
-            var selectedTeam = vwsDbContext.Teams.FirstOrDefault(team => team.Id == id);
+            var selectedTeam = _vwsDbContext.Teams.FirstOrDefault(team => team.Id == id);
 
             if (selectedTeam == null || selectedTeam.IsDeleted)
             {
                 response.Message = "Team not found";
-                response.AddError(localizer["There is no team with given Id."]);
+                response.AddError(_localizer["There is no team with given Id."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var selectedTeamMember = await vwsDbContext.GetTeamMemberAsync(id, userId);
+            var selectedTeamMember = await _vwsDbContext.GetTeamMemberAsync(id, userId);
             if (selectedTeamMember == null)
             {
                 response.Message = "Access team is forbidden";
-                response.AddError(localizer["You are not a member of team."]);
+                response.AddError(_localizer["You are not a member of team."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             var events = new List<HistoryModel>();
-            var teamEvents = vwsDbContext.TeamHistories.Where(teamHistory => teamHistory.TeamId == id);
+            var teamEvents = _vwsDbContext.TeamHistories.Where(teamHistory => teamHistory.TeamId == id);
             foreach (var teamEvent in teamEvents)
             {
                 var parameters = teamEvent.CommaSepratedParameters.Split(',');
                 events.Add(new HistoryModel()
                 {
-                    Message = String.Format(localizer[teamEvent.Event], parameters),
+                    Message = String.Format(_localizer[teamEvent.Event], parameters),
                     Time = teamEvent.EventTime
                 });
             }
