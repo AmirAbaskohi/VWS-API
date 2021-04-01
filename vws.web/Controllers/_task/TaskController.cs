@@ -1537,7 +1537,7 @@ namespace vws.web.Controllers._task
             return Ok(response);
         }
 
-        [HttpPut]
+        [HttpPost]
         [Authorize]
         [Route("addStatus")]
         public IActionResult AddStatus(int? projectId, int? teamId, string title)
@@ -1870,7 +1870,7 @@ namespace vws.web.Controllers._task
             return Ok(response);
         }
 
-        [HttpPost]
+        [HttpPut]
         [Authorize]
         [Route("updateCheckListTitle")]
         public async Task<IActionResult> UpdateCheckListTitle(long checkListId, string newTitle)
@@ -1931,7 +1931,7 @@ namespace vws.web.Controllers._task
 
         [HttpDelete]
         [Authorize]
-        [Route("deleteCheckLists")]
+        [Route("deleteCheckList")]
         public async Task<IActionResult> DeleteCheckList(long checkListId)
         {
             var response = new ResponseModel();
@@ -1980,7 +1980,7 @@ namespace vws.web.Controllers._task
             return Ok(response);
         }
 
-        [HttpPost]
+        [HttpPut]
         [Authorize]
         [Route("updateCheckListItemTitle")]
         public async Task<IActionResult> UpdateCheckListItemTitle(long checkListItemId, string newTitle)
@@ -2095,10 +2095,10 @@ namespace vws.web.Controllers._task
             return Ok(response);
         }
 
-        [HttpPost]
+        [HttpPut]
         [Authorize]
-        [Route("updateListItemIsChecked")]
-        public async Task<IActionResult> UpdateListItemIsChecked(long checkListItemId, bool isChecked)
+        [Route("updateCheckListItemIsChecked")]
+        public async Task<IActionResult> UpdateCheckListItemIsChecked(long checkListItemId, bool isChecked)
         {
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
@@ -2455,10 +2455,10 @@ namespace vws.web.Controllers._task
             return Ok(response);
         }
 
-        [HttpPost]
+        [HttpDelete]
         [Authorize]
-        [Route("deleteTagOfTask")]
-        public async Task<IActionResult> DeleteTagOfTask(long id, int tagId)
+        [Route("deleteTagFromTask")]
+        public async Task<IActionResult> DeleteTagFromTask(long id, int tagId)
         {
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;

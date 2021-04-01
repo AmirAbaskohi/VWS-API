@@ -184,7 +184,7 @@ namespace vws.web.Controllers._chat
 
         }
 
-        [HttpPost]
+        [HttpPut]
         [Authorize]
         [Route("muteChannel")]
         public async Task<IActionResult> MuteChannel([FromBody] MuteChannelModel model)
@@ -237,7 +237,7 @@ namespace vws.web.Controllers._chat
             return Ok(response);
         }
 
-        [HttpPost]
+        [HttpPut]
         [Authorize]
         [Route("unmuteChannel")]
         public IActionResult UnmuteChannel([FromBody] UnmuteChannelModel model)
@@ -278,7 +278,7 @@ namespace vws.web.Controllers._chat
             return Ok(response);
         }
 
-        [HttpPost]
+        [HttpPut]
         [Authorize]
         [Route("pinChannel")]
         public IActionResult PinChannel([FromBody] PinChannelModel model)
