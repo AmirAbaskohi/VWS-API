@@ -714,6 +714,8 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
+            string lastDescription = selectedTask.Description;
+
             selectedTask.Description = newDescription;
             selectedTask.ModifiedBy = LoggedInUserId.Value;
             selectedTask.ModifiedOn = DateTime.Now;
@@ -723,7 +725,8 @@ namespace vws.web.Controllers._task
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
-            await SendMultipleEmails(usersAssignedTo, string.Format(localizer["Your task desciption with title <b>«{0}»</b> has been updated by <b>«{1}»</b>."], selectedTask.Title, LoggedInNickName), "Task Update");
+            await SendMultipleEmails(usersAssignedTo, string.Format(localizer["Your task desciption with title <b>«{0}»</b> has been updated from <b>«{1}»</b> to <b>«{2}»</b> by <b>«{3}»</b>."]
+                                                    , selectedTask.Title, lastDescription, selectedTask.Description, LoggedInNickName), "Task Update");
 
             response.Message = "Task title updated successfully!";
             return Ok(response);

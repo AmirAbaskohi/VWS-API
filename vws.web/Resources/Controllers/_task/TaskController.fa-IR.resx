@@ -297,8 +297,8 @@
   <data name="You have been unassigned from task with title &lt;b&gt;«{0}»&lt;/b&gt;." xml:space="preserve">
     <value>تسک با عنوان &lt;b&gt;«{0}»&lt;/b&gt; از شما سلب شد.</value>
   </data>
-  <data name="Your task desciption with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated by &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
-    <value>توضیحات تسک با عنوان &lt;b&gt;«{0}»&lt;/b&gt; توسط &lt;b&gt;«{1}»&lt;/b&gt; به روز شد. </value>
+  <data name="Your task desciption with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>توضیحات تسک با عنوان &lt;b&gt;«{0}»&lt;/b&gt; توسط &lt;b&gt;«{3}»&lt;/b&gt; از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; به روز شد. </value>
   </data>
   <data name="Your task end date with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>زمان پایان تسک شما با عنوان &lt;b&gt;«{0}»&lt;/b&gt; از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; توسط &lt;b&gt;«{3}»&lt;/b&gt; به روز شد.</value>

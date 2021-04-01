@@ -294,8 +294,8 @@
   <data name="You have been unassigned from task with title &lt;b&gt;«{0}»&lt;/b&gt;." xml:space="preserve">
     <value>You have been unassigned from task with title &lt;b&gt;«{0}»&lt;/b&gt;.</value>
   </data>
-  <data name="Your task desciption with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated by &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
-    <value>Your task desciption with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated by &lt;b&gt;«{1}»&lt;/b&gt;.</value>
+  <data name="Your task desciption with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>Your task desciption with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;.</value>
   </data>
   <data name="Your task end date with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>Your task end date with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;.</value>
