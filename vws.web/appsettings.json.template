@@ -59,12 +59,12 @@
   "EmailSender": {
     "RegistrationEmail": {
       "UserName": "seventasktest",
-      "Password": "@dmin123321",
+      "Password": "reallyStrongPWD123!",
       "EmailAddress": "seventasktest@gmail.com"
     },
     "NotificationEmail": {
       "UserName": "seventasktest",
-      "Password": "@dmin123321",
+      "Password": "reallyStrongPWD123!",
       "EmailAddress": "seventasktest@gmail.com"
     },
     "SMTPHost": "smtp.gmail.com"
