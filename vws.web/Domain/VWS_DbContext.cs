@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using vws.web.Domain._file;
 using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
+using vws.web.Domain._notification;
 
 namespace vws.web.Domain
 {
@@ -652,6 +653,14 @@ namespace vws.web.Domain
         {
             FileContainers.Remove(fileContainer);
         }
+
+        #endregion
+
+        #region notification
+
+        IQueryable<Notification> IVWS_DbContext.Notifications { get => Notifications; }
+
+        public DbSet<Notification> Notifications { get; set; }
 
         #endregion
 

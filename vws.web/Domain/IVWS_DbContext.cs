@@ -7,6 +7,7 @@ using vws.web.Domain._base;
 using vws.web.Domain._chat;
 using vws.web.Domain._department;
 using vws.web.Domain._file;
+using vws.web.Domain._notification;
 using vws.web.Domain._project;
 using vws.web.Domain._task;
 using vws.web.Domain._team;
@@ -316,6 +317,21 @@ namespace vws.web.Domain
 
         public void AddTeamHistory(TeamHistory teamHistory);
 
+
+        #endregion
+
+        #endregion
+
+
+        #region notification
+
+        #region models
+
+        public IQueryable<Notification> Notifications { get; }
+
+        #endregion
+
+        #region methods
 
         #endregion
 
