@@ -120,6 +120,9 @@
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; added below attachments to comment &lt;b&gt;«{1}»&lt;/b&gt; in your task with title &lt;b&gt;«{2}»&lt;/b&gt;" xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt;  به کامنت &lt;b&gt;«{1}»&lt;/b&gt; در تسک با عنوان &lt;b&gt;«{2}»&lt;/b&gt;  فایل های زیر را ضمیمه کرد</value>
   </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; added below attachments to your task with title &lt;b&gt;«{1}»&lt;/b&gt;" xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; به تسک شما با عنوان &lt;b&gt;«{1}»&lt;/b&gt; ضمیمه های زیر را اضافه کرد</value>
+  </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; added new check list item with title &lt;b&gt;«{1}»&lt;/b&gt; to check list with title &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; آیتم چک لیست جدیدی با عنوان &lt;b&gt;«{1}»&lt;/b&gt; به چک لیست با عنوان &lt;b&gt;«{2}»&lt;/b&gt; در تسک با عنوان &lt;b&gt;«{3}»&lt;/b&gt; اضافه کرد.</value>
   </data>
@@ -131,6 +134,9 @@
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted attachment &lt;b&gt;«{1}»&lt;/b&gt; from comment &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; ضمیمه &lt;b&gt;«{1}»&lt;/b&gt; را از کامنت &lt;b&gt;«{2}»&lt;/b&gt; در تسک شما با عنوان &lt;b&gt;«{3}»&lt;/b&gt; حذف کرد.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted attachment &lt;b&gt;«{1}»&lt;/b&gt; from your task with title &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; ضمیمه &lt;b&gt;«{1}»&lt;/b&gt; را از تسک شما با عنوان &lt;b&gt;«{2}»&lt;/b&gt; حذف کرد.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted check list item with title &lt;b&gt;«{1}»&lt;/b&gt; in your check list with title &lt;b&gt;«{2}»&lt;/b&gt; of &lt;b&gt;«{3}»&lt;/b&gt; task." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; آیتم چک لیست با عنوان &lt;b&gt;«{1}»&lt;/b&gt; را در چک لیست با عنوان &lt;b&gt;«{2}»&lt;/b&gt; از تسک &lt;b&gt;«{3}»&lt;/b&gt; را به روز کرد. </value>
@@ -251,6 +257,9 @@
   </data>
   <data name="There is no attachment with such information for given comment." xml:space="preserve">
     <value>ضمیمه ای با اطلاعات داده شده برای کامنت انتخاب شده وجود ندارد.</value>
+  </data>
+  <data name="There is no attachment with such information for given task." xml:space="preserve">
+    <value>ضمیمه ای با اطلاعات داده شده برای تسک انتخاب شده وجود ندارد.</value>
   </data>
   <data name="There is no status to give task." xml:space="preserve">
     <value>وضعیتی وجو ندارد تا به تسک الصاق شود/</value>

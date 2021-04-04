@@ -129,8 +129,14 @@
   <data name="Invalid parameters." xml:space="preserve">
     <value>پارامتر های وارد شده نامعتبر اند.</value>
   </data>
+  <data name="There is more than one file." xml:space="preserve">
+    <value>بیشتر از یک فایل ارسال شده است.</value>
+  </data>
   <data name="There is no such file." xml:space="preserve">
     <value>فایل وجود ندارد.</value>
+  </data>
+  <data name="You did not upload any file." xml:space="preserve">
+    <value>شما هیچ فایلی آپلود نکردید.</value>
   </data>
   <data name="Your file does not have extension." xml:space="preserve">
     <value>فایل شما پسوند ندارد.</value>

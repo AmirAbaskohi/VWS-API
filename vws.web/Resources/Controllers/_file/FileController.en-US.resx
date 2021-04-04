@@ -129,8 +129,14 @@
   <data name="Invalid parameters." xml:space="preserve">
     <value>Invalid parameters.</value>
   </data>
+  <data name="There is more than one file." xml:space="preserve">
+    <value>There is more than one file.</value>
+  </data>
   <data name="There is no such file." xml:space="preserve">
     <value>There is no such file.</value>
+  </data>
+  <data name="You did not upload any file." xml:space="preserve">
+    <value>You did not upload any file.</value>
   </data>
   <data name="Your file does not have extension." xml:space="preserve">
     <value>Your file does not have extension.</value>

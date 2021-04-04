@@ -74,5 +74,7 @@ namespace vws.web.Domain._task
         public virtual ICollection<TaskTag> TaskTags { get; set; }
 
         public ICollection<TaskComment> TaskComments { get; set; }
+
+        public ICollection<TaskAttachment> TaskAttachments { get; set; }
     }
 }

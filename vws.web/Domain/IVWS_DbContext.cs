@@ -222,6 +222,8 @@ namespace vws.web.Domain
 
         public IQueryable<TaskCommentAttachment> TaskCommentAttachments { get; }
 
+        public IQueryable<TaskAttachment> TaskAttachments { get; }
+
         #endregion
 
         #region methods
@@ -261,6 +263,10 @@ namespace vws.web.Domain
         public void DeleteTaskTag(long taskId, int tagId);
 
         public void DeleteTaskComment(long id);
+
+        public void AddTaskAttachment(TaskAttachment taskAttachment);
+
+        public void DeleteTaskAttachment(TaskAttachment taskAttachment);
 
         #endregion
 

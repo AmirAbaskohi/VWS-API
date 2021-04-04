@@ -407,6 +407,10 @@ namespace vws.web.Domain
 
         public DbSet<TaskCommentAttachment> TaskCommentAttachments { get; set; }
 
+        IQueryable<TaskAttachment> IVWS_DbContext.TaskAttachments { get => TaskAttachments; }
+
+        public DbSet<TaskAttachment> TaskAttachments { get; set; }
+
         public async Task<GeneralTask> AddTaskAsync(GeneralTask generalTask)
         {
             await GeneralTasks.AddAsync(generalTask);
@@ -502,6 +506,16 @@ namespace vws.web.Domain
         {
             var selectedTaskComment = TaskComments.FirstOrDefault(comment => comment.Id == id);
             TaskComments.Remove(selectedTaskComment);
+        }
+
+        public void AddTaskAttachment(TaskAttachment taskAttachment)
+        {
+            TaskAttachments.Add(taskAttachment);
+        }
+
+        public void DeleteTaskAttachment(TaskAttachment taskAttachment)
+        {
+            TaskAttachments.Remove(taskAttachment);
         }
 
         #endregion
@@ -647,6 +661,9 @@ namespace vws.web.Domain
 
             builder.Entity<TaskCommentAttachment>()
                 .HasKey(commentAttachment => new { commentAttachment.FileContainerId, commentAttachment.TaskCommentId});
+
+            builder.Entity<TaskAttachment>()
+                .HasKey(taskAttachment => new { taskAttachment.FileContainerId, taskAttachment.GeneralTaskId });
 
             builder.Entity<ProjectDepartment>()
                 .HasKey(pd => new { pd.ProjectId, pd.DepartmentId });

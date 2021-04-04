@@ -110,6 +110,7 @@ namespace vws.web.Controllers._file
 
 
         [HttpGet]
+        [Authorize]
         [Route("get")]
         public async Task<IActionResult> GetFile(Guid id)
         {
@@ -133,6 +134,74 @@ namespace vws.web.Controllers._file
             }
             memory.Position = 0;
             return File(memory, "application/" + selectedFile.Extension, Path.GetFileName(fileName));
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("update")]
+        public async Task<IActionResult> UpdateFile(Guid id, IFormFile file)
+        {
+            var response = new ResponseModel<FileModel>();
+
+            var files = Request.Form.Files.ToList();
+
+            List<string> types = new List<string>() ;
+
+            if (files.Count > 1)
+            {
+                response.AddError(_localizer["There is more than one file."]);
+                response.Message = "Too many files passed";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            if (files.Count == 0 && file == null)
+            {
+                response.AddError(_localizer["You did not upload any file."]);
+                response.Message = "There is no file";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            var uploadedFile = files.Count == 0 ? file : files[0];
+
+            var selectedContainer = _vwsDbContext.FileContainers.FirstOrDefault(container => container.Guid == id);
+            if (selectedContainer == null)
+            {
+                response.AddError(_localizer["There is no such file."]);
+                response.Message = "File not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var recentFile = _vwsDbContext.Files.FirstOrDefault(file => file.Id == selectedContainer.RecentFileId);
+            var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), $"Upload{Path.DirectorySeparatorChar}");
+            string filePath = recentFile.Address;
+            filePath = filePath.Replace(uploadPath, "");
+            string[] subs = filePath.Split(Path.DirectorySeparatorChar);
+            if (subs[0] == "profileImages")
+            {
+                string[] imageTypes = { "png", "jpg", "jpeg" };
+                types.AddRange(imageTypes);
+            }
+            filePath = "";
+            for (int i = 0; i < subs.Length - 1; i++)
+            {
+                filePath += subs[i];
+                if (i != subs.Length - 2)
+                    filePath += Path.DirectorySeparatorChar;
+            }
+
+            var fileResponse = await _fileManager.WriteFile(uploadedFile, LoggedInUserId.Value, filePath, selectedContainer.Id, types.Count == 0 ? null : types.ToList());
+            if (fileResponse.HasError)
+            {
+                foreach (var error in fileResponse.Errors)
+                    response.AddError(_localizer[error]);
+                response.Message = "Error in writing file";
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
+            selectedContainer.RecentFileId = fileResponse.Value.Id;
+            selectedContainer.ModifiedOn = DateTime.Now;
+            selectedContainer.ModifiedBy = LoggedInUserId.Value;
+            _vwsDbContext.Save();
+
+            response.Message = "File updated successfully!";
+            return Ok(response);
         }
     }
 }

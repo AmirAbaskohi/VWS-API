@@ -342,6 +342,39 @@ namespace vws.web.Controllers._task
             return result;
         }
 
+        private List<FileModel> AddTaskAttachments(long taskId, List<Guid> attachments)
+        {
+            var fileAlreadyAttachments = _vwsDbContext.TaskAttachments.Where(taskAttachment => taskAttachment.GeneralTaskId == taskId)
+                                                                      .Select(taskAttachment => taskAttachment.FileContainerGuid);
+
+            attachments = attachments.Except(fileAlreadyAttachments).ToList();
+
+            var result = new List<FileModel>();
+            foreach (var attachment in attachments)
+            {
+                var selectedFileContainer = _vwsDbContext.FileContainers.FirstOrDefault(container => container.Guid == attachment);
+                if (selectedFileContainer == null || selectedFileContainer.CreatedBy != LoggedInUserId.Value)
+                    continue;
+                _vwsDbContext.AddTaskAttachment(new TaskAttachment()
+                {
+                    FileContainerId = selectedFileContainer.Id,
+                    FileContainerGuid = selectedFileContainer.Guid,
+                    GeneralTaskId = taskId
+                });
+                var recentFile = _vwsDbContext.Files.FirstOrDefault(file => file.Id == selectedFileContainer.RecentFileId);
+                result.Add(new FileModel()
+                {
+                    FileContainerGuid = selectedFileContainer.Guid,
+                    Name = recentFile.Name,
+                    Extension = recentFile.Extension,
+                    Size = recentFile.Size
+                });
+            }
+
+            _vwsDbContext.Save();
+            return result;
+        }
+
         private void DeleteTaskComment(long commentId)
         {
             var attachments = _vwsDbContext.TaskCommentAttachments.Include(attachment => attachment.FileContainer)
@@ -365,6 +398,29 @@ namespace vws.web.Controllers._task
             var attachments = _vwsDbContext.TaskCommentAttachments.Include(attachment => attachment.FileContainer)
                                                                  .Where(attachment => attachment.TaskCommentId == commentId)
                                                                  .Select(attachment => attachment.FileContainer);
+
+            foreach (var attachment in attachments)
+            {
+                var recentFile = _vwsDbContext.Files.FirstOrDefault(file => file.Id == attachment.RecentFileId);
+                result.Add(new FileModel()
+                {
+                    FileContainerGuid = attachment.Guid,
+                    Name = recentFile.Name,
+                    Extension = recentFile.Extension,
+                    Size = recentFile.Size
+                });
+            }
+
+            return result;
+        }
+
+        private List<FileModel> GetTaskAttachments(long taskId)
+        {
+            var result = new List<FileModel>();
+
+            var attachments = _vwsDbContext.TaskAttachments.Include(attachment => attachment.FileContainer)
+                                                           .Where(attachment => attachment.GeneralTaskId == taskId)
+                                                           .Select(attachment => attachment.FileContainer);
 
             foreach (var attachment in attachments)
             {
@@ -632,6 +688,8 @@ namespace vws.web.Controllers._task
 
             AddTaskTags(newTask.Id, model.Tags);
 
+            AddTaskAttachments(newTask.Id, model.Attachments);
+
             await AddUsersToTask(newTask.Id, model.Users);
             AddCheckLists(newTask.Id, model.CheckLists);
             model.Users.Remove(userId);
@@ -661,7 +719,8 @@ namespace vws.web.Controllers._task
                 StatusTitle = _vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == newTask.TaskStatusId).Title,
                 CheckLists = GetCheckLists(newTask.Id),
                 Tags = GetTaskTags(newTask.Id),
-                Comments = await GetTaskComments(newTask.Id)
+                Comments = await GetTaskComments(newTask.Id),
+                Attachments = GetTaskAttachments(newTask.Id)
             };
 
             response.Value = newTaskResponseModel;
@@ -1078,7 +1137,8 @@ namespace vws.web.Controllers._task
                     StatusTitle = _vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == userTask.TaskStatusId).Title,
                     CheckLists = GetCheckLists(userTask.Id),
                     Tags = GetTaskTags(userTask.Id),
-                    Comments = await GetTaskComments(userTask.Id)
+                    Comments = await GetTaskComments(userTask.Id),
+                    Attachments = GetTaskAttachments(userTask.Id)
                 });
             }
             return response;
@@ -1134,7 +1194,8 @@ namespace vws.web.Controllers._task
                     StatusTitle = _vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == projectTask.TaskStatusId).Title,
                     CheckLists = GetCheckLists(projectTask.Id),
                     Tags = GetTaskTags(projectTask.Id),
-                    Comments = await GetTaskComments(projectTask.Id)
+                    Comments = await GetTaskComments(projectTask.Id),
+                    Attachments = GetTaskAttachments(projectTask.Id)
                 });
             }
             response.Value = result;
@@ -1179,7 +1240,8 @@ namespace vws.web.Controllers._task
                         StatusTitle = _vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == userTask.TaskStatusId).Title,
                         CheckLists = GetCheckLists(userTask.Id),
                         Tags = GetTaskTags(userTask.Id),
-                        Comments = await GetTaskComments(userTask.Id)
+                        Comments = await GetTaskComments(userTask.Id),
+                        Attachments = GetTaskAttachments(userTask.Id)
                     });
                 }
             }
@@ -2753,7 +2815,7 @@ namespace vws.web.Controllers._task
 
             var userId = LoggedInUserId.Value;
 
-            var selectedComment = _vwsDbContext.TaskComments.Include(comment => comment.GeneralTask).FirstOrDefault(comment => comment.Id == model.CommentId);
+            var selectedComment = _vwsDbContext.TaskComments.Include(comment => comment.GeneralTask).FirstOrDefault(comment => comment.Id == model.Id);
             if (selectedComment == null)
             {
                 response.AddError(_localizer["Task comment not found."]);
@@ -2841,6 +2903,105 @@ namespace vws.web.Controllers._task
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, selectedAttachment.FileContainerGuid.ToString(), selectedComment.Body, selectedComment.GeneralTask.Title };
             await SendMultipleEmails(usersAssignedTo, "<b>«{0}»</b> deleted attachment <b>«{1}»</b> from comment <b>«{2}»</b> in your task with title <b>«{3}»</b>.", "Task Update", arguments);
+
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("addAtachment")]
+        public async Task<IActionResult> AddAtachment([FromBody] AddAtachmentModel model)
+        {
+            var response = new ResponseModel<List<FileModel>>();
+
+            var userId = LoggedInUserId.Value;
+
+            var selectedTask = _vwsDbContext.GeneralTasks.Include(task => task.TaskAttachments).FirstOrDefault(task => task.Id == model.Id);
+            if (selectedTask == null || selectedTask.IsDeleted)
+            {
+                response.Message = "Task not found";
+                response.AddError(_localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            if (!_permissionService.HasAccessToTask(userId, model.Id))
+            {
+                response.Message = "Task access forbidden";
+                response.AddError(_localizer["You don't have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            response.Value = AddTaskAttachments(selectedTask.Id, model.Attachments);
+            response.Message = "Attachments added successfully";
+            selectedTask.ModifiedOn = DateTime.Now;
+            selectedTask.ModifiedBy = userId;
+            _vwsDbContext.Save();
+
+            if (response.Value.Count() != 0)
+            {
+                string emailMessage = _localizer["<b>«{0}»</b> added below attachments to your task with title <b>«{1}»</b>"];
+                emailMessage += ":\n <br>";
+                foreach (var file in response.Value)
+                    emailMessage += $"<a href='{Request.Scheme}://{Request.Host}/en-US/File/get?id={file.FileContainerGuid}'>{file.Name}</a>\n<br>\n";
+
+                var usersAssignedTo = GetAssignedTo(selectedTask.Id).Select(user => user.UserId).ToList();
+                usersAssignedTo.Add(selectedTask.CreatedBy);
+                usersAssignedTo = usersAssignedTo.Distinct().ToList();
+                usersAssignedTo.Remove(LoggedInUserId.Value);
+                string[] arguments = { LoggedInNickName, selectedTask.Title };
+                await SendMultipleEmails(usersAssignedTo, emailMessage, "Task Update", arguments);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpDelete]
+        [Authorize]
+        [Route("deleteAttachment")]
+        public async Task<IActionResult> DeleteAttachment(long id, Guid attachmentGuid)
+        {
+            var response = new ResponseModel();
+
+            var userId = LoggedInUserId.Value;
+
+            var selectedTask = _vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == id);
+            if (selectedTask == null || selectedTask.IsDeleted)
+            {
+                response.Message = "Task not found";
+                response.AddError(_localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            if (!_permissionService.HasAccessToTask(userId, id))
+            {
+                response.Message = "Task access forbidden";
+                response.AddError(_localizer["You don't have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            var selectedAttachment = _vwsDbContext.TaskAttachments.Include(attachment => attachment.FileContainer)
+                                                                  .ThenInclude(attachment => attachment.Files)
+                                                                  .FirstOrDefault(attachment => attachment.FileContainerGuid == attachmentGuid && attachment.GeneralTaskId == id);
+            if (selectedAttachment == null)
+            {
+                response.AddError(_localizer["There is no attachment with such information for given task."]);
+                response.Message = "Attachment not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            foreach (var file in selectedAttachment.FileContainer.Files)
+                _fileManager.DeleteFile(file.Address);
+
+            var selectedContainer = _vwsDbContext.FileContainers.FirstOrDefault(container => container.Id == selectedAttachment.FileContainerId);
+            _vwsDbContext.DeleteFileContainer(selectedContainer);
+            selectedTask.ModifiedOn = DateTime.Now;
+            selectedTask.ModifiedBy = userId;
+            _vwsDbContext.Save();
+
+            var usersAssignedTo = GetAssignedTo(selectedTask.Id).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedTask.CreatedBy);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            string[] arguments = { LoggedInNickName, selectedAttachment.FileContainerGuid.ToString(), selectedTask.Title };
+            await SendMultipleEmails(usersAssignedTo, "<b>«{0}»</b> deleted attachment <b>«{1}»</b> from your task with title <b>«{2}»</b>.", "Task Update", arguments);
 
             return Ok(response);
         }

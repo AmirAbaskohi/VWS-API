@@ -23,5 +23,7 @@ namespace vws.web.Models._task
         public List<CheckListModel> CheckLists { get; set; }
         [Required]
         public List<int> Tags { get; set; } 
+        [Required]
+        public List<Guid> Attachments { get; set; }
     }
 }

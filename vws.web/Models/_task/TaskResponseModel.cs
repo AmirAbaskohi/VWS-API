@@ -33,5 +33,6 @@ namespace vws.web.Models._task
         public List<CheckListResponseModel> CheckLists { get; set; }
         public List<TagResponseModel> Tags { get; set; }
         public List<CommentResponseModel> Comments { get; set; }
+        public List<FileModel> Attachments { get; set; }
     }
 }

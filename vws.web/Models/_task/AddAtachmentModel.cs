@@ -9,7 +9,7 @@ namespace vws.web.Models._task
     public class AddAtachmentModel
     {
         [Required]
-        public long CommentId { get; set; }
+        public long Id { get; set; }
         [Required]
         public List<Guid> Attachments { get; set; }
     }
