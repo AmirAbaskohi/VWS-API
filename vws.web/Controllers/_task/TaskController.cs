@@ -512,7 +512,7 @@ namespace vws.web.Controllers._task
                     };
                     await _emailSender.SendEmailAsync(emailModel, out emailErrorMessage);
                 }
-            }).ConfigureAwait(false);
+            });
         }
 
         private async Task SendSingleEmail(string emailMessage, string subject, Guid sendToUserId, string[] arguments, bool[] argumentsLocalize = null)
@@ -1473,8 +1473,10 @@ namespace vws.web.Controllers._task
         public async Task<IActionResult> AssignTask([FromBody] AssignTaskModel model)
         {
             var userId = LoggedInUserId.Value;
-            var response = new ResponseModel();
-            var selectedUserId = new Guid(model.UserId);
+            var response = new ResponseModel<Object>();
+
+            var successfulAssignedUsers = new List<Guid>();
+            var failedToAssignUsers = new List<Guid>();
 
             var selectedTask = await _vwsDbContext.GetTaskAsync(model.TaskId);
             if (selectedTask == null || selectedTask.IsDeleted)
@@ -1491,38 +1493,35 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            if (!_vwsDbContext.UserProfiles.Any(profile => profile.UserId == selectedUserId))
+            var taskUsers = GetAssignedTo(model.TaskId).Select(user => user.UserId);
+
+            foreach(var user in model.Users)
             {
-                response.AddError(_localizer["User does not exist."]);
-                response.Message = "User not found";
-                return StatusCode(StatusCodes.Status400BadRequest, response);
+                if (!_vwsDbContext.UserProfiles.Any(profile => profile.UserId == user) ||
+                    taskUsers.Contains(user))
+                {
+                    failedToAssignUsers.Add(user);
+                    continue;
+                }
+                var newTaskAssign = new TaskAssign()
+                {
+                    Guid = Guid.NewGuid(),
+                    GeneralTaskId = model.TaskId,
+                    UserProfileId = user,
+                    IsDeleted = false,
+                    CreatedBy = userId,
+                    CreatedOn = DateTime.Now
+                };
+                await _vwsDbContext.AddTaskAssignAsync(newTaskAssign);
+                successfulAssignedUsers.Add(user);
             }
-
-            if (_vwsDbContext.TaskAssigns.Any(taskAssign => taskAssign.UserProfileId == selectedUserId &&
-                                              taskAssign.GeneralTaskId == model.TaskId &&
-                                              taskAssign.IsDeleted == false))
-            {
-                response.AddError(_localizer["Task is assigned to user before."]);
-                response.Message = "Task assigned before";
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-
-            var newTaskAssign = new TaskAssign()
-            {
-                Guid = Guid.NewGuid(),
-                GeneralTaskId = model.TaskId,
-                UserProfileId = selectedUserId,
-                IsDeleted = false,
-                CreatedBy = userId,
-                CreatedOn = DateTime.Now
-            };
-
-            await _vwsDbContext.AddTaskAssignAsync(newTaskAssign);
             _vwsDbContext.Save();
 
             string[] arguments = { selectedTask.Title, LoggedInNickName };
-            await SendSingleEmail("New task with title <b>«{0}»</b> has been assigned to you by <b>«{1}»</b>.", "Task Assign", selectedUserId, arguments) ;
+            Guid[] reuqestedUser = { userId };
+            await SendMultipleEmails(successfulAssignedUsers.Except(reuqestedUser).ToList(), "New task with title <b>«{0}»</b> has been assigned to you by <b>«{1}»</b>.", "Task Assign", arguments) ;
 
+            response.Value = new { SuccessAssigs = successfulAssignedUsers, FailedAssign = failedToAssignUsers};
             response.Message = "Task assigned successfully!";
             return Ok(response);
         }

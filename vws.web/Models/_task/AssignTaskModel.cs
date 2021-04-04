@@ -11,6 +11,6 @@ namespace vws.web.Models._task
         [Required]
         public long TaskId { get; set; }
         [Required]
-        public string UserId { get; set; }
+        public List<Guid> Users { get; set; }
     }
 }
