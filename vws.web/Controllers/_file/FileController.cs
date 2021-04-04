@@ -110,7 +110,6 @@ namespace vws.web.Controllers._file
 
 
         [HttpGet]
-        [Authorize]
         [Route("get")]
         public async Task<IActionResult> GetFile(Guid id)
         {
