@@ -329,9 +329,19 @@ namespace vws.web.Domain
 
         public IQueryable<Notification> Notifications { get; }
 
+        public IQueryable<NotificationType> NotificationTypes { get; }
+
         #endregion
 
         #region methods
+
+        public void AddNotification(Notification notification);
+
+        public void AddNotificationType(NotificationType notificationType);
+
+        public void UpdateNotificationType(byte id, string newName);
+
+        public string GetNotificationType(byte id);
 
         #endregion
 

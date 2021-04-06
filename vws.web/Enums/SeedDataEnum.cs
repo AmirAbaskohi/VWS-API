@@ -58,5 +58,13 @@ namespace vws.web.Enums
             it_IT = 9,
             tr_TU = 10
         };
+
+        public enum NotificationTypes : byte
+        {
+            Team = 1,
+            Project = 2,
+            Department = 3,
+            Task = 4
+        }
     }
 }

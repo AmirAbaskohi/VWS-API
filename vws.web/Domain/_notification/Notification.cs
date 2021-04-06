@@ -13,11 +13,15 @@ namespace vws.web.Domain._notification
         public long Id { get; set; }
         
         public Guid UserProfileId { get; set; }
-
-        public string Content { get; set; }
         
         public bool IsSeen { get; set; }
 
+        public byte NotificationTypeId { get; set; }
+
+        public long ActivityId { get; set; }
+
         public virtual UserProfile UserProfile { get; set; }
+
+        public virtual NotificationType NotificationType { get; set; }
     }
 }

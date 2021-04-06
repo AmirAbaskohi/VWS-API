@@ -662,6 +662,32 @@ namespace vws.web.Domain
 
         public DbSet<Notification> Notifications { get; set; }
 
+        IQueryable<NotificationType> IVWS_DbContext.NotificationTypes { get => NotificationTypes; }
+
+        public DbSet<NotificationType> NotificationTypes { get; set; }
+
+        public void AddNotification(Notification notification)
+        {
+            Notifications.Add(notification);
+        }
+
+        public void AddNotificationType(NotificationType notificationType)
+        {
+            NotificationTypes.Add(notificationType);
+        }
+
+        public void UpdateNotificationType(byte id, string newName)
+        {
+            var selectedNotificationType = NotificationTypes.FirstOrDefault(notifType => notifType.Id == id);
+            selectedNotificationType.Name = newName;
+        }
+
+        public string GetNotificationType(byte id)
+        {
+            var selectedNotificationType = NotificationTypes.FirstOrDefault(notifType => notifType.Id == id);
+            return selectedNotificationType == null ? (string)null : selectedNotificationType.Name;
+        }
+
         #endregion
 
         protected override void OnModelCreating(ModelBuilder builder)

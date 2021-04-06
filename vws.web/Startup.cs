@@ -296,9 +296,16 @@ namespace vws.web
                         context.UpdateCulture((byte)culture, culture.ToString().Replace('_','-'));
                 }
                 context.Save();
+                foreach (var notifType in Enum.GetValues(typeof(SeedDataEnum.NotificationTypes)))
+                {
+                    string dbNotif = context.GetNotificationType((byte)notifType);
+                    if (dbNotif == null)
+                        context.AddNotificationType(new Domain._notification.NotificationType { Id = (byte)notifType, Name = notifType.ToString() });
+                    else if (dbNotif != notifType.ToString())
+                        context.UpdateNotificationType((byte)notifType, notifType.ToString());
+                }
+                context.Save();
             }
-
-
         }
     }
 }
