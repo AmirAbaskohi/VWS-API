@@ -7,16 +7,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using vws.web.Domain;
 using vws.web.Domain._base;
 using vws.web.Domain._project;
 using vws.web.Domain._task;
 using vws.web.Domain._team;
-using vws.web.EmailTemplates;
 using vws.web.Enums;
 using vws.web.Models;
 using vws.web.Models._task;
@@ -38,12 +35,13 @@ namespace vws.web.Controllers._task
         private readonly IConfiguration _configuration;
         private readonly IFileManager _fileManager;
         private readonly IEmailSender _emailSender;
+        private readonly INotificationService _notificationService;
         #endregion
 
         #region Ctor
         public TaskController(UserManager<ApplicationUser> userManager, IStringLocalizer<TaskController> localizer,
             IVWS_DbContext vwsDbContext, IPermissionService permissionService, IConfiguration configuration, IFileManager fileManager,
-            IEmailSender emailSender)
+            IEmailSender emailSender, INotificationService notificationService)
         {
             _userManager = userManager;
             _localizer = localizer;
@@ -52,6 +50,7 @@ namespace vws.web.Controllers._task
             _configuration = configuration;
             _fileManager = fileManager;
             _emailSender = emailSender;
+            _notificationService = notificationService;
         }
         #endregion
 
@@ -463,83 +462,6 @@ namespace vws.web.Controllers._task
 
             return result;
         }
-
-        private string[] LocalizeList(string culture, string[] values, bool[] localizeOrNot)
-        {
-            List<string> result = new List<string>();
-
-            for (int i = 0; i < values.Length; i++)
-            {
-                result.Add(localizeOrNot[i] ? _localizer.WithCulture(new CultureInfo(culture))[values[i]]  : values[i]);
-            }
-            return result.ToArray();
-        }
-
-        private async Task SendMultipleEmails(List<Guid> userIds, string emailMessage, string emailSubject, string[] arguments, bool[] argumentsLocalize = null)
-        {
-            SendEmailModel emailModel;
-            string emailErrorMessage;
-
-            List<string> emails = new List<string>();
-            List<string> cultures = new List<string>();
-
-            bool shouldLocalizeArguments = argumentsLocalize == null ? false : true;
-
-            foreach (var userId in userIds)
-            {
-                var user = await _userManager.FindByIdAsync(userId.ToString());
-                var profile = _vwsDbContext.UserProfiles.Include(profile => profile.Culture).FirstOrDefault(profile => profile.UserId == userId);
-                emails.Add(user.Email);
-                cultures.Add(profile.CultureId == null ? "en-US" : profile.Culture.CultureAbbreviation);
-            }
-            Task.Run(async () =>
-            {
-                for (int i = 0; i < emails.Count; i++)
-                {
-                    emailModel = new SendEmailModel
-                    {
-                        FromEmail = _configuration["EmailSender:NotificationEmail:EmailAddress"],
-                        ToEmail = emails[i],
-                        Subject = emailSubject,
-                        Body = EmailTemplateUtility.GetEmailTemplate((int)EmailTemplateEnum.TaskAssign).Replace("{0}", String.Format(_localizer.WithCulture(new CultureInfo(cultures[i]))[emailMessage],
-                                                                                                                       shouldLocalizeArguments ? LocalizeList(cultures[i], arguments, argumentsLocalize) : arguments)),
-                        Credential = new NetworkCredential
-                        {
-                            UserName = _configuration["EmailSender:NotificationEmail:UserName"],
-                            Password = _configuration["EmailSender:NotificationEmail:Password"]
-                        },
-                        IsBodyHtml = true
-                    };
-                    await _emailSender.SendEmailAsync(emailModel, out emailErrorMessage);
-                }
-            });
-        }
-
-        private async Task SendSingleEmail(string emailMessage, string subject, Guid sendToUserId, string[] arguments, bool[] argumentsLocalize = null)
-        {
-            string userEmail = (await _userManager.FindByIdAsync(sendToUserId.ToString())).Email;
-            var profile = _vwsDbContext.UserProfiles.Include(profile => profile.Culture).FirstOrDefault(profile => profile.UserId == sendToUserId); ;
-            string culture = profile.CultureId == null ? "en-US" : profile.Culture.CultureAbbreviation;
-            string emailErrorMessage;
-
-            bool shouldLocalizeArguments = argumentsLocalize == null ? false : true;
-
-            var emailModel = new SendEmailModel
-            {
-                FromEmail = _configuration["EmailSender:NotificationEmail:EmailAddress"],
-                ToEmail = userEmail,
-                Subject = subject,
-                Body = EmailTemplateUtility.GetEmailTemplate((int)EmailTemplateEnum.TaskAssign).Replace("{0}", String.Format(_localizer.WithCulture(new CultureInfo(culture))[emailMessage]
-                                                                                                             , shouldLocalizeArguments ? LocalizeList(culture, arguments, argumentsLocalize) : arguments)),
-                Credential = new NetworkCredential
-                {
-                    UserName = _configuration["EmailSender:NotificationEmail:UserName"],
-                    Password = _configuration["EmailSender:NotificationEmail:Password"]
-                },
-                IsBodyHtml = true
-            };
-            Task.Run(async () => await _emailSender.SendEmailAsync(emailModel, out emailErrorMessage));
-        }
         #endregion
 
         #region TaskAPIS
@@ -695,7 +617,7 @@ namespace vws.web.Controllers._task
             AddCheckLists(newTask.Id, model.CheckLists);
             model.Users.Remove(userId);
             string[] arguments = { newTask.Title, LoggedInNickName };
-            await SendMultipleEmails(model.Users, "New task with title <b>«{0}»</b> has been assigned to you by <b>«{1}»</b>.", "Task Assign", arguments);
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, model.Users, "New task with title <b>«{0}»</b> has been assigned to you by <b>«{1}»</b>.", "Task Assign", arguments);
 
             var newTaskResponseModel = new TaskResponseModel()
             {
@@ -771,7 +693,7 @@ namespace vws.web.Controllers._task
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { lastTitle, newTitle, LoggedInNickName };
-            await SendMultipleEmails(usersAssignedTo, "Your task title has been updated from <b>«{0}»</b> to <b>«{1}»</b> by <b>«{2}»</b>.", "Task Update", arguments);
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, usersAssignedTo, "Your task title has been updated from <b>«{0}»</b> to <b>«{1}»</b> by <b>«{2}»</b>.", "Task Update", arguments);
 
             response.Message = "Task title updated successfully!";
             return Ok(response);
@@ -818,7 +740,7 @@ namespace vws.web.Controllers._task
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { selectedTask.Title, lastDescription, selectedTask.Description, LoggedInNickName };
-            await SendMultipleEmails(usersAssignedTo, "Your task desciption with title <b>«{0}»</b> has been updated from <b>«{1}»</b> to <b>«{2}»</b> by <b>«{3}»</b>.", "Task Update", arguments);
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, usersAssignedTo, "Your task desciption with title <b>«{0}»</b> has been updated from <b>«{1}»</b> to <b>«{2}»</b> by <b>«{3}»</b>.", "Task Update", arguments);
 
             response.Message = "Task title updated successfully!";
             return Ok(response);
@@ -866,7 +788,7 @@ namespace vws.web.Controllers._task
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { selectedTask.Title, ((SeedDataEnum.TaskPriority)lastPriority).ToString(), ((SeedDataEnum.TaskPriority)newPriority).ToString(), LoggedInNickName };
             bool[] argumentsLocalize = { false, true, true, false };
-            await SendMultipleEmails(usersAssignedTo, "Your task priority with title <b>«{0}»</b> has been updated from <b>«{1}»</b>. to <b>«{2}»</b>. by <b>«{3}»</b>.", "Task Update", arguments, argumentsLocalize);
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, usersAssignedTo, "Your task priority with title <b>«{0}»</b> has been updated from <b>«{1}»</b>. to <b>«{2}»</b>. by <b>«{3}»</b>.", "Task Update", arguments, argumentsLocalize);
 
             response.Message = "Task priority updated successfully!";
             return Ok(response);
@@ -994,7 +916,7 @@ namespace vws.web.Controllers._task
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
-            await SendMultipleEmails(usersAssignedTo, emailMessage, "Task Update", emailMessageArguments.ToArray(), emailMessageArgumentsLocalize.ToArray());
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, usersAssignedTo, emailMessage, "Task Update", emailMessageArguments.ToArray(), emailMessageArgumentsLocalize.ToArray());
 
             response.Message = "Task team and project updated successfully!";
             return Ok(response);
@@ -1044,7 +966,7 @@ namespace vws.web.Controllers._task
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { selectedTask.Title, lastStartDate == null ? "No Time" : lastStartDate.ToString(), selectedTask.StartDate == null ? "No Time" : selectedTask.StartDate.ToString(), LoggedInNickName };
             bool[] argumentsLocalize = { false, lastStartDate == null ? true : false, selectedTask.StartDate == null ? true : false, false };
-            await SendMultipleEmails(usersAssignedTo, "Your task start date with title <b>«{0}»</b> has been updated from <b>«{1}»</b> to <b>«{2}»</b> by <b>«{3}»</b>.", "Task Update", arguments, argumentsLocalize);
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, usersAssignedTo, "Your task start date with title <b>«{0}»</b> has been updated from <b>«{1}»</b> to <b>«{2}»</b> by <b>«{3}»</b>.", "Task Update", arguments, argumentsLocalize);
 
             response.Message = "Task start date updated successfully!";
             return Ok(response);
@@ -1094,7 +1016,7 @@ namespace vws.web.Controllers._task
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { selectedTask.Title, lastEndDate == null ? "No Time" : lastEndDate.ToString(), selectedTask.EndDate == null ? "No Time" : selectedTask.EndDate.ToString(), LoggedInNickName };
             bool[] argumentsLocalize = { false, lastEndDate == null ? true : false, selectedTask.EndDate == null ? true : false, false };
-            await SendMultipleEmails(usersAssignedTo, "Your task end date with title <b>«{0}»</b> has been updated from <b>«{1}»</b> to <b>«{2}»</b> by <b>«{3}»</b>.", "Task Update", arguments, argumentsLocalize);
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, usersAssignedTo, "Your task end date with title <b>«{0}»</b> has been updated from <b>«{1}»</b> to <b>«{2}»</b> by <b>«{3}»</b>.", "Task Update", arguments, argumentsLocalize);
 
             response.Message = "Task start date updated successfully!";
             return Ok(response);
@@ -1143,7 +1065,7 @@ namespace vws.web.Controllers._task
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { selectedTask.Title, lastStatus, _vwsDbContext.TaskStatuses.FirstOrDefault(status => status.Id == selectedTask.TaskStatusId).Title, LoggedInNickName };
-            await SendMultipleEmails(usersAssignedTo, "Status of your task with title <b>«{0}»</b> has been updated from <b>«{1}»</b> to <b>«{2}»</b> by <b>«{3}»</b>.", "Task Update", arguments);
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, usersAssignedTo, "Status of your task with title <b>«{0}»</b> has been updated from <b>«{1}»</b> to <b>«{2}»</b> by <b>«{3}»</b>.", "Task Update", arguments);
 
             response.Message = "Task status changed";
             return Ok(response);
@@ -1183,7 +1105,7 @@ namespace vws.web.Controllers._task
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { selectedTask.Title, LoggedInNickName };
-            await SendMultipleEmails(usersAssignedTo, "Your task with title <b>«{0}»</b> has been archived by <b>«{1}»</b>.", "Task Update", arguments);
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, usersAssignedTo, "Your task with title <b>«{0}»</b> has been archived by <b>«{1}»</b>.", "Task Update", arguments);
 
             response.Message = "Task archived successfully!";
             return Ok(response);
@@ -1459,7 +1381,7 @@ namespace vws.web.Controllers._task
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { selectedTask.Title, LoggedInNickName  };
-            await SendMultipleEmails(usersAssignedTo, "Your task with title <b>«{0}»</b> has been deleted by <b>«{1}»</b>.", "Task Update", arguments);
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, usersAssignedTo, "Your task with title <b>«{0}»</b> has been deleted by <b>«{1}»</b>.", "Task Update", arguments);
 
             response.Message = "Task deleted successfully!";
             return Ok(response);
@@ -1519,7 +1441,7 @@ namespace vws.web.Controllers._task
 
             string[] arguments = { selectedTask.Title, LoggedInNickName };
             Guid[] reuqestedUser = { userId };
-            await SendMultipleEmails(successfulAssignedUsers.Except(reuqestedUser).ToList(), "New task with title <b>«{0}»</b> has been assigned to you by <b>«{1}»</b>.", "Task Assign", arguments) ;
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, successfulAssignedUsers.Except(reuqestedUser).ToList(), "New task with title <b>«{0}»</b> has been assigned to you by <b>«{1}»</b>.", "Task Assign", arguments) ;
 
             response.Value = new { SuccessAssigs = successfulAssignedUsers, FailedAssign = failedToAssignUsers};
             response.Message = "Task assigned successfully!";
@@ -1599,7 +1521,7 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
 
             string[] arguments = { selectedTask.Title, LoggedInNickName };
-            await SendSingleEmail("You have been unassigned from task with title <b>«{0}»</b> by <b>«{1}»</b>.", "Task Assign", userId, arguments);
+            await _notificationService.SendSingleEmail((int)EmailTemplateEnum.TaskAssign, "You have been unassigned from task with title <b>«{0}»</b> by <b>«{1}»</b>.", "Task Assign", userId, arguments);
 
             response.Message = "User unassigned from task successfully!";
             return Ok(response);
@@ -1888,7 +1810,7 @@ namespace vws.web.Controllers._task
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, newCheckList.Title, selectedTask.Title };
-            await SendMultipleEmails(usersAssignedTo, "<b>«{0}»</b> added new check list with title <b>«{1}»</b> to your task with title <b>«{2}»</b>.", "Task Update", arguments);
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, usersAssignedTo, "<b>«{0}»</b> added new check list with title <b>«{1}»</b> to your task with title <b>«{2}»</b>.", "Task Update", arguments);
 
             var itemsResponse = AddCheckListItems(newCheckList.Id, model.Items);
 
@@ -1960,7 +1882,7 @@ namespace vws.web.Controllers._task
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, lastTitle, selectedCheckList.Title, selectedCheckList.GeneralTask.Title };
-            await SendMultipleEmails(usersAssignedTo, "<b>«{0}»</b> updated check list title from <b>«{1}»</b> to <b>«{2}»</b> in your task with title <b>«{3}»</b>.", "Task Update", arguments);
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, usersAssignedTo, "<b>«{0}»</b> updated check list title from <b>«{1}»</b> to <b>«{2}»</b> in your task with title <b>«{3}»</b>.", "Task Update", arguments);
 
             response.Message = "Check list title updated successfully!";
             return Ok(response);
@@ -2010,7 +1932,7 @@ namespace vws.web.Controllers._task
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, selectedCheckList.Title, selectedCheckList.GeneralTask.Title };
-            await SendMultipleEmails(usersAssignedTo, "<b>«{0}»</b> deleted check list with title <b>«{1}»</b> in your task with title <b>«{2}»</b>.", "Task Update", arguments);
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, usersAssignedTo, "<b>«{0}»</b> deleted check list with title <b>«{1}»</b> in your task with title <b>«{2}»</b>.", "Task Update", arguments);
 
 
             response.Message = "Check list deleted successfully!";
@@ -2082,7 +2004,7 @@ namespace vws.web.Controllers._task
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, newCheckListItem.Title, selectedCheckList.Title, selectedCheckList.GeneralTask.Title };
-            await SendMultipleEmails(usersAssignedTo, "<b>«{0}»</b> added new check list item with title <b>«{1}»</b> to check list with title <b>«{2}»</b> in your task with title <b>«{3}»</b>.", "Task Update", arguments);
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, usersAssignedTo, "<b>«{0}»</b> added new check list item with title <b>«{1}»</b> to check list with title <b>«{2}»</b> in your task with title <b>«{3}»</b>.", "Task Update", arguments);
 
             response.Value = new CheckListItemResponseModel()
             {
@@ -2155,7 +2077,7 @@ namespace vws.web.Controllers._task
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, lastTitle, selectedCheckListItem.Title, selectedCheckListItem.TaskCheckList.Title, selectedCheckListItem.TaskCheckList.GeneralTask.Title };
-            await SendMultipleEmails(usersAssignedTo, "<b>«{0}»</b> updated check list item title from <b>«{1}»</b> to <b>«{2}»</b> in check list with title <b>«{3}»</b> of your task with title <b>«{4}»</b>.", "Task Update", arguments);
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, usersAssignedTo, "<b>«{0}»</b> updated check list item title from <b>«{1}»</b> to <b>«{2}»</b> in check list with title <b>«{3}»</b> of your task with title <b>«{4}»</b>.", "Task Update", arguments);
 
             response.Message = "Check list item title updated successfully!";
             return Ok(response);
@@ -2211,7 +2133,7 @@ namespace vws.web.Controllers._task
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, lastStatus ? "Done" : "UnderDone", selectedCheckListItem.IsChecked ? "Done" : "UnderDone", selectedCheckListItem.TaskCheckList.Title, selectedCheckListItem.TaskCheckList.GeneralTask.Title };
             bool[] arguemtsLocalize = { false, true, true, false, false };
-            await SendMultipleEmails(usersAssignedTo, "<b>«{0}»</b> updated check list item status from <b>«{1}»</b> to <b>«{2}»</b> in check list with title <b>«{3}»</b> of your task with title <b>«{4}»</b>.", "Task Update", arguments);
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, usersAssignedTo, "<b>«{0}»</b> updated check list item status from <b>«{1}»</b> to <b>«{2}»</b> in check list with title <b>«{3}»</b> of your task with title <b>«{4}»</b>.", "Task Update", arguments);
 
             response.Message = "Check list item is checked updated successfully!";
             return Ok(response);
@@ -2264,7 +2186,7 @@ namespace vws.web.Controllers._task
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, selectedCheckListItem.Title, selectedCheckListItem.TaskCheckList.Title, selectedCheckListItem.TaskCheckList.GeneralTask.Title };
-            await SendMultipleEmails(usersAssignedTo, "<b>«{0}»</b> deleted check list item with title <b>«{1}»</b> in your check list with title <b>«{2}»</b> of <b>«{3}»</b> task.", "Task Update", arguments);
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, usersAssignedTo, "<b>«{0}»</b> deleted check list item with title <b>«{1}»</b> in your check list with title <b>«{2}»</b> of <b>«{3}»</b> task.", "Task Update", arguments);
 
             response.Message = "Check list item delete successfully!";
             return Ok(response);
@@ -2408,7 +2330,7 @@ namespace vws.web.Controllers._task
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, selectedTag.Title, selectedTask.Title };
-            await SendMultipleEmails(usersAssignedTo, "<b>«{0}»</b> added new tag <b>«{1}»</b> to your task with title <b>«{2}»</b>.", "Task Update", arguments);
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, usersAssignedTo, "<b>«{0}»</b> added new tag <b>«{1}»</b> to your task with title <b>«{2}»</b>.", "Task Update", arguments);
 
             response.Message = "New tag added to task";
             return Ok(response);
@@ -2635,7 +2557,7 @@ namespace vws.web.Controllers._task
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, selectedTag.Title, selectedTask.Title };
-            await SendMultipleEmails(usersAssignedTo, "<b>«{0}»</b> deleted tag <b>«{1}»</b> from your task with title <b>«{2}»</b>.", "Task Update", arguments);
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, usersAssignedTo, "<b>«{0}»</b> deleted tag <b>«{1}»</b> from your task with title <b>«{2}»</b>.", "Task Update", arguments);
 
             response.Message = "Task tag deleted";
             return Ok(response);
@@ -2695,7 +2617,7 @@ namespace vws.web.Controllers._task
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, newComment.Body, selectedTask.Title };
-            await SendMultipleEmails(usersAssignedTo, "<b>«{0}»</b> added new comment <b>«{1}»</b> to your task with title <b>«{2}»</b>.", "Task Update", arguments);
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, usersAssignedTo, "<b>«{0}»</b> added new comment <b>«{1}»</b> to your task with title <b>«{2}»</b>.", "Task Update", arguments);
 
             UserProfile userProfile = await _vwsDbContext.GetUserProfileAsync(newComment.CommentedBy);
             response.Value = new CommentResponseModel()
@@ -2766,7 +2688,7 @@ namespace vws.web.Controllers._task
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, lastBody, selectedComment.Body, selectedComment.GeneralTask.Title };
-            await SendMultipleEmails(usersAssignedTo, "<b>«{0}»</b> updated comment from <b>«{1}»</b> to <b>«{2}»</b> in your task with title <b>«{3}»</b>.", "Task Update", arguments);
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, usersAssignedTo, "<b>«{0}»</b> updated comment from <b>«{1}»</b> to <b>«{2}»</b> in your task with title <b>«{3}»</b>.", "Task Update", arguments);
 
             response.Message = "Comment body updated successfully";
             return Ok(response);
@@ -2813,7 +2735,7 @@ namespace vws.web.Controllers._task
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, selectedComment.Body, selectedComment.GeneralTask.Title };
-            await SendMultipleEmails(usersAssignedTo, "<b>«{0}»</b> deleted comment <b>«{1}»</b> in your task with title <b>«{2}»</b>.", "Task Update", arguments);
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, usersAssignedTo, "<b>«{0}»</b> deleted comment <b>«{1}»</b> in your task with title <b>«{2}»</b>.", "Task Update", arguments);
 
             response.Message = "Comment body deleted successfully";
             return Ok(response);
@@ -2863,7 +2785,7 @@ namespace vws.web.Controllers._task
                 usersAssignedTo = usersAssignedTo.Distinct().ToList();
                 usersAssignedTo.Remove(LoggedInUserId.Value);
                 string[] arguments = { LoggedInNickName, selectedComment.Body, selectedComment.GeneralTask.Title };
-                await SendMultipleEmails(usersAssignedTo, emailMessage, "Task Update", arguments);
+                await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, usersAssignedTo, emailMessage, "Task Update", arguments);
             }
 
             return Ok(response);
@@ -2917,7 +2839,7 @@ namespace vws.web.Controllers._task
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, selectedAttachment.FileContainerGuid.ToString(), selectedComment.Body, selectedComment.GeneralTask.Title };
-            await SendMultipleEmails(usersAssignedTo, "<b>«{0}»</b> deleted attachment <b>«{1}»</b> from comment <b>«{2}»</b> in your task with title <b>«{3}»</b>.", "Task Update", arguments);
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, usersAssignedTo, "<b>«{0}»</b> deleted attachment <b>«{1}»</b> from comment <b>«{2}»</b> in your task with title <b>«{3}»</b>.", "Task Update", arguments);
 
             return Ok(response);
         }
@@ -2965,7 +2887,7 @@ namespace vws.web.Controllers._task
                 usersAssignedTo = usersAssignedTo.Distinct().ToList();
                 usersAssignedTo.Remove(LoggedInUserId.Value);
                 string[] arguments = { LoggedInNickName, selectedTask.Title };
-                await SendMultipleEmails(usersAssignedTo, emailMessage, "Task Update", arguments);
+                await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, usersAssignedTo, emailMessage, "Task Update", arguments);
             }
 
             return Ok(response);
@@ -3018,7 +2940,7 @@ namespace vws.web.Controllers._task
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, selectedAttachment.FileContainerGuid.ToString(), selectedTask.Title };
-            await SendMultipleEmails(usersAssignedTo, "<b>«{0}»</b> deleted attachment <b>«{1}»</b> from your task with title <b>«{2}»</b>.", "Task Update", arguments);
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.TaskAssign, usersAssignedTo, "<b>«{0}»</b> deleted attachment <b>«{1}»</b> from your task with title <b>«{2}»</b>.", "Task Update", arguments);
 
             return Ok(response);
         }

@@ -1,0 +1,243 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; added below attachments to comment &lt;b&gt;«{1}»&lt;/b&gt; in your task with title &lt;b&gt;«{2}»&lt;/b&gt;" xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt;  به کامنت &lt;b&gt;«{1}»&lt;/b&gt; در تسک با عنوان &lt;b&gt;«{2}»&lt;/b&gt;  فایل های زیر را ضمیمه کرد</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; added below attachments to your task with title &lt;b&gt;«{1}»&lt;/b&gt;" xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; به تسک شما با عنوان &lt;b&gt;«{1}»&lt;/b&gt; ضمیمه های زیر را اضافه کرد</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; added new check list item with title &lt;b&gt;«{1}»&lt;/b&gt; to check list with title &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; آیتم چک لیست جدیدی با عنوان &lt;b&gt;«{1}»&lt;/b&gt; به چک لیست با عنوان &lt;b&gt;«{2}»&lt;/b&gt; در تسک با عنوان &lt;b&gt;«{3}»&lt;/b&gt; اضافه کرد.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; added new check list with title &lt;b&gt;«{1}»&lt;/b&gt; to your task with title &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; چک لیست جدیدی به عنوان &lt;b&gt;«{1}»&lt;/b&gt; به تسک شما به عنوان &lt;b&gt;«{2}»&lt;/b&gt; اضافه شد.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; added new tag &lt;b&gt;«{1}»&lt;/b&gt; to your task with title &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; برچسب جدید&lt;b&gt;«{1}»&lt;/b&gt; به تسک شما با عنوان &lt;b&gt;«{2}»&lt;/b&gt; اضافه کرد.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted attachment &lt;b&gt;«{1}»&lt;/b&gt; from comment &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; ضمیمه &lt;b&gt;«{1}»&lt;/b&gt; را از کامنت &lt;b&gt;«{2}»&lt;/b&gt; در تسک شما با عنوان &lt;b&gt;«{3}»&lt;/b&gt; حذف کرد.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted attachment &lt;b&gt;«{1}»&lt;/b&gt; from your task with title &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; ضمیمه &lt;b&gt;«{1}»&lt;/b&gt; را از تسک شما با عنوان &lt;b&gt;«{2}»&lt;/b&gt; حذف کرد.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted check list item with title &lt;b&gt;«{1}»&lt;/b&gt; in your check list with title &lt;b&gt;«{2}»&lt;/b&gt; of &lt;b&gt;«{3}»&lt;/b&gt; task." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; آیتم چک لیست با عنوان &lt;b&gt;«{1}»&lt;/b&gt; را در چک لیست با عنوان &lt;b&gt;«{2}»&lt;/b&gt; از تسک &lt;b&gt;«{3}»&lt;/b&gt; را به روز کرد. </value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted check list with title &lt;b&gt;«{1}»&lt;/b&gt; in your task with title &lt;b&gt;«{2}»&lt;/b&gt;" xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; چک لیست با عنوان &lt;b&gt;«{1}»&lt;/b&gt; را از تسک با عنوان &lt;b&gt;«{2}»&lt;/b&gt; حذف کرد.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted comment &lt;b&gt;«{1}»&lt;/b&gt; in your task with title &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; کامنت &lt;b&gt;«{1}»&lt;/b&gt; را در تسک شما با عنوان &lt;b&gt;«{2}»&lt;/b&gt; حذف کرد. </value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted tag &lt;b&gt;«{1}»&lt;/b&gt; from your task with title &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; برچسب &lt;b&gt;«{1}»&lt;/b&gt; از تسک شما با عنوان &lt;b&gt;«{2}»&lt;/b&gt; حذف کرد.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated check list item status from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in check list with title &lt;b&gt;«{3}»&lt;/b&gt; of your task with title &lt;b&gt;«{4}»&lt;/b&gt;" xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; وضعیت آیتم چک لیست را از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; در چک لیست با عنوان &lt;b&gt;«{3}»&lt;/b&gt; از تسک &lt;b&gt;«{4}»&lt;/b&gt; به روز کرد.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated check list item title from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in check list with title &lt;b&gt;«{3}»&lt;/b&gt; of your task with title &lt;b&gt;«{4}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; عنوان آیتم چک لیست را از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; در چک لیست با عنوان &lt;b&gt;«{3}»&lt;/b&gt; از تسک &lt;b&gt;«{4}»&lt;/b&gt; به روز کرد.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated check list title from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; عنوان چک لیست را از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; در تسک شما با عنوان &lt;b&gt;«{3}»&lt;/b&gt; به روز کرد.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated comment from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; کامنت خود را از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; در تسک شما با عنوان &lt;b&gt;«{3}»&lt;/b&gt; به روز کرد.</value>
+  </data>
+  <data name="Done" xml:space="preserve">
+    <value>انجام شده</value>
+  </data>
+  <data name="High" xml:space="preserve">
+    <value>بالا</value>
+  </data>
+  <data name="Low" xml:space="preserve">
+    <value>پایین</value>
+  </data>
+  <data name="Medium" xml:space="preserve">
+    <value>متوسط</value>
+  </data>
+  <data name="New task with title &lt;b&gt;«{0}»&lt;/b&gt; has been assigned to you by &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
+    <value>تسک جدیدی با عنوان &lt;b&gt;«{0}»&lt;/b&gt; توسط &lt;b&gt;«{1}»&lt;/b&gt; به شما اختصاص یافته است.</value>
+  </data>
+  <data name="No Time" xml:space="preserve">
+    <value>بدون زمان</value>
+  </data>
+  <data name="Personal" xml:space="preserve">
+    <value>شخصی</value>
+  </data>
+  <data name="Status of your task with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>وضعیت تسک با عنوان &lt;b&gt;«{0}»&lt;/b&gt; از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; توسط &lt;b&gt;«{3}»&lt;/b&gt; به روز شد.</value>
+  </data>
+  <data name="UnderDone" xml:space="preserve">
+    <value>انجام نشده</value>
+  </data>
+  <data name="You have been unassigned from task with title &lt;b&gt;«{0}»&lt;/b&gt; by &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
+    <value>تسک با عنوان &lt;b&gt;«{0}»&lt;/b&gt; توسط &lt;b&gt;«{1}»&lt;/b&gt; از شما سلب شد.</value>
+  </data>
+  <data name="Your task desciption with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>توضیحات تسک با عنوان &lt;b&gt;«{0}»&lt;/b&gt; توسط &lt;b&gt;«{3}»&lt;/b&gt; از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; به روز شد. </value>
+  </data>
+  <data name="Your task end date with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>زمان پایان تسک شما با عنوان &lt;b&gt;«{0}»&lt;/b&gt; از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; توسط &lt;b&gt;«{3}»&lt;/b&gt; به روز شد.</value>
+  </data>
+  <data name="Your task priority with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt;. to &lt;b&gt;«{2}»&lt;/b&gt;. by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>اولویت تسک شما به عنوان &lt;b&gt;«{0}»&lt;/b&gt; از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; توسط &lt;b&gt;«{3}»&lt;/b&gt; به روز شد.</value>
+  </data>
+  <data name="Your task start date with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>زمان شروع تسک شما با عنوان &lt;b&gt;«{0}»&lt;/b&gt; از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; توسط &lt;b&gt;«{3}»&lt;/b&gt; به روز شد.</value>
+  </data>
+  <data name="Your task title has been updated from &lt;b&gt;«{0}»&lt;/b&gt; to &lt;b&gt;«{1}»&lt;/b&gt; by &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>عنوان تسک شما از &lt;b&gt;«{0}»&lt;/b&gt; به &lt;b&gt;«{1}»&lt;/b&gt; توسط &lt;b&gt;«{2}»&lt;/b&gt; تغییر پیدا کرد.</value>
+  </data>
+  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; has been archived by &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
+    <value>تسک با عنوان &lt;b&gt;«{0}»&lt;/b&gt; توسط &lt;b&gt;«{1}»&lt;/b&gt; آرشیو شد.</value>
+  </data>
+  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; has been deleted by &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
+    <value>تسک با عنوان &lt;b&gt;«{0}»&lt;/b&gt; توسط &lt;b&gt;«{1}»&lt;/b&gt; حذف شد.</value>
+  </data>
+  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was &lt;b&gt;«{1}»&lt;/b&gt; updated to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>تسک شما با عنوان &lt;b&gt;«{0}»&lt;/b&gt; که &lt;b&gt;«{1}»&lt;/b&gt; بود توسط &lt;b&gt;«{3}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; به روز شد.</value>
+  </data>
+  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was &lt;b&gt;«{1}»&lt;/b&gt; updated to under &lt;b&gt;«{2}»&lt;/b&gt; project  by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>تسک شما با عنوان &lt;b&gt;«{0}»&lt;/b&gt; که &lt;b&gt;«{1}»&lt;/b&gt; بود توسط &lt;b&gt;«{3}»&lt;/b&gt; به تحت پروژه &lt;b&gt;«{2}»&lt;/b&gt; به روز شد.</value>
+  </data>
+  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was &lt;b&gt;«{1}»&lt;/b&gt; updated to under &lt;b&gt;«{2}»&lt;/b&gt; team by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>تسک شما با عنوان &lt;b&gt;«{0}»&lt;/b&gt; که &lt;b&gt;«{1}»&lt;/b&gt; بود توسط &lt;b&gt;«{3}»&lt;/b&gt; به تحت تیم &lt;b&gt;«{2}»&lt;/b&gt; به روز شد.</value>
+  </data>
+  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was under &lt;b&gt;«{1}»&lt;/b&gt; team updated to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>تسک شما با عنوان &lt;b&gt;«{0}»&lt;/b&gt; که تحت تیم &lt;b&gt;«{1}»&lt;/b&gt; بود توسط &lt;b&gt;«{3}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; به روز شد.</value>
+  </data>
+  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was under &lt;b&gt;«{1}»&lt;/b&gt; team updated to under &lt;b&gt;«{2}»&lt;/b&gt; project  by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>تسک شما با عنوان &lt;b&gt;«{0}»&lt;/b&gt; که تحت تیم &lt;b&gt;«{1}»&lt;/b&gt; بود توسط &lt;b&gt;«{3}»&lt;/b&gt; به تحت پروژه &lt;b&gt;«{2}»&lt;/b&gt; به روز شد.</value>
+  </data>
+  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was under &lt;b&gt;«{1}»&lt;/b&gt; team updated to under &lt;b&gt;«{2}»&lt;/b&gt; team by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>تسک شما با عنوان &lt;b&gt;«{0}»&lt;/b&gt; که تحت تیم &lt;b&gt;«{1}»&lt;/b&gt; بود توسط &lt;b&gt;«{3}»&lt;/b&gt; به تحت تیم &lt;b&gt;«{2}»&lt;/b&gt; به روز شد.</value>
+  </data>
+  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was under under &lt;b&gt;«{1}»&lt;/b&gt; project updated to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>تسک شما با عنوان &lt;b&gt;«{0}»&lt;/b&gt; که تحت پروژه &lt;b&gt;«{1}»&lt;/b&gt; بود توسط &lt;b&gt;«{3}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; به روز شد.</value>
+  </data>
+  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was under under &lt;b&gt;«{1}»&lt;/b&gt; project updated to under &lt;b&gt;«{2}»&lt;/b&gt; project  by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>تسک شما با عنوان &lt;b&gt;«{0}»&lt;/b&gt; که تحت پروژه &lt;b&gt;«{1}»&lt;/b&gt; بود توسط &lt;b&gt;«{3}»&lt;/b&gt; به تحت پروژه &lt;b&gt;«{2}»&lt;/b&gt; به روز شد.</value>
+  </data>
+  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was under under &lt;b&gt;«{1}»&lt;/b&gt; project updated to under &lt;b&gt;«{2}»&lt;/b&gt; team by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>تسک شما با عنوان &lt;b&gt;«{0}»&lt;/b&gt; که تحت پروژه &lt;b&gt;«{1}»&lt;/b&gt; بود توسط &lt;b&gt;«{3}»&lt;/b&gt; به تحت تیم &lt;b&gt;«{2}»&lt;/b&gt; به روز شد.</value>
+  </data>
+</root>

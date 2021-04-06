@@ -117,51 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; added below attachments to comment &lt;b&gt;«{1}»&lt;/b&gt; in your task with title &lt;b&gt;«{2}»&lt;/b&gt;" xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt;  به کامنت &lt;b&gt;«{1}»&lt;/b&gt; در تسک با عنوان &lt;b&gt;«{2}»&lt;/b&gt;  فایل های زیر را ضمیمه کرد</value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; added below attachments to your task with title &lt;b&gt;«{1}»&lt;/b&gt;" xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; به تسک شما با عنوان &lt;b&gt;«{1}»&lt;/b&gt; ضمیمه های زیر را اضافه کرد</value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; added new check list item with title &lt;b&gt;«{1}»&lt;/b&gt; to check list with title &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; آیتم چک لیست جدیدی با عنوان &lt;b&gt;«{1}»&lt;/b&gt; به چک لیست با عنوان &lt;b&gt;«{2}»&lt;/b&gt; در تسک با عنوان &lt;b&gt;«{3}»&lt;/b&gt; اضافه کرد.</value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; added new check list with title &lt;b&gt;«{1}»&lt;/b&gt; to your task with title &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; چک لیست جدیدی به عنوان &lt;b&gt;«{1}»&lt;/b&gt; به تسک شما به عنوان &lt;b&gt;«{2}»&lt;/b&gt; اضافه شد.</value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; added new tag &lt;b&gt;«{1}»&lt;/b&gt; to your task with title &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; برچسب جدید&lt;b&gt;«{1}»&lt;/b&gt; به تسک شما با عنوان &lt;b&gt;«{2}»&lt;/b&gt; اضافه کرد.</value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted attachment &lt;b&gt;«{1}»&lt;/b&gt; from comment &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; ضمیمه &lt;b&gt;«{1}»&lt;/b&gt; را از کامنت &lt;b&gt;«{2}»&lt;/b&gt; در تسک شما با عنوان &lt;b&gt;«{3}»&lt;/b&gt; حذف کرد.</value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted attachment &lt;b&gt;«{1}»&lt;/b&gt; from your task with title &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; ضمیمه &lt;b&gt;«{1}»&lt;/b&gt; را از تسک شما با عنوان &lt;b&gt;«{2}»&lt;/b&gt; حذف کرد.</value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted check list item with title &lt;b&gt;«{1}»&lt;/b&gt; in your check list with title &lt;b&gt;«{2}»&lt;/b&gt; of &lt;b&gt;«{3}»&lt;/b&gt; task." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; آیتم چک لیست با عنوان &lt;b&gt;«{1}»&lt;/b&gt; را در چک لیست با عنوان &lt;b&gt;«{2}»&lt;/b&gt; از تسک &lt;b&gt;«{3}»&lt;/b&gt; را به روز کرد. </value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted check list with title &lt;b&gt;«{1}»&lt;/b&gt; in your task with title &lt;b&gt;«{2}»&lt;/b&gt;" xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; چک لیست با عنوان &lt;b&gt;«{1}»&lt;/b&gt; را از تسک با عنوان &lt;b&gt;«{2}»&lt;/b&gt; حذف کرد.</value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted comment &lt;b&gt;«{1}»&lt;/b&gt; in your task with title &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; کامنت &lt;b&gt;«{1}»&lt;/b&gt; را در تسک شما با عنوان &lt;b&gt;«{2}»&lt;/b&gt; حذف کرد. </value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted tag &lt;b&gt;«{1}»&lt;/b&gt; from your task with title &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; برچسب &lt;b&gt;«{1}»&lt;/b&gt; از تسک شما با عنوان &lt;b&gt;«{2}»&lt;/b&gt; حذف کرد.</value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated check list item status from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in check list with title &lt;b&gt;«{3}»&lt;/b&gt; of your task with title &lt;b&gt;«{4}»&lt;/b&gt;" xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; وضعیت آیتم چک لیست را از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; در چک لیست با عنوان &lt;b&gt;«{3}»&lt;/b&gt; از تسک &lt;b&gt;«{4}»&lt;/b&gt; به روز کرد.</value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated check list item title from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in check list with title &lt;b&gt;«{3}»&lt;/b&gt; of your task with title &lt;b&gt;«{4}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; عنوان آیتم چک لیست را از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; در چک لیست با عنوان &lt;b&gt;«{3}»&lt;/b&gt; از تسک &lt;b&gt;«{4}»&lt;/b&gt; به روز کرد.</value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated check list title from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; عنوان چک لیست را از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; در تسک شما با عنوان &lt;b&gt;«{3}»&lt;/b&gt; به روز کرد.</value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated comment from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; کامنت خود را از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; در تسک شما با عنوان &lt;b&gt;«{3}»&lt;/b&gt; به روز کرد.</value>
-  </data>
   <data name="Check list item title can not have more than 500 characters." xml:space="preserve">
     <value>عنوان آیتم چک لیست نمی تواند بیشتر از 500 کاراکتر داشته باشد.</value>
   </data>
@@ -176,12 +131,6 @@
   </data>
   <data name="Comment body can not be emty or have more than 1000 characters." xml:space="preserve">
     <value>کامنت نمیتواند خالی باشد یا بیش از 1000 کاراکتر داشته باشد.</value>
-  </data>
-  <data name="Done" xml:space="preserve">
-    <value>انجام شده</value>
-  </data>
-  <data name="High" xml:space="preserve">
-    <value>بالا</value>
   </data>
   <data name="Invalid status." xml:space="preserve">
     <value>وضعیت نا معتبر.</value>
@@ -201,21 +150,6 @@
   <data name="Length of title is more than 500 characters." xml:space="preserve">
     <value>تعداد کاراکتر های بخش عنوان بیشتر از 500 کاراکتر است.</value>
   </data>
-  <data name="Low" xml:space="preserve">
-    <value>پایین</value>
-  </data>
-  <data name="Medium" xml:space="preserve">
-    <value>متوسط</value>
-  </data>
-  <data name="New task with title &lt;b&gt;«{0}»&lt;/b&gt; has been assigned to you by &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
-    <value>تسک جدیدی با عنوان &lt;b&gt;«{0}»&lt;/b&gt; توسط &lt;b&gt;«{1}»&lt;/b&gt; به شما اختصاص یافته است.</value>
-  </data>
-  <data name="No Time" xml:space="preserve">
-    <value>بدون زمان</value>
-  </data>
-  <data name="Personal" xml:space="preserve">
-    <value>شخصی</value>
-  </data>
   <data name="Priority id is not defined." xml:space="preserve">
     <value>اولویت تسک معتبر نیست.</value>
   </data>
@@ -230,9 +164,6 @@
   </data>
   <data name="Status not found." xml:space="preserve">
     <value>وضعیتی با آی دی داده شده یافت نشد.</value>
-  </data>
-  <data name="Status of your task with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>وضعیت تسک با عنوان &lt;b&gt;«{0}»&lt;/b&gt; از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; توسط &lt;b&gt;«{3}»&lt;/b&gt; به روز شد.</value>
   </data>
   <data name="Task already has the tag." xml:space="preserve">
     <value>تسک در حال حاضر این تگ را دارد.</value>
@@ -267,9 +198,6 @@
   <data name="Title can not be empty or with more than 500 characters." xml:space="preserve">
     <value>تیتر نمیتواند خالی یا دارای بیش از 500 کاراکتر باشد.</value>
   </data>
-  <data name="UnderDone" xml:space="preserve">
-    <value>انجام نشده</value>
-  </data>
   <data name="User does not exist." xml:space="preserve">
     <value>کاربر وجود ندارد.</value>
   </data>
@@ -302,56 +230,5 @@
   </data>
   <data name="You don't have access to this task." xml:space="preserve">
     <value>شما به این تسک دسترسی ندارید.</value>
-  </data>
-  <data name="You have been unassigned from task with title &lt;b&gt;«{0}»&lt;/b&gt; by &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
-    <value>تسک با عنوان &lt;b&gt;«{0}»&lt;/b&gt; توسط &lt;b&gt;«{1}»&lt;/b&gt; از شما سلب شد.</value>
-  </data>
-  <data name="Your task desciption with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>توضیحات تسک با عنوان &lt;b&gt;«{0}»&lt;/b&gt; توسط &lt;b&gt;«{3}»&lt;/b&gt; از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; به روز شد. </value>
-  </data>
-  <data name="Your task end date with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>زمان پایان تسک شما با عنوان &lt;b&gt;«{0}»&lt;/b&gt; از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; توسط &lt;b&gt;«{3}»&lt;/b&gt; به روز شد.</value>
-  </data>
-  <data name="Your task priority with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt;. to &lt;b&gt;«{2}»&lt;/b&gt;. by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>اولویت تسک شما به عنوان &lt;b&gt;«{0}»&lt;/b&gt; از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; توسط &lt;b&gt;«{3}»&lt;/b&gt; به روز شد.</value>
-  </data>
-  <data name="Your task start date with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>زمان شروع تسک شما با عنوان &lt;b&gt;«{0}»&lt;/b&gt; از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; توسط &lt;b&gt;«{3}»&lt;/b&gt; به روز شد.</value>
-  </data>
-  <data name="Your task title has been updated from &lt;b&gt;«{0}»&lt;/b&gt; to &lt;b&gt;«{1}»&lt;/b&gt; by &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
-    <value>عنوان تسک شما از &lt;b&gt;«{0}»&lt;/b&gt; به &lt;b&gt;«{1}»&lt;/b&gt; توسط &lt;b&gt;«{2}»&lt;/b&gt; تغییر پیدا کرد.</value>
-  </data>
-  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; has been archived by &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
-    <value>تسک با عنوان &lt;b&gt;«{0}»&lt;/b&gt; توسط &lt;b&gt;«{1}»&lt;/b&gt; آرشیو شد.</value>
-  </data>
-  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; has been deleted by &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
-    <value>تسک با عنوان &lt;b&gt;«{0}»&lt;/b&gt; توسط &lt;b&gt;«{1}»&lt;/b&gt; حذف شد.</value>
-  </data>
-  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was &lt;b&gt;«{1}»&lt;/b&gt; updated to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>تسک شما با عنوان &lt;b&gt;«{0}»&lt;/b&gt; که &lt;b&gt;«{1}»&lt;/b&gt; بود توسط &lt;b&gt;«{3}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; به روز شد.</value>
-  </data>
-  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was &lt;b&gt;«{1}»&lt;/b&gt; updated to under &lt;b&gt;«{2}»&lt;/b&gt; project  by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>تسک شما با عنوان &lt;b&gt;«{0}»&lt;/b&gt; که &lt;b&gt;«{1}»&lt;/b&gt; بود توسط &lt;b&gt;«{3}»&lt;/b&gt; به تحت پروژه &lt;b&gt;«{2}»&lt;/b&gt; به روز شد.</value>
-  </data>
-  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was &lt;b&gt;«{1}»&lt;/b&gt; updated to under &lt;b&gt;«{2}»&lt;/b&gt; team by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>تسک شما با عنوان &lt;b&gt;«{0}»&lt;/b&gt; که &lt;b&gt;«{1}»&lt;/b&gt; بود توسط &lt;b&gt;«{3}»&lt;/b&gt; به تحت تیم &lt;b&gt;«{2}»&lt;/b&gt; به روز شد.</value>
-  </data>
-  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was under &lt;b&gt;«{1}»&lt;/b&gt; team updated to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>تسک شما با عنوان &lt;b&gt;«{0}»&lt;/b&gt; که تحت تیم &lt;b&gt;«{1}»&lt;/b&gt; بود توسط &lt;b&gt;«{3}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; به روز شد.</value>
-  </data>
-  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was under &lt;b&gt;«{1}»&lt;/b&gt; team updated to under &lt;b&gt;«{2}»&lt;/b&gt; project  by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>تسک شما با عنوان &lt;b&gt;«{0}»&lt;/b&gt; که تحت تیم &lt;b&gt;«{1}»&lt;/b&gt; بود توسط &lt;b&gt;«{3}»&lt;/b&gt; به تحت پروژه &lt;b&gt;«{2}»&lt;/b&gt; به روز شد.</value>
-  </data>
-  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was under &lt;b&gt;«{1}»&lt;/b&gt; team updated to under &lt;b&gt;«{2}»&lt;/b&gt; team by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>تسک شما با عنوان &lt;b&gt;«{0}»&lt;/b&gt; که تحت تیم &lt;b&gt;«{1}»&lt;/b&gt; بود توسط &lt;b&gt;«{3}»&lt;/b&gt; به تحت تیم &lt;b&gt;«{2}»&lt;/b&gt; به روز شد.</value>
-  </data>
-  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was under under &lt;b&gt;«{1}»&lt;/b&gt; project updated to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>تسک شما با عنوان &lt;b&gt;«{0}»&lt;/b&gt; که تحت پروژه &lt;b&gt;«{1}»&lt;/b&gt; بود توسط &lt;b&gt;«{3}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; به روز شد.</value>
-  </data>
-  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was under under &lt;b&gt;«{1}»&lt;/b&gt; project updated to under &lt;b&gt;«{2}»&lt;/b&gt; project  by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>تسک شما با عنوان &lt;b&gt;«{0}»&lt;/b&gt; که تحت پروژه &lt;b&gt;«{1}»&lt;/b&gt; بود توسط &lt;b&gt;«{3}»&lt;/b&gt; به تحت پروژه &lt;b&gt;«{2}»&lt;/b&gt; به روز شد.</value>
-  </data>
-  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was under under &lt;b&gt;«{1}»&lt;/b&gt; project updated to under &lt;b&gt;«{2}»&lt;/b&gt; team by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>تسک شما با عنوان &lt;b&gt;«{0}»&lt;/b&gt; که تحت پروژه &lt;b&gt;«{1}»&lt;/b&gt; بود توسط &lt;b&gt;«{3}»&lt;/b&gt; به تحت تیم &lt;b&gt;«{2}»&lt;/b&gt; به روز شد.</value>
   </data>
 </root>

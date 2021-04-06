@@ -117,48 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; added below attachments to comment &lt;b&gt;«{1}»&lt;/b&gt; in your task with title &lt;b&gt;«{2}»&lt;/b&gt;" xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; added below attachments to comment &lt;b&gt;«{1}»&lt;/b&gt; in your task with title &lt;b&gt;«{2}»&lt;/b&gt;</value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; added below attachments to your task with title &lt;b&gt;«{1}»&lt;/b&gt;" xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; added below attachments to your task with title &lt;b&gt;«{1}»&lt;/b&gt;</value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; added new check list item with title &lt;b&gt;«{1}»&lt;/b&gt; to check list with title &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; added new check list item with title &lt;b&gt;«{1}»&lt;/b&gt; to check list with title &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;.</value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; added new check list with title &lt;b&gt;«{1}»&lt;/b&gt; to your task with title &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; added new check list with title &lt;b&gt;«{1}»&lt;/b&gt; to your task with title &lt;b&gt;«{2}»&lt;/b&gt;.</value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; added new tag &lt;b&gt;«{1}»&lt;/b&gt; to your task with title &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; added new tag &lt;b&gt;«{1}»&lt;/b&gt; to your task with title &lt;b&gt;«{2}»&lt;/b&gt;.</value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted attachment &lt;b&gt;«{1}»&lt;/b&gt; from comment &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; deleted attachment &lt;b&gt;«{1}»&lt;/b&gt; from comment &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;.</value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted attachment &lt;b&gt;«{1}»&lt;/b&gt; from your task with title &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; deleted attachment &lt;b&gt;«{1}»&lt;/b&gt; from your task with title &lt;b&gt;«{2}»&lt;/b&gt;.</value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted check list item with title &lt;b&gt;«{1}»&lt;/b&gt; in your check list with title &lt;b&gt;«{2}»&lt;/b&gt; of &lt;b&gt;«{3}»&lt;/b&gt; task." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; deleted check list item with title &lt;b&gt;«{1}»&lt;/b&gt; in your check list with title &lt;b&gt;«{2}»&lt;/b&gt; of &lt;b&gt;«{3}»&lt;/b&gt; task.</value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted check list with title &lt;b&gt;«{1}»&lt;/b&gt; in your task with title &lt;b&gt;«{2}»&lt;/b&gt;" xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; deleted check list with title &lt;b&gt;«{1}»&lt;/b&gt; in your task with title &lt;b&gt;«{2}»&lt;/b&gt;</value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted comment &lt;b&gt;«{1}»&lt;/b&gt; in your task with title &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; deleted comment &lt;b&gt;«{1}»&lt;/b&gt; in your task with title &lt;b&gt;«{2}»&lt;/b&gt;.</value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated check list item status from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in check list with title &lt;b&gt;«{3}»&lt;/b&gt; of your task with title &lt;b&gt;«{4}»&lt;/b&gt;" xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; updated check list item status from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in check list with title &lt;b&gt;«{3}»&lt;/b&gt; of your task with title &lt;b&gt;«{4}»&lt;/b&gt;</value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated check list item title from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in check list with title &lt;b&gt;«{3}»&lt;/b&gt; of your task with title &lt;b&gt;«{4}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; updated check list item title from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in check list with title &lt;b&gt;«{3}»&lt;/b&gt; of your task with title &lt;b&gt;«{4}»&lt;/b&gt;.</value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated check list title from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; updated check list title from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;.</value>
-  </data>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated comment from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; updated comment from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;.</value>
-  </data>
   <data name="Check list item title can not have more than 500 characters." xml:space="preserve">
     <value>Check list item title can not have more than 500 characters.</value>
   </data>
@@ -174,14 +132,8 @@
   <data name="Comment body can not be emty or have more than 1000 characters." xml:space="preserve">
     <value>Comment body can not be emty or have more than 1000 characters.</value>
   </data>
-  <data name="Done" xml:space="preserve">
-    <value>Done</value>
-  </data>
   <data name="File size is not allowed." xml:space="preserve">
     <value>File size is not allowed.</value>
-  </data>
-  <data name="High" xml:space="preserve">
-    <value>High</value>
   </data>
   <data name="Invalid status." xml:space="preserve">
     <value>Invalid status.</value>
@@ -201,21 +153,6 @@
   <data name="Length of title is more than 500 characters." xml:space="preserve">
     <value>Length of title is more than 500 characters.</value>
   </data>
-  <data name="Low" xml:space="preserve">
-    <value>Low</value>
-  </data>
-  <data name="Medium" xml:space="preserve">
-    <value>Medium</value>
-  </data>
-  <data name="New task with title &lt;b&gt;«{0}»&lt;/b&gt; has been assigned to you by &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
-    <value>New task with title &lt;b&gt;«{0}»&lt;/b&gt; has been assigned to you by &lt;b&gt;«{1}»&lt;/b&gt;.</value>
-  </data>
-  <data name="No Time" xml:space="preserve">
-    <value>No Time</value>
-  </data>
-  <data name="Personal" xml:space="preserve">
-    <value>Personal</value>
-  </data>
   <data name="Priority id is not defined." xml:space="preserve">
     <value>Priority id is not defined.</value>
   </data>
@@ -230,9 +167,6 @@
   </data>
   <data name="Status not found." xml:space="preserve">
     <value>Status not found.</value>
-  </data>
-  <data name="Status of your task with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>Status of your task with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;.</value>
   </data>
   <data name="Task already has the tag." xml:space="preserve">
     <value>Task already has the tag.</value>
@@ -267,9 +201,6 @@
   <data name="Title can not be empty or with more than 500 characters." xml:space="preserve">
     <value>Title can not be empty or with more than 500 characters.</value>
   </data>
-  <data name="UnderDone" xml:space="preserve">
-    <value>UnderDone</value>
-  </data>
   <data name="User does not exist." xml:space="preserve">
     <value>User does not exist.</value>
   </data>
@@ -299,53 +230,5 @@
   </data>
   <data name="You don not have access to this check list." xml:space="preserve">
     <value>You don not have access to this check list.</value>
-  </data>
-  <data name="You have been unassigned from task with title &lt;b&gt;«{0}»&lt;/b&gt; by &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
-    <value>You have been unassigned from task with title &lt;b&gt;«{0}»&lt;/b&gt; by &lt;b&gt;«{1}»&lt;/b&gt;.</value>
-  </data>
-  <data name="Your task desciption with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>Your task desciption with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;.</value>
-  </data>
-  <data name="Your task end date with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>Your task end date with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;.</value>
-  </data>
-  <data name="Your task priority with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt;. to &lt;b&gt;«{2}»&lt;/b&gt;. by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>Your task priority with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt;. to &lt;b&gt;«{2}»&lt;/b&gt;. by &lt;b&gt;«{3}»&lt;/b&gt;.</value>
-  </data>
-  <data name="Your task start date with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>Your task start date with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;.</value>
-  </data>
-  <data name="Your task title has been updated from &lt;b&gt;«{0}»&lt;/b&gt; to &lt;b&gt;«{1}»&lt;/b&gt; by &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
-    <value>Your task title has been updated from &lt;b&gt;«{0}»&lt;/b&gt; to &lt;b&gt;«{1}»&lt;/b&gt; by &lt;b&gt;«{2}»&lt;/b&gt;.</value>
-  </data>
-  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; has been deleted by &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
-    <value>Your task with title &lt;b&gt;«{0}»&lt;/b&gt; has been deleted by &lt;b&gt;«{1}»&lt;/b&gt;.</value>
-  </data>
-  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was &lt;b&gt;«{1}»&lt;/b&gt; updated to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was &lt;b&gt;«{1}»&lt;/b&gt; updated to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;.</value>
-  </data>
-  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was &lt;b&gt;«{1}»&lt;/b&gt; updated to under &lt;b&gt;«{2}»&lt;/b&gt; project  by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was &lt;b&gt;«{1}»&lt;/b&gt; updated to under &lt;b&gt;«{2}»&lt;/b&gt; project  by &lt;b&gt;«{3}»&lt;/b&gt;.</value>
-  </data>
-  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was &lt;b&gt;«{1}»&lt;/b&gt; updated to under &lt;b&gt;«{2}»&lt;/b&gt; team by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was &lt;b&gt;«{1}»&lt;/b&gt; updated to under &lt;b&gt;«{2}»&lt;/b&gt; team by &lt;b&gt;«{3}»&lt;/b&gt;.</value>
-  </data>
-  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was under &lt;b&gt;«{1}»&lt;/b&gt; team updated to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was under &lt;b&gt;«{1}»&lt;/b&gt; team updated to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;.</value>
-  </data>
-  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was under &lt;b&gt;«{1}»&lt;/b&gt; team updated to under &lt;b&gt;«{2}»&lt;/b&gt; project  by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was under &lt;b&gt;«{1}»&lt;/b&gt; team updated to under &lt;b&gt;«{2}»&lt;/b&gt; project  by &lt;b&gt;«{3}»&lt;/b&gt;.</value>
-  </data>
-  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was under &lt;b&gt;«{1}»&lt;/b&gt; team updated to under &lt;b&gt;«{2}»&lt;/b&gt; team by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was under &lt;b&gt;«{1}»&lt;/b&gt; team updated to under &lt;b&gt;«{2}»&lt;/b&gt; team by &lt;b&gt;«{3}»&lt;/b&gt;.</value>
-  </data>
-  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was under under &lt;b&gt;«{1}»&lt;/b&gt; project updated to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was under under &lt;b&gt;«{1}»&lt;/b&gt; project updated to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;.</value>
-  </data>
-  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was under under &lt;b&gt;«{1}»&lt;/b&gt; project updated to under &lt;b&gt;«{2}»&lt;/b&gt; project  by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was under under &lt;b&gt;«{1}»&lt;/b&gt; project updated to under &lt;b&gt;«{2}»&lt;/b&gt; project  by &lt;b&gt;«{3}»&lt;/b&gt;.</value>
-  </data>
-  <data name="Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was under under &lt;b&gt;«{1}»&lt;/b&gt; project updated to under &lt;b&gt;«{2}»&lt;/b&gt; team by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>Your task with title &lt;b&gt;«{0}»&lt;/b&gt; which was under under &lt;b&gt;«{1}»&lt;/b&gt; project updated to under &lt;b&gt;«{2}»&lt;/b&gt; team by &lt;b&gt;«{3}»&lt;/b&gt;.</value>
   </data>
 </root>

@@ -133,6 +133,8 @@ namespace vws.web
 
             services.AddScoped<ITeamManagerService, TeamManagerService>();
 
+            services.AddScoped<INotificationService, NotificationService>();
+
             services.AddScoped<TokenValidationFilterAttribute>();
 
             services
