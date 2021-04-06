@@ -34,14 +34,13 @@ namespace vws.web.Controllers._task
         private readonly IPermissionService _permissionService;
         private readonly IConfiguration _configuration;
         private readonly IFileManager _fileManager;
-        private readonly IEmailSender _emailSender;
         private readonly INotificationService _notificationService;
         #endregion
 
         #region Ctor
         public TaskController(UserManager<ApplicationUser> userManager, IStringLocalizer<TaskController> localizer,
             IVWS_DbContext vwsDbContext, IPermissionService permissionService, IConfiguration configuration, IFileManager fileManager,
-            IEmailSender emailSender, INotificationService notificationService)
+            INotificationService notificationService)
         {
             _userManager = userManager;
             _localizer = localizer;
@@ -49,7 +48,6 @@ namespace vws.web.Controllers._task
             _permissionService = permissionService;
             _configuration = configuration;
             _fileManager = fileManager;
-            _emailSender = emailSender;
             _notificationService = notificationService;
         }
         #endregion

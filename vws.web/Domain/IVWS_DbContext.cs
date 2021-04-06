@@ -225,6 +225,10 @@ namespace vws.web.Domain
 
         public IQueryable<TaskAttachment> TaskAttachments { get; }
 
+        public IQueryable<TimeTrack> TimeTracks { get; }
+
+        public IQueryable<TimeTrackPause> TimeTrackPauses { get; }
+
         #endregion
 
         #region methods
@@ -268,6 +272,13 @@ namespace vws.web.Domain
         public void AddTaskAttachment(TaskAttachment taskAttachment);
 
         public void DeleteTaskAttachment(TaskAttachment taskAttachment);
+
+        public void AddTimeTrack(TimeTrack timeTrack);
+
+        public void AddTimeTrackPause(TimeTrackPause timeTrackPause);
+
+        public void DeleteTimeTrackPause(TimeTrackPause timeTrackPause);
+
 
         #endregion
 

@@ -412,6 +412,14 @@ namespace vws.web.Domain
 
         public DbSet<TaskAttachment> TaskAttachments { get; set; }
 
+        IQueryable<TimeTrack> IVWS_DbContext.TimeTracks { get => TimeTracks; }
+
+        public DbSet<TimeTrack> TimeTracks { get; set; }
+
+        IQueryable<TimeTrackPause> IVWS_DbContext.TimeTrackPauses { get => TimeTrackPauses; }
+
+        public DbSet<TimeTrackPause> TimeTrackPauses { get; set; }
+
         public async Task<GeneralTask> AddTaskAsync(GeneralTask generalTask)
         {
             await GeneralTasks.AddAsync(generalTask);
@@ -517,6 +525,21 @@ namespace vws.web.Domain
         public void DeleteTaskAttachment(TaskAttachment taskAttachment)
         {
             TaskAttachments.Remove(taskAttachment);
+        }
+
+        public void AddTimeTrack(TimeTrack timeTrack)
+        {
+            TimeTracks.Add(timeTrack);
+        }
+
+        public void AddTimeTrackPause(TimeTrackPause timeTrackPause)
+        {
+            TimeTrackPauses.Add(timeTrackPause);
+        }
+
+        public void DeleteTimeTrackPause(TimeTrackPause timeTrackPause)
+        {
+            TimeTrackPauses.Remove(timeTrackPause);
         }
 
         #endregion
