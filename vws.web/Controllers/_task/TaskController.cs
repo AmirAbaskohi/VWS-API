@@ -492,7 +492,7 @@ namespace vws.web.Controllers._task
                 emails.Add(user.Email);
                 cultures.Add(profile.CultureId == null ? "en-US" : profile.Culture.CultureAbbreviation);
             }
-            await Task.Run(async () =>
+            Task.Run(async () =>
             {
                 for (int i = 0; i < emails.Count; i++)
                 {
@@ -538,7 +538,7 @@ namespace vws.web.Controllers._task
                 },
                 IsBodyHtml = true
             };
-            await Task.Run(async () => await _emailSender.SendEmailAsync(emailModel, out emailErrorMessage));
+            Task.Run(async () => await _emailSender.SendEmailAsync(emailModel, out emailErrorMessage));
         }
         #endregion
 
