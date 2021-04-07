@@ -225,7 +225,7 @@
   <data name="You do not have access to team." xml:space="preserve">
     <value>شما به تیم دسترسی ندارید.</value>
   </data>
-  <data name="You don not have access to this check list." xml:space="preserve">
+  <data name="You do not have access to this check list." xml:space="preserve">
     <value>شما به این چک لیست دسترسی ندارید.</value>
   </data>
   <data name="You don't have access to this task." xml:space="preserve">

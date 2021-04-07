@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using vws.web.Domain;
 
 namespace vws.web.Migrations
 {
     [DbContext(typeof(VWS_DbContext))]
-    partial class VWS_DbContextModelSnapshot : ModelSnapshot
+    [Migration("20210407130104_UpdateTotalTimeInMinutesToNullable")]
+    partial class UpdateTotalTimeInMinutesToNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1329,8 +1331,8 @@ namespace vws.web.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<double?>("TotalTimeInMinutes")
-                        .HasColumnType("float");
+                    b.Property<long?>("TotalTimeInMinutes")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid>("UserProfileId")
                         .HasColumnType("uniqueidentifier");
@@ -1346,18 +1348,28 @@ namespace vws.web.Migrations
 
             modelBuilder.Entity("vws.web.Domain._task.TimeTrackPause", b =>
                 {
-                    b.Property<long>("TimeTrackId")
-                        .HasColumnType("bigint");
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .UseIdentityColumn();
 
                     b.Property<long>("GeneralTaskId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("TimeTrackId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("TotalTimeInMinutes")
                         .HasColumnType("bigint");
 
                     b.Property<Guid>("UserProfileId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("TimeTrackId");
+                    b.HasKey("Id");
 
                     b.HasIndex("GeneralTaskId");
+
+                    b.HasIndex("TimeTrackId");
 
                     b.HasIndex("UserProfileId");
 
@@ -1688,13 +1700,11 @@ namespace vws.web.Migrations
 
             modelBuilder.Entity("vws.web.Domain._file.File", b =>
                 {
-                    b.HasOne("vws.web.Domain._file.FileContainer", "FileContainer")
+                    b.HasOne("vws.web.Domain._file.FileContainer", null)
                         .WithMany("Files")
                         .HasForeignKey("FileContainerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("FileContainer");
                 });
 
             modelBuilder.Entity("vws.web.Domain._notification.Notification", b =>
@@ -2022,11 +2032,9 @@ namespace vws.web.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("vws.web.Domain._task.TimeTrack", "TimeTrack")
+                    b.HasOne("vws.web.Domain._task.TimeTrack", null)
                         .WithMany("TimeTrackPauses")
-                        .HasForeignKey("TimeTrackId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("TimeTrackId");
 
                     b.HasOne("vws.web.Domain._base.UserProfile", "UserProfile")
                         .WithMany()
@@ -2035,8 +2043,6 @@ namespace vws.web.Migrations
                         .IsRequired();
 
                     b.Navigation("GeneralTask");
-
-                    b.Navigation("TimeTrack");
 
                     b.Navigation("UserProfile");
                 });

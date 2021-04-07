@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -28,7 +27,6 @@ namespace vws.web.Controllers._task
     public class TaskController : BaseController
     {
         #region Feilds
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IStringLocalizer<TaskController> _localizer;
         private readonly IVWS_DbContext _vwsDbContext;
         private readonly IPermissionService _permissionService;
@@ -38,11 +36,10 @@ namespace vws.web.Controllers._task
         #endregion
 
         #region Ctor
-        public TaskController(UserManager<ApplicationUser> userManager, IStringLocalizer<TaskController> localizer,
-            IVWS_DbContext vwsDbContext, IPermissionService permissionService, IConfiguration configuration, IFileManager fileManager,
+        public TaskController(IStringLocalizer<TaskController> localizer, IVWS_DbContext vwsDbContext,
+            IPermissionService permissionService, IConfiguration configuration, IFileManager fileManager,
             INotificationService notificationService)
         {
-            _userManager = userManager;
             _localizer = localizer;
             _vwsDbContext = vwsDbContext;
             _permissionService = permissionService;

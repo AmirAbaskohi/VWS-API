@@ -11,12 +11,21 @@ namespace vws.web.Domain._file
     public class File
     {
         public Guid Id { get; set; }
+        
         public string Address { get; set; }
+        
         public string Name { get; set; }
+        
         public string Extension { get; set; }
+        
         public long Size { get; set; }
+        
         public Guid UploadedBy { get; set; }
+        
         public int FileContainerId { get; set; }
+        
         public Guid FileContainerGuid { get; set; }
+
+        public virtual FileContainer FileContainer { get; set; }
     }
 }

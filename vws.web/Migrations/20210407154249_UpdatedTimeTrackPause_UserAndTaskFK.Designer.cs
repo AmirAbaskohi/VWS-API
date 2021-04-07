@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using vws.web.Domain;
 
 namespace vws.web.Migrations
 {
     [DbContext(typeof(VWS_DbContext))]
-    partial class VWS_DbContextModelSnapshot : ModelSnapshot
+    [Migration("20210407154249_UpdatedTimeTrackPause_UserAndTaskFK")]
+    partial class UpdatedTimeTrackPause_UserAndTaskFK
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1329,8 +1331,8 @@ namespace vws.web.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<double?>("TotalTimeInMinutes")
-                        .HasColumnType("float");
+                    b.Property<long?>("TotalTimeInMinutes")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid>("UserProfileId")
                         .HasColumnType("uniqueidentifier");

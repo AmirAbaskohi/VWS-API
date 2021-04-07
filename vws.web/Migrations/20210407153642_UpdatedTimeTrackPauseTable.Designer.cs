@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using vws.web.Domain;
 
 namespace vws.web.Migrations
 {
     [DbContext(typeof(VWS_DbContext))]
-    partial class VWS_DbContextModelSnapshot : ModelSnapshot
+    [Migration("20210407153642_UpdatedTimeTrackPauseTable")]
+    partial class UpdatedTimeTrackPauseTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1329,8 +1331,8 @@ namespace vws.web.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<double?>("TotalTimeInMinutes")
-                        .HasColumnType("float");
+                    b.Property<long?>("TotalTimeInMinutes")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid>("UserProfileId")
                         .HasColumnType("uniqueidentifier");
@@ -1349,17 +1351,7 @@ namespace vws.web.Migrations
                     b.Property<long>("TimeTrackId")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("GeneralTaskId")
-                        .HasColumnType("bigint");
-
-                    b.Property<Guid>("UserProfileId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("TimeTrackId");
-
-                    b.HasIndex("GeneralTaskId");
-
-                    b.HasIndex("UserProfileId");
 
                     b.ToTable("Task_TimeTrackPause");
                 });
@@ -2016,29 +2008,13 @@ namespace vws.web.Migrations
 
             modelBuilder.Entity("vws.web.Domain._task.TimeTrackPause", b =>
                 {
-                    b.HasOne("vws.web.Domain._task.GeneralTask", "GeneralTask")
-                        .WithMany()
-                        .HasForeignKey("GeneralTaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("vws.web.Domain._task.TimeTrack", "TimeTrack")
                         .WithMany("TimeTrackPauses")
                         .HasForeignKey("TimeTrackId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("vws.web.Domain._base.UserProfile", "UserProfile")
-                        .WithMany()
-                        .HasForeignKey("UserProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("GeneralTask");
-
                     b.Navigation("TimeTrack");
-
-                    b.Navigation("UserProfile");
                 });
 
             modelBuilder.Entity("vws.web.Domain._team.Team", b =>
