@@ -114,14 +114,15 @@ namespace vws.web.Controllers._chat
                                                                  .Where(messageRead => messageRead.ChannelId == LoggedInUserId && messageRead.Message.FromUserId == userIds[i] && !messageRead.Message.IsDeleted)
                                                                  .Count();
                 else
-                    readMessagesCount = _vwsDbContext.MessageReads.Include(messageRead => messageRead.Message).Where(messageRead => messageRead.ChannelId == channelId && !messageRead.Message.IsDeleted)
-                                                                                                             .Count();
+                    readMessagesCount = _vwsDbContext.MessageReads.Include(messageRead => messageRead.Message)
+                                                                  .Where(messageRead => messageRead.ChannelId == channelId && !messageRead.Message.IsDeleted)
+                                                                  .Count();
 
                 if (channelResponseModels[i].ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
                     allMessagesCount = _vwsDbContext.Messages.Where(message => message.ChannelId == LoggedInUserId && message.FromUserId == userIds[i] && !message.IsDeleted)
                                                              .Count();
                 else
-                    allMessagesCount = _vwsDbContext.Messages.Where(message => message.ChannelId == channelId && !message.IsDeleted)
+                    allMessagesCount = _vwsDbContext.Messages.Where(message => message.ChannelId == channelId && message.FromUserId != LoggedInUserId.Value && !message.IsDeleted)
                                                                  .Count();
 
                 channelResponseModels[i].NumberOfUnreadMessages = allMessagesCount - readMessagesCount;
@@ -137,7 +138,7 @@ namespace vws.web.Controllers._chat
                 if (channelResponseModel.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
                     result.Add(channelResponseModel.Guid);
                 else
-                    result.Add(new Guid()); //why?
+                    result.Add(new Guid());
             }
 
             return result;

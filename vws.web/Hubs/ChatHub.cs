@@ -410,7 +410,8 @@ namespace vws.web.Hubs
 
             #region check channel existance and access
             if (!channelService.DoesChannelExist(selectedMessage.ChannelId, selectedMessage.ChannelTypeId) ||
-                    !channelService.HasUserAccessToChannel(LoggedInUserId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId))
+                    !channelService.HasUserAccessToChannel(LoggedInUserId , selectedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private ? selectedMessage.FromUserId : selectedMessage.ChannelId,
+                    selectedMessage.ChannelTypeId))
                 return;
             #endregion
 
