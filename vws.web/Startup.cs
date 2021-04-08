@@ -305,6 +305,15 @@ namespace vws.web
                         context.UpdateNotificationType((byte)notifType, notifType.ToString());
                 }
                 context.Save();
+                foreach (var activityParamType in Enum.GetValues(typeof(SeedDataEnum.ActivityParameterTypes)))
+                {
+                    string dbActivityParamType = context.GetActivityParameterType((byte)activityParamType);
+                    if (dbActivityParamType == null)
+                        context.AddActivityParameterType(new Domain.ActivityParameterType { Id = (byte)activityParamType, Name = activityParamType.ToString() });
+                    else if (dbActivityParamType != activityParamType.ToString())
+                        context.UpdateActivityParameterType((byte)activityParamType, activityParamType.ToString());
+                }
+                context.Save();
             }
         }
     }

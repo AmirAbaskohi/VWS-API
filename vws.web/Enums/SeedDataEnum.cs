@@ -66,5 +66,12 @@ namespace vws.web.Enums
             Department = 3,
             Task = 4
         }
+
+        public enum ActivityParameterTypes : byte
+        {
+            Text = 1,
+            User = 2,
+            File = 3
+        }
     }
 }

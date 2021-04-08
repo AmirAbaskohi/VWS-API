@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using vws.web.Domain;
 
 namespace vws.web.Migrations
 {
     [DbContext(typeof(VWS_DbContext))]
-    partial class VWS_DbContextModelSnapshot : ModelSnapshot
+    [Migration("20210408093254_AddedAcitivityParameterTypeTable")]
+    partial class AddedAcitivityParameterTypeTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1211,52 +1213,6 @@ namespace vws.web.Migrations
                     b.ToTable("Task_TaskCommentTemplate");
                 });
 
-            modelBuilder.Entity("vws.web.Domain._task.TaskHistory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .UseIdentityColumn();
-
-                    b.Property<string>("Event")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("EventTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long>("TaskId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Task_TaskHistory");
-                });
-
-            modelBuilder.Entity("vws.web.Domain._task.TaskHistoryParameter", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .UseIdentityColumn();
-
-                    b.Property<byte>("ActivityParameterTypeId")
-                        .HasColumnType("tinyint");
-
-                    b.Property<string>("Body")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("TaskHistoryId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ActivityParameterTypeId");
-
-                    b.HasIndex("TaskHistoryId");
-
-                    b.ToTable("Task_TaskHistoryParameter");
-                });
-
             modelBuilder.Entity("vws.web.Domain._task.TaskPriority", b =>
                 {
                     b.Property<byte>("Id")
@@ -1984,25 +1940,6 @@ namespace vws.web.Migrations
                     b.Navigation("TaskComment");
                 });
 
-            modelBuilder.Entity("vws.web.Domain._task.TaskHistoryParameter", b =>
-                {
-                    b.HasOne("vws.web.Domain.ActivityParameterType", "ActivityParameterType")
-                        .WithMany()
-                        .HasForeignKey("ActivityParameterTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("vws.web.Domain._task.TaskHistory", "TaskHistory")
-                        .WithMany("TaskHistoryParameters")
-                        .HasForeignKey("TaskHistoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ActivityParameterType");
-
-                    b.Navigation("TaskHistory");
-                });
-
             modelBuilder.Entity("vws.web.Domain._task.TaskReminder", b =>
                 {
                     b.HasOne("vws.web.Domain._task.GeneralTask", "GeneralTask")
@@ -2237,11 +2174,6 @@ namespace vws.web.Migrations
             modelBuilder.Entity("vws.web.Domain._task.TaskComment", b =>
                 {
                     b.Navigation("Attachments");
-                });
-
-            modelBuilder.Entity("vws.web.Domain._task.TaskHistory", b =>
-                {
-                    b.Navigation("TaskHistoryParameters");
                 });
 
             modelBuilder.Entity("vws.web.Domain._task.TaskReminder", b =>

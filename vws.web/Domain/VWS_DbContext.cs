@@ -32,6 +32,29 @@ namespace vws.web.Domain
             SaveChanges();
         }
 
+        #region dbo
+        IQueryable<ActivityParameterType> IVWS_DbContext.ActivityParameterTypes { get => ActivityParameterTypes; }
+
+        public DbSet<ActivityParameterType> ActivityParameterTypes { get; set; }
+
+        public void AddActivityParameterType(ActivityParameterType activityParameterType)
+        {
+            ActivityParameterTypes.Add(activityParameterType);
+        }
+
+        public void UpdateActivityParameterType(byte id, string newName)
+        {
+            var selectedActivityParameterType = ActivityParameterTypes.FirstOrDefault(activityParamType => activityParamType.Id == id);
+            selectedActivityParameterType.Name = newName;
+        }
+
+        public string GetActivityParameterType(byte id)
+        {
+            var selectedActivityParameterType = ActivityParameterTypes.FirstOrDefault(activityParamType => activityParamType.Id == id);
+            return selectedActivityParameterType == null ? null : selectedActivityParameterType.Name;
+        }
+        #endregion
+
         #region base
 
         IQueryable<UserProfile> IVWS_DbContext.UserProfiles { get => UserProfiles; }
@@ -420,6 +443,14 @@ namespace vws.web.Domain
 
         public DbSet<TimeTrackPause> TimeTrackPauses { get; set; }
 
+        IQueryable<TaskHistory> IVWS_DbContext.TaskHistories { get => TaskHistories; }
+
+        public DbSet<TaskHistory> TaskHistories { get; set; }
+
+        IQueryable<TaskHistoryParameter> IVWS_DbContext.TaskHistoryParameters { get => TaskHistoryParameters; }
+
+        public DbSet<TaskHistoryParameter> TaskHistoryParameters { get; set; }
+
         public async Task<GeneralTask> AddTaskAsync(GeneralTask generalTask)
         {
             await GeneralTasks.AddAsync(generalTask);
@@ -540,6 +571,16 @@ namespace vws.web.Domain
         public void DeleteTimeTrackPause(TimeTrackPause timeTrackPause)
         {
             TimeTrackPauses.Remove(timeTrackPause);
+        }
+
+        public void AddTaskHistory(TaskHistory taskHistory)
+        {
+            TaskHistories.Add(taskHistory);
+        }
+
+        public void AddTaskHistoryParameter(TaskHistoryParameter taskHistoryParameter)
+        {
+            TaskHistoryParameters.Add(taskHistoryParameter);
         }
 
         #endregion

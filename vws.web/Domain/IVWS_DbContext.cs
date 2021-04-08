@@ -21,6 +21,20 @@ namespace vws.web.Domain
 
         public void Save();
 
+        #region dbo
+        #region models
+        public IQueryable<ActivityParameterType> ActivityParameterTypes { get; }
+        #endregion
+        #region methods
+        public void AddActivityParameterType(ActivityParameterType activityParameterType);
+
+        public void UpdateActivityParameterType(byte id, string newName);
+
+        public string GetActivityParameterType(byte id);
+        #endregion
+        #endregion
+
+
         #region base
 
         #region models
@@ -56,7 +70,6 @@ namespace vws.web.Domain
         #endregion
 
         #endregion
-
 
 
         #region chat
@@ -229,6 +242,10 @@ namespace vws.web.Domain
 
         public IQueryable<TimeTrackPause> TimeTrackPauses { get; }
 
+        public IQueryable<TaskHistory> TaskHistories { get; }
+
+        public IQueryable<TaskHistoryParameter> TaskHistoryParameters { get; }
+
         #endregion
 
         #region methods
@@ -279,6 +296,9 @@ namespace vws.web.Domain
 
         public void DeleteTimeTrackPause(TimeTrackPause timeTrackPause);
 
+        public void AddTaskHistory(TaskHistory taskHistory);
+
+        public void AddTaskHistoryParameter(TaskHistoryParameter taskHistoryParameter);
 
         #endregion
 
