@@ -55,7 +55,7 @@ namespace vws.web.Controllers._task
             var response = new ResponseModel();
 
             var selectedTask = _vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == taskId);
-            if (selectedTask == null || selectedTask.IsDeleted)
+            if (selectedTask == null || selectedTask.IsDeleted || selectedTask.IsArchived)
             {
                 response.Message = "Task not found";
                 response.AddError(_localizer["Task does not exist."]);
@@ -103,7 +103,7 @@ namespace vws.web.Controllers._task
             var response = new ResponseModel();
 
             var selectedTask = _vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == taskId);
-            if (selectedTask == null || selectedTask.IsDeleted)
+            if (selectedTask == null || selectedTask.IsDeleted || selectedTask.IsArchived)
             {
                 response.Message = "Task not found";
                 response.AddError(_localizer["Task does not exist."]);
@@ -153,7 +153,7 @@ namespace vws.web.Controllers._task
             var response = new ResponseModel();
 
             var selectedTask = _vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == taskId);
-            if (selectedTask == null || selectedTask.IsDeleted)
+            if (selectedTask == null || selectedTask.IsDeleted || selectedTask.IsArchived)
             {
                 response.Message = "Task not found";
                 response.AddError(_localizer["Task does not exist."]);
