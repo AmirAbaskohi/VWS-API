@@ -229,3 +229,8 @@ _Pvt_Extensions
 
 # FAKE - F# Make
 .fake/
+
+# VWS UNSHARABLE FILES
+**/Upload/
+**/appsettings.json
+**/vws.web.sln
