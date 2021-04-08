@@ -111,11 +111,11 @@ namespace vws.web.Controllers._chat
 
                 if (channelResponseModels[i].ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
                     readMessagesCount = _vwsDbContext.MessageReads.Include(messageRead => messageRead.Message)
-                                                                 .Where(messageRead => messageRead.ChannelId == LoggedInUserId && messageRead.Message.FromUserId == userIds[i] && !messageRead.Message.IsDeleted)
+                                                                 .Where(messageRead => messageRead.ChannelId == LoggedInUserId && messageRead.Message.FromUserId == userIds[i] && messageRead.ReadBy == LoggedInUserId.Value && !messageRead.Message.IsDeleted)
                                                                  .Count();
                 else
                     readMessagesCount = _vwsDbContext.MessageReads.Include(messageRead => messageRead.Message)
-                                                                  .Where(messageRead => messageRead.ChannelId == channelId && !messageRead.Message.IsDeleted)
+                                                                  .Where(messageRead => messageRead.ChannelId == channelId && messageRead.ReadBy == LoggedInUserId.Value && !messageRead.Message.IsDeleted)
                                                                   .Count();
 
                 if (channelResponseModels[i].ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
@@ -305,7 +305,7 @@ namespace vws.web.Controllers._chat
                                                                                                     pinnedChannel.ChannelTypeId == model.ChannelTypeId &&
                                                                                                     pinnedChannel.UserId == userId);
 
-            if(selectedPinnedChannel != null)
+            if (selectedPinnedChannel != null)
             {
                 response.AddError(_localizer["Channel is already pinned."]);
                 response.Message = "Channel is already pinned";
@@ -455,7 +455,7 @@ namespace vws.web.Controllers._chat
                                                        .Select(projectMember => projectMember.UserProfile).ToList();
 
                 }
-                else if(selectedProject.ProjectDepartments.Count == 0)
+                else if (selectedProject.ProjectDepartments.Count == 0)
                 {
                     users = _vwsDbContext.TeamMembers.Include(teamMember => teamMember.UserProfile)
                                                     .Where(teamMember => teamMember.TeamId == selectedProject.TeamId && !teamMember.IsDeleted)
@@ -473,7 +473,7 @@ namespace vws.web.Controllers._chat
                 }
             }
 
-            foreach  (var user in users)
+            foreach (var user in users)
             {
                 members.Add(new UserModel()
                 {

@@ -313,6 +313,10 @@ namespace vws.web.Domain
 
         public DbSet<ProjectHistory> ProjectHistories { get; set; }
 
+        IQueryable<ProjectHistoryParameter> IVWS_DbContext.ProjectHistoryParameters { get => ProjectHistoryParameters; }
+
+        public DbSet<ProjectHistoryParameter> ProjectHistoryParameters { get; set; }
+
         public IQueryable<Project> GetUserPrivateProjects(Guid userId)
         {
             return ProjectMembers.Include(projectMember => projectMember.Project)
@@ -359,6 +363,12 @@ namespace vws.web.Domain
         {
             ProjectHistories.Add(projectHistory);
             return projectHistory;
+        }
+
+        public ProjectHistoryParameter AddProjectHistoryParameter(ProjectHistoryParameter projectHistoryParameter)
+        {
+            ProjectHistoryParameters.Add(projectHistoryParameter);
+            return projectHistoryParameter;
         }
 
         public void DeleteProjectDepartment(ProjectDepartment projectDepartment)
@@ -607,6 +617,10 @@ namespace vws.web.Domain
 
         public DbSet<TeamHistory> TeamHistories { get; set; }
 
+        IQueryable<TeamHistoryParameter> IVWS_DbContext.TeamHistoryParameters { get => TeamHistoryParameters; }
+
+        public DbSet<TeamHistoryParameter> TeamHistoryParameters { get; set; }
+
         public async Task<Team> AddTeamAsync(Team team)
         {
             await Teams.AddAsync(team);
@@ -672,6 +686,11 @@ namespace vws.web.Domain
         public void AddTeamHistory(TeamHistory teamHistory)
         {
             TeamHistories.Add(teamHistory);
+        }
+
+        public void AddTeamHistoryParameter(TeamHistoryParameter teamHistoryParameter)
+        {
+            TeamHistoryParameters.Add(teamHistoryParameter);
         }
 
         #endregion

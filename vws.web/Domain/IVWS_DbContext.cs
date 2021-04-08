@@ -174,6 +174,8 @@ namespace vws.web.Domain
 
         public IQueryable<ProjectHistory> ProjectHistories { get; }
 
+        public IQueryable<ProjectHistoryParameter> ProjectHistoryParameters { get; }
+
         #endregion
 
         #region methods
@@ -193,6 +195,8 @@ namespace vws.web.Domain
         public ProjectDepartment AddProjectDepartment(ProjectDepartment projectDepartment);
 
         public ProjectHistory AddProjectHistory(ProjectHistory projectHistory);
+
+        public ProjectHistoryParameter AddProjectHistoryParameter(ProjectHistoryParameter projectHistoryParameter);
 
         public void DeleteProjectDepartment(ProjectDepartment projectDepartment);
 
@@ -320,6 +324,8 @@ namespace vws.web.Domain
 
         public IQueryable<TeamHistory> TeamHistories { get; }
 
+        public IQueryable<TeamHistoryParameter> TeamHistoryParameters { get; }
+
         #endregion
 
         #region methods
@@ -347,6 +353,8 @@ namespace vws.web.Domain
         public void UpdateTeamType(byte id, string newName);
 
         public void AddTeamHistory(TeamHistory teamHistory);
+
+        public void AddTeamHistoryParameter(TeamHistoryParameter teamHistoryParameter);
 
 
         #endregion

@@ -177,7 +177,6 @@ namespace vws.web.Hubs
 
         public async Task SendMessage(string message, byte channelTypeId, Guid channelId, byte messageTypeId, long? replyTo = null)
         {
-            await MarkMessageAsRead(11);
             #region check channel existance and access
             if (!channelService.DoesChannelExist(channelId, channelTypeId) ||
                     !channelService.HasUserAccessToChannel(LoggedInUserId, channelId, channelTypeId))
@@ -409,8 +408,12 @@ namespace vws.web.Hubs
                 return;
 
             #region check channel existance and access
+            Guid channelId = (selectedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private && selectedMessage.FromUserId != LoggedInUserId) ? 
+                              selectedMessage.FromUserId : 
+                              selectedMessage.ChannelId;
+
             if (!channelService.DoesChannelExist(selectedMessage.ChannelId, selectedMessage.ChannelTypeId) ||
-                    !channelService.HasUserAccessToChannel(LoggedInUserId , selectedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private ? selectedMessage.FromUserId : selectedMessage.ChannelId,
+                    !channelService.HasUserAccessToChannel(LoggedInUserId , channelId,
                     selectedMessage.ChannelTypeId))
                 return;
             #endregion
