@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
+using Newtonsoft.Json;
 using vws.web.Domain;
 using vws.web.Domain._base;
 using vws.web.Domain._file;
@@ -363,12 +364,30 @@ namespace vws.web.Controllers._project
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = newProject.Id,
-                Event = "Project created by {0}.",
-                CommaSepratedParameters = (await _vwsDbContext.GetUserProfileAsync(userId)).NickName,
+                Event = "Project {0} created by {1}.",
                 EventTime = creationTime
             };
-
             _vwsDbContext.AddProjectHistory(newProjectHistory);
+            _vwsDbContext.Save();
+
+            var user = await _vwsDbContext.GetUserProfileAsync(userId);
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = newProject.Name
+            });
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                })
+            });
             _vwsDbContext.Save();
 
             foreach (var departmentId in model.DepartmentIds)
@@ -409,7 +428,7 @@ namespace vws.web.Controllers._project
         [HttpPut]
         [Authorize]
         [Route("updateName")]
-        public IActionResult UpdateName(int id, string newName)
+        public async Task<IActionResult> UpdateName(int id, string newName)
         {
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
@@ -441,17 +460,44 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
+            var lastName = selectedProject.Name;
+
             selectedProject.Name = newName;
             selectedProject.ModifiedOn = DateTime.Now;
             selectedProject.ModifiedBy = userId;
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = selectedProject.Id,
-                Event = "Project name updated to {0} by {1}.",
-                CommaSepratedParameters = selectedProject.Name + "," + LoggedInNickName,
+                Event = "Project name updated from {0} to {1} by {2}.",
                 EventTime = selectedProject.ModifiedOn
             };
             _vwsDbContext.AddProjectHistory(newProjectHistory);
+            _vwsDbContext.Save();
+
+            var user = await _vwsDbContext.GetUserProfileAsync(userId);
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = lastName
+            });
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = selectedProject.Name
+            });
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                })
+            });
             _vwsDbContext.Save();
 
             response.Message = "Name updated successfully!";
@@ -461,7 +507,7 @@ namespace vws.web.Controllers._project
         [HttpPut]
         [Authorize]
         [Route("updateDescription")]
-        public IActionResult UpdateDescription(int id, string newDescription)
+        public async Task<IActionResult> UpdateDescription(int id, string newDescription)
         {
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
@@ -494,11 +540,36 @@ namespace vws.web.Controllers._project
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = selectedProject.Id,
-                Event = "Project description updated by {0}.",
-                CommaSepratedParameters = LoggedInNickName,
+                Event = "Project description updated to {0} by {1}.",
                 EventTime = selectedProject.ModifiedOn
             };
             _vwsDbContext.AddProjectHistory(newProjectHistory);
+            _vwsDbContext.Save();
+
+            var user = await _vwsDbContext.GetUserProfileAsync(userId);
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = selectedProject.Description
+            });
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = selectedProject.Name
+            });
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                })
+            });
             _vwsDbContext.Save();
 
             response.Message = "Description updated successfully!";
@@ -508,7 +579,7 @@ namespace vws.web.Controllers._project
         [HttpPut]
         [Authorize]
         [Route("updateColor")]
-        public IActionResult UpdateColor(int id, string newColor)
+        public async Task<IActionResult> UpdateColor(int id, string newColor)
         {
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
@@ -535,17 +606,44 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
+            var lastColor = selectedProject.Color;
+
             selectedProject.Color = newColor;
             selectedProject.ModifiedOn = DateTime.Now;
             selectedProject.ModifiedBy = userId;
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = selectedProject.Id,
-                Event = "Project color updated by {0}.",
-                CommaSepratedParameters = LoggedInNickName,
+                Event = "Project color updated from {0} to {1} by {2}.",
                 EventTime = selectedProject.ModifiedOn
             };
             _vwsDbContext.AddProjectHistory(newProjectHistory);
+            _vwsDbContext.Save();
+
+            var user = await _vwsDbContext.GetUserProfileAsync(userId);
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Color,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = lastColor
+            });
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Color,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = selectedProject.Color
+            });
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                })
+            });
             _vwsDbContext.Save();
 
             response.Message = "Color updated successfully!";
@@ -555,7 +653,7 @@ namespace vws.web.Controllers._project
         [HttpPut]
         [Authorize]
         [Route("updateStartDate")]
-        public IActionResult UpdateStartDate(int id, DateTime? newStartDate)
+        public async Task<IActionResult> UpdateStartDate(int id, DateTime? newStartDate)
         {
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
@@ -582,17 +680,46 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
+            var lastStartDate = selectedProject.StartDate;
+
             selectedProject.StartDate = newStartDate;
             selectedProject.ModifiedOn = DateTime.Now;
             selectedProject.ModifiedBy = userId;
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = selectedProject.Id,
-                Event = "Project start date updated by {0}.",
-                CommaSepratedParameters = LoggedInNickName,
+                Event = "Project start date updated from {0} to {1} by {2}.",
                 EventTime = selectedProject.ModifiedOn
             };
             _vwsDbContext.AddProjectHistory(newProjectHistory);
+            _vwsDbContext.Save();
+
+            var user = await _vwsDbContext.GetUserProfileAsync(userId);
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = lastStartDate == null ? "NoTime" : lastStartDate.ToString(),
+                ShouldBeLocalized = lastStartDate == null ? true : false
+            });
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = selectedProject.StartDate == null ? "NoTime" : selectedProject.StartDate.ToString(),
+                ShouldBeLocalized = selectedProject.StartDate == null ? true : false
+            });
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                })
+            });
             _vwsDbContext.Save();
 
             response.Message = "Start date updated successfully!";
@@ -602,7 +729,7 @@ namespace vws.web.Controllers._project
         [HttpPut]
         [Authorize]
         [Route("updateEndDate")]
-        public IActionResult UpdateEndDate(int id, DateTime? newEndDate)
+        public async Task<IActionResult> UpdateEndDate(int id, DateTime? newEndDate)
         {
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
@@ -629,17 +756,44 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
+            var lastEndDate = selectedProject.EndDate;
+
             selectedProject.EndDate = newEndDate;
             selectedProject.ModifiedOn = DateTime.Now;
             selectedProject.ModifiedBy = userId;
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = selectedProject.Id,
-                Event = "Project end date updated by {0}.",
-                CommaSepratedParameters = LoggedInNickName,
+                Event = "Project end date updated from {0} to {1} by {2}.",
                 EventTime = selectedProject.ModifiedOn
             };
             _vwsDbContext.AddProjectHistory(newProjectHistory);
+            _vwsDbContext.Save();
+
+            var user = await _vwsDbContext.GetUserProfileAsync(userId);
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = lastEndDate == null ? "NoTime" : lastEndDate.ToString()
+            });
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = selectedProject.EndDate == null ? "NoTime" : selectedProject.EndDate.ToString()
+            });
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                })
+            });
             _vwsDbContext.Save();
 
             response.Message = "End date updated successfully!";
@@ -688,10 +842,35 @@ namespace vws.web.Controllers._project
             {
                 ProjectId = selectedProject.Id,
                 Event = "{0} removed from project by {1}.",
-                CommaSepratedParameters = (await _vwsDbContext.GetUserProfileAsync(userId)).NickName + "," + LoggedInNickName,
                 EventTime = selectedProject.ModifiedOn
             };
             _vwsDbContext.AddProjectHistory(newProjectHistory);
+            _vwsDbContext.Save();
+
+            var removedUser = await _vwsDbContext.GetUserProfileAsync(userId);
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                })
+            });
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = removedUser.NickName,
+                    ProfileImageGuid = removedUser.ProfileImageGuid,
+                    UserId = removedUser.UserId
+                })
+            });
             _vwsDbContext.Save();
 
             response.Message = "User deleted successfully!";
@@ -814,10 +993,23 @@ namespace vws.web.Controllers._project
             {
                 ProjectId = selectedProject.Id,
                 Event = "Project team and departments updated by {0}.",
-                CommaSepratedParameters = LoggedInNickName,
                 EventTime = selectedProject.ModifiedOn
             };
             _vwsDbContext.AddProjectHistory(newProjectHistory);
+            _vwsDbContext.Save();
+
+            var user = await _vwsDbContext.GetUserProfileAsync(userId);
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                })
+            });
             _vwsDbContext.Save();
 
             response.Message = "Project team and departments updated successfully!";
@@ -866,11 +1058,22 @@ namespace vws.web.Controllers._project
                 ProjectId = id,
                 Event = "Project deleted by {0}.",
                 EventTime = modificationTime,
-                CommaSepratedParameters = (await _vwsDbContext.GetUserProfileAsync(userId)).NickName
             };
-
             _vwsDbContext.AddProjectHistory(newProjectHistory);
+            _vwsDbContext.Save();
 
+            var user = await _vwsDbContext.GetUserProfileAsync(userId);
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                })
+            });
             _vwsDbContext.Save();
 
             response.Message = "Project deleted successfully!";
@@ -1215,12 +1418,35 @@ namespace vws.web.Controllers._project
             {
                 ProjectId = model.ProjectId,
                 Event = "{0} added {1} to the project.",
-                EventTime = newPorjectMember.CreatedOn,
-                CommaSepratedParameters = (await _vwsDbContext.GetUserProfileAsync(userId)).NickName + "," + (await _vwsDbContext.GetUserProfileAsync(model.UserId)).NickName
+                EventTime = newPorjectMember.CreatedOn
             };
-
             _vwsDbContext.AddProjectHistory(newProjectHistory);
+            _vwsDbContext.Save();
 
+            var user = await _vwsDbContext.GetUserProfileAsync(userId);
+            var addedUser = await _vwsDbContext.GetUserProfileAsync(model.UserId);
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = addedUser.NickName,
+                    ProfileImageGuid = addedUser.ProfileImageGuid,
+                    UserId = addedUser.UserId
+                })
+            });
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                })
+            });
             _vwsDbContext.Save();
 
             response.Message = "User added successfully!";
@@ -1325,13 +1551,36 @@ namespace vws.web.Controllers._project
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = projectId,
-                Event = "Added new project image for project by {0}.",
-                EventTime = selectedProject.ModifiedOn,
-                CommaSepratedParameters = (await _vwsDbContext.GetUserProfileAsync(userId)).NickName
+                Event = "Project image updated to {0} by {1}.",
+                EventTime = selectedProject.ModifiedOn
             };
-
             _vwsDbContext.AddProjectHistory(newProjectHistory);
+            _vwsDbContext.Save();
 
+            var user = await _vwsDbContext.GetUserProfileAsync(userId);
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.File,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = JsonConvert.SerializeObject(new FileModel()
+                {
+                    Name = fileResponse.Value.Name,
+                    Extension = fileResponse.Value.Extension,
+                    FileContainerGuid = fileResponse.Value.FileContainerGuid,
+                    Size = fileResponse.Value.Size
+                })
+            });;
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                })
+            });
             _vwsDbContext.Save();
 
             response.Value = fileResponse.Value.FileContainerGuid;
@@ -1388,14 +1637,35 @@ namespace vws.web.Controllers._project
             {
                 ProjectId = id,
                 Event = "Project status changed from {0} to {1} by {2}.",
-                EventTime = selectedProject.ModifiedOn,
-                CommaSepratedParameters = (SeedDataEnum.ProjectStatuses)lastStatus +
-                                          "," + (SeedDataEnum.ProjectStatuses)selectedProject.StatusId +
-                                          "," + (await _vwsDbContext.GetUserProfileAsync(userId)).NickName
+                EventTime = selectedProject.ModifiedOn
             };
-
             _vwsDbContext.AddProjectHistory(newProjectHistory);
+            _vwsDbContext.Save();
 
+            var user = await _vwsDbContext.GetUserProfileAsync(userId);
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = ((SeedDataEnum.ProjectStatuses)lastStatus).ToString()
+            });
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = ((SeedDataEnum.ProjectStatuses)selectedProject.StatusId).ToString()
+            });
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                })
+            });
             _vwsDbContext.Save();
 
             response.Message = "Project status updated successfully!";
@@ -1529,21 +1799,22 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            if (selectedProject.TeamId == null && selectedProject.CreateBy != userId)
-            {
-                response.Message = "Not creator";
-                response.AddError(_localizer["You are not project creator."]);
-                return StatusCode(StatusCodes.Status403Forbidden, response);
-            }
-
             var events = new List<HistoryModel>();
             var projectEvents = _vwsDbContext.ProjectHistories.Where(projectHistory => projectHistory.ProjectId == id);
             foreach (var projectEvent in projectEvents)
             {
-                var parameters = projectEvent.CommaSepratedParameters.Split(',');
+                var parameters = _vwsDbContext.ProjectHistoryParameters.Where(param => param.ProjectHistoryId == projectEvent.Id)
+                                                                       .OrderBy(param => param.Id)
+                                                                       .ToList();
+                for (int i = 0; i < parameters.Count(); i++)
+                {
+                    if (parameters[i].ActivityParameterTypeId == (byte)SeedDataEnum.ActivityParameterTypes.Text && parameters[i].ShouldBeLocalized)
+                        parameters[i].Body = _localizer[parameters[i].Body];
+                }
                 events.Add(new HistoryModel()
                 {
-                    Message = String.Format(_localizer[projectEvent.Event], parameters),
+                    Message = _localizer[projectEvent.Event],
+                    Parameters = parameters.Select(param => new HistoryParameterModel() { ParameterBody = param.Body, ParameterType = param.ActivityParameterTypeId }).ToList(),
                     Time = projectEvent.EventTime
                 });
             }

@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Active" xml:space="preserve">
+    <value>فعال</value>
+  </data>
   <data name="Added new project image for project by {0}." xml:space="preserve">
     <value>تصویر جدیدی برای پروژه توسط {0} آپلود شد.</value>
   </data>
@@ -132,6 +135,9 @@
   <data name="Department with name {0} is not for selected team." xml:space="preserve">
     <value>دپارتمان با نام {0} زیر مجموعه تیم انتخاب شده نیست.</value>
   </data>
+  <data name="DoneOrArchived" xml:space="preserve">
+    <value>تمام یا آرشیو شده</value>
+  </data>
   <data name="Error in writing files." xml:space="preserve">
     <value>در نوشتن فایل مشکلی پیش آمد.</value>
   </data>
@@ -140,6 +146,9 @@
   </data>
   <data name="File size is not allowed." xml:space="preserve">
     <value>حجم فایل معتبر نیست.</value>
+  </data>
+  <data name="Hold" xml:space="preserve">
+    <value>نگه داشته شده</value>
   </data>
   <data name="If your project is under department, you should specify the team." xml:space="preserve">
     <value>در صورتی که پروژه تحت دپارتمان است، باید تیم مشخص شود.</value>
@@ -156,8 +165,14 @@
   <data name="Name can not be empty." xml:space="preserve">
     <value>نام نمی تواند خالی باشد.</value>
   </data>
+  <data name="NoTime" xml:space="preserve">
+    <value>بدون زمان</value>
+  </data>
   <data name="Project color updated by {0}." xml:space="preserve">
     <value>رنگ پروژه توسط {0} به روز شد.</value>
+  </data>
+  <data name="Project color updated from {0} to {1} by {2}." xml:space="preserve">
+    <value>رنگ پروژه از {0} به {1} توسط {2} به روز شد.</value>
   </data>
   <data name="Project created by {0}." xml:space="preserve">
     <value>پروژه توسط {0} ساخته شد.</value>
@@ -168,17 +183,32 @@
   <data name="Project description updated by {0}." xml:space="preserve">
     <value>توضیحات پروژه توسط {0} به روز شد.</value>
   </data>
+  <data name="Project description updated to {0} by {1}." xml:space="preserve">
+    <value>توضیحات پروژه به {0} توسط {1} به روز شد.</value>
+  </data>
   <data name="Project end date updated by {0}." xml:space="preserve">
     <value>تاریخ پایان پروژه توسط {0} به روز شد.</value>
   </data>
+  <data name="Project end date updated from {0} to {1} by {2}." xml:space="preserve">
+    <value>زمان پایان پروژه از {0} به {1} توسط {2} به روز شد.</value>
+  </data>
+  <data name="Project image updated to {0} by {1}." xml:space="preserve">
+    <value>تصویر پروژه به {0} توسط {1} به روز شد.</value>
+  </data>
   <data name="Project is not personal." xml:space="preserve">
     <value>پروژه شخصی نیست.</value>
+  </data>
+  <data name="Project name updated from {0} to {1} by {2}." xml:space="preserve">
+    <value>نام پروژه از {0} به {1} توسط {2} به روز شد.</value>
   </data>
   <data name="Project name updated to {0} by {1}." xml:space="preserve">
     <value>نام پروژه توسط {1} به {0} تغییر پیدا کرد.</value>
   </data>
   <data name="Project start date updated by {0}." xml:space="preserve">
     <value>تاریخ شروع پروژه توسط {0} به روز شد.</value>
+  </data>
+  <data name="Project start date updated from {0} to {1} by {2}." xml:space="preserve">
+    <value>زمان شروع پروژه از {0} به {1} توسط {2} به روز شد.</value>
   </data>
   <data name="Project status changed from {0} to {1} by {2}." xml:space="preserve">
     <value>وضعیت پروژه از {0} به {1} توسط {2} تغییر پیدا کرد.</value>
@@ -188,6 +218,9 @@
   </data>
   <data name="Project updated by {0}." xml:space="preserve">
     <value>پروژه توسط {0} آپدیت شد.</value>
+  </data>
+  <data name="Project {0} created by {1}." xml:space="preserve">
+    <value>پروژه {0} توسط {1} ایجاد شد.</value>
   </data>
   <data name="Start Date should be before End Date." xml:space="preserve">
     <value>زمان شروع باید قبل از زمان پایان باشد.</value>

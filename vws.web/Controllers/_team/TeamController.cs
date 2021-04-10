@@ -23,6 +23,7 @@ using static vws.web.EmailTemplates.EmailTemplateTypes;
 using vws.web.EmailTemplates;
 using Microsoft.Extensions.Configuration;
 using System.Net;
+using Newtonsoft.Json;
 
 namespace vws.web.Controllers._team
 {
@@ -227,12 +228,32 @@ namespace vws.web.Controllers._team
 
             SendJoinTeamInvitaionLinks(model.EmailsForInvite, newTeam.Id);
 
-            _vwsDbContext.AddTeamHistory(new TeamHistory()
+            var newHistory = new TeamHistory()
             {
                 TeamId = newTeam.Id,
                 EventTime = newTeam.CreatedOn,
-                CommaSepratedParameters = (await _vwsDbContext.GetUserProfileAsync(newTeam.CreatedBy)).NickName,
-                Event = "Team created by {0}."
+                Event = "Team {0} created by {1}."
+            };
+            _vwsDbContext.AddTeamHistory(newHistory);
+            _vwsDbContext.Save();
+
+            var user = await _vwsDbContext.GetUserProfileAsync(userId);
+            _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = newTeam.Name,
+                TeamHistoryId = newHistory.Id
+            });
+            _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel() 
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TeamHistoryId = newHistory.Id
             });
             _vwsDbContext.Save();
 
@@ -303,12 +324,32 @@ namespace vws.web.Controllers._team
             await _vwsDbContext.AddTeamInviteLinkAsync(newInviteLink);
             _vwsDbContext.Save();
 
-            _vwsDbContext.AddTeamHistory(new TeamHistory()
+            var newHistory = new TeamHistory()
             {
                 TeamId = teamId,
                 EventTime = creationTime,
-                CommaSepratedParameters = (await _vwsDbContext.GetUserProfileAsync(newInviteLink.CreatedBy)).NickName + "," + newInviteLink.LinkGuid.ToString(),
-                Event = "Created new invite link by {0} with id {1}."
+                Event = "{0} created new invite link with id {1}."
+            };
+            _vwsDbContext.AddTeamHistory(newHistory);
+            _vwsDbContext.Save();
+
+            var user = await _vwsDbContext.GetUserProfileAsync(userId) ;
+            _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TeamHistoryId = newHistory.Id
+            });
+            _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = newInviteLink.LinkGuid.ToString(),
+                TeamHistoryId = newHistory.Id
             });
             _vwsDbContext.Save();
 
@@ -364,12 +405,32 @@ namespace vws.web.Controllers._team
             await _vwsDbContext.AddTeamMemberAsync(newTeamMember);
             _vwsDbContext.Save();
 
-            _vwsDbContext.AddTeamHistory(new TeamHistory()
+            var newHistory = new TeamHistory()
             {
                 TeamId = newTeamMember.TeamId,
                 EventTime = newTeamMember.CreatedOn,
-                CommaSepratedParameters = LoggedInNickName + "," + guid.ToString(),
-                Event = "{0} joined the group using {1} invite link."
+                Event = "{0} joined the team using invite link with guid {1}."
+            };
+            _vwsDbContext.AddTeamHistory(newHistory);
+            _vwsDbContext.Save();
+
+            var user = await _vwsDbContext.GetUserProfileAsync(userId);
+            _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TeamHistoryId = newHistory.Id
+            });
+            _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedTeamLink.LinkGuid.ToString(),
+                TeamHistoryId = newHistory.Id
             });
             _vwsDbContext.Save();
 
@@ -475,12 +536,32 @@ namespace vws.web.Controllers._team
             selectedInviteLink.IsRevoked = true;
             _vwsDbContext.Save();
 
-            _vwsDbContext.AddTeamHistory(new TeamHistory()
+            var newHistory = new TeamHistory()
             {
                 TeamId = selectedInviteLink.TeamId,
                 EventTime = DateTime.Now,
-                CommaSepratedParameters = selectedInviteLink.LinkGuid + "," + LoggedInNickName,
                 Event = "Invite link with id {0} revoked by {1}."
+            };
+            _vwsDbContext.AddTeamHistory(newHistory);
+            _vwsDbContext.Save();
+
+            var user = await _vwsDbContext.GetUserProfileAsync(userId);
+            _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedInviteLink.LinkGuid.ToString(),
+                TeamHistoryId = newHistory.Id
+            });
+            _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TeamHistoryId = newHistory.Id
             });
             _vwsDbContext.Save();
 
@@ -663,6 +744,41 @@ namespace vws.web.Controllers._team
             selectedTeam.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
+            var newHistory = new TeamHistory()
+            {
+                TeamId = selectedTeam.Id,
+                EventTime = selectedTeam.ModifiedOn,
+                Event = "Team image updated to {0} by {1}."
+            };
+            _vwsDbContext.AddTeamHistory(newHistory);
+            _vwsDbContext.Save();
+
+            var user = await _vwsDbContext.GetUserProfileAsync(userId);
+            _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.File,
+                Body = JsonConvert.SerializeObject(new FileModel()
+                {
+                    Extension = fileResponse.Value.Extension,
+                    FileContainerGuid = fileResponse.Value.FileContainerGuid,
+                    Name = fileResponse.Value.Name,
+                    Size = fileResponse.Value.Size
+                }),
+                TeamHistoryId = newHistory.Id
+            });
+            _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TeamHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+
             response.Value = fileResponse.Value.FileContainerGuid;
             response.Message = "Team image added successfully!";
             return Ok(response);
@@ -720,12 +836,26 @@ namespace vws.web.Controllers._team
             }
             _vwsDbContext.Save();
 
-            _vwsDbContext.AddTeamHistory(new TeamHistory()
+            var newHistory = new TeamHistory()
             {
                 TeamId = selectedTeam.Id,
                 EventTime = selectedTeam.ModifiedOn,
-                CommaSepratedParameters = LoggedInNickName,
-                Event = "{0} updated team image."
+                Event = "{0} deleted team."
+            };
+            _vwsDbContext.AddTeamHistory(newHistory);
+            _vwsDbContext.Save();
+
+            var user = await _vwsDbContext.GetUserProfileAsync(userId);
+            _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TeamHistoryId = newHistory.Id
             });
             _vwsDbContext.Save();
 
@@ -933,10 +1063,18 @@ namespace vws.web.Controllers._team
             var teamEvents = _vwsDbContext.TeamHistories.Where(teamHistory => teamHistory.TeamId == id);
             foreach (var teamEvent in teamEvents)
             {
-                var parameters = teamEvent.CommaSepratedParameters.Split(',');
+                var parameters = _vwsDbContext.TeamHistoryParameters.Where(param => param.TeamHistoryId == teamEvent.Id)
+                                                                    .OrderBy(param => param.Id)
+                                                                    .ToList();
+                for (int i = 0; i < parameters.Count(); i++)
+                {
+                    if (parameters[i].ActivityParameterTypeId == (byte)SeedDataEnum.ActivityParameterTypes.Text && parameters[i].ShouldBeLocalized)
+                        parameters[i].Body = _localizer[parameters[i].Body];
+                }
                 events.Add(new HistoryModel()
                 {
-                    Message = String.Format(_localizer[teamEvent.Event], parameters),
+                    Message = _localizer[teamEvent.Event],
+                    Parameters = parameters.Select(param => new HistoryParameterModel() { ParameterBody = param.Body, ParameterType = param.ActivityParameterTypeId }).ToList(),
                     Time = teamEvent.EventTime
                 });
             }

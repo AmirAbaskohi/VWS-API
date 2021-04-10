@@ -470,6 +470,22 @@ namespace vws.web.Controllers._task
 
             return result;
         }
+
+        //private void AddCreateTaaskHistory(TaskResponseModel taskResponseModel)
+        //{
+        //    _vwsDbContext.AddTaskHistory(new TaskHistory()
+        //    {
+        //        EventTime = taskResponseModel.CreatedOn,
+        //        Event = "Task created by {0}.",
+        //        TaskId = taskResponseModel.Id
+        //    });
+        //    _vwsDbContext.
+
+        //    if (taskResponseModel.ProjectId != null)
+        //    {
+        //        _vwsDbContext.AddProjectHistory()
+        //    }
+        //}
         #endregion
 
         #region TaskAPIS
@@ -653,6 +669,8 @@ namespace vws.web.Controllers._task
                 Comments = await GetTaskComments(newTask.Id),
                 Attachments = GetTaskAttachments(newTask.Id)
             };
+
+            //AddCreateTaaskHistory(newTaskResponseModel);
 
             response.Value = newTaskResponseModel;
             response.Message = "Task created successfully!";

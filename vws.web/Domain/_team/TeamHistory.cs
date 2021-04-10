@@ -18,8 +18,6 @@ namespace vws.web.Domain._team
 
         public string Event { get; set; }
 
-        public string CommaSepratedParameters { get; set; }
-
         public DateTime EventTime { get; set; }
 
         public ICollection<TeamHistoryParameter> TeamHistoryParameters { get; set; }

@@ -150,6 +150,12 @@
   <data name="Team created by {0}." xml:space="preserve">
     <value>Team created by {0}.</value>
   </data>
+  <data name="Team image updated to {0} by {1}." xml:space="preserve">
+    <value>Team image updated to {0} by {1}.</value>
+  </data>
+  <data name="Team {0} created by {1}." xml:space="preserve">
+    <value>Team {0} created by {1}.</value>
+  </data>
   <data name="There is more than one file." xml:space="preserve">
     <value>There is more than one file.</value>
   </data>
@@ -177,8 +183,14 @@
   <data name="Your file does not have extension." xml:space="preserve">
     <value>Your file does not have extension.</value>
   </data>
+  <data name="{0} created new invite link with id {1}." xml:space="preserve">
+    <value>{0} created new invite link with id {1}.</value>
+  </data>
   <data name="{0} joined the group using {1} invite link." xml:space="preserve">
     <value>{0} joined the group using {1} invite link.</value>
+  </data>
+  <data name="{0} joined the team using invite link with guid {1}." xml:space="preserve">
+    <value>{0} joined the team using invite link with guid {1}.</value>
   </data>
   <data name="{0} updated team image." xml:space="preserve">
     <value>{0} updated team image.</value>

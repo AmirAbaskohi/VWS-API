@@ -18,8 +18,6 @@ namespace vws.web.Domain._project
 
         public string Event { get; set; }
 
-        public string CommaSepratedParameters { get; set; }
-
         public DateTime EventTime { get; set; }
 
         public virtual ICollection<ProjectHistoryParameter> ProjectHistoryParameters { get; set; }

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using vws.web.Domain;
 
 namespace vws.web.Migrations
 {
     [DbContext(typeof(VWS_DbContext))]
-    partial class VWS_DbContextModelSnapshot : ModelSnapshot
+    [Migration("20210408154358_MoveValuesFromLastHistoryTableToParameterTable")]
+    partial class MoveValuesFromLastHistoryTableToParameterTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -838,6 +840,9 @@ namespace vws.web.Migrations
                         .HasColumnType("bigint")
                         .UseIdentityColumn();
 
+                    b.Property<string>("CommaSepratedParameters")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Event")
                         .HasColumnType("nvarchar(max)");
 
@@ -867,9 +872,6 @@ namespace vws.web.Migrations
 
                     b.Property<long>("ProjectHistoryId")
                         .HasColumnType("bigint");
-
-                    b.Property<bool>("ShouldBeLocalized")
-                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
@@ -1511,6 +1513,9 @@ namespace vws.web.Migrations
                         .HasColumnType("bigint")
                         .UseIdentityColumn();
 
+                    b.Property<string>("CommaSepratedParameters")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Event")
                         .HasColumnType("nvarchar(max)");
 
@@ -1537,9 +1542,6 @@ namespace vws.web.Migrations
 
                     b.Property<string>("Body")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("ShouldBeLocalized")
-                        .HasColumnType("bit");
 
                     b.Property<long>("TeamHistoryId")
                         .HasColumnType("bigint");

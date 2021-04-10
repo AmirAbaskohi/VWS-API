@@ -17,6 +17,8 @@ namespace vws.web.Domain._team
 
         public string Body { get; set; }
 
+        public bool ShouldBeLocalized { get; set; }
+
         public virtual ActivityParameterType ActivityParameterType { get; set; }
 
         public virtual TeamHistory TeamHistory { get; set; }

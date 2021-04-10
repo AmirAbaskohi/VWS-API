@@ -150,6 +150,12 @@
   <data name="Team created by {0}." xml:space="preserve">
     <value>تیم توسط {0} ساخته شد.</value>
   </data>
+  <data name="Team image updated to {0} by {1}." xml:space="preserve">
+    <value>تصویر تیم به {0} توسط {1} به روز شد.</value>
+  </data>
+  <data name="Team {0} created by {1}." xml:space="preserve">
+    <value>تیم {0} توسط {1} ایجاد شد.</value>
+  </data>
   <data name="There is more than one file." xml:space="preserve">
     <value>بیشتر از یک فایل وجود دارد.</value>
   </data>
@@ -177,8 +183,14 @@
   <data name="Your file does not have extension." xml:space="preserve">
     <value>فایل شما پسوند ندارد.</value>
   </data>
+  <data name="{0} created new invite link with id {1}." xml:space="preserve">
+    <value>{0} لینک دعوت جدیدی با آی دی {1} ایجاد کرد.</value>
+  </data>
   <data name="{0} joined the group using {1} invite link." xml:space="preserve">
     <value>{0} با استفاده از لینک {1} به تیم اضافه شد.</value>
+  </data>
+  <data name="{0} joined the team using invite link with guid {1}." xml:space="preserve">
+    <value>{0} با استفاده از لینک با آی دی {1} به تیم پیوست.</value>
   </data>
   <data name="{0} updated team image." xml:space="preserve">
     <value>{0} تصویر تیم را به روز کرد.</value>

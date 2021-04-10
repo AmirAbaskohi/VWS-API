@@ -71,7 +71,8 @@ namespace vws.web.Enums
         {
             Text = 1,
             User = 2,
-            File = 3
+            File = 3,
+            Color = 4
         }
     }
 }

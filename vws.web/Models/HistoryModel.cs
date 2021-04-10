@@ -9,5 +9,6 @@ namespace vws.web.Models
     {
         public string Message { get; set; }
         public DateTime Time { get; set; }
+        public List<HistoryParameterModel> Parameters { get; set; }
     }
 }
