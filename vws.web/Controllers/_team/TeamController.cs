@@ -297,6 +297,7 @@ namespace vws.web.Controllers._team
             {
                 response.Message = "Team model data has problem.";
                 response.AddError(_localizer["Team name can not be empty and should have less than 500 characters."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             var selectedTeam = await _vwsDbContext.GetTeamAsync(id);
@@ -333,6 +334,7 @@ namespace vws.web.Controllers._team
             {
                 response.Message = "Team model data has problem.";
                 response.AddError(_localizer["Length of description is more than 2000 characters."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             var selectedTeam = await _vwsDbContext.GetTeamAsync(id);
@@ -369,6 +371,7 @@ namespace vws.web.Controllers._team
             {
                 response.Message = "Team model data has problem.";
                 response.AddError(_localizer["Length of color is more than 6 characters."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             var selectedTeam = await _vwsDbContext.GetTeamAsync(id);
