@@ -25,6 +25,8 @@ using Microsoft.Extensions.Configuration;
 using System.Net;
 using Newtonsoft.Json;
 using vws.web.Services;
+using vws.web.Models._project;
+using vws.web.Services._project;
 
 namespace vws.web.Controllers._team
 {
@@ -42,12 +44,14 @@ namespace vws.web.Controllers._team
         private readonly IEmailSender _emailSender;
         private readonly IConfiguration _configuration;
         private readonly IPermissionService _permissionService;
+        private readonly IProjectManagerService _projectManager;
         #endregion
 
         #region Ctor
         public TeamController(UserManager<ApplicationUser> userManager, IStringLocalizer<TeamController> localizer,
             IVWS_DbContext vwsDbContext, IFileManager fileManager, IDepartmentManagerService departmentManager,
-            ITeamManagerService teamManager, IEmailSender emailSender, IConfiguration configuration, IPermissionService permissionService)
+            ITeamManagerService teamManager, IEmailSender emailSender, IConfiguration configuration, IPermissionService permissionService,
+            IProjectManagerService projectManager)
         {
             _userManager = userManager;
             _localizer = localizer;
@@ -58,6 +62,7 @@ namespace vws.web.Controllers._team
             _emailSender = emailSender;
             _configuration = configuration;
             _permissionService = permissionService;
+            _projectManager = projectManager;
         }
         #endregion
 
@@ -632,7 +637,6 @@ namespace vws.web.Controllers._team
             var userId = LoggedInUserId.Value;
 
             var selectedTeam = await _vwsDbContext.GetTeamAsync(id);
-
             if (selectedTeam == null || selectedTeam.IsDeleted)
             {
                 response.Message = "Team not found";
@@ -668,6 +672,56 @@ namespace vws.web.Controllers._team
                 });
 
             response.Value = departments;
+            response.Message = "Team departments returned successfully!";
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getProjects")]
+        public async Task<IActionResult> GetTeamProjects(int id)
+        {
+            var response = new ResponseModel<List<ProjectResponseModel>>();
+            var projects = new List<ProjectResponseModel>();
+            var userId = LoggedInUserId.Value;
+
+            var selectedTeam = await _vwsDbContext.GetTeamAsync(id);
+            if (selectedTeam == null || selectedTeam.IsDeleted)
+            {
+                response.Message = "Team not found";
+                response.AddError(_localizer["There is no team with given Id."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!_permissionService.HasAccessToTeam(userId, id))
+            {
+                response.Message = "Access team is forbidden";
+                response.AddError(_localizer["You are not a member of team."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var teamProjects = _vwsDbContext.Projects.Where(project => project.TeamId == id && !project.IsDeleted);
+            foreach (var teamProject in teamProjects)
+                projects.Add(new ProjectResponseModel()
+                {
+                    Id = teamProject.Id,
+                    Description = teamProject.Description,
+                    Color = teamProject.Color,
+                    EndDate = teamProject.EndDate,
+                    Guid = teamProject.Guid,
+                    Name = teamProject.Name,
+                    StartDate = teamProject.StartDate,
+                    StatusId = teamProject.StatusId,
+                    TeamId = teamProject.TeamId,
+                    TeamName = teamProject.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == teamProject.TeamId).Name,
+                    ProjectImageGuid = teamProject.ProjectImageGuid,
+                    DepartmentIds = teamProject.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
+                    NumberOfUpdates = _vwsDbContext.ProjectHistories.Where(history => history.ProjectId == teamProject.Id).Count(),
+                    Users = _projectManager.GetProjectUsers(teamProject.Id),
+                    NumberOfTasks = _projectManager.GetNumberOfProjectTasks(teamProject.Id)
+                });
+
+            response.Value = projects;
             response.Message = "Team departments returned successfully!";
             return Ok(response);
         }

@@ -20,6 +20,7 @@ using vws.web.Models._project;
 using vws.web.Repositories;
 using vws.web.Services;
 using vws.web.Services._chat;
+using vws.web.Services._project;
 
 namespace vws.web.Controllers._project
 {
@@ -33,17 +34,20 @@ namespace vws.web.Controllers._project
         private readonly IVWS_DbContext _vwsDbContext;
         private readonly IFileManager _fileManager;
         private readonly IPermissionService _permissionService;
+        private readonly IProjectManagerService _projectManager;
         #endregion
 
         #region Ctor
         public ProjectController(UserManager<ApplicationUser> userManager, IStringLocalizer<ProjectController> localizer,
-            IVWS_DbContext vwsDbContext, IFileManager fileManager, IPermissionService permissionService)
+            IVWS_DbContext vwsDbContext, IFileManager fileManager, IPermissionService permissionService,
+            IProjectManagerService projectManager)
         {
             _userManager = userManager;
             _localizer = localizer;
             _vwsDbContext = vwsDbContext;
             _fileManager = fileManager;
             _permissionService = permissionService;
+            _projectManager = projectManager;
         }
         #endregion
 
@@ -138,102 +142,6 @@ namespace vws.web.Controllers._project
             return availableUsers;
         }
 
-        private List<UserModel> GetProjectUsers(int projectId)
-        {
-            var selectedProject = _vwsDbContext.Projects.Include(project => project.ProjectDepartments)
-                                                       .FirstOrDefault(project => project.Id == projectId);
-
-            List<UserProfile> projectUsers = new List<UserProfile>();
-
-            if (selectedProject.TeamId != null)
-            {
-                if (selectedProject.ProjectDepartments.Count == 0)
-                {
-                    projectUsers = _vwsDbContext.TeamMembers.Include(teamMember => teamMember.UserProfile)
-                                                           .Where(teamMember => teamMember.TeamId == (int)selectedProject.TeamId &&
-                                                                                                     !teamMember.IsDeleted)
-                                                           .Select(teamMember => teamMember.UserProfile)
-                                                           .ToList();
-                }
-
-                else
-                {
-                    foreach (var departmentId in selectedProject.ProjectDepartments.Select(pd => pd.DepartmentId))
-                    {
-                        projectUsers.AddRange(_vwsDbContext.DepartmentMembers.Include(departmentMember => departmentMember.UserProfile)
-                                                                            .Where(departmentMember => departmentMember.DepartmentId == departmentId &&
-                                                                                                       !departmentMember.IsDeleted)
-                                                                            .Select(departmentMember => departmentMember.UserProfile)
-                                                                            .ToList());
-                    }
-                }
-            }
-
-            else
-            {
-                projectUsers = _vwsDbContext.ProjectMembers.Include(projectMember => projectMember.UserProfile)
-                                                          .Where(projectMember => !projectMember.IsDeleted &&
-                                                                                  projectMember.IsPermittedByCreator == true &&
-                                                                                  projectMember.ProjectId == projectId)
-                                                          .Select(projectMember => projectMember.UserProfile)
-                                                          .ToList();
-            }
-
-            List<UserModel> users = new List<UserModel>();
-
-            foreach (var user in projectUsers)
-            {
-                users.Add(new UserModel()
-                {
-                    UserId = user.UserId,
-                    ProfileImageGuid = user.ProfileImageGuid,
-                    NickName = user.NickName
-                });
-            }
-
-            return users.Distinct().ToList();
-        }
-
-        private List<Project> GetAllUserProjects(Guid userId)
-        {
-            List<Project> userProjects = new List<Project>();
-
-            List<int> userTeams = _vwsDbContext.GetUserTeams(userId).Select(team => team.Id).ToList();
-            List<int> userDepartments = _vwsDbContext.DepartmentMembers.Include(departmentMember => departmentMember.Department)
-                                                                      .Where(departmentMember => !departmentMember.IsDeleted &&
-                                                                                                 departmentMember.UserProfileId == userId &&
-                                                                                                 !departmentMember.Department.IsDeleted)
-                                                                      .Select(departmentMember => departmentMember.DepartmentId)
-                                                                      .ToList();
-
-            userProjects.AddRange(_vwsDbContext.Projects.Include(project => project.ProjectDepartments)
-                                                       .Where(project => project.IsDeleted == false &&
-                                                                         project.TeamId != null &&
-                                                                         project.ProjectDepartments.Count == 0 &&
-                                                                         userTeams.Contains((int)project.TeamId))
-                                                       .ToList());
-
-            foreach (var project in _vwsDbContext.Projects.Include(project => project.ProjectDepartments))
-            {
-                if (project.IsDeleted == false && project.TeamId != null &&
-                   project.ProjectDepartments.Count != 0 &&
-                   userTeams.Contains((int)project.TeamId) &&
-                   project.ProjectDepartments.Select(pd => pd.DepartmentId).Intersect(userDepartments).Any())
-                {
-                    userProjects.Add(project);
-                }
-            }
-
-            userProjects.AddRange(_vwsDbContext.ProjectMembers.Include(projectMember => projectMember.Project)
-                                                             .Where(projectMember => projectMember.UserProfileId == userId &&
-                                                                                     !projectMember.IsDeleted &&
-                                                                                     projectMember.IsPermittedByCreator == true &&
-                                                                                     !projectMember.Project.IsDeleted)
-                                                             .Select(projectMember => projectMember.Project));
-
-            return userProjects;
-        }
-
         private async Task AddProjectUsers(int projectId, List<Guid> users)
         {
             var creationTime = DateTime.Now;
@@ -250,11 +158,6 @@ namespace vws.web.Controllers._project
                 });
             }
             _vwsDbContext.Save();
-        }
-
-        private long GetNumberOfProjectTasks(int id)
-        {
-            return _vwsDbContext.GeneralTasks.Where(task => task.ProjectId == id && !task.IsDeleted).Count();
         }
 
         private void CreateProjectTaskStatuses(int projectId)
@@ -417,8 +320,8 @@ namespace vws.web.Controllers._project
                 ProjectImageGuid = newProject.ProjectImageGuid,
                 DepartmentIds = model.DepartmentIds,
                 NumberOfUpdates = _vwsDbContext.ProjectHistories.Where(history => history.ProjectId == newProject.Id).Count(),
-                Users = GetProjectUsers(newProject.Id),
-                NumberOfTasks = GetNumberOfProjectTasks(newProject.Id)
+                Users = _projectManager.GetProjectUsers(newProject.Id),
+                NumberOfTasks = _projectManager.GetNumberOfProjectTasks(newProject.Id)
             };
 
             response.Value = newProjectResponse;
@@ -1166,7 +1069,7 @@ namespace vws.web.Controllers._project
         {
             Guid userId = LoggedInUserId.Value;
 
-            var project = GetAllUserProjects(userId).FirstOrDefault(project => project.Id == Id);
+            var project = _projectManager.GetAllUserProjects(userId).FirstOrDefault(project => project.Id == Id);
             if (project == null)
                 return new ProjectResponseModel();
 
@@ -1185,8 +1088,8 @@ namespace vws.web.Controllers._project
                 ProjectImageGuid = project.ProjectImageGuid,
                 DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
                 NumberOfUpdates = _vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
-                Users = GetProjectUsers(project.Id),
-                NumberOfTasks = GetNumberOfProjectTasks(project.Id)
+                Users = _projectManager.GetProjectUsers(project.Id),
+                NumberOfTasks = _projectManager.GetNumberOfProjectTasks(project.Id)
             };
 
             return response;
@@ -1200,7 +1103,7 @@ namespace vws.web.Controllers._project
             var response = new List<ProjectResponseModel>();
             Guid userId = LoggedInUserId.Value;
 
-            var userProjects = GetAllUserProjects(userId).Where(project => project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Active);
+            var userProjects = _projectManager.GetAllUserProjects(userId).Where(project => project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Active);
 
             foreach (var project in userProjects)
             {
@@ -1219,8 +1122,8 @@ namespace vws.web.Controllers._project
                     ProjectImageGuid = project.ProjectImageGuid,
                     DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
                     NumberOfUpdates = _vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
-                    Users = GetProjectUsers(project.Id),
-                    NumberOfTasks = GetNumberOfProjectTasks(project.Id)
+                    Users = _projectManager.GetProjectUsers(project.Id),
+                    NumberOfTasks = _projectManager.GetNumberOfProjectTasks(project.Id)
                 });
             }
 
@@ -1235,7 +1138,7 @@ namespace vws.web.Controllers._project
             var response = new List<ProjectResponseModel>();
             Guid userId = LoggedInUserId.Value;
 
-            var userProjects = GetAllUserProjects(userId).Where(project => project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Hold);
+            var userProjects = _projectManager.GetAllUserProjects(userId).Where(project => project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Hold);
 
             foreach (var project in userProjects)
             {
@@ -1254,8 +1157,8 @@ namespace vws.web.Controllers._project
                     ProjectImageGuid = project.ProjectImageGuid,
                     DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
                     NumberOfUpdates = _vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
-                    Users = GetProjectUsers(project.Id),
-                    NumberOfTasks = GetNumberOfProjectTasks(project.Id)
+                    Users = _projectManager.GetProjectUsers(project.Id),
+                    NumberOfTasks = _projectManager.GetNumberOfProjectTasks(project.Id)
                 });
             }
 
@@ -1270,7 +1173,7 @@ namespace vws.web.Controllers._project
             var response = new List<ProjectResponseModel>();
             Guid userId = LoggedInUserId.Value;
 
-            var userProjects = GetAllUserProjects(userId).Where(project => project.StatusId == (byte)SeedDataEnum.ProjectStatuses.DoneOrArchived);
+            var userProjects = _projectManager.GetAllUserProjects(userId).Where(project => project.StatusId == (byte)SeedDataEnum.ProjectStatuses.DoneOrArchived);
 
             foreach (var project in userProjects)
             {
@@ -1288,8 +1191,8 @@ namespace vws.web.Controllers._project
                     TeamName = project.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == project.TeamId).Name,
                     ProjectImageGuid = project.ProjectImageGuid,
                     DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
-                    Users = GetProjectUsers(project.Id),
-                    NumberOfTasks = GetNumberOfProjectTasks(project.Id)
+                    Users = _projectManager.GetProjectUsers(project.Id),
+                    NumberOfTasks = _projectManager.GetNumberOfProjectTasks(project.Id)
                 });
             }
 
@@ -1634,7 +1537,7 @@ namespace vws.web.Controllers._project
 
             var userId = LoggedInUserId.Value;
 
-            var userProjects = GetAllUserProjects(LoggedInUserId.Value);
+            var userProjects = _projectManager.GetAllUserProjects(LoggedInUserId.Value);
 
             if (!userProjects.Any(project => project.Id == projectId))
             {

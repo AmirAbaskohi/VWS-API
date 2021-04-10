@@ -30,6 +30,7 @@ using Microsoft.AspNetCore.Http.Features;
 using vws.web.Services;
 using vws.web.Services._department;
 using vws.web.Services._team;
+using vws.web.Services._project;
 
 namespace vws.web
 {
@@ -130,6 +131,8 @@ namespace vws.web
             services.AddScoped<IPermissionService, PermissionService>();
 
             services.AddScoped<IDepartmentManagerService, DepartmentManagerService>();
+
+            services.AddScoped<IProjectManagerService, ProjectManagerService>();
 
             services.AddScoped<ITeamManagerService, TeamManagerService>();
 
