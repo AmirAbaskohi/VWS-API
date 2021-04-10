@@ -329,7 +329,7 @@ namespace vws.web.Controllers._team
             var response = new ResponseModel();
             Guid userId = LoggedInUserId.Value;
 
-            if (!String.IsNullOrEmpty(newDescription) || newDescription.Length > 200)
+            if (!String.IsNullOrEmpty(newDescription) && newDescription.Length > 2000)
             {
                 response.Message = "Team model data has problem.";
                 response.AddError(_localizer["Length of description is more than 2000 characters."]);
