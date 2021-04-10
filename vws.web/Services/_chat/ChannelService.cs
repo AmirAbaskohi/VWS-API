@@ -48,16 +48,17 @@ namespace vws.web.Services._chat
 
             foreach (var userTeamMate in userTeamMates)
             {
+                var user = await _vwsDbContext.GetUserProfileAsync(userTeamMate.UserId);
                 channelResponseModels.Add(new ChannelResponseModel
                 {
                     Guid = userTeamMate.UserId,
                     ChannelTypeId = (byte)SeedDataEnum.ChannelTypes.Private,
-                    LogoUrl = "http://app.seventask.com/assets/Images/Chat/DefaultAvatars/User.jpg",
-                    Title = (await _vwsDbContext.GetUserProfileAsync(userTeamMate.UserId)).NickName,
+                    Title = user.NickName,
                     IsMuted = false,
                     IsPinned = false,
                     EvenOrder = 0,
-                    LastTransactionDateTime = new DateTime()
+                    LastTransactionDateTime = new DateTime(),
+                    ProfileImageGuid = user.ProfileImageGuid
                 });
             }
 
@@ -65,34 +66,34 @@ namespace vws.web.Services._chat
             {
                 Guid = userTeam.Guid,
                 ChannelTypeId = (byte)SeedDataEnum.ChannelTypes.Team,
-                LogoUrl = "http://app.seventask.com/assets/Images/Chat/DefaultAvatars/Team.jpg",
                 Title = userTeam.Name,
                 IsMuted = false,
                 IsPinned = false,
                 EvenOrder = 0,
-                LastTransactionDateTime = new DateTime()
+                LastTransactionDateTime = new DateTime(),
+                ProfileImageGuid = userTeam.TeamImageGuid
             }));
 
             channelResponseModels.AddRange(userProjects.Select(userProject => new ChannelResponseModel
             {
                 Guid = userProject.Guid,
                 ChannelTypeId = (byte)SeedDataEnum.ChannelTypes.Project,
-                LogoUrl = "http://app.seventask.com/assets/Images/Chat/DefaultAvatars/Project.jpg",
                 Title = userProject.Name,
                 IsMuted = false,
                 EvenOrder = 0,
-                LastTransactionDateTime = new DateTime()
+                LastTransactionDateTime = new DateTime(),
+                ProfileImageGuid = userProject.ProjectImageGuid
             }));
 
             channelResponseModels.AddRange(userDepartments.Select(userDepartment => new ChannelResponseModel
             {
                 Guid = userDepartment.Guid,
                 ChannelTypeId = (byte)SeedDataEnum.ChannelTypes.Department,
-                LogoUrl = "http://app.seventask.com/assets/Images/Chat/DefaultAvatars/Department.jpg",
                 Title = userDepartment.Name,
                 IsMuted = false,
                 EvenOrder = 0,
-                LastTransactionDateTime = new DateTime()
+                LastTransactionDateTime = new DateTime(),
+                ProfileImageGuid = userDepartment.DepartmentImageGuid
             }));
 
             return channelResponseModels;

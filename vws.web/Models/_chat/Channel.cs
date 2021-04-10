@@ -7,8 +7,6 @@ namespace vws.web.Models._chat
 
         public string Title { get; set; }
 
-        public string LogoUrl { get; set; }
-
         public byte ChannelTypeId { get; set; }
 
         public bool IsMuted { get; set; }
@@ -18,6 +16,8 @@ namespace vws.web.Models._chat
         public int EvenOrder { get; set; }
 
         public int NumberOfUnreadMessages { get; set; }
+
+        public Guid? ProfileImageGuid { get; set; }
 
         public DateTime LastTransactionDateTime { get; set; }
     }
