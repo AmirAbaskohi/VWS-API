@@ -267,6 +267,7 @@ namespace vws.web.Controllers._project
         }
         #endregion
 
+        #region ProjectAPIS
         [HttpPost]
         [Authorize]
         [Route("create")]
@@ -800,83 +801,6 @@ namespace vws.web.Controllers._project
             return Ok(response);
         }
 
-        [HttpDelete]
-        [Authorize]
-        [Route("removeUserFromProject")]
-        public async Task<IActionResult> RemoveUserFromProject(int id, Guid userId)
-        {
-            var response = new ResponseModel();
-
-            var selectedProject = _vwsDbContext.Projects.FirstOrDefault(project => project.Id == id);
-            if (selectedProject == null || selectedProject.IsDeleted)
-            {
-                response.Message = "Project not found";
-                response.AddError(_localizer["There is no project with given Id."]);
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-
-            if (!_permissionService.HasAccessToProject(LoggedInUserId.Value, id))
-            {
-                response.Message = "Project access denied";
-                response.AddError(_localizer["You are not a memeber of project."]);
-                return StatusCode(StatusCodes.Status403Forbidden, response);
-            }
-            
-            if (selectedProject.TeamId != null)
-            {
-                response.AddError(_localizer["Deleting user is just for personal projects."]);
-                response.Message = "Non-Personal project";
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-
-            var selectedProjectMember = _vwsDbContext.ProjectMembers.FirstOrDefault(projectMember => projectMember.ProjectId == id && projectMember.UserProfileId == userId);
-            if (selectedProjectMember == null || selectedProject.IsDeleted)
-            {
-                response.AddError(_localizer["There is no member with such id in given project."]);
-                response.Message = "Project member not found";
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-
-            _vwsDbContext.DeleteProjectMember(selectedProjectMember);
-            var newProjectHistory = new ProjectHistory()
-            {
-                ProjectId = selectedProject.Id,
-                Event = "{0} removed from project by {1}.",
-                EventTime = selectedProject.ModifiedOn
-            };
-            _vwsDbContext.AddProjectHistory(newProjectHistory);
-            _vwsDbContext.Save();
-
-            var removedUser = await _vwsDbContext.GetUserProfileAsync(userId);
-            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
-            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
-            {
-                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
-                ProjectHistoryId = newProjectHistory.Id,
-                Body = JsonConvert.SerializeObject(new UserModel()
-                {
-                    NickName = user.NickName,
-                    ProfileImageGuid = user.ProfileImageGuid,
-                    UserId = user.UserId
-                })
-            });
-            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
-            {
-                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
-                ProjectHistoryId = newProjectHistory.Id,
-                Body = JsonConvert.SerializeObject(new UserModel()
-                {
-                    NickName = removedUser.NickName,
-                    ProfileImageGuid = removedUser.ProfileImageGuid,
-                    UserId = removedUser.UserId
-                })
-            });
-            _vwsDbContext.Save();
-
-            response.Message = "User deleted successfully!";
-            return Ok(response);
-        }
-
         [HttpPut]
         [Authorize]
         [Route("updateTeamAndDepartments")]
@@ -1016,53 +940,123 @@ namespace vws.web.Controllers._project
             return Ok(response);
         }
 
-        [HttpDelete]
+        [HttpPost]
         [Authorize]
-        [Route("delete")]
-        public async Task<IActionResult> DeleteProject(int id)
+        [Route("uploadProjectImage")]
+        public async Task<IActionResult> UploadProjectImage(IFormFile image, int projectId)
         {
-            var response = new ResponseModel();
+            var response = new ResponseModel<Guid>();
+
+            string[] types = { "png", "jpg", "jpeg" };
+
+            var files = Request.Form.Files.ToList();
 
             Guid userId = LoggedInUserId.Value;
 
-            var selectedProject = _vwsDbContext.Projects.FirstOrDefault(project => project.Id == id);
+            if (files.Count > 1)
+            {
+                response.AddError(_localizer["There is more than one file."]);
+                response.Message = "Too many files passed";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            if (files.Count == 0 && image == null)
+            {
+                response.AddError(_localizer["You did not upload an image."]);
+                response.Message = "There is no image";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            var uploadedImage = files.Count == 0 ? image : files[0];
+
+            var selectedProject = _vwsDbContext.Projects.Include(project => project.ProjectImage).FirstOrDefault(project => project.Id == projectId);
             if (selectedProject == null || selectedProject.IsDeleted)
             {
                 response.AddError(_localizer["There is no project with given Id."]);
-                response.Message = "Projet not found";
+                response.Message = "Project not found";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!_permissionService.HasAccessToProject(userId, id))
+            if (!_permissionService.HasAccessToProject(userId, projectId))
             {
-                response.AddError(_localizer["You are not a memeber of project."]);
                 response.Message = "Project access denied";
+                response.AddError(_localizer["You are not a memeber of project."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            if (selectedProject.TeamId == null && userId != selectedProject.CreateBy)
+            bool isProjectPersonal = selectedProject.TeamId == null ? true : false;
+
+            if (isProjectPersonal && userId != selectedProject.CreateBy)
             {
-                response.AddError(_localizer["Deleting personal project just can be done by creator."]);
-                response.Message = "Delete project access denied";
+                response.AddError(_localizer["Updating personal project just can be done by creator."]);
+                response.Message = "Update project access denied";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            var modificationTime = DateTime.Now;
+            ResponseModel<File> fileResponse;
 
-            selectedProject.IsDeleted = true;
-            selectedProject.ModifiedBy = userId;
-            selectedProject.ModifiedOn = modificationTime;
+            if (selectedProject.ProjectImage != null)
+            {
+                fileResponse = await _fileManager.WriteFile(uploadedImage, userId, "profileImages", (int)selectedProject.ProjectImageId, types.ToList());
+                if (fileResponse.HasError)
+                {
+                    foreach (var error in fileResponse.Errors)
+                        response.AddError(_localizer[error]);
+                    response.Message = "Error in writing file";
+                    return StatusCode(StatusCodes.Status500InternalServerError, response);
+                }
+                selectedProject.ProjectImage.RecentFileId = fileResponse.Value.Id;
+            }
+            else
+            {
+                var time = DateTime.Now;
+                var newFileContainer = new FileContainer
+                {
+                    ModifiedOn = time,
+                    CreatedOn = time,
+                    CreatedBy = userId,
+                    ModifiedBy = userId,
+                    Guid = Guid.NewGuid()
+                };
+                await _vwsDbContext.AddFileContainerAsync(newFileContainer);
+                _vwsDbContext.Save();
+                fileResponse = await _fileManager.WriteFile(uploadedImage, userId, "profileImages", newFileContainer.Id, types.ToList());
+                if (fileResponse.HasError)
+                {
+                    foreach (var error in fileResponse.Errors)
+                        response.AddError(_localizer[error]);
+                    response.Message = "Error in writing file";
+                    _vwsDbContext.DeleteFileContainer(newFileContainer);
+                    _vwsDbContext.Save();
+                    return StatusCode(StatusCodes.Status500InternalServerError, response);
+                }
+                newFileContainer.RecentFileId = fileResponse.Value.Id;
+                selectedProject.ProjectImageId = newFileContainer.Id;
+                selectedProject.ProjectImageGuid = newFileContainer.Guid;
+            }
+            selectedProject.ModifiedBy = LoggedInUserId.Value;
+            selectedProject.ModifiedOn = DateTime.Now;
 
             var newProjectHistory = new ProjectHistory()
             {
-                ProjectId = id,
-                Event = "Project deleted by {0}.",
-                EventTime = modificationTime,
+                ProjectId = projectId,
+                Event = "Project image updated to {0} by {1}.",
+                EventTime = selectedProject.ModifiedOn
             };
             _vwsDbContext.AddProjectHistory(newProjectHistory);
             _vwsDbContext.Save();
 
             var user = await _vwsDbContext.GetUserProfileAsync(userId);
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.File,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = JsonConvert.SerializeObject(new FileModel()
+                {
+                    Name = fileResponse.Value.Name,
+                    Extension = fileResponse.Value.Extension,
+                    FileContainerGuid = fileResponse.Value.FileContainerGuid,
+                    Size = fileResponse.Value.Size
+                })
+            }); ;
             _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -1076,7 +1070,92 @@ namespace vws.web.Controllers._project
             });
             _vwsDbContext.Save();
 
-            response.Message = "Project deleted successfully!";
+            response.Value = fileResponse.Value.FileContainerGuid;
+            response.Message = "Project image added successfully!";
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("changeStatus")]
+        public async Task<IActionResult> ChangeProjectStatus(int id, byte statusId)
+        {
+            var response = new ResponseModel();
+
+            var selectedProject = _vwsDbContext.Projects.FirstOrDefault(project => project.Id == id);
+            if (selectedProject == null || selectedProject.IsDeleted)
+            {
+                response.Message = "Project not found";
+                response.AddError(_localizer["There is no project with given Id."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (statusId < 1 || statusId > 3)
+            {
+                response.Message = "Invalid tatus id";
+                response.AddError(_localizer["Status id is not valid."]);
+            }
+
+            var userId = LoggedInUserId.Value;
+
+            if (!_permissionService.HasAccessToProject(userId, id))
+            {
+                response.Message = "Project access denied";
+                response.AddError(_localizer["You are not a memeber of project."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            bool isProjectPersonal = selectedProject.TeamId == null ? true : false;
+
+            if (isProjectPersonal && userId != selectedProject.CreateBy)
+            {
+                response.AddError(_localizer["Updating personal project just can be done by creator."]);
+                response.Message = "Update project access denied";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            var lastStatus = selectedProject.StatusId;
+
+            selectedProject.StatusId = statusId;
+            selectedProject.ModifiedOn = DateTime.Now;
+            selectedProject.ModifiedBy = userId;
+
+            var newProjectHistory = new ProjectHistory()
+            {
+                ProjectId = id,
+                Event = "Project status changed from {0} to {1} by {2}.",
+                EventTime = selectedProject.ModifiedOn
+            };
+            _vwsDbContext.AddProjectHistory(newProjectHistory);
+            _vwsDbContext.Save();
+
+            var user = await _vwsDbContext.GetUserProfileAsync(userId);
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = ((SeedDataEnum.ProjectStatuses)lastStatus).ToString()
+            });
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = ((SeedDataEnum.ProjectStatuses)selectedProject.StatusId).ToString()
+            });
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                })
+            });
+            _vwsDbContext.Save();
+
+            response.Message = "Project status updated successfully!";
             return Ok(response);
         }
 
@@ -1219,121 +1298,119 @@ namespace vws.web.Controllers._project
 
         [HttpGet]
         [Authorize]
-        [Route("getUsersCanBeAddedToProject")]
-        public async Task<IActionResult> GetUsersCanBeAddedToProject(int? Id)
+        [Route("getProjectHistory")]
+        public IActionResult GetProjectHistory(int id)
         {
-            var response = new ResponseModel<List<UserModel>>();
-            var users = new List<UserModel>();
-
             var userId = LoggedInUserId.Value;
+            var response = new ResponseModel<List<HistoryModel>>();
 
-            if (Id != null)
+            var selectedProject = _vwsDbContext.Projects.FirstOrDefault(project => project.Id == id);
+
+            if (selectedProject == null || selectedProject.IsDeleted)
             {
-                var selectedProject = _vwsDbContext.Projects.Include(project => project.ProjectDepartments)
-                                                           .FirstOrDefault(project => project.Id == Id);
-
-                if (selectedProject == null || selectedProject.IsDeleted)
-                {
-                    response.AddError(_localizer["There is no project with given Id."]);
-                    response.Message = "Projet not found";
-                    return StatusCode(StatusCodes.Status400BadRequest, response);
-                }
-
-                if (selectedProject.TeamId != null)
-                {
-                    response.AddError(_localizer["Adding user is just for personal projects."]);
-                    response.Message = "Non-Personal project";
-                    return StatusCode(StatusCodes.Status400BadRequest, response);
-                }
-
-                if (!_permissionService.HasAccessToProject(userId, (int)Id))
-                {
-                    response.AddError(_localizer["You are not a memeber of project."]);
-                    response.Message = "Project access denied";
-                    return StatusCode(StatusCodes.Status403Forbidden, response);
-                }
+                response.Message = "Project not found";
+                response.AddError(_localizer["There is no project with given Id."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var availableUsers = GetAvailableUsersToAddProject(Id);
-
-            foreach (var availableUserId in availableUsers)
+            if (!_permissionService.HasAccessToProject(userId, id))
             {
-                var user = await _userManager.FindByIdAsync(availableUserId.ToString());
-                var userProfile = await _vwsDbContext.GetUserProfileAsync(availableUserId);
-                users.Add(new UserModel()
+                response.Message = "Project access denied";
+                response.AddError(_localizer["You are not a memeber of project."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            var events = new List<HistoryModel>();
+            var projectEvents = _vwsDbContext.ProjectHistories.Where(projectHistory => projectHistory.ProjectId == id);
+            foreach (var projectEvent in projectEvents)
+            {
+                var parameters = _vwsDbContext.ProjectHistoryParameters.Where(param => param.ProjectHistoryId == projectEvent.Id)
+                                                                       .OrderBy(param => param.Id)
+                                                                       .ToList();
+                for (int i = 0; i < parameters.Count(); i++)
                 {
-                    UserId = availableUserId,
-                    ProfileImageGuid = userProfile.ProfileImageGuid,
-                    NickName = userProfile.NickName
+                    if (parameters[i].ActivityParameterTypeId == (byte)SeedDataEnum.ActivityParameterTypes.Text && parameters[i].ShouldBeLocalized)
+                        parameters[i].Body = _localizer[parameters[i].Body];
+                }
+                events.Add(new HistoryModel()
+                {
+                    Message = _localizer[projectEvent.Event],
+                    Parameters = parameters.Select(param => new HistoryParameterModel() { ParameterBody = param.Body, ParameterType = param.ActivityParameterTypeId }).ToList(),
+                    Time = projectEvent.EventTime
                 });
             }
 
-            response.Value = users;
-            response.Message = "Users returned successfully!";
+            response.Message = "History returned successfully!";
+            response.Value = events;
             return Ok(response);
         }
 
-        [HttpGet]
+        [HttpDelete]
         [Authorize]
-        [Route("getProjectMembers")]
-        public IActionResult GetProjectMembers(int projectId)
+        [Route("delete")]
+        public async Task<IActionResult> DeleteProject(int id)
         {
-            var response = new ResponseModel<List<UserModel>>();
-            var members = new List<UserModel>();
+            var response = new ResponseModel();
 
-            var userId = LoggedInUserId.Value;
+            Guid userId = LoggedInUserId.Value;
 
-            var userProjects = GetAllUserProjects(LoggedInUserId.Value);
-
-            if (!userProjects.Any(project => project.Id == projectId))
+            var selectedProject = _vwsDbContext.Projects.FirstOrDefault(project => project.Id == id);
+            if (selectedProject == null || selectedProject.IsDeleted)
             {
                 response.AddError(_localizer["There is no project with given Id."]);
-                response.Message = "Project not found";
-                return BadRequest(response);
+                response.Message = "Projet not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            List<UserProfile> users = new List<UserProfile>();
+            if (!_permissionService.HasAccessToProject(userId, id))
+            {
+                response.AddError(_localizer["You are not a memeber of project."]);
+                response.Message = "Project access denied";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
 
-            var selectedProject = _vwsDbContext.Projects.Include(project => project.ProjectDepartments).FirstOrDefault(project => project.Id == projectId);
-            if (selectedProject.TeamId == null)
+            if (selectedProject.TeamId == null && userId != selectedProject.CreateBy)
             {
-                users = _vwsDbContext.ProjectMembers.Include(projectMember => projectMember.UserProfile)
-                                                   .Where(projectMember => projectMember.ProjectId == selectedProject.Id && !projectMember.IsDeleted)
-                                                   .Select(projectMember => projectMember.UserProfile).ToList();
+                response.AddError(_localizer["Deleting personal project just can be done by creator."]);
+                response.Message = "Delete project access denied";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
             }
-            else if (selectedProject.ProjectDepartments.Count == 0)
+
+            var modificationTime = DateTime.Now;
+
+            selectedProject.IsDeleted = true;
+            selectedProject.ModifiedBy = userId;
+            selectedProject.ModifiedOn = modificationTime;
+
+            var newProjectHistory = new ProjectHistory()
             {
-                users = _vwsDbContext.TeamMembers.Include(teamMember => teamMember.UserProfile)
-                                                .Where(teamMember => teamMember.TeamId == selectedProject.TeamId && !teamMember.IsDeleted)
-                                                .Select(teamMember => teamMember.UserProfile).ToList();
-            }
-            else
+                ProjectId = id,
+                Event = "Project deleted by {0}.",
+                EventTime = modificationTime,
+            };
+            _vwsDbContext.AddProjectHistory(newProjectHistory);
+            _vwsDbContext.Save();
+
+            var user = await _vwsDbContext.GetUserProfileAsync(userId);
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
             {
-                foreach (var projectDepartment in selectedProject.ProjectDepartments)
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = JsonConvert.SerializeObject(new UserModel()
                 {
-                    var selectedDepartment = _vwsDbContext.Departments.FirstOrDefault(department => department.Id == projectDepartment.DepartmentId);
-                    users.AddRange(_vwsDbContext.DepartmentMembers.Include(departmentMember => departmentMember.UserProfile)
-                                                                 .Where(departmentMember => departmentMember.DepartmentId == selectedDepartment.Id && !departmentMember.IsDeleted)
-                                                                 .Select(departmentMember => departmentMember.UserProfile));
-                }
-            }
-
-            foreach (var user in users)
-            {
-                members.Add(new UserModel()
-                {
-                    UserId = user.UserId,
                     NickName = user.NickName,
-                    ProfileImageGuid = user.ProfileImageGuid
-                });
-            }
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                })
+            });
+            _vwsDbContext.Save();
 
-            response.Message = "Members returned successfully!";
-            response.Value = members;
-
+            response.Message = "Project deleted successfully!";
             return Ok(response);
         }
+        #endregion
 
+        #region ProjectMemberAPIS
         [HttpPost]
         [Authorize]
         [Route("addUserToProject")]
@@ -1453,222 +1530,158 @@ namespace vws.web.Controllers._project
             return Ok(response);
         }
 
-        [HttpPost]
-        [Authorize]
-        [Route("uploadProjectImage")]
-        public async Task<IActionResult> UploadProjectImage(IFormFile image, int projectId)
-        {
-            var response = new ResponseModel<Guid>();
-
-            string[] types = { "png", "jpg", "jpeg" };
-
-            var files = Request.Form.Files.ToList();
-
-            Guid userId = LoggedInUserId.Value;
-
-            if (files.Count > 1)
-            {
-                response.AddError(_localizer["There is more than one file."]);
-                response.Message = "Too many files passed";
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-            if (files.Count == 0 && image == null)
-            {
-                response.AddError(_localizer["You did not upload an image."]);
-                response.Message = "There is no image";
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-            var uploadedImage = files.Count == 0 ? image : files[0];
-
-            var selectedProject = _vwsDbContext.Projects.Include(project => project.ProjectImage).FirstOrDefault(project => project.Id == projectId);
-            if (selectedProject == null || selectedProject.IsDeleted)
-            {
-                response.AddError(_localizer["There is no project with given Id."]);
-                response.Message = "Project not found";
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-
-            if (!_permissionService.HasAccessToProject(userId, projectId))
-            {
-                response.Message = "Project access denied";
-                response.AddError(_localizer["You are not a memeber of project."]);
-                return StatusCode(StatusCodes.Status403Forbidden, response);
-            }
-
-            bool isProjectPersonal = selectedProject.TeamId == null ? true : false;
-
-            if (isProjectPersonal && userId != selectedProject.CreateBy)
-            {
-                response.AddError(_localizer["Updating personal project just can be done by creator."]);
-                response.Message = "Update project access denied";
-                return StatusCode(StatusCodes.Status403Forbidden, response);
-            }
-
-            ResponseModel<File> fileResponse;
-
-            if (selectedProject.ProjectImage != null)
-            {
-                fileResponse = await _fileManager.WriteFile(uploadedImage, userId, "profileImages", (int)selectedProject.ProjectImageId, types.ToList());
-                if (fileResponse.HasError)
-                {
-                    foreach (var error in fileResponse.Errors)
-                        response.AddError(_localizer[error]);
-                    response.Message = "Error in writing file";
-                    return StatusCode(StatusCodes.Status500InternalServerError, response);
-                }
-                selectedProject.ProjectImage.RecentFileId = fileResponse.Value.Id;
-            }
-            else
-            {
-                var time = DateTime.Now;
-                var newFileContainer = new FileContainer
-                {
-                    ModifiedOn = time,
-                    CreatedOn = time,
-                    CreatedBy = userId,
-                    ModifiedBy = userId,
-                    Guid = Guid.NewGuid()
-                };
-                await _vwsDbContext.AddFileContainerAsync(newFileContainer);
-                _vwsDbContext.Save();
-                fileResponse = await _fileManager.WriteFile(uploadedImage, userId, "profileImages", newFileContainer.Id, types.ToList());
-                if (fileResponse.HasError)
-                {
-                    foreach (var error in fileResponse.Errors)
-                        response.AddError(_localizer[error]);
-                    response.Message = "Error in writing file";
-                    _vwsDbContext.DeleteFileContainer(newFileContainer);
-                    _vwsDbContext.Save();
-                    return StatusCode(StatusCodes.Status500InternalServerError, response);
-                }
-                newFileContainer.RecentFileId = fileResponse.Value.Id;
-                selectedProject.ProjectImageId = newFileContainer.Id;
-                selectedProject.ProjectImageGuid = newFileContainer.Guid;
-            }
-            selectedProject.ModifiedBy = LoggedInUserId.Value;
-            selectedProject.ModifiedOn = DateTime.Now;
-
-            var newProjectHistory = new ProjectHistory()
-            {
-                ProjectId = projectId,
-                Event = "Project image updated to {0} by {1}.",
-                EventTime = selectedProject.ModifiedOn
-            };
-            _vwsDbContext.AddProjectHistory(newProjectHistory);
-            _vwsDbContext.Save();
-
-            var user = await _vwsDbContext.GetUserProfileAsync(userId);
-            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
-            {
-                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.File,
-                ProjectHistoryId = newProjectHistory.Id,
-                Body = JsonConvert.SerializeObject(new FileModel()
-                {
-                    Name = fileResponse.Value.Name,
-                    Extension = fileResponse.Value.Extension,
-                    FileContainerGuid = fileResponse.Value.FileContainerGuid,
-                    Size = fileResponse.Value.Size
-                })
-            });;
-            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
-            {
-                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
-                ProjectHistoryId = newProjectHistory.Id,
-                Body = JsonConvert.SerializeObject(new UserModel()
-                {
-                    NickName = user.NickName,
-                    ProfileImageGuid = user.ProfileImageGuid,
-                    UserId = user.UserId
-                })
-            });
-            _vwsDbContext.Save();
-
-            response.Value = fileResponse.Value.FileContainerGuid;
-            response.Message = "Project image added successfully!";
-            return Ok(response);
-        }
-
         [HttpPut]
         [Authorize]
-        [Route("changeStatus")]
-        public async Task<IActionResult> ChangeProjectStatus(int id, byte statusId)
+        [Route("changeProjectMemberPermisssion")]
+        public IActionResult ChangeProjectMemberPermisssion(int projectMemberId, bool hasAccess)
         {
             var response = new ResponseModel();
 
-            var selectedProject = _vwsDbContext.Projects.FirstOrDefault(project => project.Id == id);
-            if (selectedProject == null || selectedProject.IsDeleted)
+            var userId = LoggedInUserId.Value;
+
+            var selectedProjecMember = _vwsDbContext.ProjectMembers.Include(projectMember => projectMember.Project).FirstOrDefault(projectMember => projectMember.Id == projectMemberId);
+
+            if (selectedProjecMember == null || selectedProjecMember.IsDeleted)
             {
-                response.Message = "Project not found";
-                response.AddError(_localizer["There is no project with given Id."]);
+                response.AddError(_localizer["There is not project member with such id."]);
+                response.Message = "Project member not found";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (statusId < 1 || statusId > 3)
+            if (selectedProjecMember.Project.CreateBy != userId)
             {
-                response.Message = "Invalid tatus id";
-                response.AddError(_localizer["Status id is not valid."]);
+                response.Message = "Not creator";
+                response.AddError(_localizer["You are not project creator."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
             }
+
+            if (selectedProjecMember.Project.CreateBy == userId)
+            {
+                response.Message = "Creator can not change his permission.";
+                response.AddError(_localizer["You are the project creator and can not change your access permission."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            selectedProjecMember.IsPermittedByCreator = hasAccess;
+            _vwsDbContext.Save();
+
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getUsersCanBeAddedToProject")]
+        public async Task<IActionResult> GetUsersCanBeAddedToProject(int? Id)
+        {
+            var response = new ResponseModel<List<UserModel>>();
+            var users = new List<UserModel>();
 
             var userId = LoggedInUserId.Value;
 
-            if (!_permissionService.HasAccessToProject(userId, id))
+            if (Id != null)
             {
-                response.Message = "Project access denied";
-                response.AddError(_localizer["You are not a memeber of project."]);
-                return StatusCode(StatusCodes.Status403Forbidden, response);
-            }
+                var selectedProject = _vwsDbContext.Projects.Include(project => project.ProjectDepartments)
+                                                           .FirstOrDefault(project => project.Id == Id);
 
-            bool isProjectPersonal = selectedProject.TeamId == null ? true : false;
-
-            if (isProjectPersonal && userId != selectedProject.CreateBy)
-            {
-                response.AddError(_localizer["Updating personal project just can be done by creator."]);
-                response.Message = "Update project access denied";
-                return StatusCode(StatusCodes.Status403Forbidden, response);
-            }
-
-            var lastStatus = selectedProject.StatusId;
-
-            selectedProject.StatusId = statusId;
-            selectedProject.ModifiedOn = DateTime.Now;
-            selectedProject.ModifiedBy = userId;
-
-            var newProjectHistory = new ProjectHistory()
-            {
-                ProjectId = id,
-                Event = "Project status changed from {0} to {1} by {2}.",
-                EventTime = selectedProject.ModifiedOn
-            };
-            _vwsDbContext.AddProjectHistory(newProjectHistory);
-            _vwsDbContext.Save();
-
-            var user = await _vwsDbContext.GetUserProfileAsync(userId);
-            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
-            {
-                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
-                ProjectHistoryId = newProjectHistory.Id,
-                Body = ((SeedDataEnum.ProjectStatuses)lastStatus).ToString()
-            });
-            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
-            {
-                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
-                ProjectHistoryId = newProjectHistory.Id,
-                Body = ((SeedDataEnum.ProjectStatuses)selectedProject.StatusId).ToString()
-            });
-            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
-            {
-                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
-                ProjectHistoryId = newProjectHistory.Id,
-                Body = JsonConvert.SerializeObject(new UserModel()
+                if (selectedProject == null || selectedProject.IsDeleted)
                 {
-                    NickName = user.NickName,
-                    ProfileImageGuid = user.ProfileImageGuid,
-                    UserId = user.UserId
-                })
-            });
-            _vwsDbContext.Save();
+                    response.AddError(_localizer["There is no project with given Id."]);
+                    response.Message = "Projet not found";
+                    return StatusCode(StatusCodes.Status400BadRequest, response);
+                }
 
-            response.Message = "Project status updated successfully!";
+                if (selectedProject.TeamId != null)
+                {
+                    response.AddError(_localizer["Adding user is just for personal projects."]);
+                    response.Message = "Non-Personal project";
+                    return StatusCode(StatusCodes.Status400BadRequest, response);
+                }
+
+                if (!_permissionService.HasAccessToProject(userId, (int)Id))
+                {
+                    response.AddError(_localizer["You are not a memeber of project."]);
+                    response.Message = "Project access denied";
+                    return StatusCode(StatusCodes.Status403Forbidden, response);
+                }
+            }
+
+            var availableUsers = GetAvailableUsersToAddProject(Id);
+
+            foreach (var availableUserId in availableUsers)
+            {
+                var user = await _userManager.FindByIdAsync(availableUserId.ToString());
+                var userProfile = await _vwsDbContext.GetUserProfileAsync(availableUserId);
+                users.Add(new UserModel()
+                {
+                    UserId = availableUserId,
+                    ProfileImageGuid = userProfile.ProfileImageGuid,
+                    NickName = userProfile.NickName
+                });
+            }
+
+            response.Value = users;
+            response.Message = "Users returned successfully!";
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getProjectMembers")]
+        public IActionResult GetProjectMembers(int projectId)
+        {
+            var response = new ResponseModel<List<UserModel>>();
+            var members = new List<UserModel>();
+
+            var userId = LoggedInUserId.Value;
+
+            var userProjects = GetAllUserProjects(LoggedInUserId.Value);
+
+            if (!userProjects.Any(project => project.Id == projectId))
+            {
+                response.AddError(_localizer["There is no project with given Id."]);
+                response.Message = "Project not found";
+                return BadRequest(response);
+            }
+
+            List<UserProfile> users = new List<UserProfile>();
+
+            var selectedProject = _vwsDbContext.Projects.Include(project => project.ProjectDepartments).FirstOrDefault(project => project.Id == projectId);
+            if (selectedProject.TeamId == null)
+            {
+                users = _vwsDbContext.ProjectMembers.Include(projectMember => projectMember.UserProfile)
+                                                   .Where(projectMember => projectMember.ProjectId == selectedProject.Id && !projectMember.IsDeleted)
+                                                   .Select(projectMember => projectMember.UserProfile).ToList();
+            }
+            else if (selectedProject.ProjectDepartments.Count == 0)
+            {
+                users = _vwsDbContext.TeamMembers.Include(teamMember => teamMember.UserProfile)
+                                                .Where(teamMember => teamMember.TeamId == selectedProject.TeamId && !teamMember.IsDeleted)
+                                                .Select(teamMember => teamMember.UserProfile).ToList();
+            }
+            else
+            {
+                foreach (var projectDepartment in selectedProject.ProjectDepartments)
+                {
+                    var selectedDepartment = _vwsDbContext.Departments.FirstOrDefault(department => department.Id == projectDepartment.DepartmentId);
+                    users.AddRange(_vwsDbContext.DepartmentMembers.Include(departmentMember => departmentMember.UserProfile)
+                                                                 .Where(departmentMember => departmentMember.DepartmentId == selectedDepartment.Id && !departmentMember.IsDeleted)
+                                                                 .Select(departmentMember => departmentMember.UserProfile));
+                }
+            }
+
+            foreach (var user in users)
+            {
+                members.Add(new UserModel()
+                {
+                    UserId = user.UserId,
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid
+                });
+            }
+
+            response.Message = "Members returned successfully!";
+            response.Value = members;
+
             return Ok(response);
         }
 
@@ -1737,54 +1750,14 @@ namespace vws.web.Controllers._project
             return Ok(response);
         }
 
-        [HttpPut]
+        [HttpDelete]
         [Authorize]
-        [Route("changeProjectMemberPermisssion")]
-        public IActionResult ChangeProjectMemberPermisssion(int projectMemberId, bool hasAccess)
+        [Route("removeUserFromProject")]
+        public async Task<IActionResult> RemoveUserFromProject(int id, Guid userId)
         {
             var response = new ResponseModel();
 
-            var userId = LoggedInUserId.Value;
-
-            var selectedProjecMember = _vwsDbContext.ProjectMembers.Include(projectMember => projectMember.Project).FirstOrDefault(projectMember => projectMember.Id == projectMemberId);
-
-            if (selectedProjecMember == null || selectedProjecMember.IsDeleted)
-            {
-                response.AddError(_localizer["There is not project member with such id."]);
-                response.Message = "Project member not found";
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-
-            if (selectedProjecMember.Project.CreateBy != userId)
-            {
-                response.Message = "Not creator";
-                response.AddError(_localizer["You are not project creator."]);
-                return StatusCode(StatusCodes.Status403Forbidden, response);
-            }
-
-            if (selectedProjecMember.Project.CreateBy == userId)
-            {
-                response.Message = "Creator can not change his permission.";
-                response.AddError(_localizer["You are the project creator and can not change your access permission."]);
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-
-            selectedProjecMember.IsPermittedByCreator = hasAccess;
-            _vwsDbContext.Save();
-
-            return Ok(response);
-        }
-
-        [HttpGet]
-        [Authorize]
-        [Route("getProjectHistory")]
-        public IActionResult GetProjectHistory(int id)
-        {
-            var userId = LoggedInUserId.Value;
-            var response = new ResponseModel<List<HistoryModel>>();
-
             var selectedProject = _vwsDbContext.Projects.FirstOrDefault(project => project.Id == id);
-
             if (selectedProject == null || selectedProject.IsDeleted)
             {
                 response.Message = "Project not found";
@@ -1792,36 +1765,67 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!_permissionService.HasAccessToProject(userId, id))
+            if (!_permissionService.HasAccessToProject(LoggedInUserId.Value, id))
             {
                 response.Message = "Project access denied";
                 response.AddError(_localizer["You are not a memeber of project."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
-
-            var events = new List<HistoryModel>();
-            var projectEvents = _vwsDbContext.ProjectHistories.Where(projectHistory => projectHistory.ProjectId == id);
-            foreach (var projectEvent in projectEvents)
+            
+            if (selectedProject.TeamId != null)
             {
-                var parameters = _vwsDbContext.ProjectHistoryParameters.Where(param => param.ProjectHistoryId == projectEvent.Id)
-                                                                       .OrderBy(param => param.Id)
-                                                                       .ToList();
-                for (int i = 0; i < parameters.Count(); i++)
-                {
-                    if (parameters[i].ActivityParameterTypeId == (byte)SeedDataEnum.ActivityParameterTypes.Text && parameters[i].ShouldBeLocalized)
-                        parameters[i].Body = _localizer[parameters[i].Body];
-                }
-                events.Add(new HistoryModel()
-                {
-                    Message = _localizer[projectEvent.Event],
-                    Parameters = parameters.Select(param => new HistoryParameterModel() { ParameterBody = param.Body, ParameterType = param.ActivityParameterTypeId }).ToList(),
-                    Time = projectEvent.EventTime
-                });
+                response.AddError(_localizer["Deleting user is just for personal projects."]);
+                response.Message = "Non-Personal project";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            response.Message = "History returned successfully!";
-            response.Value = events;
+            var selectedProjectMember = _vwsDbContext.ProjectMembers.FirstOrDefault(projectMember => projectMember.ProjectId == id && projectMember.UserProfileId == userId);
+            if (selectedProjectMember == null || selectedProject.IsDeleted)
+            {
+                response.AddError(_localizer["There is no member with such id in given project."]);
+                response.Message = "Project member not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            _vwsDbContext.DeleteProjectMember(selectedProjectMember);
+            var newProjectHistory = new ProjectHistory()
+            {
+                ProjectId = selectedProject.Id,
+                Event = "{0} removed from project by {1}.",
+                EventTime = selectedProject.ModifiedOn
+            };
+            _vwsDbContext.AddProjectHistory(newProjectHistory);
+            _vwsDbContext.Save();
+
+            var removedUser = await _vwsDbContext.GetUserProfileAsync(userId);
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                })
+            });
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = removedUser.NickName,
+                    ProfileImageGuid = removedUser.ProfileImageGuid,
+                    UserId = removedUser.UserId
+                })
+            });
+            _vwsDbContext.Save();
+
+            response.Message = "User deleted successfully!";
             return Ok(response);
         }
+        #endregion
     }
 }
