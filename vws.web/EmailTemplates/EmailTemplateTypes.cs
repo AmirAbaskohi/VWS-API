@@ -5,10 +5,8 @@ namespace vws.web.EmailTemplates
     {
         public enum EmailTemplateEnum : int
         {
-            EmailVerificationCode = 1,
-            ResetPassword = 2,
-            ChangePasswordAlert = 3,
-            TaskAssign = 4
+            EmailCode = 1,
+            NotificationEmail = 2
         };
     }
 }

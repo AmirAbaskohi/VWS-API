@@ -471,7 +471,7 @@ namespace vws.web.Controllers._account
                     FromEmail = _configuration["EmailSender:RegistrationEmail:EmailAddress"],
                     ToEmail = user.Email,
                     Subject = "Email Confirmation",
-                    Body = EmailTemplateUtility.GetEmailTemplate((int)EmailTemplateEnum.EmailVerificationCode).Replace("{0}", randomCode),
+                    Body = EmailTemplateUtility.GetEmailTemplate((int)EmailTemplateEnum.EmailCode).Replace("{0}", randomCode),
                     Credential = new NetworkCredential
                     {
                         UserName = _configuration["EmailSender:RegistrationEmail:UserName"],
