@@ -354,7 +354,7 @@ namespace vws.web.Controllers._department
             return Ok(response);
         }
 
-        [HttpPost]
+        [HttpPut]
         [Authorize]
         [Route("uploadDepartmentImage")]
         public async Task<IActionResult> UploadDepartmentImage(IFormFile image, int departmentId)

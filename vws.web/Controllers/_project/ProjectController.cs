@@ -940,7 +940,7 @@ namespace vws.web.Controllers._project
             return Ok(response);
         }
 
-        [HttpPost]
+        [HttpPut]
         [Authorize]
         [Route("uploadProjectImage")]
         public async Task<IActionResult> UploadProjectImage(IFormFile image, int projectId)

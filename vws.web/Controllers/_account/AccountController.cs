@@ -745,7 +745,7 @@ namespace vws.web.Controllers._account
         /// </summary>
         /// <param name="image"></param>
         /// <returns></returns>
-        [HttpPost]
+        [HttpPut]
         [Route("uploadProfileImage")]
         public async Task<IActionResult> UploadProfileImage(IFormFile image)
         {

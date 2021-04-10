@@ -153,6 +153,9 @@
   <data name="Team image updated to {0} by {1}." xml:space="preserve">
     <value>Team image updated to {0} by {1}.</value>
   </data>
+  <data name="Team name can not be empty and should have less than 500 characters." xml:space="preserve">
+    <value>Team name can not be empty and should have less than 500 characters.</value>
+  </data>
   <data name="Team {0} created by {1}." xml:space="preserve">
     <value>Team {0} created by {1}.</value>
   </data>
