@@ -132,6 +132,9 @@
   <data name="Comment body can not be emty or have more than 1000 characters." xml:space="preserve">
     <value>کامنت نمیتواند خالی باشد یا بیش از 1000 کاراکتر داشته باشد.</value>
   </data>
+  <data name="High" xml:space="preserve">
+    <value>بالا</value>
+  </data>
   <data name="Invalid status." xml:space="preserve">
     <value>وضعیت نا معتبر.</value>
   </data>
@@ -149,6 +152,18 @@
   </data>
   <data name="Length of title is more than 500 characters." xml:space="preserve">
     <value>تعداد کاراکتر های بخش عنوان بیشتر از 500 کاراکتر است.</value>
+  </data>
+  <data name="Low" xml:space="preserve">
+    <value>پایین</value>
+  </data>
+  <data name="Medium" xml:space="preserve">
+    <value>متوسط</value>
+  </data>
+  <data name="No Time" xml:space="preserve">
+    <value>بدون زمان</value>
+  </data>
+  <data name="Personal" xml:space="preserve">
+    <value>شخصی</value>
   </data>
   <data name="Priority id is not defined." xml:space="preserve">
     <value>اولویت تسک معتبر نیست.</value>

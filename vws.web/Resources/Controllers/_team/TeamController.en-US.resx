@@ -129,6 +129,9 @@
   <data name="File size is not allowed." xml:space="preserve">
     <value>File size is not allowed.</value>
   </data>
+  <data name="High" xml:space="preserve">
+    <value>High</value>
+  </data>
   <data name="Invite link with id {0} revoked by {1}." xml:space="preserve">
     <value>Invite link with id {0} revoked by {1}.</value>
   </data>
@@ -146,6 +149,18 @@
   </data>
   <data name="Link is not valid" xml:space="preserve">
     <value>Link is not valid</value>
+  </data>
+  <data name="Low" xml:space="preserve">
+    <value>Low</value>
+  </data>
+  <data name="Medium" xml:space="preserve">
+    <value>Medium</value>
+  </data>
+  <data name="No Time" xml:space="preserve">
+    <value>No Time</value>
+  </data>
+  <data name="Personal" xml:space="preserve">
+    <value>Personal</value>
   </data>
   <data name="Task {0} created by {1} under this team." xml:space="preserve">
     <value>Task {0} created by {1} under this team.</value>

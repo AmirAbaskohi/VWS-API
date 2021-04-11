@@ -27,6 +27,8 @@ using Newtonsoft.Json;
 using vws.web.Services;
 using vws.web.Models._project;
 using vws.web.Services._project;
+using vws.web.Models._task;
+using vws.web.Services._task;
 
 namespace vws.web.Controllers._team
 {
@@ -45,13 +47,14 @@ namespace vws.web.Controllers._team
         private readonly IConfiguration _configuration;
         private readonly IPermissionService _permissionService;
         private readonly IProjectManagerService _projectManager;
+        private readonly ITaskManagerService _taskManagerService;
         #endregion
 
         #region Ctor
         public TeamController(UserManager<ApplicationUser> userManager, IStringLocalizer<TeamController> localizer,
             IVWS_DbContext vwsDbContext, IFileManager fileManager, IDepartmentManagerService departmentManager,
             ITeamManagerService teamManager, IEmailSender emailSender, IConfiguration configuration, IPermissionService permissionService,
-            IProjectManagerService projectManager)
+            IProjectManagerService projectManager, ITaskManagerService taskManagerService)
         {
             _userManager = userManager;
             _localizer = localizer;
@@ -63,6 +66,7 @@ namespace vws.web.Controllers._team
             _configuration = configuration;
             _permissionService = permissionService;
             _projectManager = projectManager;
+            _taskManagerService = taskManagerService;
         }
         #endregion
 
@@ -722,6 +726,64 @@ namespace vws.web.Controllers._team
                 });
 
             response.Value = projects;
+            response.Message = "Team departments returned successfully!";
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getTasks")]
+        public async Task<IActionResult> GetTeamTasks(int id)
+        {
+            var response = new ResponseModel<List<TaskResponseModel>>();
+            var tasks = new List<TaskResponseModel>();
+            var userId = LoggedInUserId.Value;
+
+            var selectedTeam = await _vwsDbContext.GetTeamAsync(id);
+            if (selectedTeam == null || selectedTeam.IsDeleted)
+            {
+                response.Message = "Team not found";
+                response.AddError(_localizer["There is no team with given Id."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!_permissionService.HasAccessToTeam(userId, id))
+            {
+                response.Message = "Access team is forbidden";
+                response.AddError(_localizer["You are not a member of team."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var teamTasks = _vwsDbContext.GeneralTasks.Where(task => task.TeamId == id && !task.IsDeleted);
+            foreach (var teamTask in teamTasks)
+                tasks.Add(new TaskResponseModel()
+                {
+                    Id = teamTask.Id,
+                    Title = teamTask.Title,
+                    Description = teamTask.Description,
+                    StartDate = teamTask.StartDate,
+                    EndDate = teamTask.EndDate,
+                    CreatedOn = teamTask.CreatedOn,
+                    ModifiedOn = teamTask.ModifiedOn,
+                    CreatedBy = (await _vwsDbContext.GetUserProfileAsync(teamTask.CreatedBy)).NickName,
+                    ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(teamTask.ModifiedBy)).NickName,
+                    Guid = teamTask.Guid,
+                    PriorityId = teamTask.TaskPriorityId,
+                    PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)teamTask.TaskPriorityId).ToString()],
+                    UsersAssignedTo = _taskManagerService.GetAssignedTo(teamTask.Id),
+                    ProjectId = teamTask.ProjectId,
+                    TeamId = teamTask.TeamId,
+                    TeamName = teamTask.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == teamTask.TeamId).Name,
+                    ProjectName = teamTask.ProjectId == null ? null : _vwsDbContext.Projects.FirstOrDefault(project => project.Id == teamTask.ProjectId).Name,
+                    StatusId = teamTask.TaskStatusId,
+                    StatusTitle = _vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == teamTask.TaskStatusId).Title,
+                    CheckLists = _taskManagerService.GetCheckLists(teamTask.Id),
+                    Tags = _taskManagerService.GetTaskTags(teamTask.Id),
+                    Comments = await _taskManagerService.GetTaskComments(teamTask.Id),
+                    Attachments = _taskManagerService.GetTaskAttachments(teamTask.Id)
+                });
+
+            response.Value = tasks;
             response.Message = "Team departments returned successfully!";
             return Ok(response);
         }

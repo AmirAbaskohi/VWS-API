@@ -31,6 +31,7 @@ using vws.web.Services;
 using vws.web.Services._department;
 using vws.web.Services._team;
 using vws.web.Services._project;
+using vws.web.Services._task;
 
 namespace vws.web
 {
@@ -137,6 +138,8 @@ namespace vws.web
             services.AddScoped<ITeamManagerService, TeamManagerService>();
 
             services.AddScoped<INotificationService, NotificationService>();
+
+            services.AddScoped<ITaskManagerService, TaskManagerService>();
 
             services.AddScoped<TokenValidationFilterAttribute>();
 

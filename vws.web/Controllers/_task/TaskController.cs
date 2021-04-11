@@ -19,6 +19,7 @@ using vws.web.Models;
 using vws.web.Models._task;
 using vws.web.Repositories;
 using vws.web.Services;
+using vws.web.Services._task;
 using static vws.web.EmailTemplates.EmailTemplateTypes;
 
 namespace vws.web.Controllers._task
@@ -34,12 +35,13 @@ namespace vws.web.Controllers._task
         private readonly IConfiguration _configuration;
         private readonly IFileManager _fileManager;
         private readonly INotificationService _notificationService;
+        private readonly ITaskManagerService _taskManagerService;
         #endregion
 
         #region Ctor
         public TaskController(IStringLocalizer<TaskController> localizer, IVWS_DbContext vwsDbContext,
             IPermissionService permissionService, IConfiguration configuration, IFileManager fileManager,
-            INotificationService notificationService)
+            INotificationService notificationService, ITaskManagerService taskManagerService)
         {
             _localizer = localizer;
             _vwsDbContext = vwsDbContext;
@@ -47,30 +49,11 @@ namespace vws.web.Controllers._task
             _configuration = configuration;
             _fileManager = fileManager;
             _notificationService = notificationService;
+            _taskManagerService = taskManagerService;
         }
         #endregion
 
         #region PrivateMethods
-        private List<UserModel> GetAssignedTo(long taskId)
-        {
-            var result = new List<UserModel>();
-            var assignedUsers = _vwsDbContext.TaskAssigns.Include(taskAssign => taskAssign.UserProfile)
-                                                        .Where(taskAssign => taskAssign.GeneralTaskId == taskId && !taskAssign.IsDeleted)
-                                                        .Select(taskAssign => taskAssign.UserProfile);
-
-            foreach (var user in assignedUsers)
-            {
-                result.Add(new UserModel()
-                {
-                    ProfileImageGuid = user.ProfileImageGuid,
-                    UserId = user.UserId,
-                    NickName = user.NickName
-                });
-            }
-
-            return result;
-        }
-
         private List<GeneralTask> GetUserTasks(Guid userId)
         {
             var assignedTasks = _vwsDbContext.TaskAssigns.Include(taskAssign => taskAssign.GeneralTask)
@@ -149,7 +132,7 @@ namespace vws.web.Controllers._task
                                                       .ToList();
         }
 
-        private List<TagResponseModel> GetTaskTags(int? projectId, int? teamId)
+        private List<TagResponseModel> GetAvailableTags(int? projectId, int? teamId)
         {
             if (projectId != null)
             {
@@ -166,40 +149,6 @@ namespace vws.web.Controllers._task
             return _vwsDbContext.Tags.Where(tag => tag.UserProfileId == LoggedInUserId.Value)
                                     .Select(tag => new TagResponseModel() { Id = tag.Id, Title = tag.Title, Color = tag.Color })
                                     .ToList();
-        }
-
-        private List<CheckListResponseModel> GetCheckLists(long taskId)
-        {
-            var result = new List<CheckListResponseModel>();
-
-            var checkLists = _vwsDbContext.TaskCheckLists.Where(checkList => checkList.GeneralTaskId == taskId && !checkList.IsDeleted);
-            foreach (var checkList in checkLists)
-            {
-                result.Add(new CheckListResponseModel()
-                {
-                    Id = checkList.Id,
-                    CreatedBy = checkList.CreatedBy,
-                    CreatedOn = checkList.CreatedOn,
-                    GeneralTaskId = checkList.GeneralTaskId,
-                    ModifiedBy = checkList.ModifiedBy,
-                    ModifiedOn = checkList.ModifiedOn,
-                    Title = checkList.Title,
-                    Items = _vwsDbContext.TaskCheckListItems.Where(item => item.TaskCheckListId == checkList.Id && !item.IsDeleted)
-                                                           .Select(item => new CheckListItemResponseModel()
-                                                           {
-                                                               Id = item.Id,
-                                                               CreatedBy = item.CreatedBy,
-                                                               CreatedOn = item.CreatedOn,
-                                                               IsChecked = item.IsChecked,
-                                                               ModifiedBy = item.ModifiedBy,
-                                                               ModifiedOn = item.ModifiedOn,
-                                                               TaskCheckListId = item.TaskCheckListId,
-                                                               Title = item.Title
-                                                           })
-                                                           .ToList()
-                });
-            }
-            return result;
         }
 
         private bool HasCheckListsTitleMoreCharacters(List<CheckListModel> checkLists)
@@ -309,13 +258,6 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
         }
 
-        private List<TagResponseModel> GetTaskTags(long taskId)
-        {
-            return _vwsDbContext.TaskTags.Include(taskTag => taskTag.Tag)
-                                        .Where(taskTag => taskTag.GeneralTaskId == taskId)
-                                        .Select(taskTag => new TagResponseModel() { Id = taskTag.Tag.Id, Title = taskTag.Tag.Title, Color = taskTag.Tag.Color })
-                                        .ToList();
-        }
 
         private List<FileModel> AddCommentAttachments(long commentId, List<Guid> attachments)
         {
@@ -397,79 +339,6 @@ namespace vws.web.Controllers._task
             }
             _vwsDbContext.DeleteTaskComment(commentId);
             _vwsDbContext.Save();
-        }
-
-        private List<FileModel> GetCommentAttachments(long commentId)
-        {
-            var result = new List<FileModel>();
-            
-            var attachments = _vwsDbContext.TaskCommentAttachments.Include(attachment => attachment.FileContainer)
-                                                                 .Where(attachment => attachment.TaskCommentId == commentId)
-                                                                 .Select(attachment => attachment.FileContainer);
-
-            foreach (var attachment in attachments)
-            {
-                var recentFile = _vwsDbContext.Files.FirstOrDefault(file => file.Id == attachment.RecentFileId);
-                result.Add(new FileModel()
-                {
-                    FileContainerGuid = attachment.Guid,
-                    Name = recentFile.Name,
-                    Extension = recentFile.Extension,
-                    Size = recentFile.Size
-                });
-            }
-
-            return result;
-        }
-
-        private List<FileModel> GetTaskAttachments(long taskId)
-        {
-            var result = new List<FileModel>();
-
-            var attachments = _vwsDbContext.TaskAttachments.Include(attachment => attachment.FileContainer)
-                                                           .Where(attachment => attachment.GeneralTaskId == taskId)
-                                                           .Select(attachment => attachment.FileContainer);
-
-            foreach (var attachment in attachments)
-            {
-                var recentFile = _vwsDbContext.Files.FirstOrDefault(file => file.Id == attachment.RecentFileId);
-                result.Add(new FileModel()
-                {
-                    FileContainerGuid = attachment.Guid,
-                    Name = recentFile.Name,
-                    Extension = recentFile.Extension,
-                    Size = recentFile.Size
-                });
-            }
-
-            return result;
-        }
-
-        private async Task<List<CommentResponseModel>> GetTaskComments(long taskId)
-        {
-            var result = new List<CommentResponseModel>();
-            var comments = _vwsDbContext.TaskComments.Where(comment => comment.GeneralTaskId == taskId);
-
-            foreach(var comment in comments)
-            {
-                var userProfile = await _vwsDbContext.GetUserProfileAsync(comment.CommentedBy);
-                result.Add(new CommentResponseModel()
-                {
-                    Id = comment.Id,
-                    Body = comment.Body,
-                    CommentedBy = new UserModel()
-                    {
-                        UserId = comment.CommentedBy,
-                        NickName = userProfile.NickName,
-                        ProfileImageGuid = userProfile.ProfileImageGuid
-                    },
-                    CommentedOn = comment.CommentedOn,
-                    MidifiedOn = comment.ModifiedOn,
-                    Attachments = GetCommentAttachments(comment.Id)
-                });
-            }
-
-            return result;
         }
 
         private async Task AddCreateTaaskHistory(TaskResponseModel taskResponseModel, Guid creatorId)
@@ -723,17 +592,17 @@ namespace vws.web.Controllers._task
                 CreatedBy = (await _vwsDbContext.GetUserProfileAsync(newTask.CreatedBy)).NickName,
                 PriorityId = newTask.TaskPriorityId,
                 PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)newTask.TaskPriorityId).ToString()],
-                UsersAssignedTo = GetAssignedTo(newTask.Id),
+                UsersAssignedTo = _taskManagerService.GetAssignedTo(newTask.Id),
                 ProjectId = newTask.ProjectId,
                 TeamId = newTask.TeamId,
                 TeamName = newTask.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == newTask.TeamId).Name,
                 ProjectName = newTask.ProjectId == null ? null : _vwsDbContext.Projects.FirstOrDefault(project => project.Id == newTask.ProjectId).Name,
                 StatusId = newTask.TaskStatusId,
                 StatusTitle = _vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == newTask.TaskStatusId).Title,
-                CheckLists = GetCheckLists(newTask.Id),
-                Tags = GetTaskTags(newTask.Id),
-                Comments = await GetTaskComments(newTask.Id),
-                Attachments = GetTaskAttachments(newTask.Id)
+                CheckLists = _taskManagerService.GetCheckLists(newTask.Id),
+                Tags = _taskManagerService.GetTaskTags(newTask.Id),
+                Comments = await _taskManagerService.GetTaskComments(newTask.Id),
+                Attachments = _taskManagerService.GetTaskAttachments(newTask.Id)
             };
 
             await AddCreateTaaskHistory(newTaskResponseModel, newTask.CreatedBy);
@@ -780,7 +649,7 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
-            var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -827,7 +696,7 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
-            var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -874,7 +743,7 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
-            var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -1004,7 +873,7 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
-            var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -1052,7 +921,7 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
-            var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -1102,7 +971,7 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
-            var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -1152,7 +1021,7 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
-            var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -1192,7 +1061,7 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
-            var usersAssignedTo = GetAssignedTo(taskId).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(taskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -1232,17 +1101,17 @@ namespace vws.web.Controllers._task
                     Guid = userTask.Guid,
                     PriorityId = userTask.TaskPriorityId,
                     PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)userTask.TaskPriorityId).ToString()],
-                    UsersAssignedTo = GetAssignedTo(userTask.Id),
+                    UsersAssignedTo = _taskManagerService.GetAssignedTo(userTask.Id),
                     ProjectId = userTask.ProjectId,
                     TeamId = userTask.TeamId,
                     TeamName = userTask.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == userTask.TeamId).Name,
                     ProjectName = userTask.ProjectId == null ? null : _vwsDbContext.Projects.FirstOrDefault(project => project.Id == userTask.ProjectId).Name,
                     StatusId = userTask.TaskStatusId,
                     StatusTitle = _vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == userTask.TaskStatusId).Title,
-                    CheckLists = GetCheckLists(userTask.Id),
-                    Tags = GetTaskTags(userTask.Id),
-                    Comments = await GetTaskComments(userTask.Id),
-                    Attachments = GetTaskAttachments(userTask.Id)
+                    CheckLists = _taskManagerService.GetCheckLists(userTask.Id),
+                    Tags = _taskManagerService.GetTaskTags(userTask.Id),
+                    Comments = await _taskManagerService.GetTaskComments(userTask.Id),
+                    Attachments = _taskManagerService.GetTaskAttachments(userTask.Id)
                 });
             }
             return response;
@@ -1277,17 +1146,17 @@ namespace vws.web.Controllers._task
                     Guid = userTask.Guid,
                     PriorityId = userTask.TaskPriorityId,
                     PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)userTask.TaskPriorityId).ToString()],
-                    UsersAssignedTo = GetAssignedTo(userTask.Id),
+                    UsersAssignedTo = _taskManagerService.GetAssignedTo(userTask.Id),
                     ProjectId = userTask.ProjectId,
                     TeamId = userTask.TeamId,
                     TeamName = userTask.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == userTask.TeamId).Name,
                     ProjectName = userTask.ProjectId == null ? null : _vwsDbContext.Projects.FirstOrDefault(project => project.Id == userTask.ProjectId).Name,
                     StatusId = userTask.TaskStatusId,
                     StatusTitle = _vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == userTask.TaskStatusId).Title,
-                    CheckLists = GetCheckLists(userTask.Id),
-                    Tags = GetTaskTags(userTask.Id),
-                    Comments = await GetTaskComments(userTask.Id),
-                    Attachments = GetTaskAttachments(userTask.Id)
+                    CheckLists = _taskManagerService.GetCheckLists(userTask.Id),
+                    Tags = _taskManagerService.GetTaskTags(userTask.Id),
+                    Comments = await _taskManagerService.GetTaskComments(userTask.Id),
+                    Attachments = _taskManagerService.GetTaskAttachments(userTask.Id)
                 });
             }
             return response;
@@ -1334,17 +1203,17 @@ namespace vws.web.Controllers._task
                     Guid = projectTask.Guid,
                     PriorityId = projectTask.TaskPriorityId,
                     PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)projectTask.TaskPriorityId).ToString()],
-                    UsersAssignedTo = GetAssignedTo(projectTask.Id),
+                    UsersAssignedTo = _taskManagerService.GetAssignedTo(projectTask.Id),
                     ProjectId = projectTask.ProjectId,
                     TeamId = projectTask.TeamId,
                     TeamName = projectTask.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == projectTask.TeamId).Name,
                     ProjectName = projectTask.ProjectId == null ? null : _vwsDbContext.Projects.FirstOrDefault(project => project.Id == projectTask.ProjectId).Name,
                     StatusId = projectTask.TaskStatusId,
                     StatusTitle = _vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == projectTask.TaskStatusId).Title,
-                    CheckLists = GetCheckLists(projectTask.Id),
-                    Tags = GetTaskTags(projectTask.Id),
-                    Comments = await GetTaskComments(projectTask.Id),
-                    Attachments = GetTaskAttachments(projectTask.Id)
+                    CheckLists = _taskManagerService.GetCheckLists(projectTask.Id),
+                    Tags = _taskManagerService.GetTaskTags(projectTask.Id),
+                    Comments = await _taskManagerService.GetTaskComments(projectTask.Id),
+                    Attachments = _taskManagerService.GetTaskAttachments(projectTask.Id)
                 });
             }
             response.Value = result;
@@ -1380,17 +1249,17 @@ namespace vws.web.Controllers._task
                         Guid = userTask.Guid,
                         PriorityId = userTask.TaskPriorityId,
                         PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)userTask.TaskPriorityId).ToString()],
-                        UsersAssignedTo = GetAssignedTo(userTask.Id),
+                        UsersAssignedTo = _taskManagerService.GetAssignedTo(userTask.Id),
                         ProjectId = userTask.ProjectId,
                         TeamId = userTask.TeamId,
                         TeamName = userTask.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == userTask.TeamId).Name,
                         ProjectName = userTask.ProjectId == null ? null : _vwsDbContext.Projects.FirstOrDefault(project => project.Id == userTask.ProjectId).Name,
                         StatusId = userTask.TaskStatusId,
                         StatusTitle = _vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == userTask.TaskStatusId).Title,
-                        CheckLists = GetCheckLists(userTask.Id),
-                        Tags = GetTaskTags(userTask.Id),
-                        Comments = await GetTaskComments(userTask.Id),
-                        Attachments = GetTaskAttachments(userTask.Id)
+                        CheckLists = _taskManagerService.GetCheckLists(userTask.Id),
+                        Tags = _taskManagerService.GetTaskTags(userTask.Id),
+                        Comments = await _taskManagerService.GetTaskComments(userTask.Id),
+                        Attachments = _taskManagerService.GetTaskAttachments(userTask.Id)
                     });
                 }
             }
@@ -1455,7 +1324,7 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
-            var usersAssignedTo = GetAssignedTo(taskId).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(taskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -1494,7 +1363,7 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            var taskUsers = GetAssignedTo(model.TaskId).Select(user => user.UserId);
+            var taskUsers = _taskManagerService.GetAssignedTo(model.TaskId).Select(user => user.UserId);
 
             foreach(var user in model.Users)
             {
@@ -1611,7 +1480,7 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            assignedUsersList = GetAssignedTo(id);
+            assignedUsersList = _taskManagerService.GetAssignedTo(id);
 
             response.Message = "Users returned successfully!";
             response.Value = assignedUsersList;
@@ -1942,7 +1811,7 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedBy = userId;
             _vwsDbContext.Save();
 
-            var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -2014,7 +1883,7 @@ namespace vws.web.Controllers._task
             selectedCheckList.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
-            var usersAssignedTo = GetAssignedTo(selectedCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedCheckList.GeneralTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -2064,7 +1933,7 @@ namespace vws.web.Controllers._task
             selectedCheckList.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
-            var usersAssignedTo = GetAssignedTo(selectedCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedCheckList.GeneralTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -2136,7 +2005,7 @@ namespace vws.web.Controllers._task
             selectedCheckList.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
-            var usersAssignedTo = GetAssignedTo(selectedCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedCheckList.GeneralTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -2209,7 +2078,7 @@ namespace vws.web.Controllers._task
             selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy = userId;
             _vwsDbContext.Save();
 
-            var usersAssignedTo = GetAssignedTo(selectedCheckListItem.TaskCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedCheckListItem.TaskCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -2264,7 +2133,7 @@ namespace vws.web.Controllers._task
             selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy = userId;
             _vwsDbContext.Save();
 
-            var usersAssignedTo = GetAssignedTo(selectedCheckListItem.TaskCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedCheckListItem.TaskCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -2318,7 +2187,7 @@ namespace vws.web.Controllers._task
             selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy = userId;
             _vwsDbContext.Save();
 
-            var usersAssignedTo = GetAssignedTo(selectedCheckListItem.TaskCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedCheckListItem.TaskCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -2462,7 +2331,7 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedBy = userId;
             _vwsDbContext.Save();
 
-            var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -2593,7 +2462,7 @@ namespace vws.web.Controllers._task
             }
             #endregion
 
-            response.Value = GetTaskTags(projectId, teamId);
+            response.Value = GetAvailableTags(projectId, teamId);
             response.Message = "Tags returned successfully!";
             return Ok(response);
         }
@@ -2689,7 +2558,7 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
-            var usersAssignedTo = GetAssignedTo(id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -2749,7 +2618,7 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
             AddCommentAttachments(newComment.Id, model.Attachments);
 
-            var usersAssignedTo = GetAssignedTo(model.Id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(model.Id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -2769,7 +2638,7 @@ namespace vws.web.Controllers._task
                 },
                 CommentedOn = newComment.CommentedOn,
                 MidifiedOn = newComment.ModifiedOn,
-                Attachments = GetCommentAttachments(newComment.Id)
+                Attachments = _taskManagerService.GetCommentAttachments(newComment.Id)
             };
             response.Message = "Comment added successfully!";
             return Ok(response);
@@ -2820,7 +2689,7 @@ namespace vws.web.Controllers._task
             selectedComment.GeneralTask.ModifiedBy = userId;
             _vwsDbContext.Save();
 
-            var usersAssignedTo = GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedComment.GeneralTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -2867,7 +2736,7 @@ namespace vws.web.Controllers._task
             selectedComment.GeneralTask.ModifiedBy = userId;
             _vwsDbContext.Save();
 
-            var usersAssignedTo = GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedComment.GeneralTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -2917,7 +2786,7 @@ namespace vws.web.Controllers._task
                 foreach (var file in response.Value)
                     emailMessage += $"<a href='{Request.Scheme}://{Request.Host}/en-US/File/get?id={file.FileContainerGuid}'>{file.Name}</a>\n<br>\n";
 
-                var usersAssignedTo = GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
+                var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
                 usersAssignedTo.Add(selectedComment.GeneralTask.CreatedBy);
                 usersAssignedTo = usersAssignedTo.Distinct().ToList();
                 usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -2971,7 +2840,7 @@ namespace vws.web.Controllers._task
             selectedComment.GeneralTask.ModifiedBy = userId;
             _vwsDbContext.Save();
 
-            var usersAssignedTo = GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedComment.GeneralTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -3019,7 +2888,7 @@ namespace vws.web.Controllers._task
                 foreach (var file in response.Value)
                     emailMessage += $"<a href='{Request.Scheme}://{Request.Host}/en-US/File/get?id={file.FileContainerGuid}'>{file.Name}</a>\n<br>\n";
 
-                var usersAssignedTo = GetAssignedTo(selectedTask.Id).Select(user => user.UserId).ToList();
+                var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedTask.Id).Select(user => user.UserId).ToList();
                 usersAssignedTo.Add(selectedTask.CreatedBy);
                 usersAssignedTo = usersAssignedTo.Distinct().ToList();
                 usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -3072,7 +2941,7 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedBy = userId;
             _vwsDbContext.Save();
 
-            var usersAssignedTo = GetAssignedTo(selectedTask.Id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedTask.Id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);

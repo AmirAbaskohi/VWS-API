@@ -135,6 +135,9 @@
   <data name="File size is not allowed." xml:space="preserve">
     <value>File size is not allowed.</value>
   </data>
+  <data name="High" xml:space="preserve">
+    <value>High</value>
+  </data>
   <data name="Invalid status." xml:space="preserve">
     <value>Invalid status.</value>
   </data>
@@ -152,6 +155,18 @@
   </data>
   <data name="Length of title is more than 500 characters." xml:space="preserve">
     <value>Length of title is more than 500 characters.</value>
+  </data>
+  <data name="Low" xml:space="preserve">
+    <value>Low</value>
+  </data>
+  <data name="Medium" xml:space="preserve">
+    <value>Medium</value>
+  </data>
+  <data name="No Time" xml:space="preserve">
+    <value>No Time</value>
+  </data>
+  <data name="Personal" xml:space="preserve">
+    <value>Personal</value>
   </data>
   <data name="Priority id is not defined." xml:space="preserve">
     <value>Priority id is not defined.</value>

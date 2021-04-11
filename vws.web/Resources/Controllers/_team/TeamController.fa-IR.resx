@@ -129,6 +129,9 @@
   <data name="File size is not allowed." xml:space="preserve">
     <value>حجم فایل معتبر نیست.</value>
   </data>
+  <data name="High" xml:space="preserve">
+    <value>بالا</value>
+  </data>
   <data name="Invite link with id {0} revoked by {1}." xml:space="preserve">
     <value>لینک با آی دی {0} توسط {1} منقضی شد.</value>
   </data>
@@ -146,6 +149,18 @@
   </data>
   <data name="Link is not valid" xml:space="preserve">
     <value>لینک معتبر نیست.</value>
+  </data>
+  <data name="Low" xml:space="preserve">
+    <value>پایین</value>
+  </data>
+  <data name="Medium" xml:space="preserve">
+    <value>متوسط</value>
+  </data>
+  <data name="No Time" xml:space="preserve">
+    <value>بدون زمان</value>
+  </data>
+  <data name="Personal" xml:space="preserve">
+    <value>شخصی</value>
   </data>
   <data name="Task {0} created by {1} under this team." xml:space="preserve">
     <value>تسک {0} توسط {1} تحت این تیم ایجاد شد.</value>
