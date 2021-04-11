@@ -186,6 +186,9 @@
   <data name="Task is assigned to user before." xml:space="preserve">
     <value>Task is assigned to user before.</value>
   </data>
+  <data name="Task {0} created by {1}." xml:space="preserve">
+    <value>Task {0} created by {1}.</value>
+  </data>
   <data name="Team not found." xml:space="preserve">
     <value>Team not found.</value>
   </data>

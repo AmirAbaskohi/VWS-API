@@ -228,6 +228,9 @@
   <data name="Status id is not valid." xml:space="preserve">
     <value>Status id is not valid.</value>
   </data>
+  <data name="Task {0} created by {1} under this project." xml:space="preserve">
+    <value>Task {0} created by {1} under this project.</value>
+  </data>
   <data name="The department is not a subset of the team." xml:space="preserve">
     <value>The department is not a subset of the team.</value>
   </data>

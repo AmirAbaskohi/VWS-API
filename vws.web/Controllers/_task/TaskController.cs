@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -471,21 +472,87 @@ namespace vws.web.Controllers._task
             return result;
         }
 
-        //private void AddCreateTaaskHistory(TaskResponseModel taskResponseModel)
-        //{
-        //    _vwsDbContext.AddTaskHistory(new TaskHistory()
-        //    {
-        //        EventTime = taskResponseModel.CreatedOn,
-        //        Event = "Task created by {0}.",
-        //        TaskId = taskResponseModel.Id
-        //    });
-        //    _vwsDbContext.
+        private async Task AddCreateTaaskHistory(TaskResponseModel taskResponseModel, Guid creatorId)
+        {
+            var user = await _vwsDbContext.GetUserProfileAsync(creatorId);
+            var userModel = new UserModel()
+            {
+                NickName = user.NickName,
+                ProfileImageGuid = user.ProfileImageGuid,
+                UserId = user.UserId
+            };
 
-        //    if (taskResponseModel.ProjectId != null)
-        //    {
-        //        _vwsDbContext.AddProjectHistory()
-        //    }
-        //}
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = taskResponseModel.CreatedOn,
+                Event = "Task {0} created by {1}.",
+                TaskId = taskResponseModel.Id
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = taskResponseModel.Title,
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(userModel),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+
+            if (taskResponseModel.ProjectId != null)
+            {
+                var newProjectHistory = new ProjectHistory()
+                {
+                    EventTime = taskResponseModel.CreatedOn,
+                    Event = "Task {0} created by {1} for this project.",
+                    ProjectId = taskResponseModel.ProjectId.Value
+                };
+                _vwsDbContext.AddProjectHistory(newProjectHistory);
+                _vwsDbContext.Save();
+                _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+                {
+                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                    Body = taskResponseModel.Title,
+                    ProjectHistoryId = newProjectHistory.Id
+                });
+                _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+                {
+                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                    Body = JsonConvert.SerializeObject(userModel),
+                    ProjectHistoryId = newProjectHistory.Id
+                });
+                _vwsDbContext.Save();
+            }
+            else if (taskResponseModel.TeamId != null)
+            {
+                var newTeamHistory = new TeamHistory()
+                {
+                    EventTime = taskResponseModel.CreatedOn,
+                    Event = "Task {0} created by {1} for this project.",
+                    TeamId = taskResponseModel.TeamId.Value
+                };
+                _vwsDbContext.AddTeamHistory(newTeamHistory);
+                _vwsDbContext.Save();
+                _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+                {
+                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                    Body = taskResponseModel.Title,
+                    TeamHistoryId = newTeamHistory.Id
+                });
+                _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+                {
+                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                    Body = JsonConvert.SerializeObject(userModel),
+                    TeamHistoryId = newTeamHistory.Id
+                });
+                _vwsDbContext.Save();
+            }
+        }
         #endregion
 
         #region TaskAPIS
@@ -584,7 +651,6 @@ namespace vws.web.Controllers._task
 
             if (GetUsersCanBeAddedToTask(model.TeamId, model.ProjectId).Intersect(model.Users).Count() != model.Users.Count)
             {
-                
                 response.Message = "Users do not have access";
                 response.AddError(_localizer["Some of users you want to add do not have access to team or project."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
@@ -670,7 +736,7 @@ namespace vws.web.Controllers._task
                 Attachments = GetTaskAttachments(newTask.Id)
             };
 
-            //AddCreateTaaskHistory(newTaskResponseModel);
+            await AddCreateTaaskHistory(newTaskResponseModel, newTask.CreatedBy);
 
             response.Value = newTaskResponseModel;
             response.Message = "Task created successfully!";

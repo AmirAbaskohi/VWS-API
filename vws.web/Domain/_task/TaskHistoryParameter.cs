@@ -17,6 +17,8 @@ namespace vws.web.Domain._task
 
         public string Body { get; set; }
 
+        public bool ShouldBeLocalized { get; set; }
+
         public virtual ActivityParameterType ActivityParameterType { get; set; }
 
         public virtual TaskHistory TaskHistory { get; set; }

@@ -147,6 +147,9 @@
   <data name="Link is not valid" xml:space="preserve">
     <value>لینک معتبر نیست.</value>
   </data>
+  <data name="Task {0} created by {1} under this team." xml:space="preserve">
+    <value>تسک {0} توسط {1} تحت این تیم ایجاد شد.</value>
+  </data>
   <data name="Team created by {0}." xml:space="preserve">
     <value>تیم توسط {0} ساخته شد.</value>
   </data>

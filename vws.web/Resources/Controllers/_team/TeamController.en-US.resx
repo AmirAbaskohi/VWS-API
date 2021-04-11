@@ -147,6 +147,9 @@
   <data name="Link is not valid" xml:space="preserve">
     <value>Link is not valid</value>
   </data>
+  <data name="Task {0} created by {1} under this team." xml:space="preserve">
+    <value>Task {0} created by {1} under this team.</value>
+  </data>
   <data name="Team created by {0}." xml:space="preserve">
     <value>Team created by {0}.</value>
   </data>

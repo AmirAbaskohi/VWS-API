@@ -183,6 +183,9 @@
   <data name="Task is assigned to user before." xml:space="preserve">
     <value>تسک قبلا به کاربر اختصاص داده شده است.</value>
   </data>
+  <data name="Task {0} created by {1}." xml:space="preserve">
+    <value>تسک {0} توسط {1} ایجاد شد.</value>
+  </data>
   <data name="Team not found." xml:space="preserve">
     <value>تیم یافت نشد.</value>
   </data>

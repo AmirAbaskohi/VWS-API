@@ -228,6 +228,9 @@
   <data name="Status id is not valid." xml:space="preserve">
     <value>وضعیت وارد شده معتبر نیست.</value>
   </data>
+  <data name="Task {0} created by {1} under this project." xml:space="preserve">
+    <value>تسک {0} توسط {1} تحت این پروژه ایجاد شد.</value>
+  </data>
   <data name="The department is not a subset of the team." xml:space="preserve">
     <value>دپارتمان زیرمجموعه تیم نیست.</value>
   </data>
