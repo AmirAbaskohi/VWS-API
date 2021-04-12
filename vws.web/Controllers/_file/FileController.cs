@@ -36,6 +36,7 @@ namespace vws.web.Controllers._file
         }
         #endregion
 
+        #region FileAPIS
         [HttpPost]
         [Authorize]
         [Route("upload")]
@@ -108,33 +109,6 @@ namespace vws.web.Controllers._file
             return Ok(response);
         }
 
-
-        [HttpGet]
-        [Route("get")]
-        public async Task<IActionResult> GetFile(Guid id)
-        {
-            var response = new ResponseModel();
-            var fileContainer = await _vwsDbContext.GetFileContainerAsync(id);
-            if (fileContainer == null)
-            {
-                response.AddError(_localizer["There is no such file."]);
-                response.Message = "File not found";
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-            var selectedFile = (await _vwsDbContext.GetFileAsync(fileContainer.RecentFileId));
-            string address = selectedFile.Address;
-            string fileName = selectedFile.Name;
-
-
-            var memory = new MemoryStream();
-            using (var stream = new FileStream(address, FileMode.Open))
-            {
-                await stream.CopyToAsync(memory);
-            }
-            memory.Position = 0;
-            return File(memory, "application/" + selectedFile.Extension, Path.GetFileName(fileName));
-        }
-
         [HttpPut]
         [Authorize]
         [Route("update")]
@@ -144,7 +118,7 @@ namespace vws.web.Controllers._file
 
             var files = Request.Form.Files.ToList();
 
-            List<string> types = new List<string>() ;
+            List<string> types = new List<string>();
 
             if (files.Count > 1)
             {
@@ -202,5 +176,33 @@ namespace vws.web.Controllers._file
             response.Message = "File updated successfully!";
             return Ok(response);
         }
+
+        [HttpGet]
+        [Route("get")]
+        public async Task<IActionResult> GetFile(Guid id)
+        {
+            var response = new ResponseModel();
+            var fileContainer = await _vwsDbContext.GetFileContainerAsync(id);
+            if (fileContainer == null)
+            {
+                response.AddError(_localizer["There is no such file."]);
+                response.Message = "File not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            var selectedFile = (await _vwsDbContext.GetFileAsync(fileContainer.RecentFileId));
+            string address = selectedFile.Address;
+            string fileName = selectedFile.Name;
+
+
+            var memory = new MemoryStream();
+            using (var stream = new FileStream(address, FileMode.Open))
+            {
+                await stream.CopyToAsync(memory);
+            }
+            memory.Position = 0;
+            return File(memory, "application/" + selectedFile.Extension, Path.GetFileName(fileName));
+        }
+
+        #endregion
     }
 }
