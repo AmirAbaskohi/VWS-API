@@ -123,14 +123,23 @@
   <data name="Check list item with given id does not exist." xml:space="preserve">
     <value>Check list item with given id does not exist.</value>
   </data>
+  <data name="Check list item {0} deleted by {1}." xml:space="preserve">
+    <value>Check list item {0} deleted by {1}.</value>
+  </data>
   <data name="Check list title can not have more than 250 characters." xml:space="preserve">
     <value>Check list title can not have more than 250 characters.</value>
+  </data>
+  <data name="Check list title updated from {0} to {1} by {2}." xml:space="preserve">
+    <value>Check list title updated from {0} to {1} by {2}.</value>
   </data>
   <data name="Check list with given id does not exist." xml:space="preserve">
     <value>Check list with given id does not exist.</value>
   </data>
   <data name="Comment body can not be emty or have more than 1000 characters." xml:space="preserve">
     <value>Comment body can not be emty or have more than 1000 characters.</value>
+  </data>
+  <data name="Done" xml:space="preserve">
+    <value>Done</value>
   </data>
   <data name="File size is not allowed." xml:space="preserve">
     <value>File size is not allowed.</value>
@@ -183,6 +192,9 @@
   <data name="Status not found." xml:space="preserve">
     <value>Status not found.</value>
   </data>
+  <data name="Status of check list item {0} updated from {1} to {2} by {3}." xml:space="preserve">
+    <value>Status of check list item {0} updated from {1} to {2} by {3}.</value>
+  </data>
   <data name="Task already has the tag." xml:space="preserve">
     <value>Task already has the tag.</value>
   </data>
@@ -192,14 +204,41 @@
   <data name="Task comment not found." xml:space="preserve">
     <value>Task comment not found.</value>
   </data>
+  <data name="Task deleted by {0}." xml:space="preserve">
+    <value>Task deleted by {0}.</value>
+  </data>
+  <data name="Task desciption updated to {0} by {1}." xml:space="preserve">
+    <value>Task desciption updated to {0} by {1}.</value>
+  </data>
   <data name="Task does not exist." xml:space="preserve">
     <value>Task does not exist.</value>
   </data>
   <data name="Task does not have the tag." xml:space="preserve">
     <value>Task does not have the tag.</value>
   </data>
+  <data name="Task end date updated from {0} to {1} by {2}." xml:space="preserve">
+    <value>Task end date updated from {0} to {1} by {2}.</value>
+  </data>
+  <data name="Task has been archived by {0}." xml:space="preserve">
+    <value>Task has been archived by {0}.</value>
+  </data>
   <data name="Task is assigned to user before." xml:space="preserve">
     <value>Task is assigned to user before.</value>
+  </data>
+  <data name="Task priority updated from {0} to {1} by {2}." xml:space="preserve">
+    <value>Task priority updated from {0} to {1} by {2}.</value>
+  </data>
+  <data name="Task start date updated from {0} to {1} by {2}." xml:space="preserve">
+    <value>Task start date updated from {0} to {1} by {2}.</value>
+  </data>
+  <data name="Task status updated from {0} to {1} by {2}." xml:space="preserve">
+    <value>Task status updated from {0} to {1} by {2}.</value>
+  </data>
+  <data name="Task title updated from {0} to {1} by {2}." xml:space="preserve">
+    <value>Task title updated from {0} to {1} by {2}.</value>
+  </data>
+  <data name="Task updated from {0} to {1} by {2}." xml:space="preserve">
+    <value>Task updated from {0} to {1} by {2}.</value>
   </data>
   <data name="Task {0} created by {1}." xml:space="preserve">
     <value>Task {0} created by {1}.</value>
@@ -218,6 +257,12 @@
   </data>
   <data name="Title can not be empty or with more than 500 characters." xml:space="preserve">
     <value>Title can not be empty or with more than 500 characters.</value>
+  </data>
+  <data name="Title of check list item updated from {0} to {1} by {2}." xml:space="preserve">
+    <value>Title of check list item updated from {0} to {1} by {2}.</value>
+  </data>
+  <data name="UnderDone" xml:space="preserve">
+    <value>UnderDone</value>
   </data>
   <data name="User does not exist." xml:space="preserve">
     <value>User does not exist.</value>
@@ -251,5 +296,47 @@
   </data>
   <data name="You don't have access to this task." xml:space="preserve">
     <value>You don't have access to this task.</value>
+  </data>
+  <data name="{0} added below attachments to comment {1}: {2}" xml:space="preserve">
+    <value>{0} added below attachments to comment {1}: {2}</value>
+  </data>
+  <data name="{0} added below attachments to task: {1}" xml:space="preserve">
+    <value>{0} added below attachments to task: {1}</value>
+  </data>
+  <data name="{0} added check list item {1} to check list {2}." xml:space="preserve">
+    <value>{0} added check list item {1} to check list {2}.</value>
+  </data>
+  <data name="{0} added check list {1} to task." xml:space="preserve">
+    <value>{0} added check list {1} to task.</value>
+  </data>
+  <data name="{0} added comment {1} to task." xml:space="preserve">
+    <value>{0} added comment {1} to task.</value>
+  </data>
+  <data name="{0} added tag {1} to task." xml:space="preserve">
+    <value>{0} added tag {1} to task.</value>
+  </data>
+  <data name="{0} assigned task to {1}." xml:space="preserve">
+    <value>{0} assigned task to {1}.</value>
+  </data>
+  <data name="{0} deleted attchment {1} from comment {2}." xml:space="preserve">
+    <value>{0} deleted attchment {1} from comment {2}.</value>
+  </data>
+  <data name="{0} deleted attchment {1} from task." xml:space="preserve">
+    <value>{0} deleted attchment {1} from task.</value>
+  </data>
+  <data name="{0} deleted check list {1}." xml:space="preserve">
+    <value>{0} deleted check list {1}.</value>
+  </data>
+  <data name="{0} deleted comment {1}." xml:space="preserve">
+    <value>{0} deleted comment {1}.</value>
+  </data>
+  <data name="{0} removed tag {1} from task." xml:space="preserve">
+    <value>{0} removed tag {1} from task.</value>
+  </data>
+  <data name="{0} unassigned {1} from task." xml:space="preserve">
+    <value>{0} unassigned {1} from task.</value>
+  </data>
+  <data name="{0} updated comment from {1} to {2}." xml:space="preserve">
+    <value>{0} updated comment from {1} to {2}.</value>
   </data>
 </root>

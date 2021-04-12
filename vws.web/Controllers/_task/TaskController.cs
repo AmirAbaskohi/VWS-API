@@ -358,6 +358,7 @@ namespace vws.web.Controllers._task
                 TaskId = taskResponseModel.Id
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
@@ -421,6 +422,56 @@ namespace vws.web.Controllers._task
                 });
                 _vwsDbContext.Save();
             }
+        }
+
+        private async Task<List<long>> SaveAssignTaskHistory(long taskId, Guid userId, List<Guid> assignedUsers, DateTime assignTime)
+        {
+            var result = new List<long>();
+
+            var user = await _vwsDbContext.GetUserProfileAsync(userId);
+            var userModelSerialized = JsonConvert.SerializeObject(new UserModel()
+            {
+                NickName = user.NickName,
+                ProfileImageGuid = user.ProfileImageGuid,
+                UserId = user.UserId
+            });
+
+            foreach (var assinedUser in assignedUsers)
+            {
+                var selectedUser = await _vwsDbContext.GetUserProfileAsync(assinedUser);
+                var selectedUserModelSerialized = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                });
+
+                var newHistory = new TaskHistory()
+                {
+                    Event = "{0} assigned task to {1}.",
+                    EventTime = assignTime,
+                    TaskId = taskId
+                };
+                _vwsDbContext.AddTaskHistory(newHistory);
+                _vwsDbContext.Save();
+                _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+                {
+                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                    Body = userModelSerialized,
+                    TaskHistoryId = newHistory.Id,
+                });
+                _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+                {
+                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                    Body = selectedUserModelSerialized,
+                    TaskHistoryId = newHistory.Id,
+                });
+                _vwsDbContext.Save();
+
+                result.Add(newHistory.Id);
+            }
+
+            return result;
         }
         #endregion
 
@@ -649,6 +700,42 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
+            #region History
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = selectedTask.ModifiedOn,
+                Event = "Task title updated from {0} to {1} by {2}.",
+                TaskId = selectedTask.Id
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = lastTitle,
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedTask.Title,
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body =  JsonConvert.SerializeObject(new UserModel() 
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
             var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
@@ -696,6 +783,36 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
+            #region History
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = selectedTask.ModifiedOn,
+                Event = "Task desciption updated to {0} by {1}.",
+                TaskId = selectedTask.Id
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedTask.Description,
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
             var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
@@ -742,6 +859,44 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedBy = LoggedInUserId.Value;
             selectedTask.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
+
+            #region History
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = selectedTask.ModifiedOn,
+                Event = "Task priority updated from {0} to {1} by {2}.",
+                TaskId = selectedTask.Id
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = ((SeedDataEnum.TaskPriority)lastPriority).ToString(),
+                TaskHistoryId = newTaskHistory.Id,
+                ShouldBeLocalized = true
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = ((SeedDataEnum.TaskPriority)selectedTask.ProjectId).ToString(),
+                TaskHistoryId = newTaskHistory.Id,
+                ShouldBeLocalized = true
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
 
             var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
@@ -812,7 +967,7 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            #region CreatingEmailMessage
+            #region CreatingEmailAndActivityMessage
             var selectedProject = projectId == null ? (Project)null : _vwsDbContext.Projects.FirstOrDefault(project => project.Id == projectId);
             var selectedTeam = teamId == null ? (Team)null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == teamId);
             List<string> emailMessageArguments = new List<string>();
@@ -873,6 +1028,44 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
+            #region History
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = selectedTask.ModifiedOn,
+                Event = "Task updated from {0} to {1} by {2}.",
+                TaskId = selectedTask.Id
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = emailMessageArguments[1],
+                TaskHistoryId = newTaskHistory.Id,
+                ShouldBeLocalized = emailMessageArgumentsLocalize[1]
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = emailMessageArguments[2],
+                TaskHistoryId = newTaskHistory.Id,
+                ShouldBeLocalized = emailMessageArgumentsLocalize[2]
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
             var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
@@ -920,6 +1113,44 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedBy = userId;
             selectedTask.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
+
+            #region History
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = selectedTask.ModifiedOn,
+                Event = "Task start date updated from {0} to {1} by {2}.",
+                TaskId = selectedTask.Id
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = lastStartDate == null ? "No Time" : lastStartDate.ToString(),
+                TaskHistoryId = newTaskHistory.Id,
+                ShouldBeLocalized = lastStartDate == null ? true : false
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedTask.StartDate == null ? "No Time" : selectedTask.StartDate.ToString(),
+                TaskHistoryId = newTaskHistory.Id,
+                ShouldBeLocalized = selectedTask.StartDate == null ? true : false
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
 
             var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
@@ -971,6 +1202,44 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
+            #region History
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = selectedTask.ModifiedOn,
+                Event = "Task end date updated from {0} to {1} by {2}.",
+                TaskId = selectedTask.Id
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = lastEndDate == null ? "No Time" : lastEndDate.ToString(),
+                TaskHistoryId = newTaskHistory.Id,
+                ShouldBeLocalized = lastEndDate == null ? true : false
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedTask.EndDate == null ? "No Time" : selectedTask.EndDate.ToString(),
+                TaskHistoryId = newTaskHistory.Id,
+                ShouldBeLocalized = selectedTask.EndDate == null ? true : false
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
             var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
@@ -1021,11 +1290,49 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
+            var newStatus = _vwsDbContext.TaskStatuses.FirstOrDefault(status => status.Id == selectedTask.TaskStatusId).Title;
+
+            #region History
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = selectedTask.ModifiedOn,
+                Event = "Task status updated from {0} to {1} by {2}.",
+                TaskId = selectedTask.Id
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = lastStatus,
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = newStatus,
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
             var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
-            string[] arguments = { selectedTask.Title, lastStatus, _vwsDbContext.TaskStatuses.FirstOrDefault(status => status.Id == selectedTask.TaskStatusId).Title, LoggedInNickName };
+            string[] arguments = { selectedTask.Title, lastStatus, newStatus , LoggedInNickName };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "Status of your task with title <b>«{0}»</b> has been updated from <b>«{1}»</b> to <b>«{2}»</b> by <b>«{3}»</b>.", "Task Update", arguments);
 
             response.Message = "Task status changed";
@@ -1035,13 +1342,13 @@ namespace vws.web.Controllers._task
         [HttpPut]
         [Authorize]
         [Route("archive")]
-        public async Task<IActionResult> ArchiveTask(long taskId)
+        public async Task<IActionResult> ArchiveTask(long id)
         {
             var response = new ResponseModel();
 
             Guid userId = LoggedInUserId.Value;
 
-            var selectedTask = await _vwsDbContext.GetTaskAsync(taskId);
+            var selectedTask = await _vwsDbContext.GetTaskAsync(id);
 
             if (selectedTask == null || selectedTask.IsDeleted)
             {
@@ -1049,7 +1356,7 @@ namespace vws.web.Controllers._task
                 response.AddError(_localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
-            if (selectedTask.CreatedBy != userId)
+            if (!_permissionService.HasAccessToTask(userId, id))
             {
                 response.Message = "Task access forbidden";
                 response.AddError(_localizer["You don't have access to this task."]);
@@ -1061,7 +1368,31 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(taskId).Select(user => user.UserId).ToList();
+            #region History
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = selectedTask.ModifiedOn,
+                Event = "Task has been archived by {0}.",
+                TaskId = selectedTask.Id
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -1279,6 +1610,54 @@ namespace vws.web.Controllers._task
             return result;
         }
 
+        [HttpGet]
+        [Authorize]
+        [Route("getTaskHistory")]
+        public IActionResult GetTaskHistory(long id)
+        {
+            var userId = LoggedInUserId.Value;
+            var response = new ResponseModel<List<HistoryModel>>();
+
+            var selectedTask = _vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == id);
+
+            if (selectedTask == null || selectedTask.IsDeleted)
+            {
+                response.Message = "Task not found";
+                response.AddError(_localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            if (!_permissionService.HasAccessToTask(userId, id))
+            {
+                response.Message = "Task access forbidden";
+                response.AddError(_localizer["You don't have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            var events = new List<HistoryModel>();
+            var taskEvents = _vwsDbContext.TaskHistories.Where(taskHistory => taskHistory.TaskId == id);
+            foreach (var taskEvent in taskEvents)
+            {
+                var parameters = _vwsDbContext.TaskHistoryParameters.Where(param => param.TaskHistoryId == taskEvent.Id)
+                                                             .OrderBy(param => param.Id)
+                                                             .ToList();
+                for (int i = 0; i < parameters.Count(); i++)
+                {
+                    if (parameters[i].ActivityParameterTypeId == (byte)SeedDataEnum.ActivityParameterTypes.Text && parameters[i].ShouldBeLocalized)
+                        parameters[i].Body = _localizer[parameters[i].Body];
+                }
+                events.Add(new HistoryModel()
+                {
+                    Message = _localizer[taskEvent.Event],
+                    Parameters = parameters.Select(param => new HistoryParameterModel() { ParameterBody = param.Body, ParameterType = param.ActivityParameterTypeId }).ToList(),
+                    Time = taskEvent.EventTime
+                });
+            }
+
+            response.Message = "History returned successfully!";
+            response.Value = events;
+            return Ok(response);
+        }
+
         [HttpDelete]
         [Authorize]
         [Route("delete")]
@@ -1324,6 +1703,30 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
+            #region History
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = selectedTask.ModifiedOn,
+                Event = "Task deleted by {0}.",
+                TaskId = selectedTask.Id
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
             var usersAssignedTo = _taskManagerService.GetAssignedTo(taskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
@@ -1365,6 +1768,8 @@ namespace vws.web.Controllers._task
 
             var taskUsers = _taskManagerService.GetAssignedTo(model.TaskId).Select(user => user.UserId);
 
+            var assignTime = DateTime.Now;
+
             foreach(var user in model.Users)
             {
                 if (!_vwsDbContext.UserProfiles.Any(profile => profile.UserId == user) ||
@@ -1380,12 +1785,14 @@ namespace vws.web.Controllers._task
                     UserProfileId = user,
                     IsDeleted = false,
                     CreatedBy = userId,
-                    CreatedOn = DateTime.Now
+                    CreatedOn = assignTime
                 };
                 await _vwsDbContext.AddTaskAssignAsync(newTaskAssign);
                 successfulAssignedUsers.Add(user);
             }
             _vwsDbContext.Save();
+
+            var historyIds = SaveAssignTaskHistory(selectedTask.Id, LoggedInUserId.Value, successfulAssignedUsers, assignTime);
 
             string[] arguments = { selectedTask.Title, LoggedInNickName };
             Guid[] reuqestedUser = { userId };
@@ -1525,6 +1932,42 @@ namespace vws.web.Controllers._task
             selectedUserAssignedTask.DeletedBy = LoggedInUserId.Value;
             selectedUserAssignedTask.DeletedOn = DateTime.Now;
             _vwsDbContext.Save();
+
+            #region History
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = selectedUserAssignedTask.DeletedOn,
+                Event = "{0} unassigned {1} from task.",
+                TaskId = selectedTask.Id
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            var deletedUser = await _vwsDbContext.GetUserProfileAsync(userId);
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = deletedUser.NickName,
+                    ProfileImageGuid = deletedUser.ProfileImageGuid,
+                    UserId = deletedUser.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
 
             string[] arguments = { selectedTask.Title, LoggedInNickName };
             await _notificationService.SendSingleEmail((int)EmailTemplateEnum.NotificationEmail, "You have been unassigned from task with title <b>«{0}»</b> by <b>«{1}»</b>.", "Task Assign", userId, arguments);
@@ -1811,6 +2254,36 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedBy = userId;
             _vwsDbContext.Save();
 
+            #region History
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = selectedTask.ModifiedOn,
+                Event = "{0} added check list {1} to task.",
+                TaskId = selectedTask.Id
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = newCheckList.Title,
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
             var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
@@ -1883,6 +2356,42 @@ namespace vws.web.Controllers._task
             selectedCheckList.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
+            #region History
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = selectedCheckList.GeneralTask.ModifiedOn,
+                Event = "Check list title updated from {0} to {1} by {2}.",
+                TaskId = selectedCheckList.GeneralTaskId
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = lastTitle,
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedCheckList.Title,
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
             var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedCheckList.GeneralTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
@@ -1932,6 +2441,36 @@ namespace vws.web.Controllers._task
             selectedCheckList.ModifiedBy = userId;
             selectedCheckList.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
+
+            #region History
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = selectedCheckList.GeneralTask.ModifiedOn,
+                Event = "{0} deleted check list {1}.",
+                TaskId = selectedCheckList.GeneralTaskId
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedCheckList.Title,
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
 
             var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedCheckList.GeneralTask.CreatedBy);
@@ -2004,6 +2543,42 @@ namespace vws.web.Controllers._task
             selectedCheckList.ModifiedBy = userId;
             selectedCheckList.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
+
+            #region History
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = selectedCheckList.GeneralTask.ModifiedOn,
+                Event = "{0} added check list item {1} to check list {2}.",
+                TaskId = selectedCheckList.GeneralTaskId
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = newCheckListItem.Title,
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedCheckList.Title,
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
 
             var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedCheckList.GeneralTask.CreatedBy);
@@ -2078,6 +2653,42 @@ namespace vws.web.Controllers._task
             selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy = userId;
             _vwsDbContext.Save();
 
+            #region History
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = selectedCheckListItem.TaskCheckList.GeneralTask.ModifiedOn,
+                Event = "Title of check list item updated from {0} to {1} by {2}.",
+                TaskId = selectedCheckListItem.TaskCheckList.GeneralTaskId
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = lastTitle,
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedCheckListItem.Title,
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
             var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedCheckListItem.TaskCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
@@ -2133,6 +2744,50 @@ namespace vws.web.Controllers._task
             selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy = userId;
             _vwsDbContext.Save();
 
+            #region History
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = selectedCheckListItem.TaskCheckList.GeneralTask.ModifiedOn,
+                Event = "Status of check list item {0} updated from {1} to {2} by {3}.",
+                TaskId = selectedCheckListItem.TaskCheckList.GeneralTaskId
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedCheckListItem.Title,
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = lastStatus ? "Done" : "UnderDone",
+                TaskHistoryId = newTaskHistory.Id,
+                ShouldBeLocalized = true
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedCheckListItem.IsChecked ? "Done" : "UnderDone",
+                TaskHistoryId = newTaskHistory.Id,
+                ShouldBeLocalized = true
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
             var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedCheckListItem.TaskCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
@@ -2186,6 +2841,36 @@ namespace vws.web.Controllers._task
             selectedCheckListItem.TaskCheckList.GeneralTask.ModifiedOn = DateTime.Now;
             selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy = userId;
             _vwsDbContext.Save();
+
+            #region History
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = selectedCheckListItem.TaskCheckList.GeneralTask.ModifiedOn,
+                Event = "Check list item {0} deleted by {1}.",
+                TaskId = selectedCheckListItem.TaskCheckList.GeneralTaskId
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedCheckListItem.Title,
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
 
             var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedCheckListItem.TaskCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy);
@@ -2330,6 +3015,36 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedOn = DateTime.Now;
             selectedTask.ModifiedBy = userId;
             _vwsDbContext.Save();
+
+            #region History
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = selectedTask.ModifiedOn,
+                Event = "{0} added tag {1} to task.",
+                TaskId = selectedTask.Id
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedTag.Title,
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
 
             var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
@@ -2558,6 +3273,36 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
+            #region History
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = selectedTask.ModifiedOn,
+                Event = "{0} removed tag {1} from task.",
+                TaskId = selectedTask.Id
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedTag.Title,
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
             var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
@@ -2617,6 +3362,36 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedBy = userId;
             _vwsDbContext.Save();
             AddCommentAttachments(newComment.Id, model.Attachments);
+
+            #region History
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = selectedTask.ModifiedOn,
+                Event = "{0} added comment {1} to task.",
+                TaskId = selectedTask.Id
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = newComment.Body,
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
 
             var usersAssignedTo = _taskManagerService.GetAssignedTo(model.Id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
@@ -2689,6 +3464,42 @@ namespace vws.web.Controllers._task
             selectedComment.GeneralTask.ModifiedBy = userId;
             _vwsDbContext.Save();
 
+            #region History
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = selectedComment.GeneralTask.ModifiedOn,
+                Event = "{0} updated comment from {1} to {2}.",
+                TaskId = selectedComment.GeneralTaskId
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = lastBody,
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedComment.Body,
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
             var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedComment.GeneralTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
@@ -2736,6 +3547,36 @@ namespace vws.web.Controllers._task
             selectedComment.GeneralTask.ModifiedBy = userId;
             _vwsDbContext.Save();
 
+            #region History
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = selectedComment.GeneralTask.ModifiedOn,
+                Event = "{0} deleted comment {1}.",
+                TaskId = selectedComment.GeneralTaskId
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedComment.Body,
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
             var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedComment.GeneralTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
@@ -2781,16 +3622,52 @@ namespace vws.web.Controllers._task
 
             if (response.Value.Count() != 0)
             {
-                string emailMessage = _localizer["<b>«{0}»</b> added below attachments to comment <b>«{1}»</b> in your task with title <b>«{2}»</b>"];
-                emailMessage += ":\n <br>";
+                string links = "";
+                string emailMessage = "<b>«{0}»</b> added below attachments to comment <b>«{1}»</b> in your task with title <b>«{2}»</b>:\n <br> {3}";
                 foreach (var file in response.Value)
-                    emailMessage += $"<a href='{Request.Scheme}://{Request.Host}/en-US/File/get?id={file.FileContainerGuid}'>{file.Name}</a>\n<br>\n";
+                    links += $"<a href='{Request.Scheme}://{Request.Host}/en-US/File/get?id={file.FileContainerGuid}'>{file.Name}</a>\n<br>\n";
+
+                #region History
+                var newTaskHistory = new TaskHistory()
+                {
+                    EventTime = selectedComment.GeneralTask.ModifiedOn,
+                    Event = "{0} added below attachments to comment {1}: {2}",
+                    TaskId = selectedComment.GeneralTaskId
+                };
+                _vwsDbContext.AddTaskHistory(newTaskHistory);
+                _vwsDbContext.Save();
+                var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+                _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+                {
+                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                    Body = JsonConvert.SerializeObject(new UserModel()
+                    {
+                        NickName = user.NickName,
+                        ProfileImageGuid = user.ProfileImageGuid,
+                        UserId = user.UserId
+                    }),
+                    TaskHistoryId = newTaskHistory.Id
+                });
+                _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+                {
+                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                    Body = selectedComment.Body,
+                    TaskHistoryId = newTaskHistory.Id
+                });
+                _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+                {
+                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.ListOfFiles,
+                    Body = JsonConvert.SerializeObject(response.Value),
+                    TaskHistoryId = newTaskHistory.Id
+                });
+                _vwsDbContext.Save();
+                #endregion
 
                 var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
                 usersAssignedTo.Add(selectedComment.GeneralTask.CreatedBy);
                 usersAssignedTo = usersAssignedTo.Distinct().ToList();
                 usersAssignedTo.Remove(LoggedInUserId.Value);
-                string[] arguments = { LoggedInNickName, selectedComment.Body, selectedComment.GeneralTask.Title };
+                string[] arguments = { LoggedInNickName, selectedComment.Body, selectedComment.GeneralTask.Title, links };
                 await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, emailMessage, "Task Update", arguments);
             }
 
@@ -2834,17 +3711,54 @@ namespace vws.web.Controllers._task
                 _fileManager.DeleteFile(file.Address);
 
             var selectedContainer = _vwsDbContext.FileContainers.FirstOrDefault(container => container.Id == selectedAttachment.FileContainerId);
+            var fileName = _vwsDbContext.Files.FirstOrDefault(file => file.Id == selectedContainer.RecentFileId).Name;
             _vwsDbContext.DeleteFileContainer(selectedContainer);
             selectedComment.ModifiedOn = DateTime.Now;
             selectedComment.GeneralTask.ModifiedOn = DateTime.Now;
             selectedComment.GeneralTask.ModifiedBy = userId;
             _vwsDbContext.Save();
 
+            #region History
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = selectedComment.GeneralTask.ModifiedOn,
+                Event = "{0} deleted attchment {1} from comment {2}.",
+                TaskId = selectedComment.GeneralTaskId
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = fileName,
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedComment.Body,
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
             var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedComment.GeneralTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
-            string[] arguments = { LoggedInNickName, selectedAttachment.FileContainerGuid.ToString(), selectedComment.Body, selectedComment.GeneralTask.Title };
+            string[] arguments = { LoggedInNickName, fileName, selectedComment.Body, selectedComment.GeneralTask.Title };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "<b>«{0}»</b> deleted attachment <b>«{1}»</b> from comment <b>«{2}»</b> in your task with title <b>«{3}»</b>.", "Task Update", arguments);
 
             return Ok(response);
@@ -2883,16 +3797,46 @@ namespace vws.web.Controllers._task
 
             if (response.Value.Count() != 0)
             {
-                string emailMessage = _localizer["<b>«{0}»</b> added below attachments to your task with title <b>«{1}»</b>"];
-                emailMessage += ":\n <br>";
+                string links = "";
+                string emailMessage = "<b>«{0}»</b> added below attachments to your task with title <b>«{1}»</b>: \n <br> {3}";
                 foreach (var file in response.Value)
-                    emailMessage += $"<a href='{Request.Scheme}://{Request.Host}/en-US/File/get?id={file.FileContainerGuid}'>{file.Name}</a>\n<br>\n";
+                    links += $"<a href='{Request.Scheme}://{Request.Host}/en-US/File/get?id={file.FileContainerGuid}'>{file.Name}</a>\n<br>\n";
+
+                #region History
+                var newTaskHistory = new TaskHistory()
+                {
+                    EventTime = selectedTask.ModifiedOn,
+                    Event = "{0} added below attachments to task: {1}",
+                    TaskId = selectedTask.Id
+                };
+                _vwsDbContext.AddTaskHistory(newTaskHistory);
+                _vwsDbContext.Save();
+                var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+                _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+                {
+                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                    Body = JsonConvert.SerializeObject(new UserModel()
+                    {
+                        NickName = user.NickName,
+                        ProfileImageGuid = user.ProfileImageGuid,
+                        UserId = user.UserId
+                    }),
+                    TaskHistoryId = newTaskHistory.Id
+                });
+                _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+                {
+                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.ListOfFiles,
+                    Body = JsonConvert.SerializeObject(response.Value),
+                    TaskHistoryId = newTaskHistory.Id
+                });
+                _vwsDbContext.Save();
+                #endregion
 
                 var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedTask.Id).Select(user => user.UserId).ToList();
                 usersAssignedTo.Add(selectedTask.CreatedBy);
                 usersAssignedTo = usersAssignedTo.Distinct().ToList();
                 usersAssignedTo.Remove(LoggedInUserId.Value);
-                string[] arguments = { LoggedInNickName, selectedTask.Title };
+                string[] arguments = { LoggedInNickName, selectedTask.Title, links };
                 await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, emailMessage, "Task Update", arguments);
             }
 
@@ -2925,6 +3869,7 @@ namespace vws.web.Controllers._task
             var selectedAttachment = _vwsDbContext.TaskAttachments.Include(attachment => attachment.FileContainer)
                                                                   .ThenInclude(attachment => attachment.Files)
                                                                   .FirstOrDefault(attachment => attachment.FileContainerGuid == attachmentGuid && attachment.GeneralTaskId == id);
+
             if (selectedAttachment == null)
             {
                 response.AddError(_localizer["There is no attachment with such information for given task."]);
@@ -2936,16 +3881,47 @@ namespace vws.web.Controllers._task
                 _fileManager.DeleteFile(file.Address);
 
             var selectedContainer = _vwsDbContext.FileContainers.FirstOrDefault(container => container.Id == selectedAttachment.FileContainerId);
+            var fileName = _vwsDbContext.Files.FirstOrDefault(file => file.Id == selectedContainer.RecentFileId).Name;
             _vwsDbContext.DeleteFileContainer(selectedContainer);
             selectedTask.ModifiedOn = DateTime.Now;
             selectedTask.ModifiedBy = userId;
             _vwsDbContext.Save();
 
+            #region History
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = selectedTask.ModifiedOn,
+                Event = "{0} deleted attchment {1} from task.",
+                TaskId = selectedTask.Id
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = fileName,
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
             var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedTask.Id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
-            string[] arguments = { LoggedInNickName, selectedAttachment.FileContainerGuid.ToString(), selectedTask.Title };
+            string[] arguments = { LoggedInNickName, fileName, selectedTask.Title };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "<b>«{0}»</b> deleted attachment <b>«{1}»</b> from your task with title <b>«{2}»</b>.", "Task Update", arguments);
 
             return Ok(response);

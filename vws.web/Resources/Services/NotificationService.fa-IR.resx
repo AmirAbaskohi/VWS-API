@@ -117,8 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="&lt;b&gt;«{0}»&lt;/b&gt; added below attachments to comment &lt;b&gt;«{1}»&lt;/b&gt; in your task with title &lt;b&gt;«{2}»&lt;/b&gt;" xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt;  به کامنت &lt;b&gt;«{1}»&lt;/b&gt; در تسک با عنوان &lt;b&gt;«{2}»&lt;/b&gt;  فایل های زیر را ضمیمه کرد</value>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; added below attachments to comment &lt;b&gt;«{1}»&lt;/b&gt; in your task with title &lt;b&gt;«{2}»&lt;/b&gt;:\n &lt;br&gt; {3}" xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt;  به کامنت &lt;b&gt;«{1}»&lt;/b&gt; در تسک با عنوان &lt;b&gt;«{2}»&lt;/b&gt;  فایل های زیر را ضمیمه کرد:\n &lt;br&gt; {3}</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; added below attachments to your task with title &lt;b&gt;«{1}»&lt;/b&gt;" xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; به تسک شما با عنوان &lt;b&gt;«{1}»&lt;/b&gt; ضمیمه های زیر را اضافه کرد</value>

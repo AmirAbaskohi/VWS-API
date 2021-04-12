@@ -123,14 +123,23 @@
   <data name="Check list item with given id does not exist." xml:space="preserve">
     <value>آیتمی با این آی دی وجود ندارد.</value>
   </data>
+  <data name="Check list item {0} deleted by {1}." xml:space="preserve">
+    <value>آیتم چک لیست {0} توسط {1} حذف شد.</value>
+  </data>
   <data name="Check list title can not have more than 250 characters." xml:space="preserve">
     <value>عنوان چک لیست نمی تواند بیشتر از 250 کاراکتر داشته باشد.</value>
+  </data>
+  <data name="Check list title updated from {0} to {1} by {2}." xml:space="preserve">
+    <value>عنوان چک لیست از {0} به {1} توسط {2} به روز شد.</value>
   </data>
   <data name="Check list with given id does not exist." xml:space="preserve">
     <value>چک لیستی با آی دی وجود ندارد. </value>
   </data>
   <data name="Comment body can not be emty or have more than 1000 characters." xml:space="preserve">
     <value>کامنت نمیتواند خالی باشد یا بیش از 1000 کاراکتر داشته باشد.</value>
+  </data>
+  <data name="Done" xml:space="preserve">
+    <value>انجام شده</value>
   </data>
   <data name="High" xml:space="preserve">
     <value>بالا</value>
@@ -180,6 +189,9 @@
   <data name="Status not found." xml:space="preserve">
     <value>وضعیتی با آی دی داده شده یافت نشد.</value>
   </data>
+  <data name="Status of check list item {0} updated from {1} to {2} by {3}." xml:space="preserve">
+    <value>وضعیت چک لیست {0} از {1} به {2} توسط {3} به روز شد.</value>
+  </data>
   <data name="Task already has the tag." xml:space="preserve">
     <value>تسک در حال حاضر این تگ را دارد.</value>
   </data>
@@ -189,14 +201,41 @@
   <data name="Task comment not found." xml:space="preserve">
     <value>کامنت یافت نشد.</value>
   </data>
+  <data name="Task deleted by {0}." xml:space="preserve">
+    <value>تسک توسط {0}  حذف شد.</value>
+  </data>
+  <data name="Task desciption updated to {0} by {1}." xml:space="preserve">
+    <value>توضیحات تسک به {0} توسط {1} به روز شد.</value>
+  </data>
   <data name="Task does not exist." xml:space="preserve">
     <value>تسک وجود ندارد.</value>
   </data>
   <data name="Task does not have the tag." xml:space="preserve">
     <value>تسک دارای تگ انتخاب شده نیست.</value>
   </data>
+  <data name="Task end date updated from {0} to {1} by {2}." xml:space="preserve">
+    <value>تاریخ شروع تسک از {0} به {1} توسط {2} به روز شد.</value>
+  </data>
+  <data name="Task has been archived by {0}." xml:space="preserve">
+    <value>تسک توسط {0} آرشیو شد.</value>
+  </data>
   <data name="Task is assigned to user before." xml:space="preserve">
     <value>تسک قبلا به کاربر اختصاص داده شده است.</value>
+  </data>
+  <data name="Task priority updated from {0} to {1} by {2}." xml:space="preserve">
+    <value>اولویت تسک از {0} به {1} توسط {2} به روز شد.</value>
+  </data>
+  <data name="Task start date updated from {0} to {1} by {2}." xml:space="preserve">
+    <value>تاریخ پایان تسک از {0} به {1} توسط {2} به روز شد.</value>
+  </data>
+  <data name="Task status updated from {0} to {1} by {2}." xml:space="preserve">
+    <value>وضعیت تسک از {0} به {1} توسط {2} به روز شد.</value>
+  </data>
+  <data name="Task title updated from {0} to {1} by {2}." xml:space="preserve">
+    <value>عنوان تسک از {0} به {1} توسط {2} به روز شد.</value>
+  </data>
+  <data name="Task updated from {0} to {1} by {2}." xml:space="preserve">
+    <value>تسک از {0} به {1} توسط {2} به روز شد.</value>
   </data>
   <data name="Task {0} created by {1}." xml:space="preserve">
     <value>تسک {0} توسط {1} ایجاد شد.</value>
@@ -215,6 +254,12 @@
   </data>
   <data name="Title can not be empty or with more than 500 characters." xml:space="preserve">
     <value>تیتر نمیتواند خالی یا دارای بیش از 500 کاراکتر باشد.</value>
+  </data>
+  <data name="Title of check list item updated from {0} to {1} by {2}." xml:space="preserve">
+    <value>عنوان چک لیست از {0} به {1} توسط {2} به روز شد.</value>
+  </data>
+  <data name="UnderDone" xml:space="preserve">
+    <value>انجام نشده</value>
   </data>
   <data name="User does not exist." xml:space="preserve">
     <value>کاربر وجود ندارد.</value>
@@ -248,5 +293,47 @@
   </data>
   <data name="You don't have access to this task." xml:space="preserve">
     <value>شما به این تسک دسترسی ندارید.</value>
+  </data>
+  <data name="{0} added below attachments to comment {1}: {2}" xml:space="preserve">
+    <value>{0} ضمیمه های زیر را به کامنت {1} اضافه کرد: {2}</value>
+  </data>
+  <data name="{0} added below attachments to task: {1}" xml:space="preserve">
+    <value>{0} ضمیمه های زیر را به تسک اضافه کرد: {1}</value>
+  </data>
+  <data name="{0} added check list item {1} to check list {2}." xml:space="preserve">
+    <value>{0} آیتم چک لیست {1} را به چک لیست {2} اضافه کرد.</value>
+  </data>
+  <data name="{0} added check list {1} to task." xml:space="preserve">
+    <value>{0} چک لیست {1} را به تسک اضافه کرد.</value>
+  </data>
+  <data name="{0} added comment {1} to task." xml:space="preserve">
+    <value>{0} کامنت {1} را به تسک اضافه کرد.</value>
+  </data>
+  <data name="{0} added tag {1} to task." xml:space="preserve">
+    <value>{0} تگ {1} را به تسک اضافه کرد.</value>
+  </data>
+  <data name="{0} assigned task to {1}." xml:space="preserve">
+    <value>{0} تسک را به {1} اساین کرد.</value>
+  </data>
+  <data name="{0} deleted attchment {1} from comment {2}." xml:space="preserve">
+    <value>{0} ضمیمه {1} را از کامنت {2} حذف کرد.</value>
+  </data>
+  <data name="{0} deleted attchment {1} from task." xml:space="preserve">
+    <value>{0} ضمیمه {1} را از تسک حذف کرد.</value>
+  </data>
+  <data name="{0} deleted check list {1}." xml:space="preserve">
+    <value>{0} چک لیست {1} را  حذف کرد.</value>
+  </data>
+  <data name="{0} deleted comment {1}." xml:space="preserve">
+    <value>{0} کامنت {1} را حذف کرد.</value>
+  </data>
+  <data name="{0} removed tag {1} from task." xml:space="preserve">
+    <value>{0} تگ {1} را  از تسک حذف کرد.</value>
+  </data>
+  <data name="{0} unassigned {1} from task." xml:space="preserve">
+    <value>{0} تسک را از {1} خارج کرد.</value>
+  </data>
+  <data name="{0} updated comment from {1} to {2}." xml:space="preserve">
+    <value>{0} کامنت خود را از {1} به {2} به روز کرد.</value>
   </data>
 </root>
