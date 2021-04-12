@@ -3556,13 +3556,13 @@ namespace vws.web.Controllers._task
 
             response.Value = AddCommentAttachments(selectedComment.Id, model.Attachments);
             response.Message = "Attachments added successfully";
-            selectedComment.ModifiedOn = DateTime.Now;
-            selectedComment.GeneralTask.ModifiedOn = DateTime.Now;
-            selectedComment.GeneralTask.ModifiedBy = userId;
-            _vwsDbContext.Save();
 
             if (response.Value.Count() != 0)
             {
+                selectedComment.ModifiedOn = DateTime.Now;
+                selectedComment.GeneralTask.ModifiedOn = DateTime.Now;
+                selectedComment.GeneralTask.ModifiedBy = userId;
+                _vwsDbContext.Save();
                 string links = "";
                 string emailMessage = "<b>«{0}»</b> added below attachments to comment <b>«{1}»</b> in your task with title <b>«{2}»</b>:\n <br> {3}";
                 foreach (var file in response.Value)
@@ -3732,12 +3732,12 @@ namespace vws.web.Controllers._task
 
             response.Value = AddTaskAttachments(selectedTask.Id, model.Attachments);
             response.Message = "Attachments added successfully";
-            selectedTask.ModifiedOn = DateTime.Now;
-            selectedTask.ModifiedBy = userId;
-            _vwsDbContext.Save();
 
             if (response.Value.Count() != 0)
             {
+                selectedTask.ModifiedOn = DateTime.Now;
+                selectedTask.ModifiedBy = userId;
+                _vwsDbContext.Save();
                 string links = "";
                 string emailMessage = "<b>«{0}»</b> added below attachments to your task with title <b>«{1}»</b>: \n <br> {3}";
                 foreach (var file in response.Value)
