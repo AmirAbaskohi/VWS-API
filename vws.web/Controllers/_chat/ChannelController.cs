@@ -159,6 +159,7 @@ namespace vws.web.Controllers._chat
         }
         #endregion
 
+        #region ChannelAPIS
         [HttpGet]
         [Authorize]
         [Route("getAll")]
@@ -184,7 +185,9 @@ namespace vws.web.Controllers._chat
             return Ok(new ResponseModel<List<ChannelResponseModel>>(channelResponseModels));
 
         }
+        #endregion
 
+        #region MuteAPIS
         [HttpPut]
         [Authorize]
         [Route("muteChannel")]
@@ -278,7 +281,9 @@ namespace vws.web.Controllers._chat
             response.Message = "Channel unmuted successfully!";
             return Ok(response);
         }
+        #endregion
 
+        #region PinAPIS
         [HttpPut]
         [Authorize]
         [Route("pinChannel")]
@@ -380,7 +385,9 @@ namespace vws.web.Controllers._chat
             response.Message = "Channel unpinned successfully!";
             return Ok(response);
         }
+        #endregion
 
+        #region ChannelMemverAPIS
         [HttpGet]
         [Authorize]
         [Route("getChannelMembers")]
@@ -488,5 +495,6 @@ namespace vws.web.Controllers._chat
 
             return Ok(response);
         }
+        #endregion
     }
 }

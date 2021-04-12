@@ -69,6 +69,7 @@ namespace vws.web.Controllers._chat
         }
         #endregion
 
+        #region MessageAPIS
         [HttpGet]
         [Authorize]
         [Route("get")]
@@ -159,6 +160,7 @@ namespace vws.web.Controllers._chat
             response.Message = "Pinned messages returned successfully!";
             return Ok(response);
         }
+        #endregion
 
     }
 }

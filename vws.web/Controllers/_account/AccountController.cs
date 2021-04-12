@@ -63,7 +63,6 @@ namespace vws.web.Controllers._account
         }
         #endregion
         
-
         #region Private Methods
 
         private JwtSecurityToken GenerateToken(IEnumerable<Claim> claims)
@@ -242,6 +241,7 @@ namespace vws.web.Controllers._account
 
         #endregion
 
+        #region LoginRegisterAPIS
         [HttpPost]
         [Route("loginRegister")]
         public async Task<IActionResult> LoginRegister([FromBody] LoginRegisterModel model)
@@ -423,6 +423,69 @@ namespace vws.web.Controllers._account
         }
 
         [HttpPost]
+        [Route("refresh")]
+        public async Task<IActionResult> Refresh([FromBody] RefreshTokenModel model)
+        {
+            var response = new ResponseModel<JwtTokenModel>();
+            var principal = GetPrincipalFromExpiredToken(model.Token);
+            Guid userId = new Guid(principal.Claims.First(claim => claim.Type == "UserId").Value);
+            var varRefreshToken = await _vwsDbContext.GetRefreshTokenAsync(userId, model.RefreshToken);
+
+            if (varRefreshToken == null || varRefreshToken.IsValid == false)
+            {
+                response.Message = "Invalid refresh token";
+                response.AddError(_localizer["Refresh token is invalid."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            _vwsDbContext.MakeRefreshTokenInvalid(model.RefreshToken);
+            var newRefreshToken = new RefreshToken
+            {
+                IsValid = true,
+                Token = GenerateRefreshToken(),
+                UserId = userId
+            };
+            await _vwsDbContext.AddRefreshTokenAsync(newRefreshToken);
+            _vwsDbContext.Save();
+
+            var newJWToken = GenerateToken(principal.Claims);
+
+            return Ok(new ResponseModel<JwtTokenModel>(new JwtTokenModel
+            {
+                Token = new JwtSecurityTokenHandler().WriteToken(newJWToken),
+                RefreshToken = newRefreshToken.Token,
+                ValidTo = newJWToken.ValidTo
+            }));
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("logOut")]
+        public async Task<IActionResult> LogOut([FromBody] TokenModel model)
+        {
+            var userId = LoggedInUserId.Value;
+            var response = new ResponseModel();
+
+            var refreshToken = await _vwsDbContext.GetRefreshTokenAsync(userId, model.Token);
+
+            if (refreshToken == null || refreshToken.IsValid == false)
+            {
+                response.Message = "Invalid refresh token";
+                response.AddError(_localizer["Refresh token is invalid."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            refreshToken.IsValid = false;
+            _vwsDbContext.Save();
+
+            response.Message = "Logged out successfully!";
+            return Ok(response);
+        }
+
+        #endregion
+
+        #region ConfirmEmailAPIS
+        [HttpPost]
         [Route("sendConfirmEmail")]
         public async Task<IActionResult> SendConfirmEmail([FromBody] EmailModel model)
         {
@@ -532,56 +595,9 @@ namespace vws.web.Controllers._account
             errors.Add(_localizer["Emil confirmation failed."]);
             return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "Email confirmation failed!", Errors = errors });
         }
+        #endregion
 
-        [HttpPost]
-        [Route("setNickName")]
-        public async Task<IActionResult> SetNickName([FromBody] NickNameModel model)
-        {
-            ResponseModel<JwtTokenModel> responseModel = new ResponseModel<JwtTokenModel>();
-
-            if (!_emailChecker.IsValid(model.Email))
-            {
-                responseModel.AddError(_localizer["Email is invalid."]);
-                responseModel.Message = "Invalid Email.";
-                return BadRequest(responseModel);
-            }
-
-            var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user == null)
-            {
-                responseModel.AddError(_localizer["User does not exist."]);
-                responseModel.Message = "User does not exist!";
-                return BadRequest(responseModel);
-            }
-            else if (!user.EmailConfirmed)
-            {
-                responseModel.AddError(_localizer["Email is not confirmed yet."]);
-                responseModel.Message = "Email is not confirmed yet!";
-                return BadRequest(responseModel);
-            }
-
-            var userProfile = await _vwsDbContext.GetUserProfileAsync(Guid.Parse(user.Id));
-            if (userProfile.NickNameSecurityStamp != model.NickNameSecurityStamp)
-            {
-                responseModel.AddError(_localizer["Invalid security stamp."]);
-                responseModel.Message = "Invalid security stamp!";
-                return BadRequest(responseModel);
-            }
-
-            if (string.IsNullOrWhiteSpace(model.NickName) || model.NickName.Length > 100)
-            {
-                responseModel.AddError(_localizer["Nick-Name can not be over 100 chars and not empty."]);
-                responseModel.Message = "Invalid nick-name!";
-                return BadRequest(responseModel);
-            }
-            userProfile.NickName = model.NickName;
-            userProfile.NickNameSecurityStamp = Guid.NewGuid();
-            _vwsDbContext.Save();
-            responseModel.Value = await GenerateJWT(user, model.NickName);
-            responseModel.Message = "Logged in successfully!";
-            return Ok(responseModel);
-        }
-
+        #region UserProfileAPIS
         [HttpPost]
         [Route("sendResetPassEmail")]
         public async Task<IActionResult> SendResetPassEmail([FromBody] EmailModel model)
@@ -641,7 +657,7 @@ namespace vws.web.Controllers._account
             return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "Sending email failed!", Errors = errors });
         }
 
-        [HttpPost]
+        [HttpPut]
         [Route("resetPassword")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordModel model)
         {
@@ -695,49 +711,6 @@ namespace vws.web.Controllers._account
             return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "Password changing failed!", Errors = errors });
         }
 
-        [HttpGet]
-        [Route("getEmailTimeWait")]
-        public int GetEmailTimeWait()
-        {
-            return Int16.Parse(_configuration["EmailCode:EmailTimeDifferenceInMinutes"]);
-        }
-
-        [HttpPost]
-        [Route("refresh")]
-        public async Task<IActionResult> Refresh([FromBody] RefreshTokenModel model)
-        {
-            var response = new ResponseModel<JwtTokenModel>();
-            var principal = GetPrincipalFromExpiredToken(model.Token);
-            Guid userId = new Guid(principal.Claims.First(claim => claim.Type == "UserId").Value);
-            var varRefreshToken = await _vwsDbContext.GetRefreshTokenAsync(userId, model.RefreshToken);
-
-            if (varRefreshToken == null || varRefreshToken.IsValid == false)
-            {
-                response.Message = "Invalid refresh token";
-                response.AddError(_localizer["Refresh token is invalid."]);
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-
-            _vwsDbContext.MakeRefreshTokenInvalid(model.RefreshToken);
-            var newRefreshToken = new RefreshToken
-            {
-                IsValid = true,
-                Token = GenerateRefreshToken(),
-                UserId = userId
-            };
-            await _vwsDbContext.AddRefreshTokenAsync(newRefreshToken);
-            _vwsDbContext.Save();
-
-            var newJWToken = GenerateToken(principal.Claims);
-
-            return Ok(new ResponseModel<JwtTokenModel>(new JwtTokenModel
-            {
-                Token = new JwtSecurityTokenHandler().WriteToken(newJWToken),
-                RefreshToken = newRefreshToken.Token,
-                ValidTo = newJWToken.ValidTo
-            }));
-        }
-
         /// <summary>
         /// If user is authorized, he can upload his image by bearer header content;
         /// else if user is not authorized (eg: while onboarding),
@@ -785,7 +758,58 @@ namespace vws.web.Controllers._account
                 }
             }
         }
-    
+
+        [HttpPut]
+        [Route("setNickName")]
+        public async Task<IActionResult> SetNickName([FromBody] NickNameModel model)
+        {
+            ResponseModel<JwtTokenModel> responseModel = new ResponseModel<JwtTokenModel>();
+
+            if (!_emailChecker.IsValid(model.Email))
+            {
+                responseModel.AddError(_localizer["Email is invalid."]);
+                responseModel.Message = "Invalid Email.";
+                return BadRequest(responseModel);
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                responseModel.AddError(_localizer["User does not exist."]);
+                responseModel.Message = "User does not exist!";
+                return BadRequest(responseModel);
+            }
+            else if (!user.EmailConfirmed)
+            {
+                responseModel.AddError(_localizer["Email is not confirmed yet."]);
+                responseModel.Message = "Email is not confirmed yet!";
+                return BadRequest(responseModel);
+            }
+
+            var userProfile = await _vwsDbContext.GetUserProfileAsync(Guid.Parse(user.Id));
+            if (userProfile.NickNameSecurityStamp != model.NickNameSecurityStamp)
+            {
+                responseModel.AddError(_localizer["Invalid security stamp."]);
+                responseModel.Message = "Invalid security stamp!";
+                return BadRequest(responseModel);
+            }
+
+            if (string.IsNullOrWhiteSpace(model.NickName) || model.NickName.Length > 100)
+            {
+                responseModel.AddError(_localizer["Nick-Name can not be over 100 chars and not empty."]);
+                responseModel.Message = "Invalid nick-name!";
+                return BadRequest(responseModel);
+            }
+
+            userProfile.NickName = model.NickName;
+            userProfile.NickNameSecurityStamp = Guid.NewGuid();
+            _vwsDbContext.Save();
+
+            responseModel.Value = await GenerateJWT(user, model.NickName);
+            responseModel.Message = "Logged in successfully!";
+            return Ok(responseModel);
+        }
+
         [HttpPut]
         [Authorize]
         [Route("changePassword")]
@@ -834,42 +858,6 @@ namespace vws.web.Controllers._account
 
         [HttpPost]
         [Authorize]
-        [Route("logOut")]
-        public async Task<IActionResult> LogOut([FromBody] TokenModel model)
-        {
-            var userId = LoggedInUserId.Value;
-            var response = new ResponseModel();
-
-            var refreshToken = await _vwsDbContext.GetRefreshTokenAsync(userId, model.Token);
-
-            if (refreshToken == null || refreshToken.IsValid == false)
-            {
-                response.Message = "Invalid refresh token";
-                response.AddError(_localizer["Refresh token is invalid."]);
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-
-            refreshToken.IsValid = false;
-            _vwsDbContext.Save();
-
-            response.Message = "Logged out successfully!";
-            return Ok(response);
-        }
-
-        [HttpGet]
-        [Authorize]
-        [Route("getCulture")]
-        public Object GetCulture()
-        {
-            var userId = LoggedInUserId.Value;
-
-            var userProfile = _vwsDbContext.UserProfiles.Include(profile => profile.Culture).FirstOrDefault(profile => profile.UserId == userId);
-
-            return userProfile.CultureId == null ? new { CultureAbbriviation = SeedDataEnum.Cultures.en_US.ToString().Replace('_', '-') } : new { CultureAbbriviation = userProfile.Culture.CultureAbbreviation };
-        }
-
-        [HttpPost]
-        [Authorize]
         [Route("setCulture")]
         public IActionResult SetCulture(byte cultureId)
         {
@@ -893,6 +881,18 @@ namespace vws.web.Controllers._account
 
         [HttpGet]
         [Authorize]
+        [Route("getCulture")]
+        public Object GetCulture()
+        {
+            var userId = LoggedInUserId.Value;
+
+            var userProfile = _vwsDbContext.UserProfiles.Include(profile => profile.Culture).FirstOrDefault(profile => profile.UserId == userId);
+
+            return userProfile.CultureId == null ? new { CultureAbbriviation = SeedDataEnum.Cultures.en_US.ToString().Replace('_', '-') } : new { CultureAbbriviation = userProfile.Culture.CultureAbbreviation };
+        }
+
+        [HttpGet]
+        [Authorize]
         [Route("getUserProfileImage")]
         public async Task<Guid?> GetUserProfileImage()
         {
@@ -900,6 +900,14 @@ namespace vws.web.Controllers._account
 
             var selectedProfile = await _vwsDbContext.GetUserProfileAsync(userId);
             return selectedProfile.ProfileImageGuid;
+        }
+        #endregion
+
+        [HttpGet]
+        [Route("getEmailTimeWait")]
+        public int GetEmailTimeWait()
+        {
+            return Int16.Parse(_configuration["EmailCode:EmailTimeDifferenceInMinutes"]);
         }
     }
 }
