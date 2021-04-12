@@ -1495,65 +1495,6 @@ namespace vws.web.Controllers._task
 
         [HttpGet]
         [Authorize]
-        [Route("getProjectTasks")]
-        public async Task<IActionResult> GetProjectTasks(int projectId)
-        {
-            Guid userId = LoggedInUserId.Value;
-
-            var response = new ResponseModel<List<TaskResponseModel>>();
-            List<TaskResponseModel> result = new List<TaskResponseModel>();
-
-            if (!_vwsDbContext.Projects.Any(p => p.Id == projectId && !p.IsDeleted))
-            {
-                response.Message = "Project not found";
-                response.AddError(_localizer["Project not found."]);
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-
-            if (!_permissionService.HasAccessToProject(userId, projectId))
-            {
-                response.Message = "Project access denied";
-                response.AddError(_localizer["You do not have access to project."]);
-                return StatusCode(StatusCodes.Status403Forbidden, response);
-            }
-
-            var projectTasks = _vwsDbContext.GeneralTasks.Where(task => task.ProjectId == projectId && !task.IsArchived && !task.IsDeleted);
-            foreach (var projectTask in projectTasks)
-            {
-                result.Add(new TaskResponseModel()
-                {
-                    Id = projectTask.Id,
-                    Title = projectTask.Title,
-                    Description = projectTask.Description,
-                    StartDate = projectTask.StartDate,
-                    EndDate = projectTask.EndDate,
-                    CreatedOn = projectTask.CreatedOn,
-                    ModifiedOn = projectTask.ModifiedOn,
-                    CreatedBy = (await _vwsDbContext.GetUserProfileAsync(projectTask.CreatedBy)).NickName,
-                    ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(projectTask.ModifiedBy)).NickName,
-                    Guid = projectTask.Guid,
-                    PriorityId = projectTask.TaskPriorityId,
-                    PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)projectTask.TaskPriorityId).ToString()],
-                    UsersAssignedTo = _taskManagerService.GetAssignedTo(projectTask.Id),
-                    ProjectId = projectTask.ProjectId,
-                    TeamId = projectTask.TeamId,
-                    TeamName = projectTask.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == projectTask.TeamId).Name,
-                    ProjectName = projectTask.ProjectId == null ? null : _vwsDbContext.Projects.FirstOrDefault(project => project.Id == projectTask.ProjectId).Name,
-                    StatusId = projectTask.TaskStatusId,
-                    StatusTitle = _vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == projectTask.TaskStatusId).Title,
-                    CheckLists = _taskManagerService.GetCheckLists(projectTask.Id),
-                    Tags = _taskManagerService.GetTaskTags(projectTask.Id),
-                    Comments = await _taskManagerService.GetTaskComments(projectTask.Id),
-                    Attachments = _taskManagerService.GetTaskAttachments(projectTask.Id)
-                });
-            }
-            response.Value = result;
-            response.Message = "Project tasks returned successfull!";
-            return Ok(response);
-        }
-
-        [HttpGet]
-        [Authorize]
         [Route("getArchived")]
         public async Task<IEnumerable<TaskResponseModel>> GetArchivedTasks()
         {
