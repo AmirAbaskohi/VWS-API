@@ -41,6 +41,7 @@ namespace vws.web.Controllers._department
         }
         #endregion
 
+        #region DepartmentAPIS
         [HttpPost]
         [Authorize]
         [Route("create")]
@@ -232,128 +233,6 @@ namespace vws.web.Controllers._department
             return Ok(response);
         }
 
-        [HttpDelete]
-        [Authorize]
-        [Route("delete")]
-        public IActionResult DeleteDepartment(int id)
-        {
-            var response = new ResponseModel();
-
-            var userId = LoggedInUserId.Value;
-
-            var selectedDepartment = _vwsDbContext.Departments.Include(department => department.Team).FirstOrDefault(department => department.Id == id);
-
-            if (selectedDepartment == null || selectedDepartment.IsDeleted || selectedDepartment.Team.IsDeleted)
-            {
-                response.AddError(_localizer["There is no department with such id."]);
-                response.Message = "Department not found";
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-
-            if (!_vwsDbContext.DepartmentMembers.Any(departmentMember => departmentMember.DepartmentId == id &&
-                                                   departmentMember.UserProfileId == userId && departmentMember.IsDeleted == false))
-            {
-                response.AddError(_localizer["You are not member of given department."]);
-                response.Message = "Department access denied";
-                return StatusCode(StatusCodes.Status403Forbidden, response);
-            }
-
-            var departmentProjects = _vwsDbContext.ProjectDepartments.Where(projectDepartment => projectDepartment.DepartmentId == id);
-            foreach (var departmentProject in departmentProjects)
-                _vwsDbContext.DeleteProjectDepartment(departmentProject);
-
-            selectedDepartment.IsDeleted = true;
-            selectedDepartment.ModifiedBy = userId;
-            selectedDepartment.ModifiedOn = DateTime.Now;
-
-            _vwsDbContext.Save();
-
-            response.Message = "Department deleted successfully!";
-            return Ok(response);
-        }
-
-        [HttpGet]
-        [Authorize]
-        [Route("getAll")]
-        public async Task<IEnumerable<DepartmentResponseModel>> GetAllDepartments()
-        {
-            List<DepartmentResponseModel> response = new List<DepartmentResponseModel>();
-
-            var userId = LoggedInUserId.Value;
-
-            var userDepartments = _vwsDbContext.GetUserDepartments(userId).ToList();
-
-            foreach (var userDepartment in userDepartments)
-            {
-                response.Add(new DepartmentResponseModel()
-                {
-                    Color = userDepartment.Color,
-                    Id = userDepartment.Id,
-                    Name = userDepartment.Name,
-                    TeamId = userDepartment.TeamId,
-                    Guid = userDepartment.Guid,
-                    Description = userDepartment.Description,
-                    CreatedBy = (await _vwsDbContext.GetUserProfileAsync(userDepartment.CreatedBy)).NickName,
-                    ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(userDepartment.ModifiedBy)).NickName,
-                    CreatedOn = userDepartment.CreatedOn,
-                    ModifiedOn = userDepartment.ModifiedOn,
-                    DepartmentImageGuid = userDepartment.DepartmentImageGuid,
-                    DepartmentMembers = await _departmentManager.GetDepartmentMembers(userDepartment.Id)
-                });
-            }
-
-            return response;
-        }
-
-        [HttpPost]
-        [Authorize]
-        [Route("addTeammateToDepartment")]
-        public async Task<IActionResult> AddTeamMateToDepartment([FromBody] AddTeammateToDepartmentModel model)
-        {
-            var response = new ResponseModel();
-            var userId = LoggedInUserId.Value;
-
-            var selectedDepartment = _vwsDbContext.Departments.Include(department => department.Team).FirstOrDefault(department => department.Id == model.DepartmentId);
-            if (selectedDepartment == null || selectedDepartment.IsDeleted || selectedDepartment.Team.IsDeleted)
-            {
-                response.AddError(_localizer["There is no department with such id."]);
-                response.Message = "Department not found";
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-
-            var selectedTeamMember = await _vwsDbContext.GetTeamMemberAsync(selectedDepartment.TeamId, model.UserId);
-            if(selectedTeamMember == null)
-            {
-                response.AddError(_localizer["User you want to to add, is not a member of selected team."]);
-                response.Message = "Not member of team";
-                return StatusCode(StatusCodes.Status406NotAcceptable, response);
-            }
-
-            if(!_vwsDbContext.DepartmentMembers.Any(departmentMember => departmentMember.UserProfileId == userId &&
-                                                                       departmentMember.DepartmentId == model.DepartmentId &&
-                                                                       !departmentMember.IsDeleted))
-            {
-                response.AddError(_localizer["You are not member of given department."]);
-                response.Message = "Department access denied";
-                return StatusCode(StatusCodes.Status403Forbidden, response);
-            }
-
-            if (_vwsDbContext.DepartmentMembers.Any(departmentMember => departmentMember.UserProfileId == model.UserId &&
-                                                                       departmentMember.DepartmentId == model.DepartmentId &&
-                                                                       !departmentMember.IsDeleted))
-            {
-                response.AddError(_localizer["User you want to add, is already a member of selected department."]);
-                response.Message = "User added before";
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-
-
-            await _departmentManager.AddUserToDepartment(model.UserId, model.DepartmentId);
-
-            response.Message = "User added to department successfully!";
-            return Ok(response);
-        }
-
         [HttpPut]
         [Authorize]
         [Route("uploadDepartmentImage")]
@@ -453,51 +332,35 @@ namespace vws.web.Controllers._department
 
         [HttpGet]
         [Authorize]
-        [Route("getCoDepartments")]
-        public async Task<IActionResult> GetCoDepartments(int departnmentId)
+        [Route("getAll")]
+        public async Task<IEnumerable<DepartmentResponseModel>> GetAllDepartments()
         {
-            var response = new ResponseModel<List<UserModel>>();
-            var coDepartmentsList = new List<UserModel>();
+            List<DepartmentResponseModel> response = new List<DepartmentResponseModel>();
 
-            var selectedDepartment = _vwsDbContext.Departments.Include(department => department.Team).FirstOrDefault(department => department.Id == departnmentId);
             var userId = LoggedInUserId.Value;
 
-            if (selectedDepartment == null || selectedDepartment.IsDeleted || selectedDepartment.Team.IsDeleted)
+            var userDepartments = _vwsDbContext.GetUserDepartments(userId).ToList();
+
+            foreach (var userDepartment in userDepartments)
             {
-                response.Message = "Department not found";
-                response.AddError(_localizer["There is no department with such id."]);
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-
-            var selectedDepartmentMember = _vwsDbContext.DepartmentMembers.FirstOrDefault(departmentMember => departmentMember.UserProfileId == userId &&
-                                                                                                             departmentMember.IsDeleted == false &&
-                                                                                                             departmentMember.DepartmentId == departnmentId);
-
-            if (selectedDepartmentMember == null)
-            {
-                response.Message = "Not member of department";
-                response.AddError(_localizer["You are not member of given department."]);
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-
-            List<UserProfile> userCoDepartments = _vwsDbContext.DepartmentMembers
-                .Include(departmentMember => departmentMember.UserProfile)
-                .Where(departmentMember => departmentMember.DepartmentId == departnmentId && departmentMember.IsDeleted == false)
-                .Select(departmentMember => departmentMember.UserProfile).Distinct().ToList();
-
-            foreach (var userCoDepartment in userCoDepartments)
-            {
-                coDepartmentsList.Add(new UserModel()
+                response.Add(new DepartmentResponseModel()
                 {
-                    NickName = userCoDepartment.NickName,
-                    UserId = userCoDepartment.UserId,
-                    ProfileImageGuid = userCoDepartment.ProfileImageGuid
+                    Color = userDepartment.Color,
+                    Id = userDepartment.Id,
+                    Name = userDepartment.Name,
+                    TeamId = userDepartment.TeamId,
+                    Guid = userDepartment.Guid,
+                    Description = userDepartment.Description,
+                    CreatedBy = (await _vwsDbContext.GetUserProfileAsync(userDepartment.CreatedBy)).NickName,
+                    ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(userDepartment.ModifiedBy)).NickName,
+                    CreatedOn = userDepartment.CreatedOn,
+                    ModifiedOn = userDepartment.ModifiedOn,
+                    DepartmentImageGuid = userDepartment.DepartmentImageGuid,
+                    DepartmentMembers = await _departmentManager.GetDepartmentMembers(userDepartment.Id)
                 });
             }
 
-            response.Message = "Co-departments are given successfully!";
-            response.Value = coDepartmentsList;
-            return Ok(response);
+            return response;
         }
 
         [HttpGet]
@@ -546,5 +409,146 @@ namespace vws.web.Controllers._department
             response.Message = "Department retured successfully!";
             return Ok(response);
         }
+
+        [HttpDelete]
+        [Authorize]
+        [Route("delete")]
+        public IActionResult DeleteDepartment(int id)
+        {
+            var response = new ResponseModel();
+
+            var userId = LoggedInUserId.Value;
+
+            var selectedDepartment = _vwsDbContext.Departments.Include(department => department.Team).FirstOrDefault(department => department.Id == id);
+
+            if (selectedDepartment == null || selectedDepartment.IsDeleted || selectedDepartment.Team.IsDeleted)
+            {
+                response.AddError(_localizer["There is no department with such id."]);
+                response.Message = "Department not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!_vwsDbContext.DepartmentMembers.Any(departmentMember => departmentMember.DepartmentId == id &&
+                                                   departmentMember.UserProfileId == userId && departmentMember.IsDeleted == false))
+            {
+                response.AddError(_localizer["You are not member of given department."]);
+                response.Message = "Department access denied";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            var departmentProjects = _vwsDbContext.ProjectDepartments.Where(projectDepartment => projectDepartment.DepartmentId == id);
+            foreach (var departmentProject in departmentProjects)
+                _vwsDbContext.DeleteProjectDepartment(departmentProject);
+
+            selectedDepartment.IsDeleted = true;
+            selectedDepartment.ModifiedBy = userId;
+            selectedDepartment.ModifiedOn = DateTime.Now;
+
+            _vwsDbContext.Save();
+
+            response.Message = "Department deleted successfully!";
+            return Ok(response);
+        }
+        #endregion
+
+        #region DepartmentMemberAPIS
+        [HttpPost]
+        [Authorize]
+        [Route("addTeammateToDepartment")]
+        public async Task<IActionResult> AddTeamMateToDepartment([FromBody] AddTeammateToDepartmentModel model)
+        {
+            var response = new ResponseModel();
+            var userId = LoggedInUserId.Value;
+
+            var selectedDepartment = _vwsDbContext.Departments.Include(department => department.Team).FirstOrDefault(department => department.Id == model.DepartmentId);
+            if (selectedDepartment == null || selectedDepartment.IsDeleted || selectedDepartment.Team.IsDeleted)
+            {
+                response.AddError(_localizer["There is no department with such id."]);
+                response.Message = "Department not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var selectedTeamMember = await _vwsDbContext.GetTeamMemberAsync(selectedDepartment.TeamId, model.UserId);
+            if(selectedTeamMember == null)
+            {
+                response.AddError(_localizer["User you want to to add, is not a member of selected team."]);
+                response.Message = "Not member of team";
+                return StatusCode(StatusCodes.Status406NotAcceptable, response);
+            }
+
+            if(!_vwsDbContext.DepartmentMembers.Any(departmentMember => departmentMember.UserProfileId == userId &&
+                                                                       departmentMember.DepartmentId == model.DepartmentId &&
+                                                                       !departmentMember.IsDeleted))
+            {
+                response.AddError(_localizer["You are not member of given department."]);
+                response.Message = "Department access denied";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            if (_vwsDbContext.DepartmentMembers.Any(departmentMember => departmentMember.UserProfileId == model.UserId &&
+                                                                       departmentMember.DepartmentId == model.DepartmentId &&
+                                                                       !departmentMember.IsDeleted))
+            {
+                response.AddError(_localizer["User you want to add, is already a member of selected department."]);
+                response.Message = "User added before";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+
+            await _departmentManager.AddUserToDepartment(model.UserId, model.DepartmentId);
+
+            response.Message = "User added to department successfully!";
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getCoDepartments")]
+        public IActionResult GetCoDepartments(int departnmentId)
+        {
+            var response = new ResponseModel<List<UserModel>>();
+            var coDepartmentsList = new List<UserModel>();
+
+            var selectedDepartment = _vwsDbContext.Departments.Include(department => department.Team).FirstOrDefault(department => department.Id == departnmentId);
+            var userId = LoggedInUserId.Value;
+
+            if (selectedDepartment == null || selectedDepartment.IsDeleted || selectedDepartment.Team.IsDeleted)
+            {
+                response.Message = "Department not found";
+                response.AddError(_localizer["There is no department with such id."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var selectedDepartmentMember = _vwsDbContext.DepartmentMembers.FirstOrDefault(departmentMember => departmentMember.UserProfileId == userId &&
+                                                                                                             departmentMember.IsDeleted == false &&
+                                                                                                             departmentMember.DepartmentId == departnmentId);
+
+            if (selectedDepartmentMember == null)
+            {
+                response.Message = "Not member of department";
+                response.AddError(_localizer["You are not member of given department."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            List<UserProfile> userCoDepartments = _vwsDbContext.DepartmentMembers
+                .Include(departmentMember => departmentMember.UserProfile)
+                .Where(departmentMember => departmentMember.DepartmentId == departnmentId && departmentMember.IsDeleted == false)
+                .Select(departmentMember => departmentMember.UserProfile).Distinct().ToList();
+
+            foreach (var userCoDepartment in userCoDepartments)
+            {
+                coDepartmentsList.Add(new UserModel()
+                {
+                    NickName = userCoDepartment.NickName,
+                    UserId = userCoDepartment.UserId,
+                    ProfileImageGuid = userCoDepartment.ProfileImageGuid
+                });
+            }
+
+            response.Message = "Co-departments are given successfully!";
+            response.Value = coDepartmentsList;
+            return Ok(response);
+        }
+        #endregion
     }
 }
