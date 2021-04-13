@@ -286,7 +286,8 @@ namespace vws.web.Controllers._team
                 NumberOfDepartments = _vwsDbContext.Departments.Where(department => department.TeamId == newTeam.Id && !department.IsDeleted).Count(),
                 NumberOfMembers = _vwsDbContext.TeamMembers.Where(teamMember => teamMember.TeamId == newTeam.Id && !teamMember.IsDeleted).Count(),
                 NumberOfTasks = _vwsDbContext.GeneralTasks.Where(task => task.TeamId == newTeam.Id && !task.IsDeleted).Count(),
-                NumberOfProjects = _vwsDbContext.Projects.Where(project => project.TeamId == newTeam.Id && !project.IsDeleted).Count()
+                NumberOfProjects = _vwsDbContext.Projects.Where(project => project.TeamId == newTeam.Id && !project.IsDeleted).Count(),
+                Users = await _teamManager.GetTeamMembers(newTeam.Id)
             };
 
             response.Value = newTeamResponse;

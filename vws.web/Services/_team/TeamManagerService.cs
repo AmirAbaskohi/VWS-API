@@ -41,15 +41,8 @@ namespace vws.web.Services._team
             await vwsDbContext.AddTeamAsync(newTeam);
             vwsDbContext.Save();
 
-            var newTeamMember = new TeamMember()
-            {
-                TeamId = newTeam.Id,
-                UserProfileId = userId,
-                CreatedOn = DateTime.Now
-            };
-
-            await vwsDbContext.AddTeamMemberAsync(newTeamMember);
-            vwsDbContext.Save();
+            model.Users.Add(userId);
+            model.Users = model.Users.Distinct().ToList();
 
             foreach (var user in model.Users)
             {

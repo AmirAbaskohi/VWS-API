@@ -14,12 +14,10 @@ namespace vws.web.Services._department
     public class DepartmentManagerService : IDepartmentManagerService
     {
         private readonly IVWS_DbContext vwsDbContext;
-        private readonly UserManager<ApplicationUser> userManager;
 
-        public DepartmentManagerService(IVWS_DbContext _vwsDbContext, UserManager<ApplicationUser> _userManager)
+        public DepartmentManagerService(IVWS_DbContext _vwsDbContext)
         {
             vwsDbContext = _vwsDbContext;
-            userManager = _userManager;
         }
 
         public async Task<Department> CreateDepartment(DepartmentModel model, Guid userId)
@@ -41,13 +39,8 @@ namespace vws.web.Services._department
             await vwsDbContext.AddDepartmentAsync(newDepartment);
             vwsDbContext.Save();
 
-            await vwsDbContext.AddDepartmentMemberAsync(new DepartmentMember()
-            {
-                CreatedOn = creationTime,
-                IsDeleted = false,
-                DepartmentId = newDepartment.Id,
-                UserProfileId = userId
-            });
+            model.Users.Add(userId);
+            model.Users = model.Users.Distinct().ToList();
 
             foreach (var user in model.Users)
             {
