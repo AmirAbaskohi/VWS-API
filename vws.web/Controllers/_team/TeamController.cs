@@ -600,7 +600,7 @@ namespace vws.web.Controllers._team
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var teamMember = _vwsDbContext.GetTeamMemberAsync(id, userId);
+            var teamMember = await _vwsDbContext.GetTeamMemberAsync(id, userId);
             if (teamMember == null)
             {
                 response.AddError(_localizer["You are not a member of team."]);
