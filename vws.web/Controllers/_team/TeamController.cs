@@ -648,8 +648,7 @@ namespace vws.web.Controllers._team
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var selectedTeamMember = await _vwsDbContext.GetTeamMemberAsync(id, userId);
-            if (selectedTeamMember == null)
+            if (!_permissionService.HasAccessToTeam(userId, id))
             {
                 response.Message = "Access team is forbidden";
                 response.AddError(_localizer["You are not a member of team."]);
@@ -805,8 +804,7 @@ namespace vws.web.Controllers._team
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var selectedTeamMember = await _vwsDbContext.GetTeamMemberAsync(id, userId);
-            if (selectedTeamMember == null)
+            if (!_permissionService.HasAccessToTeam(userId, id))
             {
                 response.Message = "Access team is forbidden";
                 response.AddError(_localizer["You are not a member of team."]);
@@ -841,13 +839,13 @@ namespace vws.web.Controllers._team
         [HttpDelete]
         [Authorize]
         [Route("delete")]
-        public async Task<IActionResult> DeleteTeam(int teamId)
+        public async Task<IActionResult> DeleteTeam(int id)
         {
             var response = new ResponseModel();
 
             Guid userId = LoggedInUserId.Value;
 
-            var selectedTeam = await _vwsDbContext.GetTeamAsync(teamId);
+            var selectedTeam = await _vwsDbContext.GetTeamAsync(id);
             if (selectedTeam == null || selectedTeam.IsDeleted)
             {
                 response.AddError(_localizer["There is no team with given Id."]);
@@ -855,8 +853,7 @@ namespace vws.web.Controllers._team
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var selectedTeamMember = await _vwsDbContext.GetTeamMemberAsync(teamId, userId);
-            if (selectedTeamMember == null)
+            if (!_permissionService.HasAccessToTeam(userId, id))
             {
                 response.AddError(_localizer["You are not a member of team."]);
                 response.Message = "Not member of team";
@@ -869,10 +866,10 @@ namespace vws.web.Controllers._team
             selectedTeam.ModifiedBy = userId;
             selectedTeam.ModifiedOn = deletionTime;
 
-            var teamProjects = _vwsDbContext.Projects.Where(project => project.TeamId == teamId &&
+            var teamProjects = _vwsDbContext.Projects.Where(project => project.TeamId == id &&
                                                                       !project.IsDeleted);
 
-            var teamDepartments = _vwsDbContext.Departments.Where(department => department.TeamId == teamId &&
+            var teamDepartments = _vwsDbContext.Departments.Where(department => department.TeamId == id &&
                                                                                !department.IsDeleted);
 
             foreach (var teamProject in teamProjects)
@@ -1194,8 +1191,7 @@ namespace vws.web.Controllers._team
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var selectedTeamMember = await _vwsDbContext.GetTeamMemberAsync(id, userId);
-            if (selectedTeamMember == null)
+            if (!_permissionService.HasAccessToTeam(userId, id))
             {
                 response.Message = "Access team is forbidden";
                 response.AddError(_localizer["You are not a member of team."]);
