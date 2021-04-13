@@ -600,8 +600,7 @@ namespace vws.web.Controllers._team
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var teamMember = await _vwsDbContext.GetTeamMemberAsync(id, userId);
-            if (teamMember == null)
+            if (!_permissionService.HasAccessToTeam(userId, id))
             {
                 response.AddError(_localizer["You are not a member of team."]);
                 response.Message = "Team access denied";
