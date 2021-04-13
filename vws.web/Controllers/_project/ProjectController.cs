@@ -244,8 +244,8 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
+            model.Users.Add(userId);
             model.Users = model.Users.Distinct().ToList();
-            model.Users.Remove(userId);
 
             DateTime creationTime = DateTime.Now;
 
@@ -302,10 +302,7 @@ namespace vws.web.Controllers._project
                 _vwsDbContext.AddProjectDepartment(new ProjectDepartment { DepartmentId = departmentId, ProjectId = newProject.Id });
 
             if (newProject.TeamId == null)
-            {
-                model.Users.Add(LoggedInUserId.Value);
                 await AddProjectUsers(newProject.Id, model.Users);
-            }
 
             CreateProjectTaskStatuses(newProject.Id);
 
