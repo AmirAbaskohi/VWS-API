@@ -194,6 +194,7 @@ namespace vws.web.Controllers._team
                 allDepartmentUsers.AddRange(department.Users);
             }
             allDepartmentUsers = allDepartmentUsers.Distinct().ToList();
+            allDepartmentUsers.Remove(userId);
             if (!String.IsNullOrEmpty(model.Description) && model.Description.Length > 2000)
             {
                 response.Message = "Team model data has problem.";
