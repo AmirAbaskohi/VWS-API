@@ -210,10 +210,7 @@ namespace vws.web.Controllers._team
         {
             var response = new ResponseModel<TeamResponseModel>();
             Guid userId = LoggedInUserId.Value;
-            model.Users = model.Users.Distinct().ToList();
-            model.Users.Remove(userId);
 
-            #region CheckModel
             var allDepartmentUsers = new List<Guid>();
             foreach (var department in model.Departments)
             {
@@ -222,6 +219,12 @@ namespace vws.web.Controllers._team
             }
             allDepartmentUsers = allDepartmentUsers.Distinct().ToList();
             allDepartmentUsers.Remove(userId);
+
+            model.Users = model.Users.Union(allDepartmentUsers).ToList();
+            model.Users = model.Users.Distinct().ToList();
+            model.Users.Remove(userId);
+
+            #region CheckModel
             if (!String.IsNullOrEmpty(model.Description) && model.Description.Length > 2000)
             {
                 response.Message = "Team model data has problem.";
@@ -242,11 +245,6 @@ namespace vws.web.Controllers._team
             {
                 response.Message = "Team model data has problem.";
                 response.AddError(_localizer["Invalid team users."]);
-            }
-            if (allDepartmentUsers.Intersect(model.Users).Count() != allDepartmentUsers.Count)
-            {
-                response.Message = "Team model data has problem.";
-                response.AddError(_localizer["Invalid department users."]);
             }
             var hasTeamWithSameName = _vwsDbContext.TeamMembers.Any(teamMember => teamMember.UserProfileId == userId &&
                                                                     teamMember.Team.Name == model.Name &&
