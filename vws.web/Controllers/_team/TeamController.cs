@@ -48,13 +48,15 @@ namespace vws.web.Controllers._team
         private readonly IPermissionService _permissionService;
         private readonly IProjectManagerService _projectManager;
         private readonly ITaskManagerService _taskManagerService;
+        private readonly INotificationService _notificationService;
         #endregion
 
         #region Ctor
         public TeamController(UserManager<ApplicationUser> userManager, IStringLocalizer<TeamController> localizer,
             IVWS_DbContext vwsDbContext, IFileManager fileManager, IDepartmentManagerService departmentManager,
             ITeamManagerService teamManager, IEmailSender emailSender, IConfiguration configuration, IPermissionService permissionService,
-            IProjectManagerService projectManager, ITaskManagerService taskManagerService)
+            IProjectManagerService projectManager, ITaskManagerService taskManagerService,
+            INotificationService notificationService)
         {
             _userManager = userManager;
             _localizer = localizer;
@@ -67,6 +69,7 @@ namespace vws.web.Controllers._team
             _permissionService = permissionService;
             _projectManager = projectManager;
             _taskManagerService = taskManagerService;
+            _notificationService = notificationService;
         }
         #endregion
 
@@ -173,6 +176,30 @@ namespace vws.web.Controllers._team
                 }
             });
         }
+
+        private async Task SendCreateTeamEmail(int teamId)
+        {
+            var selectedTeam = _vwsDbContext.Teams.FirstOrDefault(team => team.Id == teamId);
+            var users = (await _teamManager.GetTeamMembers(teamId)).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> created new team with name <b>«{1}»</b>.";
+            string departmentEmailMessage = "<b>«{0}»</b> created new department with name <b>«{1}»</b>.";
+            string[] arguments = { LoggedInNickName, selectedTeam.Name };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Team Creation", arguments);
+
+            var departments = _vwsDbContext.Departments.Include(department => department.DepartmentMembers)
+                                                       .Where(department => department.TeamId == teamId && !department.IsDeleted);
+            foreach (var department in departments)
+            {
+                var departmentUsers = department.DepartmentMembers.Select(department => department.UserProfileId).ToList();
+                departmentUsers = departmentUsers.Distinct().ToList();
+                users.Remove(LoggedInUserId.Value);
+                string[] args = { LoggedInNickName, department.Name };
+                await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, departmentUsers, departmentEmailMessage, "Department Creation", args);
+            }
+        }
+
         #endregion
 
         #region TeamAPIS
@@ -240,8 +267,9 @@ namespace vws.web.Controllers._team
 
             CreateTeamTaskStatuses(newTeam.Id);
 
-            SendJoinTeamInvitaionLinks(model.EmailsForInvite, newTeam.Id);
+            await SendJoinTeamInvitaionLinks(model.EmailsForInvite, newTeam.Id);
 
+            #region History
             var newHistory = new TeamHistory()
             {
                 TeamId = newTeam.Id,
@@ -270,6 +298,9 @@ namespace vws.web.Controllers._team
                 TeamHistoryId = newHistory.Id
             });
             _vwsDbContext.Save();
+            #endregion
+
+            await SendCreateTeamEmail(newTeam.Id);
 
             var newTeamResponse = new TeamResponseModel()
             {
@@ -288,7 +319,8 @@ namespace vws.web.Controllers._team
                 NumberOfMembers = _vwsDbContext.TeamMembers.Where(teamMember => teamMember.TeamId == newTeam.Id && !teamMember.IsDeleted).Count(),
                 NumberOfTasks = _vwsDbContext.GeneralTasks.Where(task => task.TeamId == newTeam.Id && !task.IsDeleted).Count(),
                 NumberOfProjects = _vwsDbContext.Projects.Where(project => project.TeamId == newTeam.Id && !project.IsDeleted).Count(),
-                Users = await _teamManager.GetTeamMembers(newTeam.Id)
+                Users = await _teamManager.GetTeamMembers(newTeam.Id),
+                Departments = await GetDepartments(newTeam.Id)
             };
 
             response.Value = newTeamResponse;
@@ -325,11 +357,69 @@ namespace vws.web.Controllers._team
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
+            var hasTeamWithSameName = _vwsDbContext.TeamMembers.Any(teamMember => teamMember.UserProfileId == userId &&
+                                                                    teamMember.Team.Name == newName &&
+                                                                    teamMember.Team.IsDeleted == false &&
+                                                                    teamMember.IsDeleted == false);
+            if (newName != selectedTeam.Name && hasTeamWithSameName)
+            {
+                response.Message = "Team model data has problem.";
+                response.AddError(_localizer["You are a member of a team with that name."]);
+            }
+
+
+            var lastName = selectedTeam.Name;
+
             selectedTeam.ModifiedBy = userId;
             selectedTeam.ModifiedOn = DateTime.Now;
             selectedTeam.Name = newName;
             _vwsDbContext.Save();
 
+            #region History
+            var newHistory = new TeamHistory()
+            {
+                TeamId = selectedTeam.Id,
+                EventTime = selectedTeam.ModifiedOn,
+                Event = "Team name updated from {0} to {1} by {2}."
+            };
+            _vwsDbContext.AddTeamHistory(newHistory);
+            _vwsDbContext.Save();
+
+            var user = await _vwsDbContext.GetUserProfileAsync(userId);
+            _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = lastName,
+                TeamHistoryId = newHistory.Id
+            });
+            _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedTeam.Name,
+                TeamHistoryId = newHistory.Id
+            });
+            _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TeamHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
+            var users = (await _teamManager.GetTeamMembers(id)).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> updated team name from <b>«{1}»</b> to <b>«{2}»</b>.";
+            string[] arguments = { LoggedInNickName, lastName , selectedTeam.Name };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Team Update", arguments);
+
+            response.Message = "Team name updated successfully!";
             return Ok(response);
         }
 
@@ -362,11 +452,52 @@ namespace vws.web.Controllers._team
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
+            var lastDescription = selectedTeam.Description;
+
             selectedTeam.ModifiedBy = userId;
             selectedTeam.ModifiedOn = DateTime.Now;
             selectedTeam.Description = newDescription;
             _vwsDbContext.Save();
 
+            #region History
+            var newHistory = new TeamHistory()
+            {
+                TeamId = selectedTeam.Id,
+                EventTime = selectedTeam.ModifiedOn,
+                Event = "Team description updated to {0} by {1}."
+            };
+            _vwsDbContext.AddTeamHistory(newHistory);
+            _vwsDbContext.Save();
+
+            var user = await _vwsDbContext.GetUserProfileAsync(userId);
+            _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedTeam.Name,
+                TeamHistoryId = newHistory.Id
+            });
+            _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TeamHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
+            var users = (await _teamManager.GetTeamMembers(id)).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> updated description from <b>«{1}»</b> to <b>«{2}»</b> in your team with name <b>«{3}»</b>.";
+            string[] arguments = { LoggedInNickName, lastDescription, selectedTeam.Description, selectedTeam.Name };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Team Update", arguments);
+
+            response.Message = "Team description updated successfully!";
             return Ok(response);
         }
 
@@ -399,18 +530,65 @@ namespace vws.web.Controllers._team
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
+            var lastColor = selectedTeam.Color;
+
             selectedTeam.ModifiedBy = userId;
             selectedTeam.ModifiedOn = DateTime.Now;
             selectedTeam.Color = newColor;
             _vwsDbContext.Save();
 
+            #region History
+            var newHistory = new TeamHistory()
+            {
+                TeamId = selectedTeam.Id,
+                EventTime = selectedTeam.ModifiedOn,
+                Event = "Team color updated from {0} to {1} by {2}."
+            };
+            _vwsDbContext.AddTeamHistory(newHistory);
+            _vwsDbContext.Save();
+
+            var user = await _vwsDbContext.GetUserProfileAsync(userId);
+            _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Color,
+                Body = lastColor,
+                TeamHistoryId = newHistory.Id
+            });
+            _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Color,
+                Body = selectedTeam.Color,
+                TeamHistoryId = newHistory.Id
+            });
+            _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TeamHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
+            var users = (await _teamManager.GetTeamMembers(id)).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> updated color from <b>«{1}»</b> to <b>«{2}»</b> in your team with name <b>«{3}»</b>.";
+            string[] arguments = { LoggedInNickName, lastColor, selectedTeam.Color, selectedTeam.Name };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Team Update", arguments);
+
+            response.Message = "Team color updated successfully!";
             return Ok(response);
         }
 
         [HttpPut]
         [Authorize]
         [Route("uploadTeamImage")]
-        public async Task<IActionResult> UploadTeamImage(IFormFile image, int teamId)
+        public async Task<IActionResult> UploadTeamImage(IFormFile image, int id)
         {
             var response = new ResponseModel<Guid>();
 
@@ -434,7 +612,7 @@ namespace vws.web.Controllers._team
             }
             var uploadedImage = files.Count == 0 ? image : files[0];
 
-            var selectedTeam = await _vwsDbContext.GetTeamAsync(teamId);
+            var selectedTeam = await _vwsDbContext.GetTeamAsync(id);
             if (selectedTeam == null || selectedTeam.IsDeleted)
             {
                 response.AddError(_localizer["There is no team with given Id."]);
@@ -442,7 +620,7 @@ namespace vws.web.Controllers._team
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var selectedTeamMember = await _vwsDbContext.GetTeamMemberAsync(teamId, userId);
+            var selectedTeamMember = await _vwsDbContext.GetTeamMemberAsync(id, userId);
             if (selectedTeamMember == null)
             {
                 response.AddError(_localizer["You are not a member of team."]);
@@ -495,6 +673,7 @@ namespace vws.web.Controllers._team
             selectedTeam.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
+            #region History
             var newHistory = new TeamHistory()
             {
                 TeamId = selectedTeam.Id,
@@ -529,6 +708,14 @@ namespace vws.web.Controllers._team
                 TeamHistoryId = newHistory.Id
             });
             _vwsDbContext.Save();
+            #endregion
+
+            var users = (await _teamManager.GetTeamMembers(id)).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> updated team image to <b>«{1}»</b> in your team with name <b>«{2}»</b>.";
+            string[] arguments = { LoggedInNickName, $"<a href='{Request.Scheme}://{Request.Host}/en-US/File/get?id={fileResponse.Value.FileContainerGuid}'>{fileResponse.Value.Name}</a>", selectedTeam.Name };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Team Update", arguments);
 
             response.Value = fileResponse.Value.FileContainerGuid;
             response.Message = "Team image added successfully!";
@@ -791,7 +978,7 @@ namespace vws.web.Controllers._team
         [HttpGet]
         [Authorize]
         [Route("getTeamHistory")]
-        public async Task<IActionResult> GetTeamHistory(int id)
+        public IActionResult GetTeamHistory(int id)
         {
             var userId = LoggedInUserId.Value;
             var response = new ResponseModel<List<HistoryModel>>();
@@ -888,6 +1075,7 @@ namespace vws.web.Controllers._team
             }
             _vwsDbContext.Save();
 
+            #region History
             var newHistory = new TeamHistory()
             {
                 TeamId = selectedTeam.Id,
@@ -910,6 +1098,14 @@ namespace vws.web.Controllers._team
                 TeamHistoryId = newHistory.Id
             });
             _vwsDbContext.Save();
+            #endregion
+
+            var users = (await _teamManager.GetTeamMembers(id)).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> deleted team <b>«{1}»</b>.";
+            string[] arguments = { LoggedInNickName, selectedTeam.Name };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Team Update", arguments);
 
             response.Message = "Team deleted successfully!";
             return Ok(response);
@@ -920,11 +1116,11 @@ namespace vws.web.Controllers._team
         [HttpPost]
         [Authorize]
         [Route("createInviteLink")]
-        public async Task<IActionResult> CreateInviteLink(int teamId)
+        public async Task<IActionResult> CreateInviteLink(int id)
         {
             var response = new ResponseModel<TeamInviteLinkResponseModel>();
 
-            var selectedTeam = await _vwsDbContext.GetTeamAsync(teamId);
+            var selectedTeam = await _vwsDbContext.GetTeamAsync(id);
             if (selectedTeam == null || selectedTeam.IsDeleted)
             {
                 response.Message = "Team not found";
@@ -934,8 +1130,7 @@ namespace vws.web.Controllers._team
 
             Guid userId = LoggedInUserId.Value;
 
-            var teamMember = await _vwsDbContext.GetTeamMemberAsync(teamId, userId);
-            if (teamMember == null)
+            if (_permissionService.HasAccessToTeam(userId, id))
             {
                 response.Message = "You are not member of team";
                 response.AddError(_localizer["You are not a member of team."]);
@@ -948,7 +1143,7 @@ namespace vws.web.Controllers._team
 
             var newInviteLink = new TeamInviteLink()
             {
-                TeamId = teamId,
+                TeamId = id,
                 CreatedBy = userId,
                 ModifiedBy = userId,
                 CreatedOn = creationTime,
@@ -960,9 +1155,10 @@ namespace vws.web.Controllers._team
             await _vwsDbContext.AddTeamInviteLinkAsync(newInviteLink);
             _vwsDbContext.Save();
 
+            #region History
             var newHistory = new TeamHistory()
             {
-                TeamId = teamId,
+                TeamId = id,
                 EventTime = creationTime,
                 Event = "{0} created new invite link with id {1}."
             };
@@ -988,6 +1184,14 @@ namespace vws.web.Controllers._team
                 TeamHistoryId = newHistory.Id
             });
             _vwsDbContext.Save();
+            #endregion
+
+            var users = (await _teamManager.GetTeamMembers(id)).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> created new invite link with id <b>«{1}»</b> for team <b>«{2}»</b>.";
+            string[] arguments = { LoggedInNickName, newInviteLink.LinkGuid.ToString(), selectedTeam.Name };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Team Update", arguments);
 
             response.Value = new TeamInviteLinkResponseModel()
             {
@@ -1008,13 +1212,13 @@ namespace vws.web.Controllers._team
         [HttpPut]
         [Authorize]
         [Route("revokeLink")]
-        public async Task<IActionResult> RevokeLink(int id)
+        public async Task<IActionResult> RevokeLink(int linkId)
         {
             var response = new ResponseModel();
 
             Guid userId = LoggedInUserId.Value;
 
-            var selectedInviteLink = await _vwsDbContext.GetTeamInviteLinkByIdAsync(id);
+            var selectedInviteLink = await _vwsDbContext.GetTeamInviteLinkByIdAsync(linkId);
 
             if (selectedInviteLink == null || selectedInviteLink.Team.IsDeleted || selectedInviteLink.IsRevoked)
             {
@@ -1022,16 +1226,24 @@ namespace vws.web.Controllers._team
                 response.AddError(_localizer["Link does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
-            if (selectedInviteLink.CreatedBy != userId || !_vwsDbContext.TeamMembers.Any(teamMember => teamMember.UserProfileId == userId && teamMember.IsDeleted == false))
+            var selectedTeam = await _vwsDbContext.GetTeamAsync(selectedInviteLink.TeamId);
+            if (selectedTeam == null || selectedTeam.IsDeleted)
             {
-                response.Message = "Team access forbidden";
-                response.AddError(_localizer["You don't have access to this team."]);
+                response.Message = "Team not found";
+                response.AddError(_localizer["There is no team with given Id."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            if (_permissionService.HasAccessToTeam(userId, selectedInviteLink.TeamId))
+            {
+                response.Message = "You are not member of team";
+                response.AddError(_localizer["You are not a member of team."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
             selectedInviteLink.IsRevoked = true;
             _vwsDbContext.Save();
 
+            #region History
             var newHistory = new TeamHistory()
             {
                 TeamId = selectedInviteLink.TeamId,
@@ -1060,8 +1272,16 @@ namespace vws.web.Controllers._team
                 TeamHistoryId = newHistory.Id
             });
             _vwsDbContext.Save();
+            #endregion
 
-            response.Message = "Task updated successfully!";
+            var users = (await _teamManager.GetTeamMembers(selectedTeam.Id)).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> revoked invite link with id <b>«{1}»</b> in team <b>«{2}»</b>.";
+            string[] arguments = { LoggedInNickName, selectedInviteLink.LinkGuid.ToString(), selectedTeam.Name };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Team Update", arguments);
+
+            response.Message = "Team updated successfully!";
             return Ok(response);
         }
 
@@ -1122,8 +1342,14 @@ namespace vws.web.Controllers._team
                 response.AddError(_localizer["Link is not valid."]);
                 return StatusCode(StatusCodes.Status406NotAcceptable, response);
             }
-
-            if ((await _vwsDbContext.GetTeamMemberAsync(selectedTeamLink.TeamId, userId)) != null)
+            var selectedTeam = await _vwsDbContext.GetTeamAsync(selectedTeamLink.TeamId);
+            if (selectedTeam == null || selectedTeam.IsDeleted)
+            {
+                response.Message = "Team not found";
+                response.AddError(_localizer["There is no team with given Id."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            if (_permissionService.HasAccessToTeam(userId, selectedTeam.Id))
             {
                 response.Message = "User already joined";
                 response.AddError(_localizer["You are already joined the team."]);
@@ -1139,6 +1365,7 @@ namespace vws.web.Controllers._team
             await _vwsDbContext.AddTeamMemberAsync(newTeamMember);
             _vwsDbContext.Save();
 
+            #region History
             var newHistory = new TeamHistory()
             {
                 TeamId = newTeamMember.TeamId,
@@ -1167,6 +1394,14 @@ namespace vws.web.Controllers._team
                 TeamHistoryId = newHistory.Id
             });
             _vwsDbContext.Save();
+            #endregion
+
+            var users = (await _teamManager.GetTeamMembers(selectedTeam.Id)).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> joined team <b>«{1}»</b> via link with id <b>«{2}»</b>.";
+            string[] arguments = { LoggedInNickName, selectedTeam.Name, selectedTeamLink.LinkGuid.ToString() };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Team Update", arguments);
 
             response.Message = "User added to team successfully!";
             return Ok(response);

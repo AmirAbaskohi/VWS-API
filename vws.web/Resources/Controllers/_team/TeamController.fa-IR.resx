@@ -165,14 +165,23 @@
   <data name="Task {0} created by {1} under this team." xml:space="preserve">
     <value>تسک {0} توسط {1} تحت این تیم ایجاد شد.</value>
   </data>
+  <data name="Team color updated from {0} to {1} by {2}." xml:space="preserve">
+    <value>رنگ تیم از {0} به {1} توسط {2} به روز شد.</value>
+  </data>
   <data name="Team created by {0}." xml:space="preserve">
     <value>تیم توسط {0} ساخته شد.</value>
+  </data>
+  <data name="Team description updated to {0} by {1}." xml:space="preserve">
+    <value>توضیحات تیم به {0} توسط {1} به روز شد.</value>
   </data>
   <data name="Team image updated to {0} by {1}." xml:space="preserve">
     <value>تصویر تیم به {0} توسط {1} به روز شد.</value>
   </data>
   <data name="Team name can not be empty and should have less than 500 characters." xml:space="preserve">
     <value>نام تیم نمی تواند خالی باشد و باید کمتر از 500 کاراکتر داشته باشد.</value>
+  </data>
+  <data name="Team name updated from {0} to {1} by {2}." xml:space="preserve">
+    <value>نام تیم از {0} به {1} توسط {2} به روز شد.</value>
   </data>
   <data name="Team {0} created by {1}." xml:space="preserve">
     <value>تیم {0} توسط {1} ایجاد شد.</value>

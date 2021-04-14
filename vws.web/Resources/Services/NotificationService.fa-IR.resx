@@ -132,6 +132,15 @@
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; added new tag &lt;b&gt;«{1}»&lt;/b&gt; to your task with title &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; برچسب جدید&lt;b&gt;«{1}»&lt;/b&gt; به تسک شما با عنوان &lt;b&gt;«{2}»&lt;/b&gt; اضافه کرد.</value>
   </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; created new department with name &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; دپارتمان جدیدی با نام &lt;b&gt;«{1}»&lt;/b&gt; ایجاد کرد.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; created new invite link with id &lt;b&gt;«{1}»&lt;/b&gt; for team &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; لینک دعوت جدیدی با آی دی &lt;b&gt;«{1}»&lt;/b&gt; برای تیم &lt;b&gt;«{2}»&lt;/b&gt; ایجاد کرد.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; created new team with name &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; تیم جدیدی با نام &lt;b&gt;«{1}»&lt;/b&gt; ایجاد کرد.</value>
+  </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted attachment &lt;b&gt;«{1}»&lt;/b&gt; from comment &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; ضمیمه &lt;b&gt;«{1}»&lt;/b&gt; را از کامنت &lt;b&gt;«{2}»&lt;/b&gt; در تسک شما با عنوان &lt;b&gt;«{3}»&lt;/b&gt; حذف کرد.</value>
   </data>
@@ -150,6 +159,15 @@
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted tag &lt;b&gt;«{1}»&lt;/b&gt; from your task with title &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; برچسب &lt;b&gt;«{1}»&lt;/b&gt; از تسک شما با عنوان &lt;b&gt;«{2}»&lt;/b&gt; حذف کرد.</value>
   </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted team &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; تیم &lt;b&gt;«{1}»&lt;/b&gt; را حذف کرد.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; joined team &lt;b&gt;«{1}»&lt;/b&gt; via link with id &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; با استفاده از لینک با آی دی &lt;b&gt;«{1}»&lt;/b&gt; به تیم &lt;b&gt;«{2}»&lt;/b&gt; پیوست.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; revoked invite link with id &lt;b&gt;«{1}»&lt;/b&gt; in team &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; لینک دعوت با آی دی &lt;b&gt;«{1}»&lt;/b&gt; را در تیم &lt;b&gt;«{2}»&lt;/b&gt; منقضی کرد.</value>
+  </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated check list item status from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in check list with title &lt;b&gt;«{3}»&lt;/b&gt; of your task with title &lt;b&gt;«{4}»&lt;/b&gt;" xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; وضعیت آیتم چک لیست را از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; در چک لیست با عنوان &lt;b&gt;«{3}»&lt;/b&gt; از تسک &lt;b&gt;«{4}»&lt;/b&gt; به روز کرد.</value>
   </data>
@@ -159,8 +177,20 @@
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated check list title from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; عنوان چک لیست را از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; در تسک شما با عنوان &lt;b&gt;«{3}»&lt;/b&gt; به روز کرد.</value>
   </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated color from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in your team with name &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; رنگ را در تیم شما با نام &lt;b&gt;«{3}»&lt;/b&gt; از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; به روز کرد.</value>
+  </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated comment from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; کامنت خود را از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; در تسک شما با عنوان &lt;b&gt;«{3}»&lt;/b&gt; به روز کرد.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated description from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in your team with name &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; توضیحات را در تیم شما با نام &lt;b&gt;«{3}»&lt;/b&gt; از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; به روز کرد.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated team image to &lt;b&gt;«{1}»&lt;/b&gt; in your team with name &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; تصویر تیم شما با نام &lt;b&gt;«{2}»&lt;/b&gt; را به &lt;b&gt;«{1}»&lt;/b&gt; به روز کرد.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated team name from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; نام تیم را از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; به روز کرد.</value>
   </data>
   <data name="Done" xml:space="preserve">
     <value>انجام شده</value>
