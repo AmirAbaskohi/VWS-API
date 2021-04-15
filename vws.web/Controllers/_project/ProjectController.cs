@@ -416,6 +416,13 @@ namespace vws.web.Controllers._project
             });
             _vwsDbContext.Save();
 
+            var users = _projectManager.GetProjectUsers(selectedProject.Id).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> updated project name from <b>«{1}»</b> to <b>«{2}»</b>.";
+            string[] arguments = { LoggedInNickName, lastName, selectedProject.Name };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments);
+
             response.Message = "Name updated successfully!";
             return Ok(response);
         }
@@ -449,6 +456,8 @@ namespace vws.web.Controllers._project
                 response.Message = "Invalid model.";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
+
+            var lastDescription = selectedProject.Description;
 
             selectedProject.Description = newDescription;
             selectedProject.ModifiedOn = DateTime.Now;
@@ -487,6 +496,13 @@ namespace vws.web.Controllers._project
                 })
             });
             _vwsDbContext.Save();
+
+            var users = _projectManager.GetProjectUsers(selectedProject.Id).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> updated description from <b>«{1}»</b> to <b>«{2}»</b> in project <b>«{3}»</b>.";
+            string[] arguments = { LoggedInNickName, lastDescription, selectedProject.Description, selectedProject.Name };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments);
 
             response.Message = "Description updated successfully!";
             return Ok(response);
@@ -561,6 +577,13 @@ namespace vws.web.Controllers._project
                 })
             });
             _vwsDbContext.Save();
+
+            var users = _projectManager.GetProjectUsers(selectedProject.Id).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> updated color from <b>«{1}»</b> to <b>«{2}»</b> in project <b>«{3}»</b>.";
+            string[] arguments = { LoggedInNickName, lastColor, selectedProject.Color, selectedProject.Name };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments);
 
             response.Message = "Color updated successfully!";
             return Ok(response);
@@ -638,6 +661,14 @@ namespace vws.web.Controllers._project
             });
             _vwsDbContext.Save();
 
+            var users = _projectManager.GetProjectUsers(selectedProject.Id).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> updated start date from <b>«{1}»</b> to <b>«{2}»</b> in project <b>«{3}»</b>.";
+            string[] arguments = { LoggedInNickName, lastStartDate == null ? "No Time" : lastStartDate.ToString(), selectedProject.StartDate == null ? "No Time" : selectedProject.StartDate.ToString(), selectedProject.Name };
+            bool[] argumentLocalization = { false, lastStartDate == null ? true : false, selectedProject.StartDate == null ? true : false, false };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments, argumentLocalization);
+
             response.Message = "Start date updated successfully!";
             return Ok(response);
         }
@@ -711,6 +742,14 @@ namespace vws.web.Controllers._project
                 })
             });
             _vwsDbContext.Save();
+
+            var users = _projectManager.GetProjectUsers(selectedProject.Id).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> updated end date from <b>«{1}»</b> to <b>«{2}»</b> in project <b>«{3}»</b>.";
+            string[] arguments = { LoggedInNickName, lastEndDate == null ? "No Time" : lastEndDate.ToString(), selectedProject.EndDate == null ? "No Time" : selectedProject.EndDate.ToString(), selectedProject.Name };
+            bool[] argumentLocalization = { false, lastEndDate == null ? true : false, selectedProject.EndDate == null ? true : false, false };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments, argumentLocalization);
 
             response.Message = "End date updated successfully!";
             return Ok(response);
@@ -851,6 +890,13 @@ namespace vws.web.Controllers._project
             });
             _vwsDbContext.Save();
 
+            var users = _projectManager.GetProjectUsers(selectedProject.Id).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> updated project team and department in project <b>«{1}»</b>.";
+            string[] arguments = { LoggedInNickName, selectedProject.Name };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments);
+
             response.Message = "Project team and departments updated successfully!";
             return Ok(response);
         }
@@ -985,6 +1031,13 @@ namespace vws.web.Controllers._project
             });
             _vwsDbContext.Save();
 
+            var users = _projectManager.GetProjectUsers(selectedProject.Id).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> updated project image to <b>«{1}»</b> in project <b>«{2}»</b>.";
+            string[] arguments = { LoggedInNickName, $"<a href='{Request.Scheme}://{Request.Host}/en-US/File/get?id={fileResponse.Value.FileContainerGuid}'>{fileResponse.Value.Name}</a>", selectedProject.Name };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments);
+
             response.Value = fileResponse.Value.FileContainerGuid;
             response.Message = "Project image added successfully!";
             return Ok(response);
@@ -1049,13 +1102,15 @@ namespace vws.web.Controllers._project
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
                 ProjectHistoryId = newProjectHistory.Id,
-                Body = ((SeedDataEnum.ProjectStatuses)lastStatus).ToString()
+                Body = ((SeedDataEnum.ProjectStatuses)lastStatus).ToString(),
+                ShouldBeLocalized = true
             });
             _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
                 ProjectHistoryId = newProjectHistory.Id,
-                Body = ((SeedDataEnum.ProjectStatuses)selectedProject.StatusId).ToString()
+                Body = ((SeedDataEnum.ProjectStatuses)selectedProject.StatusId).ToString(),
+                ShouldBeLocalized = true
             });
             _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
             {
@@ -1069,6 +1124,14 @@ namespace vws.web.Controllers._project
                 })
             });
             _vwsDbContext.Save();
+
+            var users = _projectManager.GetProjectUsers(selectedProject.Id).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> updated status from <b>«{1}»</b> to <b>«{2}»</b> in project <b>«{3}»</b>.";
+            string[] arguments = { LoggedInNickName, ((SeedDataEnum.ProjectStatuses)lastStatus).ToString(), ((SeedDataEnum.ProjectStatuses)selectedProject.StatusId).ToString(), selectedProject.Name };
+            bool[] argumentLocalization = { false, true, true, false };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments, argumentLocalization);
 
             response.Message = "Project status updated successfully!";
             return Ok(response);
@@ -1379,6 +1442,13 @@ namespace vws.web.Controllers._project
             });
             _vwsDbContext.Save();
 
+            var users = _projectManager.GetProjectUsers(selectedProject.Id).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> deleted project <b>«{1}»</b>.";
+            string[] arguments = { LoggedInNickName, selectedProject.Name };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments);
+
             response.Message = "Project deleted successfully!";
             return Ok(response);
         }
@@ -1482,9 +1552,9 @@ namespace vws.web.Controllers._project
                 ProjectHistoryId = newProjectHistory.Id,
                 Body = JsonConvert.SerializeObject(new UserModel()
                 {
-                    NickName = addedUser.NickName,
-                    ProfileImageGuid = addedUser.ProfileImageGuid,
-                    UserId = addedUser.UserId
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
                 })
             });
             _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
@@ -1493,12 +1563,19 @@ namespace vws.web.Controllers._project
                 ProjectHistoryId = newProjectHistory.Id,
                 Body = JsonConvert.SerializeObject(new UserModel()
                 {
-                    NickName = user.NickName,
-                    ProfileImageGuid = user.ProfileImageGuid,
-                    UserId = user.UserId
+                    NickName = addedUser.NickName,
+                    ProfileImageGuid = addedUser.ProfileImageGuid,
+                    UserId = addedUser.UserId
                 })
             });
             _vwsDbContext.Save();
+
+            var users = _projectManager.GetProjectUsers(selectedProject.Id).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> added <b>«{1}»</b> to project <b>«{2}»</b>.";
+            string[] arguments = { LoggedInNickName, selectedProject.Name };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments);
 
             response.Message = "User added successfully!";
             return Ok(response);
@@ -1507,7 +1584,7 @@ namespace vws.web.Controllers._project
         [HttpPut]
         [Authorize]
         [Route("changeProjectMemberPermisssion")]
-        public IActionResult ChangeProjectMemberPermisssion(int projectMemberId, bool hasAccess)
+        public async Task<IActionResult> ChangeProjectMemberPermisssion(int projectMemberId, bool hasAccess)
         {
             var response = new ResponseModel();
 
@@ -1536,8 +1613,67 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
+            var lastPermission = selectedProjecMember.IsPermittedByCreator;
+
             selectedProjecMember.IsPermittedByCreator = hasAccess;
             _vwsDbContext.Save();
+
+            var newProjectHistory = new ProjectHistory()
+            {
+                ProjectId = selectedProjecMember.ProjectId,
+                Event = "{0} change permission of user {1} from {2} to {3}.",
+                EventTime = DateTime.Now
+            };
+            _vwsDbContext.AddProjectHistory(newProjectHistory);
+            _vwsDbContext.Save();
+
+            var user = await _vwsDbContext.GetUserProfileAsync(userId);
+            var updatedUser = await _vwsDbContext.GetUserProfileAsync(selectedProjecMember.UserProfileId);
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                })
+            });
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                })
+            });
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = lastPermission == true ? "Has access" : "Does not have access",
+                ShouldBeLocalized = true
+            });
+            _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                ProjectHistoryId = newProjectHistory.Id,
+                Body = selectedProjecMember.IsPermittedByCreator == true ? "Has access" : "Does not have access",
+                ShouldBeLocalized = true
+            });
+            _vwsDbContext.Save();
+
+            var users = _projectManager.GetProjectUsers(selectedProjecMember.ProjectId).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> change permission of user <b>«{1}»</b> from <b>«{2}»</b> to <b>«{3}»</b> in project <b>«{4}»</b>.";
+            string[] arguments = { LoggedInNickName, updatedUser.NickName, lastPermission == true ? "Has access" : "Does not have access", selectedProjecMember.IsPermittedByCreator == true ? "Has access" : "Does not have access", selectedProjecMember.Project.Name };
+            bool[] stringLocalization = { false, false, true, true, false };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments);
 
             return Ok(response);
         }
@@ -1762,6 +1898,7 @@ namespace vws.web.Controllers._project
             }
 
             _vwsDbContext.DeleteProjectMember(selectedProjectMember);
+
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = selectedProject.Id,
@@ -1796,6 +1933,13 @@ namespace vws.web.Controllers._project
                 })
             });
             _vwsDbContext.Save();
+
+            var users = _projectManager.GetProjectUsers(selectedProject.Id).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> removed <b>«{1}»</b> from project <b>«{2}»</b>.";
+            string[] arguments = { LoggedInNickName, removedUser.NickName, selectedProject.Name };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments);
 
             response.Message = "User deleted successfully!";
             return Ok(response);

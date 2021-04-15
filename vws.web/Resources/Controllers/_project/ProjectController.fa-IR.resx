@@ -135,6 +135,9 @@
   <data name="Department with name {0} is not for selected team." xml:space="preserve">
     <value>دپارتمان با نام {0} زیر مجموعه تیم انتخاب شده نیست.</value>
   </data>
+  <data name="Does not have access" xml:space="preserve">
+    <value>دسترسی ندارد</value>
+  </data>
   <data name="DoneOrArchived" xml:space="preserve">
     <value>تمام یا آرشیو شده</value>
   </data>
@@ -146,6 +149,9 @@
   </data>
   <data name="File size is not allowed." xml:space="preserve">
     <value>حجم فایل معتبر نیست.</value>
+  </data>
+  <data name="Has access" xml:space="preserve">
+    <value>دسترسی دارد</value>
   </data>
   <data name="Hold" xml:space="preserve">
     <value>نگه داشته شده</value>
@@ -302,6 +308,9 @@
   </data>
   <data name="{0} added {1} to the project." xml:space="preserve">
     <value>{0} {1} را به پروژه اضافه کرد.</value>
+  </data>
+  <data name="{0} changed permission of user {1} from {2} to {3}." xml:space="preserve">
+    <value>{0} دسترسی {1} را از {2} به {3} به روز کرد.</value>
   </data>
   <data name="{0} removed from project by {1}." xml:space="preserve">
     <value>{0} توسط {1} از پروژه حذف شد.</value>
