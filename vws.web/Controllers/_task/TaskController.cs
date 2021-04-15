@@ -66,19 +66,6 @@ namespace vws.web.Controllers._task
             return assignedTasks;
         }
 
-        private List<GeneralTask> GetUserRunningTask(Guid userId)
-        {
-            var pausedTaskIds = _vwsDbContext.TimeTrackPauses.Where(timeTrackPause => timeTrackPause.UserProfileId == userId)
-                                                             .Select(timeTrackPause => timeTrackPause.GeneralTaskId);
-
-            var notEndedTaskIds = _vwsDbContext.TimeTracks.Where(timeTrack => timeTrack.UserProfileId == userId && timeTrack.EndDate == null)
-                                                          .Select(timeTrack => timeTrack.GeneralTaskId);
-
-            var allRunningTasks = pausedTaskIds.Union(notEndedTaskIds);
-
-            return _vwsDbContext.GeneralTasks.Where(task => allRunningTasks.Contains(task.Id)).ToList();
-        }
-
         private async Task AddUsersToTask(long taskId, List<Guid> users)
         {
             var creationTime = DateTime.Now;
@@ -1451,46 +1438,19 @@ namespace vws.web.Controllers._task
         [HttpGet]
         [Authorize]
         [Route("getRunningTasks")]
-        public async Task<IEnumerable<TaskResponseModel>> GetRunningTasks()
+        public IEnumerable<RunningTaskResponseModel> GetRunningTasks()
         {
             Guid userId = LoggedInUserId.Value;
 
-            List<TaskResponseModel> response = new List<TaskResponseModel>();
+            var pausedTaskIds = _vwsDbContext.TimeTrackPauses.Where(timeTrackPause => timeTrackPause.UserProfileId == userId)
+                                                             .Select(timeTrackPause => new RunningTaskResponseModel() { IsPaused = true, StartDate = null, TaskId = timeTrackPause.GeneralTaskId });
 
-            var userTasks = GetUserRunningTask(userId);
-            foreach (var userTask in userTasks)
-            {
-                if (userTask.IsDeleted || userTask.IsArchived)
-                    continue;
+            var notEndedTaskIds = _vwsDbContext.TimeTracks.Where(timeTrack => timeTrack.UserProfileId == userId && timeTrack.EndDate == null)
+                                                          .Select(timeTrack => new RunningTaskResponseModel() { IsPaused = false, StartDate = timeTrack.StartDate, TaskId = timeTrack.GeneralTaskId });
 
-                response.Add(new TaskResponseModel()
-                {
-                    Id = userTask.Id,
-                    Title = userTask.Title,
-                    Description = userTask.Description,
-                    StartDate = userTask.StartDate,
-                    EndDate = userTask.EndDate,
-                    CreatedOn = userTask.CreatedOn,
-                    ModifiedOn = userTask.ModifiedOn,
-                    CreatedBy = (await _vwsDbContext.GetUserProfileAsync(userTask.CreatedBy)).NickName,
-                    ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(userTask.ModifiedBy)).NickName,
-                    Guid = userTask.Guid,
-                    PriorityId = userTask.TaskPriorityId,
-                    PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)userTask.TaskPriorityId).ToString()],
-                    UsersAssignedTo = _taskManagerService.GetAssignedTo(userTask.Id),
-                    ProjectId = userTask.ProjectId,
-                    TeamId = userTask.TeamId,
-                    TeamName = userTask.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == userTask.TeamId).Name,
-                    ProjectName = userTask.ProjectId == null ? null : _vwsDbContext.Projects.FirstOrDefault(project => project.Id == userTask.ProjectId).Name,
-                    StatusId = userTask.TaskStatusId,
-                    StatusTitle = _vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == userTask.TaskStatusId).Title,
-                    CheckLists = _taskManagerService.GetCheckLists(userTask.Id),
-                    Tags = _taskManagerService.GetTaskTags(userTask.Id),
-                    Comments = await _taskManagerService.GetTaskComments(userTask.Id),
-                    Attachments = _taskManagerService.GetTaskAttachments(userTask.Id)
-                });
-            }
-            return response;
+            var allRunningTasks = pausedTaskIds.Union(notEndedTaskIds);
+
+            return allRunningTasks;
         }
 
         [HttpGet]

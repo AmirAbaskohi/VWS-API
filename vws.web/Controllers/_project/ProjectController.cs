@@ -23,6 +23,7 @@ using vws.web.Services;
 using vws.web.Services._chat;
 using vws.web.Services._project;
 using vws.web.Services._task;
+using static vws.web.EmailTemplates.EmailTemplateTypes;
 
 namespace vws.web.Controllers._project
 {
@@ -38,12 +39,14 @@ namespace vws.web.Controllers._project
         private readonly IPermissionService _permissionService;
         private readonly IProjectManagerService _projectManager;
         private readonly ITaskManagerService _taskManagerService;
+        private readonly INotificationService _notificationService;
         #endregion
 
         #region Ctor
         public ProjectController(UserManager<ApplicationUser> userManager, IStringLocalizer<ProjectController> localizer,
             IVWS_DbContext vwsDbContext, IFileManager fileManager, IPermissionService permissionService,
-            IProjectManagerService projectManager, ITaskManagerService taskManagerService)
+            IProjectManagerService projectManager, ITaskManagerService taskManagerService,
+            INotificationService notificationService)
         {
             _userManager = userManager;
             _localizer = localizer;
@@ -52,6 +55,7 @@ namespace vws.web.Controllers._project
             _permissionService = permissionService;
             _projectManager = projectManager;
             _taskManagerService = taskManagerService;
+            _notificationService = notificationService;
         }
         #endregion
 
@@ -324,6 +328,13 @@ namespace vws.web.Controllers._project
                 Users = _projectManager.GetProjectUsers(newProject.Id),
                 NumberOfTasks = _projectManager.GetNumberOfProjectTasks(newProject.Id)
             };
+
+            var users = _projectManager.GetProjectUsers(newProject.Id).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> created new project with name <b>«{1}»</b>.";
+            string[] arguments = { LoggedInNickName, newProject.Name };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Create", arguments);
 
             response.Value = newProjectResponse;
             response.Message = "Project created successfully!";
