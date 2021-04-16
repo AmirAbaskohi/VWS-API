@@ -1831,13 +1831,15 @@ namespace vws.web.Controllers._project
             }
 
             selectedProjectMember.IsPermittedByCreator = false;
+            selectedProjectMember.IsDeleted = true;
+            selectedProjectMember.DeletedOn = DateTime.Now;
             _vwsDbContext.Save();
 
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = selectedProjectMember.ProjectId,
                 Event = "{0} did not accepted user {1} to have access to project.",
-                EventTime = selectedProjectMember.PermittedOn
+                EventTime = (DateTime)selectedProjectMember.DeletedOn
             };
             _vwsDbContext.AddProjectHistory(newProjectHistory);
             _vwsDbContext.Save();
@@ -2094,14 +2096,16 @@ namespace vws.web.Controllers._project
             }
 
             var selectedProjectMember = _vwsDbContext.ProjectMembers.FirstOrDefault(projectMember => projectMember.ProjectId == id && projectMember.UserProfileId == userId);
-            if (selectedProjectMember == null || selectedProject.IsDeleted)
+            if (selectedProjectMember == null || selectedProjectMember.IsPermittedByCreator == false || selectedProjectMember.IsDeleted)
             {
                 response.AddError(_localizer["There is no member with such id in given project."]);
                 response.Message = "Project member not found";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            _vwsDbContext.DeleteProjectMember(selectedProjectMember);
+            selectedProjectMember.IsDeleted = true;
+            selectedProjectMember.DeletedOn = DateTime.Now;
+            _vwsDbContext.Save();
 
             var newProjectHistory = new ProjectHistory()
             {
@@ -2138,9 +2142,13 @@ namespace vws.web.Controllers._project
             });
             _vwsDbContext.Save();
 
+            string[] args = { LoggedInNickName, selectedProjectMember.Project.Name };
+            await _notificationService.SendSingleEmail((int)EmailTemplateEnum.NotificationEmail, "<b>«{0}»</b> removed you from project <b>«{1}»</b>.", "Project Access", removedUser.UserId, args);
+
             var users = _projectManager.GetProjectUsers(selectedProject.Id).Select(user => user.UserId).ToList();
             users = users.Distinct().ToList();
             users.Remove(LoggedInUserId.Value);
+            users.Remove(userId);
             string emailMessage = "<b>«{0}»</b> removed <b>«{1}»</b> from project <b>«{2}»</b>.";
             string[] arguments = { LoggedInNickName, removedUser.NickName, selectedProject.Name };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments);
