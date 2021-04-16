@@ -135,6 +135,9 @@
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; added new tag &lt;b&gt;«{1}»&lt;/b&gt; to your task with title &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; added new tag &lt;b&gt;«{1}»&lt;/b&gt; to your task with title &lt;b&gt;«{2}»&lt;/b&gt;.</value>
   </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; added you to project &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; added you to project &lt;b&gt;«{1}»&lt;/b&gt;.</value>
+  </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; assigned task &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; assigned task &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt;.</value>
   </data>
@@ -174,11 +177,29 @@
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted team &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; deleted team &lt;b&gt;«{1}»&lt;/b&gt;.</value>
   </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; did not give permission to user &lt;b&gt;«{1}»&lt;/b&gt; in project &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; did not give permission to user &lt;b&gt;«{1}»&lt;/b&gt; in project &lt;b&gt;«{2}»&lt;/b&gt;.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; did not give permission to you for project &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; did not give permission to you for project &lt;b&gt;«{1}»&lt;/b&gt;.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; gave permission to user &lt;b&gt;«{1}»&lt;/b&gt; in project &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; gave permission to user &lt;b&gt;«{1}»&lt;/b&gt; in project &lt;b&gt;«{2}»&lt;/b&gt;.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; gave permission to you for project &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; gave permission to you for project &lt;b&gt;«{1}»&lt;/b&gt;.</value>
+  </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; joined team &lt;b&gt;«{1}»&lt;/b&gt; via link with id &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; joined team &lt;b&gt;«{1}»&lt;/b&gt; via link with id &lt;b&gt;«{2}»&lt;/b&gt;.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; removed &lt;b&gt;«{1}»&lt;/b&gt; from project &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; removed &lt;b&gt;«{1}»&lt;/b&gt; from project &lt;b&gt;«{2}»&lt;/b&gt;.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; requested to project creator &lt;b&gt;«{1}»&lt;/b&gt; to project &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; requested to project creator &lt;b&gt;«{1}»&lt;/b&gt; to project &lt;b&gt;«{2}»&lt;/b&gt;.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; requested to project creator to added you to project &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; requested to project creator to added you to project &lt;b&gt;«{1}»&lt;/b&gt;.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; revoked invite link with id &lt;b&gt;«{1}»&lt;/b&gt; in team &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; revoked invite link with id &lt;b&gt;«{1}»&lt;/b&gt; in team &lt;b&gt;«{2}»&lt;/b&gt;.</value>

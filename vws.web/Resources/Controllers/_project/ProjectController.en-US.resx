@@ -171,6 +171,9 @@
   <data name="Name can not be empty." xml:space="preserve">
     <value>Name can not be empty.</value>
   </data>
+  <data name="No user with such id exists." xml:space="preserve">
+    <value>No user with such id exists.</value>
+  </data>
   <data name="NoTime" xml:space="preserve">
     <value>NoTime</value>
   </data>
@@ -273,6 +276,9 @@
   <data name="Updating personal project just can be done by creator." xml:space="preserve">
     <value>Updating personal project just can be done by creator.</value>
   </data>
+  <data name="User already is permitted." xml:space="preserve">
+    <value>User already is permitted.</value>
+  </data>
   <data name="User you want to add, is already a member of selected project." xml:space="preserve">
     <value>User you want to add, is already a member of selected project.</value>
   </data>
@@ -312,7 +318,16 @@
   <data name="{0} changed permission of user {1} from {2} to {3}." xml:space="preserve">
     <value>{0} change permission of user {1} from {2} to {3}.</value>
   </data>
+  <data name="{0} did not accepted user {1} to have access to project." xml:space="preserve">
+    <value>{0} did not accepted user {1} to have access to project.</value>
+  </data>
+  <data name="{0} gave permission to user {1}." xml:space="preserve">
+    <value>{0} gave permission to user {1}.</value>
+  </data>
   <data name="{0} removed from project by {1}." xml:space="preserve">
     <value>{0} removed from project by {1}.</value>
+  </data>
+  <data name="{0} requested to add {1} to the project." xml:space="preserve">
+    <value>{0} requested to add {1} to the project.</value>
   </data>
 </root>

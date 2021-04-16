@@ -171,6 +171,9 @@
   <data name="Name can not be empty." xml:space="preserve">
     <value>نام نمی تواند خالی باشد.</value>
   </data>
+  <data name="No user with such id exists." xml:space="preserve">
+    <value>کاربری با این آی دی وجود ندارد.</value>
+  </data>
   <data name="NoTime" xml:space="preserve">
     <value>بدون زمان</value>
   </data>
@@ -273,6 +276,9 @@
   <data name="Updating personal project just can be done by creator." xml:space="preserve">
     <value>آپدیت پروژه شخصی تنها توسط سازنده پروژه امکان پذیر است.</value>
   </data>
+  <data name="User already is permitted." xml:space="preserve">
+    <value>کاربر در حال حاضر دسترسی دارد.</value>
+  </data>
   <data name="User you want to add, is already a member of selected project." xml:space="preserve">
     <value>کاربری که می خواهید به پروژه اضافه کنید، هم اکنون عضوی از پروژه انتخاب شده می باشد.</value>
   </data>
@@ -312,7 +318,16 @@
   <data name="{0} changed permission of user {1} from {2} to {3}." xml:space="preserve">
     <value>{0} دسترسی {1} را از {2} به {3} به روز کرد.</value>
   </data>
+  <data name="{0} did not accepted user {1} to have access to project." xml:space="preserve">
+    <value>{0} اجازه دسترسی به کاربر {1} را در پروژه نداد.</value>
+  </data>
+  <data name="{0} gave permission to user {1}." xml:space="preserve">
+    <value>{0} به {1} دسترسی داد.</value>
+  </data>
   <data name="{0} removed from project by {1}." xml:space="preserve">
     <value>{0} توسط {1} از پروژه حذف شد.</value>
+  </data>
+  <data name="{0} requested to add {1} to the project." xml:space="preserve">
+    <value>{0} درخواست اضافه شدن {1} به پروژه را داد.</value>
   </data>
 </root>
