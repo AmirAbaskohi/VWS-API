@@ -181,7 +181,7 @@ namespace vws.web.Controllers._team
             var selectedTeam = _vwsDbContext.Teams.FirstOrDefault(team => team.Id == teamId);
             var users = (await _teamManager.GetTeamMembers(teamId)).Select(user => user.UserId).ToList();
             users = users.Distinct().ToList();
-            //users.Remove(LoggedInUserId.Value);
+            users.Remove(LoggedInUserId.Value);
             string emailMessage = "<b>«{0}»</b> created new team with name <b>«{1}»</b>.";
             string departmentEmailMessage = "<b>«{0}»</b> created new department with name <b>«{1}»</b>.";
             string[] arguments = { LoggedInNickName, selectedTeam.Name };
@@ -193,7 +193,7 @@ namespace vws.web.Controllers._team
             {
                 var departmentUsers = department.DepartmentMembers.Select(department => department.UserProfileId).ToList();
                 departmentUsers = departmentUsers.Distinct().ToList();
-                //users.Remove(LoggedInUserId.Value);
+                users.Remove(LoggedInUserId.Value);
                 string[] args = { LoggedInNickName, department.Name };
                 await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, departmentUsers, departmentEmailMessage, "Department Creation", args);
             }

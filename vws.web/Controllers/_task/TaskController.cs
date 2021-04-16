@@ -1562,7 +1562,7 @@ namespace vws.web.Controllers._task
         [HttpDelete]
         [Authorize]
         [Route("delete")]
-        public async Task<IActionResult> DeleteTask(long taskId)
+        public async Task<IActionResult> DeleteTask(long id)
         {
             var response = new ResponseModel();
 
@@ -1572,7 +1572,7 @@ namespace vws.web.Controllers._task
                                                         .ThenInclude(comment => comment.Attachments)
                                                         .ThenInclude(attachment => attachment.FileContainer)
                                                         .ThenInclude(container => container.Files)
-                                                        .FirstOrDefault(task => task.Id == taskId);
+                                                        .FirstOrDefault(task => task.Id == id);
 
             if (selectedTask == null || selectedTask.IsDeleted)
             {
@@ -1580,7 +1580,7 @@ namespace vws.web.Controllers._task
                 response.AddError(_localizer["Task does not exist."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
-            if (!_permissionService.HasAccessToTask(userId, taskId))
+            if (!_permissionService.HasAccessToTask(userId, id))
             {
                 response.Message = "Task access forbidden";
                 response.AddError(_localizer["You don't have access to this task."]);
@@ -1628,7 +1628,7 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
             #endregion
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(taskId).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
@@ -1667,11 +1667,11 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            var taskUsers = _taskManagerService.GetAssignedTo(model.TaskId).Select(user => user.UserId);
+            var taskUsers = _taskManagerService.GetAssignedTo(model.TaskId).Select(user => user.UserId).ToList();
 
             var assignTime = DateTime.Now;
 
-            foreach(var user in model.Users)
+            foreach (var user in model.Users)
             {
                 if (!_vwsDbContext.UserProfiles.Any(profile => profile.UserId == user) ||
                     taskUsers.Contains(user))
@@ -1694,6 +1694,14 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
 
             var historyIds = SaveAssignTaskHistory(selectedTask.Id, LoggedInUserId.Value, successfulAssignedUsers, assignTime);
+
+            taskUsers.Remove(userId);
+            foreach (var user in successfulAssignedUsers)
+            {
+                var nickName = (await _vwsDbContext.GetUserProfileAsync(user)).NickName;
+                string[] args = { LoggedInNickName ,selectedTask.Title, nickName };
+                await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, taskUsers, "<b>«{0}»</b> assigned task <b>«{1}»</b> to <b>«{2}»</b>.", "Task Update", args);
+            }
 
             string[] arguments = { selectedTask.Title, LoggedInNickName };
             Guid[] reuqestedUser = { userId };
@@ -1798,11 +1806,11 @@ namespace vws.web.Controllers._task
         [HttpDelete]
         [Authorize]
         [Route("deleteUserAssignedTo")]
-        public async Task<IActionResult> DeleteUserAssignedTo(long taskId, Guid userId)
+        public async Task<IActionResult> DeleteUserAssignedTo(long id, Guid userId)
         {
             var response = new ResponseModel();
 
-            var selectedTask = await _vwsDbContext.GetTaskAsync(taskId);
+            var selectedTask = await _vwsDbContext.GetTaskAsync(id);
 
             if (selectedTask == null || selectedTask.IsDeleted)
             {
@@ -1811,7 +1819,7 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!_permissionService.HasAccessToTask(userId, taskId))
+            if (!_permissionService.HasAccessToTask(userId, id))
             {
                 response.Message = "Task access forbidden";
                 response.AddError(_localizer["You don't have access to this task."]);
@@ -1819,7 +1827,7 @@ namespace vws.web.Controllers._task
             }
 
             var selectedUserAssignedTask = _vwsDbContext.TaskAssigns.FirstOrDefault(taskAssign => taskAssign.UserProfileId == userId &&
-                                                                                   taskAssign.GeneralTaskId == taskId &&
+                                                                                   taskAssign.GeneralTaskId == id &&
                                                                                    taskAssign.IsDeleted == false);
 
             if (selectedUserAssignedTask == null)
@@ -1872,6 +1880,13 @@ namespace vws.web.Controllers._task
 
             string[] arguments = { selectedTask.Title, LoggedInNickName };
             await _notificationService.SendSingleEmail((int)EmailTemplateEnum.NotificationEmail, "You have been unassigned from task with title <b>«{0}»</b> by <b>«{1}»</b>.", "Task Assign", userId, arguments);
+
+            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedTask.CreatedBy);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            string[] args = { LoggedInNickName, (await _vwsDbContext.GetUserProfileAsync(userId)).NickName, selectedTask.Title };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "<b>«{0}»</b> unassigned <b>«{1}»</b> from task with title <b>«{2}»</b>.", "Task Update", arguments);
 
             response.Message = "User unassigned from task successfully!";
             return Ok(response);

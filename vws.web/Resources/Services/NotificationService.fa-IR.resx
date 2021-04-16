@@ -135,6 +135,9 @@
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; added new tag &lt;b&gt;«{1}»&lt;/b&gt; to your task with title &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; برچسب جدید&lt;b&gt;«{1}»&lt;/b&gt; به تسک شما با عنوان &lt;b&gt;«{2}»&lt;/b&gt; اضافه کرد.</value>
   </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; assigned task &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; تسک &lt;b&gt;«{1}»&lt;/b&gt; را به &lt;b&gt;«{2}»&lt;/b&gt; اضافه کرد.</value>
+  </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; changed permission of user &lt;b&gt;«{1}»&lt;/b&gt; from &lt;b&gt;«{2}»&lt;/b&gt; to &lt;b&gt;«{3}»&lt;/b&gt; in project &lt;b&gt;«{4}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; دسترسی &lt;b&gt;«{1}»&lt;/b&gt; را از &lt;b&gt;«{2}»&lt;/b&gt; به &lt;b&gt;«{3}»&lt;/b&gt;در پروژه &lt;b&gt;«{4}»&lt;/b&gt; به روز کرد.</value>
   </data>
@@ -182,6 +185,9 @@
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; revoked invite link with id &lt;b&gt;«{1}»&lt;/b&gt; in team &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; لینک دعوت با آی دی &lt;b&gt;«{1}»&lt;/b&gt; را در تیم &lt;b&gt;«{2}»&lt;/b&gt; منقضی کرد.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; unassigned &lt;b&gt;«{1}»&lt;/b&gt; from task with title &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; &lt;b&gt;«{1}»&lt;/b&gt; را از تسک با عنوان &lt;b&gt;«{2}»&lt;/b&gt; حذف کرد.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated check list item status from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in check list with title &lt;b&gt;«{3}»&lt;/b&gt; of your task with title &lt;b&gt;«{4}»&lt;/b&gt;" xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; وضعیت آیتم چک لیست را از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; در چک لیست با عنوان &lt;b&gt;«{3}»&lt;/b&gt; از تسک &lt;b&gt;«{4}»&lt;/b&gt; به روز کرد.</value>

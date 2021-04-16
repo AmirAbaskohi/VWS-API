@@ -1570,11 +1570,13 @@ namespace vws.web.Controllers._project
             });
             _vwsDbContext.Save();
 
+
             var users = _projectManager.GetProjectUsers(selectedProject.Id).Select(user => user.UserId).ToList();
             users = users.Distinct().ToList();
             users.Remove(LoggedInUserId.Value);
+            users.Remove(model.UserId);
             string emailMessage = "<b>«{0}»</b> added <b>«{1}»</b> to project <b>«{2}»</b>.";
-            string[] arguments = { LoggedInNickName, selectedProject.Name };
+            string[] arguments = { LoggedInNickName, addedUser.NickName, selectedProject.Name };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments);
 
             response.Message = "User added successfully!";
