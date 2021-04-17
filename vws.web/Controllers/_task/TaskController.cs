@@ -1885,6 +1885,7 @@ namespace vws.web.Controllers._task
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
+            usersAssignedTo.Remove(userId);
             string[] args = { LoggedInNickName, (await _vwsDbContext.GetUserProfileAsync(userId)).NickName, selectedTask.Title };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "<b>«{0}»</b> unassigned <b>«{1}»</b> from task with title <b>«{2}»</b>.", "Task Update", arguments);
 
