@@ -20,6 +20,8 @@ namespace vws.web.Domain._team
 
         public DateTime EventTime { get; set; }
 
-        public ICollection<TeamHistoryParameter> TeamHistoryParameters { get; set; }
+        public virtual Team Team { get; set; }
+
+        public virtual ICollection<TeamHistoryParameter> TeamHistoryParameters { get; set; }
     }
 }

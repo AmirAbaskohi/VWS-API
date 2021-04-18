@@ -20,6 +20,8 @@ namespace vws.web.Domain._project
 
         public DateTime EventTime { get; set; }
 
+        public virtual Project Project { get; set; }
+
         public virtual ICollection<ProjectHistoryParameter> ProjectHistoryParameters { get; set; }
     }
 }

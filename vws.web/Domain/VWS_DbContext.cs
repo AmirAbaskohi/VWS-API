@@ -749,9 +749,9 @@ namespace vws.web.Domain
 
         public DbSet<NotificationType> NotificationTypes { get; set; }
 
-        public void AddNotification(Notification notification)
+        public void AddNotifications(ICollection<Notification> notifications)
         {
-            Notifications.Add(notification);
+            Notifications.AddRange(notifications);
         }
 
         public void AddNotificationType(NotificationType notificationType)

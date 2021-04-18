@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using vws.web.Models;
 
 namespace vws.web.Hubs
 {
@@ -14,6 +15,8 @@ namespace vws.web.Hubs
         Task InformUserIsOnline(Guid userId);
 
         Task UnmuteChannel(Guid channelId, byte channelTypeId);
+
+        Task ReceiveNotification(NotificationModel notification);
 
         Task ReceiveDeleteMessage(long messageId, Guid channelId, byte channelTypeId);
 

@@ -342,7 +342,7 @@ namespace vws.web.Controllers._task
             {
                 EventTime = taskResponseModel.CreatedOn,
                 Event = "Task {0} created by {1}.",
-                TaskId = taskResponseModel.Id
+                GeneralTaskId = taskResponseModel.Id
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.AddTaskHistory(newTaskHistory);
@@ -437,7 +437,7 @@ namespace vws.web.Controllers._task
                 {
                     Event = "{0} assigned task to {1}.",
                     EventTime = assignTime,
-                    TaskId = taskId
+                    GeneralTaskId = taskId
                 };
                 _vwsDbContext.AddTaskHistory(newHistory);
                 _vwsDbContext.Save();
@@ -692,7 +692,7 @@ namespace vws.web.Controllers._task
             {
                 EventTime = selectedTask.ModifiedOn,
                 Event = "Task title updated from {0} to {1} by {2}.",
-                TaskId = selectedTask.Id
+                GeneralTaskId = selectedTask.Id
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();
@@ -775,7 +775,7 @@ namespace vws.web.Controllers._task
             {
                 EventTime = selectedTask.ModifiedOn,
                 Event = "Task desciption updated to {0} by {1}.",
-                TaskId = selectedTask.Id
+                GeneralTaskId = selectedTask.Id
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();
@@ -852,7 +852,7 @@ namespace vws.web.Controllers._task
             {
                 EventTime = selectedTask.ModifiedOn,
                 Event = "Task priority updated from {0} to {1} by {2}.",
-                TaskId = selectedTask.Id
+                GeneralTaskId = selectedTask.Id
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();
@@ -1020,7 +1020,7 @@ namespace vws.web.Controllers._task
             {
                 EventTime = selectedTask.ModifiedOn,
                 Event = "Task updated from {0} to {1} by {2}.",
-                TaskId = selectedTask.Id
+                GeneralTaskId = selectedTask.Id
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();
@@ -1106,7 +1106,7 @@ namespace vws.web.Controllers._task
             {
                 EventTime = selectedTask.ModifiedOn,
                 Event = "Task start date updated from {0} to {1} by {2}.",
-                TaskId = selectedTask.Id
+                GeneralTaskId = selectedTask.Id
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();
@@ -1194,7 +1194,7 @@ namespace vws.web.Controllers._task
             {
                 EventTime = selectedTask.ModifiedOn,
                 Event = "Task end date updated from {0} to {1} by {2}.",
-                TaskId = selectedTask.Id
+                GeneralTaskId = selectedTask.Id
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();
@@ -1284,7 +1284,7 @@ namespace vws.web.Controllers._task
             {
                 EventTime = selectedTask.ModifiedOn,
                 Event = "Task status updated from {0} to {1} by {2}.",
-                TaskId = selectedTask.Id
+                GeneralTaskId = selectedTask.Id
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();
@@ -1360,7 +1360,7 @@ namespace vws.web.Controllers._task
             {
                 EventTime = selectedTask.ModifiedOn,
                 Event = "Task has been archived by {0}.",
-                TaskId = selectedTask.Id
+                GeneralTaskId = selectedTask.Id
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();
@@ -1535,7 +1535,7 @@ namespace vws.web.Controllers._task
             }
 
             var events = new List<HistoryModel>();
-            var taskEvents = _vwsDbContext.TaskHistories.Where(taskHistory => taskHistory.TaskId == id);
+            var taskEvents = _vwsDbContext.TaskHistories.Where(taskHistory => taskHistory.GeneralTaskId == id);
             foreach (var taskEvent in taskEvents)
             {
                 var parameters = _vwsDbContext.TaskHistoryParameters.Where(param => param.TaskHistoryId == taskEvent.Id)
@@ -1609,7 +1609,7 @@ namespace vws.web.Controllers._task
             {
                 EventTime = selectedTask.ModifiedOn,
                 Event = "Task deleted by {0}.",
-                TaskId = selectedTask.Id
+                GeneralTaskId = selectedTask.Id
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();
@@ -1847,7 +1847,7 @@ namespace vws.web.Controllers._task
             {
                 EventTime = selectedUserAssignedTask.DeletedOn,
                 Event = "{0} unassigned {1} from task.",
-                TaskId = selectedTask.Id
+                GeneralTaskId = selectedTask.Id
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();
@@ -2176,7 +2176,7 @@ namespace vws.web.Controllers._task
             {
                 EventTime = selectedTask.ModifiedOn,
                 Event = "{0} added check list {1} to task.",
-                TaskId = selectedTask.Id
+                GeneralTaskId = selectedTask.Id
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();
@@ -2278,7 +2278,7 @@ namespace vws.web.Controllers._task
             {
                 EventTime = selectedCheckList.GeneralTask.ModifiedOn,
                 Event = "Check list title updated from {0} to {1} by {2}.",
-                TaskId = selectedCheckList.GeneralTaskId
+                GeneralTaskId = selectedCheckList.GeneralTaskId
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();
@@ -2364,7 +2364,7 @@ namespace vws.web.Controllers._task
             {
                 EventTime = selectedCheckList.GeneralTask.ModifiedOn,
                 Event = "{0} deleted check list {1}.",
-                TaskId = selectedCheckList.GeneralTaskId
+                GeneralTaskId = selectedCheckList.GeneralTaskId
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();
@@ -2466,7 +2466,7 @@ namespace vws.web.Controllers._task
             {
                 EventTime = selectedCheckList.GeneralTask.ModifiedOn,
                 Event = "{0} added check list item {1} to check list {2}.",
-                TaskId = selectedCheckList.GeneralTaskId
+                GeneralTaskId = selectedCheckList.GeneralTaskId
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();
@@ -2575,7 +2575,7 @@ namespace vws.web.Controllers._task
             {
                 EventTime = selectedCheckListItem.TaskCheckList.GeneralTask.ModifiedOn,
                 Event = "Title of check list item updated from {0} to {1} by {2}.",
-                TaskId = selectedCheckListItem.TaskCheckList.GeneralTaskId
+                GeneralTaskId = selectedCheckListItem.TaskCheckList.GeneralTaskId
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();
@@ -2666,7 +2666,7 @@ namespace vws.web.Controllers._task
             {
                 EventTime = selectedCheckListItem.TaskCheckList.GeneralTask.ModifiedOn,
                 Event = "Status of check list item {0} updated from {1} to {2} by {3}.",
-                TaskId = selectedCheckListItem.TaskCheckList.GeneralTaskId
+                GeneralTaskId = selectedCheckListItem.TaskCheckList.GeneralTaskId
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();
@@ -2764,7 +2764,7 @@ namespace vws.web.Controllers._task
             {
                 EventTime = selectedCheckListItem.TaskCheckList.GeneralTask.ModifiedOn,
                 Event = "Check list item {0} deleted by {1}.",
-                TaskId = selectedCheckListItem.TaskCheckList.GeneralTaskId
+                GeneralTaskId = selectedCheckListItem.TaskCheckList.GeneralTaskId
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();
@@ -2938,7 +2938,7 @@ namespace vws.web.Controllers._task
             {
                 EventTime = selectedTask.ModifiedOn,
                 Event = "{0} added tag {1} to task.",
-                TaskId = selectedTask.Id
+                GeneralTaskId = selectedTask.Id
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();
@@ -3195,7 +3195,7 @@ namespace vws.web.Controllers._task
             {
                 EventTime = selectedTask.ModifiedOn,
                 Event = "{0} removed tag {1} from task.",
-                TaskId = selectedTask.Id
+                GeneralTaskId = selectedTask.Id
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();
@@ -3285,7 +3285,7 @@ namespace vws.web.Controllers._task
             {
                 EventTime = selectedTask.ModifiedOn,
                 Event = "{0} added comment {1} to task.",
-                TaskId = selectedTask.Id
+                GeneralTaskId = selectedTask.Id
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();
@@ -3386,7 +3386,7 @@ namespace vws.web.Controllers._task
             {
                 EventTime = selectedComment.GeneralTask.ModifiedOn,
                 Event = "{0} updated comment from {1} to {2}.",
-                TaskId = selectedComment.GeneralTaskId
+                GeneralTaskId = selectedComment.GeneralTaskId
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();
@@ -3469,7 +3469,7 @@ namespace vws.web.Controllers._task
             {
                 EventTime = selectedComment.GeneralTask.ModifiedOn,
                 Event = "{0} deleted comment {1}.",
-                TaskId = selectedComment.GeneralTaskId
+                GeneralTaskId = selectedComment.GeneralTaskId
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();
@@ -3549,7 +3549,7 @@ namespace vws.web.Controllers._task
                 {
                     EventTime = selectedComment.GeneralTask.ModifiedOn,
                     Event = "{0} added below attachments to comment {1}: {2}",
-                    TaskId = selectedComment.GeneralTaskId
+                    GeneralTaskId = selectedComment.GeneralTaskId
                 };
                 _vwsDbContext.AddTaskHistory(newTaskHistory);
                 _vwsDbContext.Save();
@@ -3640,7 +3640,7 @@ namespace vws.web.Controllers._task
             {
                 EventTime = selectedComment.GeneralTask.ModifiedOn,
                 Event = "{0} deleted attchment {1} from comment {2}.",
-                TaskId = selectedComment.GeneralTaskId
+                GeneralTaskId = selectedComment.GeneralTaskId
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();
@@ -3724,7 +3724,7 @@ namespace vws.web.Controllers._task
                 {
                     EventTime = selectedTask.ModifiedOn,
                     Event = "{0} added below attachments to task: {1}",
-                    TaskId = selectedTask.Id
+                    GeneralTaskId = selectedTask.Id
                 };
                 _vwsDbContext.AddTaskHistory(newTaskHistory);
                 _vwsDbContext.Save();
@@ -3809,7 +3809,7 @@ namespace vws.web.Controllers._task
             {
                 EventTime = selectedTask.ModifiedOn,
                 Event = "{0} deleted attchment {1} from task.",
-                TaskId = selectedTask.Id
+                GeneralTaskId = selectedTask.Id
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();

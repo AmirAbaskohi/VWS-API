@@ -16,11 +16,13 @@ namespace vws.web.Domain._task
 
         public long Id { get; set; }
 
-        public long TaskId { get; set; }
+        public long GeneralTaskId { get; set; }
 
         public string Event { get; set; }
 
         public DateTime EventTime { get; set; }
+
+        public virtual GeneralTask GeneralTask { get; set; }
 
         public virtual ICollection<TaskHistoryParameter> TaskHistoryParameters { get; set; }
     }

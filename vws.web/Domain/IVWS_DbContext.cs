@@ -374,7 +374,7 @@ namespace vws.web.Domain
 
         #region methods
 
-        public void AddNotification(Notification notification);
+        public void AddNotifications(ICollection<Notification> notifications);
 
         public void AddNotificationType(NotificationType notificationType);
 
