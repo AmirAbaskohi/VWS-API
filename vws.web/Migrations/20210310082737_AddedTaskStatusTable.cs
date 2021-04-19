@@ -26,19 +26,19 @@ namespace vws.web.Migrations
                         column: x => x.UserProfileId,
                         principalTable: "Base_UserProfile",
                         principalColumn: "UserId",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Task_TaskStatus_Project_Project_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Project_Project",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Task_TaskStatus_Team_Team_TeamId",
                         column: x => x.TeamId,
                         principalTable: "Team_Team",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
