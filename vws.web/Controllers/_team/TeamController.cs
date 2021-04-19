@@ -299,6 +299,11 @@ namespace vws.web.Controllers._team
 
             await SendCreateTeamEmail(newTeam.Id);
 
+            var users = (await _teamManager.GetTeamMembers(newTeam.Id)).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Team, newHistory.Id);
+
             var newTeamResponse = new TeamResponseModel()
             {
                 Id = newTeam.Id,
@@ -416,6 +421,8 @@ namespace vws.web.Controllers._team
             string[] arguments = { LoggedInNickName, lastName , selectedTeam.Name };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Team Update", arguments);
 
+            _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Team, newHistory.Id);
+
             response.Message = "Team name updated successfully!";
             return Ok(response);
         }
@@ -493,6 +500,8 @@ namespace vws.web.Controllers._team
             string emailMessage = "<b>«{0}»</b> updated description from <b>«{1}»</b> to <b>«{2}»</b> in your team with name <b>«{3}»</b>.";
             string[] arguments = { LoggedInNickName, lastDescription, selectedTeam.Description, selectedTeam.Name };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Team Update", arguments);
+
+            _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Team, newHistory.Id);
 
             response.Message = "Team description updated successfully!";
             return Ok(response);
@@ -577,6 +586,8 @@ namespace vws.web.Controllers._team
             string emailMessage = "<b>«{0}»</b> updated color from <b>«{1}»</b> to <b>«{2}»</b> in your team with name <b>«{3}»</b>.";
             string[] arguments = { LoggedInNickName, lastColor, selectedTeam.Color, selectedTeam.Name };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Team Update", arguments);
+
+            _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Team, newHistory.Id);
 
             response.Message = "Team color updated successfully!";
             return Ok(response);
@@ -713,6 +724,8 @@ namespace vws.web.Controllers._team
             string emailMessage = "<b>«{0}»</b> updated team image to <b>«{1}»</b> in your team with name <b>«{2}»</b>.";
             string[] arguments = { LoggedInNickName, $"<a href='{Request.Scheme}://{Request.Host}/en-US/File/get?id={fileResponse.Value.FileContainerGuid}'>{fileResponse.Value.Name}</a>", selectedTeam.Name };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Team Update", arguments);
+
+            _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Team, newHistory.Id);
 
             response.Value = fileResponse.Value.FileContainerGuid;
             response.Message = "Team image added successfully!";
@@ -1104,6 +1117,8 @@ namespace vws.web.Controllers._team
             string[] arguments = { LoggedInNickName, selectedTeam.Name };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Team Update", arguments);
 
+            _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Team, newHistory.Id);
+
             response.Message = "Team deleted successfully!";
             return Ok(response);
         }
@@ -1189,6 +1204,8 @@ namespace vws.web.Controllers._team
             string emailMessage = "<b>«{0}»</b> created new invite link with id <b>«{1}»</b> for team <b>«{2}»</b>.";
             string[] arguments = { LoggedInNickName, newInviteLink.LinkGuid.ToString(), selectedTeam.Name };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Team Update", arguments);
+
+            _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Team, newHistory.Id);
 
             response.Value = new TeamInviteLinkResponseModel()
             {
@@ -1277,6 +1294,8 @@ namespace vws.web.Controllers._team
             string emailMessage = "<b>«{0}»</b> revoked invite link with id <b>«{1}»</b> in team <b>«{2}»</b>.";
             string[] arguments = { LoggedInNickName, selectedInviteLink.LinkGuid.ToString(), selectedTeam.Name };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Team Update", arguments);
+
+            _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Team, newHistory.Id);
 
             response.Message = "Team updated successfully!";
             return Ok(response);
@@ -1399,6 +1418,8 @@ namespace vws.web.Controllers._team
             string emailMessage = "<b>«{0}»</b> joined team <b>«{1}»</b> via link with id <b>«{2}»</b>.";
             string[] arguments = { LoggedInNickName, selectedTeam.Name, selectedTeamLink.LinkGuid.ToString() };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Team Update", arguments);
+
+            _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Team, newHistory.Id);
 
             response.Message = "User added to team successfully!";
             return Ok(response);

@@ -336,6 +336,8 @@ namespace vws.web.Controllers._project
             string[] arguments = { LoggedInNickName, newProject.Name };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Create", arguments);
 
+            _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Project, newProjectHistory.Id);
+
             response.Value = newProjectResponse;
             response.Message = "Project created successfully!";
             return Ok(response);
@@ -423,6 +425,8 @@ namespace vws.web.Controllers._project
             string[] arguments = { LoggedInNickName, lastName, selectedProject.Name };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments);
 
+            _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Project, newProjectHistory.Id);
+
             response.Message = "Name updated successfully!";
             return Ok(response);
         }
@@ -504,6 +508,8 @@ namespace vws.web.Controllers._project
             string[] arguments = { LoggedInNickName, lastDescription, selectedProject.Description, selectedProject.Name };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments);
 
+            _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Project, newProjectHistory.Id);
+
             response.Message = "Description updated successfully!";
             return Ok(response);
         }
@@ -584,6 +590,8 @@ namespace vws.web.Controllers._project
             string emailMessage = "<b>«{0}»</b> updated color from <b>«{1}»</b> to <b>«{2}»</b> in project <b>«{3}»</b>.";
             string[] arguments = { LoggedInNickName, lastColor, selectedProject.Color, selectedProject.Name };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments);
+
+            _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Project, newProjectHistory.Id);
 
             response.Message = "Color updated successfully!";
             return Ok(response);
@@ -669,6 +677,8 @@ namespace vws.web.Controllers._project
             bool[] argumentLocalization = { false, lastStartDate == null ? true : false, selectedProject.StartDate == null ? true : false, false };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments, argumentLocalization);
 
+            _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Project, newProjectHistory.Id);
+
             response.Message = "Start date updated successfully!";
             return Ok(response);
         }
@@ -750,6 +760,8 @@ namespace vws.web.Controllers._project
             string[] arguments = { LoggedInNickName, lastEndDate == null ? "No Time" : lastEndDate.ToString(), selectedProject.EndDate == null ? "No Time" : selectedProject.EndDate.ToString(), selectedProject.Name };
             bool[] argumentLocalization = { false, lastEndDate == null ? true : false, selectedProject.EndDate == null ? true : false, false };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments, argumentLocalization);
+
+            _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Project, newProjectHistory.Id);
 
             response.Message = "End date updated successfully!";
             return Ok(response);
@@ -897,6 +909,8 @@ namespace vws.web.Controllers._project
             string[] arguments = { LoggedInNickName, selectedProject.Name };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments);
 
+            _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Project, newProjectHistory.Id);
+
             response.Message = "Project team and departments updated successfully!";
             return Ok(response);
         }
@@ -1038,6 +1052,8 @@ namespace vws.web.Controllers._project
             string[] arguments = { LoggedInNickName, $"<a href='{Request.Scheme}://{Request.Host}/en-US/File/get?id={fileResponse.Value.FileContainerGuid}'>{fileResponse.Value.Name}</a>", selectedProject.Name };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments);
 
+            _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Project, newProjectHistory.Id);
+
             response.Value = fileResponse.Value.FileContainerGuid;
             response.Message = "Project image added successfully!";
             return Ok(response);
@@ -1132,6 +1148,8 @@ namespace vws.web.Controllers._project
             string[] arguments = { LoggedInNickName, ((SeedDataEnum.ProjectStatuses)lastStatus).ToString(), ((SeedDataEnum.ProjectStatuses)selectedProject.StatusId).ToString(), selectedProject.Name };
             bool[] argumentLocalization = { false, true, true, false };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments, argumentLocalization);
+
+            _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Project, newProjectHistory.Id);
 
             response.Message = "Project status updated successfully!";
             return Ok(response);
@@ -1449,6 +1467,8 @@ namespace vws.web.Controllers._project
             string[] arguments = { LoggedInNickName, selectedProject.Name };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments);
 
+            _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Project, newProjectHistory.Id);
+
             response.Message = "Project deleted successfully!";
             return Ok(response);
         }
@@ -1499,8 +1519,8 @@ namespace vws.web.Controllers._project
             var addedUser = await _vwsDbContext.GetUserProfileAsync(model.UserId);
 
             var selectedProjectMember = _vwsDbContext.ProjectMembers.FirstOrDefault(projectMember => projectMember.UserProfileId == model.UserId &&
-                                                                                         projectMember.ProjectId == model.ProjectId &&
-                                                                                         !projectMember.IsDeleted);
+                                                                                                     projectMember.ProjectId == model.ProjectId &&
+                                                                                                     !projectMember.IsDeleted);
 
             ProjectHistory newProjectHistory;
             List<Guid> users;
@@ -1565,6 +1585,9 @@ namespace vws.web.Controllers._project
                 users = _projectManager.GetProjectUsers(selectedProjectMember.ProjectId).Select(user => user.UserId).ToList();
                 users = users.Distinct().ToList();
                 users.Remove(LoggedInUserId.Value);
+
+                _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Project, newProjectHistory.Id);
+
                 users.Remove(addedUser.UserId);
                 emailMessage = "<b>«{0}»</b> gave permission to user <b>«{1}»</b> in project <b>«{2}»</b>.";
                 string[] permissionArguments = { LoggedInNickName, addedUser.NickName, selectedProjectMember.Project.Name };
@@ -1638,6 +1661,9 @@ namespace vws.web.Controllers._project
                 users = _projectManager.GetProjectUsers(selectedProject.Id).Select(user => user.UserId).ToList();
                 users = users.Distinct().ToList();
                 users.Remove(LoggedInUserId.Value);
+
+                _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Project, newProjectHistory.Id);
+
                 users.Remove(model.UserId);
                 emailMessage = "<b>«{0}»</b> added <b>«{1}»</b> to project <b>«{2}»</b>.";
                 string[] arguments = { LoggedInNickName, addedUser.NickName, selectedProject.Name };
@@ -1688,6 +1714,9 @@ namespace vws.web.Controllers._project
                 emailMessage = "<b>«{0}»</b> requested to project creator <b>«{1}»</b> to project <b>«{2}»</b>.";
                 string[] arguments = { LoggedInNickName, addedUser.NickName, selectedProject.Name };
                 await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments);
+
+                users.Add(model.UserId);
+                _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Project, newProjectHistory.Id);
             }
             #endregion
 
@@ -1781,6 +1810,9 @@ namespace vws.web.Controllers._project
             var users = _projectManager.GetProjectUsers(selectedProjectMember.ProjectId).Select(user => user.UserId).ToList();
             users = users.Distinct().ToList();
             users.Remove(LoggedInUserId.Value);
+
+            _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Project, newProjectHistory.Id);
+
             users.Remove(permittedUser.UserId);
             string emailMessage = "<b>«{0}»</b> gave permission to user <b>«{1}»</b> in project <b>«{2}»</b>.";
             string[] arguments = { LoggedInNickName, permittedUser.NickName, selectedProjectMember.Project.Name };
@@ -1880,6 +1912,9 @@ namespace vws.web.Controllers._project
             string emailMessage = "<b>«{0}»</b> did not give permission to user <b>«{1}»</b> in project <b>«{2}»</b>.";
             string[] arguments = { LoggedInNickName, prohibittedUser.NickName, selectedProjectMember.Project.Name };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments);
+
+            users.Add(prohibittedUser.UserId);
+            _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Project, newProjectHistory.Id);
 
             return Ok(response);
         }
@@ -2152,6 +2187,9 @@ namespace vws.web.Controllers._project
             string emailMessage = "<b>«{0}»</b> removed <b>«{1}»</b> from project <b>«{2}»</b>.";
             string[] arguments = { LoggedInNickName, removedUser.NickName, selectedProject.Name };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments);
+
+            users.Add(userId);
+            _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Project, newProjectHistory.Id);
 
             response.Message = "User deleted successfully!";
             return Ok(response);

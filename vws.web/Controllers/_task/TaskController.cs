@@ -19,7 +19,9 @@ using vws.web.Models;
 using vws.web.Models._task;
 using vws.web.Repositories;
 using vws.web.Services;
+using vws.web.Services._project;
 using vws.web.Services._task;
+using vws.web.Services._team;
 using static vws.web.EmailTemplates.EmailTemplateTypes;
 
 namespace vws.web.Controllers._task
@@ -35,13 +37,16 @@ namespace vws.web.Controllers._task
         private readonly IConfiguration _configuration;
         private readonly IFileManager _fileManager;
         private readonly INotificationService _notificationService;
-        private readonly ITaskManagerService _taskManagerService;
+        private readonly ITaskManagerService _taskManager;
+        private readonly IProjectManagerService _projectManager;
+        private readonly ITeamManagerService _teamManager;
         #endregion
 
         #region Ctor
         public TaskController(IStringLocalizer<TaskController> localizer, IVWS_DbContext vwsDbContext,
             IPermissionService permissionService, IConfiguration configuration, IFileManager fileManager,
-            INotificationService notificationService, ITaskManagerService taskManagerService)
+            INotificationService notificationService, ITaskManagerService taskManager,
+            IProjectManagerService projectManager, ITeamManagerService teamManager)
         {
             _localizer = localizer;
             _vwsDbContext = vwsDbContext;
@@ -49,7 +54,9 @@ namespace vws.web.Controllers._task
             _configuration = configuration;
             _fileManager = fileManager;
             _notificationService = notificationService;
-            _taskManagerService = taskManagerService;
+            _taskManager = taskManager;
+            _teamManager = teamManager;
+            _projectManager = projectManager;
         }
         #endregion
 
@@ -361,6 +368,10 @@ namespace vws.web.Controllers._task
             });
             _vwsDbContext.Save();
 
+            var taskUsers = _taskManager.GetAssignedTo(taskResponseModel.Id).Select(user => user.UserId).ToList();
+            taskUsers.Remove(creatorId);
+            _notificationService.SendMultipleNotification(taskUsers, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
+
             if (taskResponseModel.ProjectId != null)
             {
                 var newProjectHistory = new ProjectHistory()
@@ -384,6 +395,10 @@ namespace vws.web.Controllers._task
                     ProjectHistoryId = newProjectHistory.Id
                 });
                 _vwsDbContext.Save();
+
+                var projectUsers = _projectManager.GetProjectUsers((int)taskResponseModel.ProjectId).Select(user => user.UserId).ToList();
+                projectUsers.Remove(creatorId);
+                _notificationService.SendMultipleNotification(taskUsers, (byte)SeedDataEnum.NotificationTypes.Project, newProjectHistory.Id);
             }
             else if (taskResponseModel.TeamId != null)
             {
@@ -408,6 +423,10 @@ namespace vws.web.Controllers._task
                     TeamHistoryId = newTeamHistory.Id
                 });
                 _vwsDbContext.Save();
+
+                var teamUsers = (await _teamManager.GetTeamMembers((int)taskResponseModel.TeamId)).Select(user => user.UserId).ToList();
+                teamUsers.Remove(creatorId);
+                _notificationService.SendMultipleNotification(teamUsers, (byte)SeedDataEnum.NotificationTypes.Team, newTeamHistory.Id);
             }
         }
 
@@ -428,9 +447,9 @@ namespace vws.web.Controllers._task
                 var selectedUser = await _vwsDbContext.GetUserProfileAsync(assinedUser);
                 var selectedUserModelSerialized = JsonConvert.SerializeObject(new UserModel()
                 {
-                    NickName = user.NickName,
-                    ProfileImageGuid = user.ProfileImageGuid,
-                    UserId = user.UserId
+                    NickName = selectedUser.NickName,
+                    ProfileImageGuid = selectedUser.ProfileImageGuid,
+                    UserId = selectedUser.UserId
                 });
 
                 var newHistory = new TaskHistory()
@@ -630,17 +649,17 @@ namespace vws.web.Controllers._task
                 CreatedBy = (await _vwsDbContext.GetUserProfileAsync(newTask.CreatedBy)).NickName,
                 PriorityId = newTask.TaskPriorityId,
                 PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)newTask.TaskPriorityId).ToString()],
-                UsersAssignedTo = _taskManagerService.GetAssignedTo(newTask.Id),
+                UsersAssignedTo = _taskManager.GetAssignedTo(newTask.Id),
                 ProjectId = newTask.ProjectId,
                 TeamId = newTask.TeamId,
                 TeamName = newTask.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == newTask.TeamId).Name,
                 ProjectName = newTask.ProjectId == null ? null : _vwsDbContext.Projects.FirstOrDefault(project => project.Id == newTask.ProjectId).Name,
                 StatusId = newTask.TaskStatusId,
                 StatusTitle = _vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == newTask.TaskStatusId).Title,
-                CheckLists = _taskManagerService.GetCheckLists(newTask.Id),
-                Tags = _taskManagerService.GetTaskTags(newTask.Id),
-                Comments = await _taskManagerService.GetTaskComments(newTask.Id),
-                Attachments = _taskManagerService.GetTaskAttachments(newTask.Id)
+                CheckLists = _taskManager.GetCheckLists(newTask.Id),
+                Tags = _taskManager.GetTaskTags(newTask.Id),
+                Comments = await _taskManager.GetTaskComments(newTask.Id),
+                Attachments = _taskManager.GetTaskAttachments(newTask.Id)
             };
 
             await AddCreateTaaskHistory(newTaskResponseModel, newTask.CreatedBy);
@@ -723,12 +742,14 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
             #endregion
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManager.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { lastTitle, newTitle, LoggedInNickName };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "Your task title has been updated from <b>«{0}»</b> to <b>«{1}»</b> by <b>«{2}»</b>.", "Task Update", arguments);
+
+            _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
 
             response.Message = "Task title updated successfully!";
             return Ok(response);
@@ -800,12 +821,14 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
             #endregion
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManager.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { selectedTask.Title, lastDescription, selectedTask.Description, LoggedInNickName };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "Your task desciption with title <b>«{0}»</b> has been updated from <b>«{1}»</b> to <b>«{2}»</b> by <b>«{3}»</b>.", "Task Update", arguments);
+
+            _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
 
             response.Message = "Task title updated successfully!";
             return Ok(response);
@@ -885,13 +908,15 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
             #endregion
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManager.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { selectedTask.Title, ((SeedDataEnum.TaskPriority)lastPriority).ToString(), ((SeedDataEnum.TaskPriority)newPriority).ToString(), LoggedInNickName };
             bool[] argumentsLocalize = { false, true, true, false };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "Your task priority with title <b>«{0}»</b> has been updated from <b>«{1}»</b>. to <b>«{2}»</b>. by <b>«{3}»</b>.", "Task Update", arguments, argumentsLocalize);
+
+            _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
 
             response.Message = "Task priority updated successfully!";
             return Ok(response);
@@ -1053,11 +1078,13 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
             #endregion
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManager.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, emailMessage, "Task Update", emailMessageArguments.ToArray(), emailMessageArgumentsLocalize.ToArray());
+
+            _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
 
             response.Message = "Task team and project updated successfully!";
             return Ok(response);
@@ -1139,13 +1166,15 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
             #endregion
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManager.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { selectedTask.Title, lastStartDate == null ? "No Time" : lastStartDate.ToString(), selectedTask.StartDate == null ? "No Time" : selectedTask.StartDate.ToString(), LoggedInNickName };
             bool[] argumentsLocalize = { false, lastStartDate == null ? true : false, selectedTask.StartDate == null ? true : false, false };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "Your task start date with title <b>«{0}»</b> has been updated from <b>«{1}»</b> to <b>«{2}»</b> by <b>«{3}»</b>.", "Task Update", arguments, argumentsLocalize);
+
+            _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
 
             response.Message = "Task start date updated successfully!";
             return Ok(response);
@@ -1227,13 +1256,15 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
             #endregion
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManager.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { selectedTask.Title, lastEndDate == null ? "No Time" : lastEndDate.ToString(), selectedTask.EndDate == null ? "No Time" : selectedTask.EndDate.ToString(), LoggedInNickName };
             bool[] argumentsLocalize = { false, lastEndDate == null ? true : false, selectedTask.EndDate == null ? true : false, false };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "Your task end date with title <b>«{0}»</b> has been updated from <b>«{1}»</b> to <b>«{2}»</b> by <b>«{3}»</b>.", "Task Update", arguments, argumentsLocalize);
+
+            _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
 
             response.Message = "Task start date updated successfully!";
             return Ok(response);
@@ -1315,12 +1346,14 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
             #endregion
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManager.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { selectedTask.Title, lastStatus, newStatus , LoggedInNickName };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "Status of your task with title <b>«{0}»</b> has been updated from <b>«{1}»</b> to <b>«{2}»</b> by <b>«{3}»</b>.", "Task Update", arguments);
+
+            _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
 
             response.Message = "Task status changed";
             return Ok(response);
@@ -1379,12 +1412,14 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
             #endregion
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManager.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { selectedTask.Title, LoggedInNickName };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "Your task with title <b>«{0}»</b> has been archived by <b>«{1}»</b>.", "Task Update", arguments);
+
+            _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
 
             response.Message = "Task archived successfully!";
             return Ok(response);
@@ -1419,17 +1454,17 @@ namespace vws.web.Controllers._task
                     Guid = userTask.Guid,
                     PriorityId = userTask.TaskPriorityId,
                     PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)userTask.TaskPriorityId).ToString()],
-                    UsersAssignedTo = _taskManagerService.GetAssignedTo(userTask.Id),
+                    UsersAssignedTo = _taskManager.GetAssignedTo(userTask.Id),
                     ProjectId = userTask.ProjectId,
                     TeamId = userTask.TeamId,
                     TeamName = userTask.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == userTask.TeamId).Name,
                     ProjectName = userTask.ProjectId == null ? null : _vwsDbContext.Projects.FirstOrDefault(project => project.Id == userTask.ProjectId).Name,
                     StatusId = userTask.TaskStatusId,
                     StatusTitle = _vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == userTask.TaskStatusId).Title,
-                    CheckLists = _taskManagerService.GetCheckLists(userTask.Id),
-                    Tags = _taskManagerService.GetTaskTags(userTask.Id),
-                    Comments = await _taskManagerService.GetTaskComments(userTask.Id),
-                    Attachments = _taskManagerService.GetTaskAttachments(userTask.Id)
+                    CheckLists = _taskManager.GetCheckLists(userTask.Id),
+                    Tags = _taskManager.GetTaskTags(userTask.Id),
+                    Comments = await _taskManager.GetTaskComments(userTask.Id),
+                    Attachments = _taskManager.GetTaskAttachments(userTask.Id)
                 });
             }
             return response;
@@ -1481,17 +1516,17 @@ namespace vws.web.Controllers._task
                         Guid = userTask.Guid,
                         PriorityId = userTask.TaskPriorityId,
                         PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)userTask.TaskPriorityId).ToString()],
-                        UsersAssignedTo = _taskManagerService.GetAssignedTo(userTask.Id),
+                        UsersAssignedTo = _taskManager.GetAssignedTo(userTask.Id),
                         ProjectId = userTask.ProjectId,
                         TeamId = userTask.TeamId,
                         TeamName = userTask.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == userTask.TeamId).Name,
                         ProjectName = userTask.ProjectId == null ? null : _vwsDbContext.Projects.FirstOrDefault(project => project.Id == userTask.ProjectId).Name,
                         StatusId = userTask.TaskStatusId,
                         StatusTitle = _vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == userTask.TaskStatusId).Title,
-                        CheckLists = _taskManagerService.GetCheckLists(userTask.Id),
-                        Tags = _taskManagerService.GetTaskTags(userTask.Id),
-                        Comments = await _taskManagerService.GetTaskComments(userTask.Id),
-                        Attachments = _taskManagerService.GetTaskAttachments(userTask.Id)
+                        CheckLists = _taskManager.GetCheckLists(userTask.Id),
+                        Tags = _taskManager.GetTaskTags(userTask.Id),
+                        Comments = await _taskManager.GetTaskComments(userTask.Id),
+                        Attachments = _taskManager.GetTaskAttachments(userTask.Id)
                     });
                 }
             }
@@ -1628,12 +1663,14 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
             #endregion
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManager.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { selectedTask.Title, LoggedInNickName  };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "Your task with title <b>«{0}»</b> has been deleted by <b>«{1}»</b>.", "Task Update", arguments);
+
+            _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
 
             response.Message = "Task deleted successfully!";
             return Ok(response);
@@ -1667,7 +1704,7 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            var taskUsers = _taskManagerService.GetAssignedTo(model.TaskId).Select(user => user.UserId).ToList();
+            var taskUsers = _taskManager.GetAssignedTo(model.TaskId).Select(user => user.UserId).ToList();
 
             var assignTime = DateTime.Now;
 
@@ -1693,7 +1730,7 @@ namespace vws.web.Controllers._task
             }
             _vwsDbContext.Save();
 
-            var historyIds = SaveAssignTaskHistory(selectedTask.Id, LoggedInUserId.Value, successfulAssignedUsers, assignTime);
+            var historyIds = await SaveAssignTaskHistory(selectedTask.Id, LoggedInUserId.Value, successfulAssignedUsers, assignTime);
 
             taskUsers.Remove(userId);
             foreach (var user in successfulAssignedUsers)
@@ -1706,6 +1743,13 @@ namespace vws.web.Controllers._task
             string[] arguments = { selectedTask.Title, LoggedInNickName };
             Guid[] reuqestedUser = { userId };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, successfulAssignedUsers.Except(reuqestedUser).ToList(), "New task with title <b>«{0}»</b> has been assigned to you by <b>«{1}»</b>.", "Task Assign", arguments) ;
+
+            var usersAssignedTo = _taskManager.GetAssignedTo(selectedTask.Id).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedTask.CreatedBy);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            foreach (var historyId in historyIds)
+                _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, historyId);
 
             response.Value = new { SuccessAssigs = successfulAssignedUsers, FailedAssign = failedToAssignUsers};
             response.Message = "Task assigned successfully!";
@@ -1796,7 +1840,7 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            assignedUsersList = _taskManagerService.GetAssignedTo(id);
+            assignedUsersList = _taskManager.GetAssignedTo(id);
 
             response.Message = "Users returned successfully!";
             response.Value = assignedUsersList;
@@ -1881,10 +1925,13 @@ namespace vws.web.Controllers._task
             string[] arguments = { selectedTask.Title, LoggedInNickName };
             await _notificationService.SendSingleEmail((int)EmailTemplateEnum.NotificationEmail, "You have been unassigned from task with title <b>«{0}»</b> by <b>«{1}»</b>.", "Task Assign", userId, arguments);
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManager.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
+
+            _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
+
             usersAssignedTo.Remove(userId);
             string[] args = { LoggedInNickName, (await _vwsDbContext.GetUserProfileAsync(userId)).NickName, selectedTask.Title };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "<b>«{0}»</b> unassigned <b>«{1}»</b> from task with title <b>«{2}»</b>.", "Task Update", arguments);
@@ -2201,14 +2248,16 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
             #endregion
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
+            var itemsResponse = AddCheckListItems(newCheckList.Id, model.Items);
+            
+            var usersAssignedTo = _taskManager.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, newCheckList.Title, selectedTask.Title };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "<b>«{0}»</b> added new check list with title <b>«{1}»</b> to your task with title <b>«{2}»</b>.", "Task Update", arguments);
 
-            var itemsResponse = AddCheckListItems(newCheckList.Id, model.Items);
+            _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
 
             response.Message = "Check list added successfully!";
             response.Value = new CheckListResponseModel()
@@ -2309,12 +2358,14 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
             #endregion
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManager.GetAssignedTo(selectedCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedCheckList.GeneralTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, lastTitle, selectedCheckList.Title, selectedCheckList.GeneralTask.Title };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "<b>«{0}»</b> updated check list title from <b>«{1}»</b> to <b>«{2}»</b> in your task with title <b>«{3}»</b>.", "Task Update", arguments);
+
+            _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
 
             response.Message = "Check list title updated successfully!";
             return Ok(response);
@@ -2389,13 +2440,14 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
             #endregion
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManager.GetAssignedTo(selectedCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedCheckList.GeneralTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, selectedCheckList.Title, selectedCheckList.GeneralTask.Title };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "<b>«{0}»</b> deleted check list with title <b>«{1}»</b> in your task with title <b>«{2}»</b>.", "Task Update", arguments);
 
+            _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
 
             response.Message = "Check list deleted successfully!";
             return Ok(response);
@@ -2497,12 +2549,14 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
             #endregion
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManager.GetAssignedTo(selectedCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedCheckList.GeneralTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, newCheckListItem.Title, selectedCheckList.Title, selectedCheckList.GeneralTask.Title };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "<b>«{0}»</b> added new check list item with title <b>«{1}»</b> to check list with title <b>«{2}»</b> in your task with title <b>«{3}»</b>.", "Task Update", arguments);
+
+            _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
 
             response.Value = new CheckListItemResponseModel()
             {
@@ -2606,12 +2660,14 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
             #endregion
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedCheckListItem.TaskCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManager.GetAssignedTo(selectedCheckListItem.TaskCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, lastTitle, selectedCheckListItem.Title, selectedCheckListItem.TaskCheckList.Title, selectedCheckListItem.TaskCheckList.GeneralTask.Title };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "<b>«{0}»</b> updated check list item title from <b>«{1}»</b> to <b>«{2}»</b> in check list with title <b>«{3}»</b> of your task with title <b>«{4}»</b>.", "Task Update", arguments);
+
+            _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
 
             response.Message = "Check list item title updated successfully!";
             return Ok(response);
@@ -2705,13 +2761,15 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
             #endregion
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedCheckListItem.TaskCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManager.GetAssignedTo(selectedCheckListItem.TaskCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, lastStatus ? "Done" : "UnderDone", selectedCheckListItem.IsChecked ? "Done" : "UnderDone", selectedCheckListItem.TaskCheckList.Title, selectedCheckListItem.TaskCheckList.GeneralTask.Title };
             bool[] arguemtsLocalize = { false, true, true, false, false };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "<b>«{0}»</b> updated check list item status from <b>«{1}»</b> to <b>«{2}»</b> in check list with title <b>«{3}»</b> of your task with title <b>«{4}»</b>.", "Task Update", arguments);
+
+            _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
 
             response.Message = "Check list item is checked updated successfully!";
             return Ok(response);
@@ -2789,12 +2847,14 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
             #endregion
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedCheckListItem.TaskCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManager.GetAssignedTo(selectedCheckListItem.TaskCheckList.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, selectedCheckListItem.Title, selectedCheckListItem.TaskCheckList.Title, selectedCheckListItem.TaskCheckList.GeneralTask.Title };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "<b>«{0}»</b> deleted check list item with title <b>«{1}»</b> in your check list with title <b>«{2}»</b> of <b>«{3}»</b> task.", "Task Update", arguments);
+
+            _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
 
             response.Message = "Check list item delete successfully!";
             return Ok(response);
@@ -2963,12 +3023,14 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
             #endregion
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManager.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, selectedTag.Title, selectedTask.Title };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "<b>«{0}»</b> added new tag <b>«{1}»</b> to your task with title <b>«{2}»</b>.", "Task Update", arguments);
+
+            _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
 
             response.Message = "New tag added to task";
             return Ok(response);
@@ -3220,12 +3282,14 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
             #endregion
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManager.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, selectedTag.Title, selectedTask.Title };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "<b>«{0}»</b> deleted tag <b>«{1}»</b> from your task with title <b>«{2}»</b>.", "Task Update", arguments);
+
+            _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
 
             response.Message = "Task tag deleted";
             return Ok(response);
@@ -3310,12 +3374,14 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
             #endregion
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(model.Id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManager.GetAssignedTo(model.Id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, newComment.Body, selectedTask.Title };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "<b>«{0}»</b> added new comment <b>«{1}»</b> to your task with title <b>«{2}»</b>.", "Task Update", arguments);
+
+            _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
 
             UserProfile userProfile = await _vwsDbContext.GetUserProfileAsync(newComment.CommentedBy);
             response.Value = new CommentResponseModel()
@@ -3330,7 +3396,7 @@ namespace vws.web.Controllers._task
                 },
                 CommentedOn = newComment.CommentedOn,
                 MidifiedOn = newComment.ModifiedOn,
-                Attachments = _taskManagerService.GetCommentAttachments(newComment.Id)
+                Attachments = _taskManager.GetCommentAttachments(newComment.Id)
             };
             response.Message = "Comment added successfully!";
             return Ok(response);
@@ -3417,12 +3483,14 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
             #endregion
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManager.GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedComment.GeneralTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, lastBody, selectedComment.Body, selectedComment.GeneralTask.Title };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "<b>«{0}»</b> updated comment from <b>«{1}»</b> to <b>«{2}»</b> in your task with title <b>«{3}»</b>.", "Task Update", arguments);
+
+            _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
 
             response.Message = "Comment body updated successfully";
             return Ok(response);
@@ -3494,12 +3562,14 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
             #endregion
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManager.GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedComment.GeneralTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, selectedComment.Body, selectedComment.GeneralTask.Title };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "<b>«{0}»</b> deleted comment <b>«{1}»</b> in your task with title <b>«{2}»</b>.", "Task Update", arguments);
+
+            _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
 
             response.Message = "Comment body deleted successfully";
             return Ok(response);
@@ -3580,12 +3650,14 @@ namespace vws.web.Controllers._task
                 _vwsDbContext.Save();
                 #endregion
 
-                var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
+                var usersAssignedTo = _taskManager.GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
                 usersAssignedTo.Add(selectedComment.GeneralTask.CreatedBy);
                 usersAssignedTo = usersAssignedTo.Distinct().ToList();
                 usersAssignedTo.Remove(LoggedInUserId.Value);
                 string[] arguments = { LoggedInNickName, selectedComment.Body, selectedComment.GeneralTask.Title, links };
                 await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, emailMessage, "Task Update", arguments);
+
+                _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
             }
 
             return Ok(response);
@@ -3671,12 +3743,14 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
             #endregion
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManager.GetAssignedTo(selectedComment.GeneralTaskId).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedComment.GeneralTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, fileName, selectedComment.Body, selectedComment.GeneralTask.Title };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "<b>«{0}»</b> deleted attachment <b>«{1}»</b> from comment <b>«{2}»</b> in your task with title <b>«{3}»</b>.", "Task Update", arguments);
+
+            _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
 
             return Ok(response);
         }
@@ -3749,12 +3823,14 @@ namespace vws.web.Controllers._task
                 _vwsDbContext.Save();
                 #endregion
 
-                var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedTask.Id).Select(user => user.UserId).ToList();
+                var usersAssignedTo = _taskManager.GetAssignedTo(selectedTask.Id).Select(user => user.UserId).ToList();
                 usersAssignedTo.Add(selectedTask.CreatedBy);
                 usersAssignedTo = usersAssignedTo.Distinct().ToList();
                 usersAssignedTo.Remove(LoggedInUserId.Value);
                 string[] arguments = { LoggedInNickName, selectedTask.Title, links };
                 await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, emailMessage, "Task Update", arguments);
+
+                _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
             }
 
             return Ok(response);
@@ -3834,12 +3910,14 @@ namespace vws.web.Controllers._task
             _vwsDbContext.Save();
             #endregion
 
-            var usersAssignedTo = _taskManagerService.GetAssignedTo(selectedTask.Id).Select(user => user.UserId).ToList();
+            var usersAssignedTo = _taskManager.GetAssignedTo(selectedTask.Id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { LoggedInNickName, fileName, selectedTask.Title };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "<b>«{0}»</b> deleted attachment <b>«{1}»</b> from your task with title <b>«{2}»</b>.", "Task Update", arguments);
+
+            _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
 
             return Ok(response);
         }

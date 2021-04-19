@@ -66,8 +66,9 @@ namespace vws.web.Services
             }
             return result.ToArray();
         }
+        #endregion
 
-        private string LocalizeActivityByType(string message, string culture, byte type)
+        public string LocalizeActivityByType(string message, string culture, byte type)
         {
             if (type == (byte)SeedDataEnum.NotificationTypes.Project)
                 return _projectLocalizer.WithCulture(new CultureInfo(culture))[message];
@@ -79,7 +80,7 @@ namespace vws.web.Services
                 return message;
         }
 
-        private List<string> LocalizeActivityParametersByType(List<string> parameters, List<bool> parametersShouldBeLocalized, string culture, byte type)
+        public List<string> LocalizeActivityParametersByType(List<string> parameters, List<bool> parametersShouldBeLocalized, string culture, byte type)
         {
             var result = new List<string>();
 
@@ -106,7 +107,6 @@ namespace vws.web.Services
 
             return result;
         }
-        #endregion
 
         public async Task SendMultipleEmails(int template, List<Guid> userIds, string emailMessage, string emailSubject, string[] arguments, bool[] argumentsLocalize = null)
         {
@@ -174,10 +174,10 @@ namespace vws.web.Services
             Task.Run(async () => await _emailSender.SendEmailAsync(emailModel, out emailErrorMessage));
         }
 
-        public async Task SendMultipleNotification(List<Guid> userIds, byte notificationTypeId, long notificationId)
+        public void SendMultipleNotification(List<Guid> userIds, byte notificationTypeId, long activityId)
         {
-            _vwsDbContext.AddNotifications(userIds.Select(userId => new Notification { ActivityId = notificationId, IsSeen = false, NotificationTypeId = notificationTypeId, UserProfileId = userId }).ToList());
-            _vwsDbContext.Save() ;
+            _vwsDbContext.AddNotifications(userIds.Select(userId => new Notification { ActivityId = activityId, IsSeen = false, NotificationTypeId = notificationTypeId, UserProfileId = userId }).ToList());
+            _vwsDbContext.Save();
 
             List<string> cultures = new List<string>();
             foreach (var userId in userIds)
@@ -196,7 +196,7 @@ namespace vws.web.Services
 
             if (notificationTypeId == (byte)SeedDataEnum.NotificationTypes.Project)
             {
-                var history = _vwsDbContext.ProjectHistories.Include(projectHistory => projectHistory.ProjectHistoryParameters).Include(projectHistory => projectHistory.Project).FirstOrDefault(projectHistory => projectHistory.Id == notificationId);
+                var history = _vwsDbContext.ProjectHistories.Include(projectHistory => projectHistory.ProjectHistoryParameters).Include(projectHistory => projectHistory.Project).FirstOrDefault(projectHistory => projectHistory.Id == activityId);
                 message = history.Event;
                 parameters = history.ProjectHistoryParameters.Select(parameter => parameter.Body).ToList();
                 parametersShouldBeLocalized = history.ProjectHistoryParameters.Select(parameter => parameter.ShouldBeLocalized).ToList();
@@ -207,7 +207,7 @@ namespace vws.web.Services
             }
             else if (notificationTypeId == (byte)SeedDataEnum.NotificationTypes.Team)
             {
-                var history = _vwsDbContext.TeamHistories.Include(teamHistory => teamHistory.TeamHistoryParameters).Include(teamHistory => teamHistory.Team).FirstOrDefault(teamHistory => teamHistory.Id == notificationId);
+                var history = _vwsDbContext.TeamHistories.Include(teamHistory => teamHistory.TeamHistoryParameters).Include(teamHistory => teamHistory.Team).FirstOrDefault(teamHistory => teamHistory.Id == activityId);
                 message = history.Event;
                 parameters = history.TeamHistoryParameters.Select(parameter => parameter.Body).ToList();
                 parametersShouldBeLocalized = history.TeamHistoryParameters.Select(parameter => parameter.ShouldBeLocalized).ToList();
@@ -218,7 +218,7 @@ namespace vws.web.Services
             }
             else
             {
-                var history = _vwsDbContext.TaskHistories.Include(taskHistory => taskHistory.TaskHistoryParameters).Include(taskHistory => taskHistory.GeneralTask).FirstOrDefault(taskHistory => taskHistory.Id == notificationId);
+                var history = _vwsDbContext.TaskHistories.Include(taskHistory => taskHistory.TaskHistoryParameters).Include(taskHistory => taskHistory.GeneralTask).FirstOrDefault(taskHistory => taskHistory.Id == activityId);
                 message = history.Event;
                 parameters = history.TaskHistoryParameters.Select(parameter => parameter.Body).ToList();
                 parametersShouldBeLocalized = history.TaskHistoryParameters.Select(parameter => parameter.ShouldBeLocalized).ToList();
@@ -238,13 +238,15 @@ namespace vws.web.Services
                                    .ForEach(connectionId => _hub.Clients.Client(connectionId)
                                                                         .ReceiveNotification(new NotificationModel()
                                                                         {
+                                                                            Id = _vwsDbContext.Notifications.FirstOrDefault(notif => notif.NotificationTypeId == notificationTypeId && notif.UserProfileId == userIds[i] && notif.ActivityId == activityId).Id,
                                                                             Message = LocalizeActivityByType(message, cultures[i], notificationTypeId),
                                                                             NotificationTime = eventTime,
                                                                             NotificationType = notificationTypeId,
                                                                             NotifiedOnId = notifiedOnId,
                                                                             NotifiedOnName = notifiedOnName,
                                                                             Parameters = LocalizeActivityParametersByType(parameters, parametersShouldBeLocalized, cultures[i], notificationTypeId),
-                                                                            ParameterTypes = parametersType
+                                                                            ParameterTypes = parametersType,
+                                                                            IsSeen = false
                                                                         }));
                 }
             });
