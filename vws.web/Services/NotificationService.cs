@@ -180,10 +180,12 @@ namespace vws.web.Services
             _vwsDbContext.Save();
 
             List<string> cultures = new List<string>();
+            List<long> notificationIds = new List<long>();
             foreach (var userId in userIds)
             {
                 var profile = _vwsDbContext.UserProfiles.Include(profile => profile.Culture).FirstOrDefault(profile => profile.UserId == userId);
                 cultures.Add(profile.CultureId == null ? "en-US" : profile.Culture.CultureAbbreviation);
+                notificationIds.Add(_vwsDbContext.Notifications.FirstOrDefault(notif => notif.NotificationTypeId == notificationTypeId && notif.UserProfileId == userId && notif.ActivityId == activityId).Id);
             }
 
             string message;
@@ -238,7 +240,7 @@ namespace vws.web.Services
                                    .ForEach(connectionId => _hub.Clients.Client(connectionId)
                                                                         .ReceiveNotification(new NotificationModel()
                                                                         {
-                                                                            Id = _vwsDbContext.Notifications.FirstOrDefault(notif => notif.NotificationTypeId == notificationTypeId && notif.UserProfileId == userIds[i] && notif.ActivityId == activityId).Id,
+                                                                            Id = notificationIds[i],
                                                                             Message = LocalizeActivityByType(message, cultures[i], notificationTypeId),
                                                                             NotificationTime = eventTime,
                                                                             NotificationType = notificationTypeId,
