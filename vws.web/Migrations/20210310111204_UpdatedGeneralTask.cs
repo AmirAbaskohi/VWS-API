@@ -26,7 +26,7 @@ namespace vws.web.Migrations
                 column: "TaskStatusId",
                 principalTable: "Task_TaskStatus",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.NoAction);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -49,7 +49,7 @@ namespace vws.web.Migrations
                 column: "TaskStatusId",
                 principalTable: "Task_TaskStatus",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                onDelete: ReferentialAction.NoAction);
         }
     }
 }
