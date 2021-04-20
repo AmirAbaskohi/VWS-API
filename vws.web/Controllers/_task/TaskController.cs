@@ -890,7 +890,7 @@ namespace vws.web.Controllers._task
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
-                Body = ((SeedDataEnum.TaskPriority)selectedTask.ProjectId).ToString(),
+                Body = ((SeedDataEnum.TaskPriority)selectedTask.TaskPriorityId).ToString(),
                 TaskHistoryId = newTaskHistory.Id,
                 ShouldBeLocalized = true
             });
@@ -912,7 +912,7 @@ namespace vws.web.Controllers._task
             usersAssignedTo.Add(selectedTask.CreatedBy);
             usersAssignedTo = usersAssignedTo.Distinct().ToList();
             usersAssignedTo.Remove(LoggedInUserId.Value);
-            string[] arguments = { selectedTask.Title, ((SeedDataEnum.TaskPriority)lastPriority).ToString(), ((SeedDataEnum.TaskPriority)newPriority).ToString(), LoggedInNickName };
+            string[] arguments = { selectedTask.Title, ((SeedDataEnum.TaskPriority)lastPriority).ToString(), ((SeedDataEnum.TaskPriority)selectedTask.TaskPriorityId).ToString(), LoggedInNickName };
             bool[] argumentsLocalize = { false, true, true, false };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "Your task priority with title <b>«{0}»</b> has been updated from <b>«{1}»</b>. to <b>«{2}»</b>. by <b>«{3}»</b>.", "Task Update", arguments, argumentsLocalize);
 
