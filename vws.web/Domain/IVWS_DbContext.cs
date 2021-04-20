@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using vws.web.Domain._base;
 using vws.web.Domain._chat;
 using vws.web.Domain._department;
+using vws.web.Domain._feedback;
 using vws.web.Domain._file;
 using vws.web.Domain._notification;
 using vws.web.Domain._project;
@@ -135,7 +136,6 @@ namespace vws.web.Domain
         #endregion
 
 
-
         #region department
 
         #region models
@@ -157,7 +157,6 @@ namespace vws.web.Domain
         #endregion
 
         #endregion
-
 
 
         #region project
@@ -205,7 +204,6 @@ namespace vws.web.Domain
         #endregion
 
         #endregion
-
 
 
         #region task
@@ -309,7 +307,6 @@ namespace vws.web.Domain
         #endregion
 
 
-
         #region team
 
         #region models
@@ -387,7 +384,6 @@ namespace vws.web.Domain
         #endregion
 
 
-
         #region file
 
         #region models
@@ -416,6 +412,22 @@ namespace vws.web.Domain
 
         #endregion
 
+
+        #region feedback
+
+        #region models
+
+        public IQueryable<FeedBack> FeedBacks { get; }
+
+        #endregion
+
+        #region methods
+
+        public void AddFeedBack(FeedBack feedBack);
+
+        #endregion
+
+        #endregion
 
     }
 }

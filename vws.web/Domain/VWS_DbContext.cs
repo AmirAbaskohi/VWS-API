@@ -14,6 +14,7 @@ using vws.web.Domain._file;
 using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
 using vws.web.Domain._notification;
+using vws.web.Domain._feedback;
 
 namespace vws.web.Domain
 {
@@ -769,6 +770,19 @@ namespace vws.web.Domain
         {
             var selectedNotificationType = NotificationTypes.FirstOrDefault(notifType => notifType.Id == id);
             return selectedNotificationType == null ? (string)null : selectedNotificationType.Name;
+        }
+
+        #endregion
+
+        #region feedback
+
+        IQueryable<FeedBack> IVWS_DbContext.FeedBacks { get => FeedBacks; }
+
+        public DbSet<FeedBack> FeedBacks { get; set; }
+
+        public void AddFeedBack(FeedBack feedBack)
+        {
+            FeedBacks.Add(feedBack);
         }
 
         #endregion
