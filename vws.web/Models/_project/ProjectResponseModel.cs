@@ -22,5 +22,6 @@ namespace vws.web.Models._project
         public List<int> DepartmentIds { get; set; }
         public Guid? ProjectImageGuid { get; set; }
         public long NumberOfTasks { get; set; }
+        public double SpentTimeInMinutes { get; set; }
     }
 }

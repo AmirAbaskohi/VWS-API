@@ -176,6 +176,24 @@ namespace vws.web.Controllers._project
 
             _vwsDbContext.Save();
         }
+
+        private double GetProjectSpentTime(int projectId)
+        {
+            double result = 0;
+
+            var times = _vwsDbContext.TimeTracks.Include(timeTrack => timeTrack.GeneralTask)
+                                                .Where(timeTrack => timeTrack.GeneralTask.ProjectId == projectId);
+
+            foreach (var time in times)
+            {
+                if (time.TotalTimeInMinutes != null)
+                    result += (double)time.TotalTimeInMinutes;
+                else
+                    result += (DateTime.Now - time.StartDate).TotalMinutes;
+            }
+
+            return result;
+        }
         #endregion
 
         #region ProjectAPIS
@@ -326,7 +344,8 @@ namespace vws.web.Controllers._project
                 DepartmentIds = model.DepartmentIds,
                 NumberOfUpdates = _vwsDbContext.ProjectHistories.Where(history => history.ProjectId == newProject.Id).Count(),
                 Users = _projectManager.GetProjectUsers(newProject.Id),
-                NumberOfTasks = _projectManager.GetNumberOfProjectTasks(newProject.Id)
+                NumberOfTasks = _projectManager.GetNumberOfProjectTasks(newProject.Id),
+                SpentTimeInMinutes = GetProjectSpentTime(newProject.Id)
             };
 
             var users = _projectManager.GetProjectUsers(newProject.Id).Select(user => user.UserId).ToList();
@@ -1182,7 +1201,8 @@ namespace vws.web.Controllers._project
                 DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
                 NumberOfUpdates = _vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
                 Users = _projectManager.GetProjectUsers(project.Id),
-                NumberOfTasks = _projectManager.GetNumberOfProjectTasks(project.Id)
+                NumberOfTasks = _projectManager.GetNumberOfProjectTasks(project.Id),
+                SpentTimeInMinutes = GetProjectSpentTime(project.Id)
             };
 
             return response;
@@ -1216,7 +1236,8 @@ namespace vws.web.Controllers._project
                     DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
                     NumberOfUpdates = _vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
                     Users = _projectManager.GetProjectUsers(project.Id),
-                    NumberOfTasks = _projectManager.GetNumberOfProjectTasks(project.Id)
+                    NumberOfTasks = _projectManager.GetNumberOfProjectTasks(project.Id),
+                    SpentTimeInMinutes = GetProjectSpentTime(project.Id)
                 });
             }
 
@@ -1251,7 +1272,8 @@ namespace vws.web.Controllers._project
                     DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
                     NumberOfUpdates = _vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
                     Users = _projectManager.GetProjectUsers(project.Id),
-                    NumberOfTasks = _projectManager.GetNumberOfProjectTasks(project.Id)
+                    NumberOfTasks = _projectManager.GetNumberOfProjectTasks(project.Id),
+                    SpentTimeInMinutes = GetProjectSpentTime(project.Id)
                 });
             }
 
@@ -1285,7 +1307,8 @@ namespace vws.web.Controllers._project
                     ProjectImageGuid = project.ProjectImageGuid,
                     DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
                     Users = _projectManager.GetProjectUsers(project.Id),
-                    NumberOfTasks = _projectManager.GetNumberOfProjectTasks(project.Id)
+                    NumberOfTasks = _projectManager.GetNumberOfProjectTasks(project.Id),
+                    SpentTimeInMinutes = GetProjectSpentTime(project.Id)
                 });
             }
 
