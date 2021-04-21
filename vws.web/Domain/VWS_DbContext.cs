@@ -56,6 +56,18 @@ namespace vws.web.Domain
         }
         #endregion
 
+        #region version
+
+        IQueryable<_version.Version> IVWS_DbContext.Versions { get => Versions; }
+
+        public DbSet<_version.Version> Versions { get; set; }
+
+        IQueryable<_version.VersionLog> IVWS_DbContext.VersionLogs { get => VersionLogs; }
+
+        public DbSet<_version.VersionLog> VersionLogs { get; set; }
+
+        #endregion
+
         #region base
 
         IQueryable<UserProfile> IVWS_DbContext.UserProfiles { get => UserProfiles; }

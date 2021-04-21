@@ -35,6 +35,18 @@ namespace vws.web.Domain
         #endregion
         #endregion
 
+        #region version
+
+        #region models
+
+        public IQueryable<_version.Version> Versions { get; }
+
+        public IQueryable<_version.VersionLog> VersionLogs { get; }
+
+        #endregion
+
+        #endregion
+
 
         #region base
 
