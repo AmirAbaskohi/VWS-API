@@ -1302,6 +1302,7 @@ namespace vws.web.Controllers._task
             }
 
             var lastStatus = selectedTask.Status.Title;
+            var lastStatusId = selectedTask.TaskStatusId;
 
             selectedTask.TaskStatusId = newStatusId;
             selectedTask.ModifiedBy = userId;
@@ -1345,6 +1346,15 @@ namespace vws.web.Controllers._task
             });
             _vwsDbContext.Save();
             #endregion
+
+            _vwsDbContext.AddTaskStatusHistory(new TaskStatusHistory()
+            {
+                ChangeById = userId,
+                GeneralTaskId = selectedTask.Id,
+                LastStatusId = lastStatusId,
+               NewStatusId = selectedTask.TaskStatusId
+            });
+            _vwsDbContext.Save();
 
             var usersAssignedTo = _taskManager.GetAssignedTo(id).Select(user => user.UserId).ToList();
             usersAssignedTo.Add(selectedTask.CreatedBy);

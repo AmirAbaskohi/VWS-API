@@ -474,6 +474,10 @@ namespace vws.web.Domain
 
         public DbSet<TaskHistoryParameter> TaskHistoryParameters { get; set; }
 
+        IQueryable<TaskStatusHistory> IVWS_DbContext.TaskStatusHistories { get => TaskStatusHistories; }
+
+        public DbSet<TaskStatusHistory> TaskStatusHistories { get; set; }
+
         public async Task<GeneralTask> AddTaskAsync(GeneralTask generalTask)
         {
             await GeneralTasks.AddAsync(generalTask);
@@ -604,6 +608,11 @@ namespace vws.web.Domain
         public void AddTaskHistoryParameter(TaskHistoryParameter taskHistoryParameter)
         {
             TaskHistoryParameters.Add(taskHistoryParameter);
+        }
+
+        public void AddTaskStatusHistory(TaskStatusHistory taskStatusHistory)
+        {
+            TaskStatusHistories.Add(taskStatusHistory);
         }
 
         #endregion

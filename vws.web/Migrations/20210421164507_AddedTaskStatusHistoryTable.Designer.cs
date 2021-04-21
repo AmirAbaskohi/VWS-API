@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using vws.web.Domain;
 
 namespace vws.web.Migrations
 {
     [DbContext(typeof(VWS_DbContext))]
-    partial class VWS_DbContextModelSnapshot : ModelSnapshot
+    [Migration("20210421164507_AddedTaskStatusHistoryTable")]
+    partial class AddedTaskStatusHistoryTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1451,7 +1453,7 @@ namespace vws.web.Migrations
 
                     b.HasIndex("NewStatusId");
 
-                    b.ToTable("Task_TaskStatusHistory");
+                    b.ToTable("TaskStatusHistories");
                 });
 
             modelBuilder.Entity("vws.web.Domain._task.TaskTag", b =>

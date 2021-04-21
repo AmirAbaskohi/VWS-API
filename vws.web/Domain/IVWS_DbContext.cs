@@ -260,6 +260,8 @@ namespace vws.web.Domain
 
         public IQueryable<TaskHistoryParameter> TaskHistoryParameters { get; }
 
+        public IQueryable<TaskStatusHistory> TaskStatusHistories { get; }
+
         #endregion
 
         #region methods
@@ -313,6 +315,8 @@ namespace vws.web.Domain
         public void AddTaskHistory(TaskHistory taskHistory);
 
         public void AddTaskHistoryParameter(TaskHistoryParameter taskHistoryParameter);
+
+        public void AddTaskStatusHistory(TaskStatusHistory taskStatusHistory);
 
         #endregion
 
