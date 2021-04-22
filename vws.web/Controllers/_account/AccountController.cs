@@ -62,7 +62,7 @@ namespace vws.web.Controllers._account
             _fileManager = fileManager;
         }
         #endregion
-        
+
         #region Private Methods
 
         private JwtSecurityToken GenerateToken(IEnumerable<Claim> claims)
@@ -90,13 +90,14 @@ namespace vws.web.Controllers._account
             }
         }
 
-        private async Task<JwtTokenModel> GenerateJWT(IdentityUser user, string nickName)
+        private async Task<JwtTokenModel> GenerateJWT(IdentityUser user, string nickName, Guid? userProfileImageId)
         {
             var authClaims = new List<Claim>
                 {
                     new Claim("UserEmail", user.Email),
                     new Claim("NickName", nickName),
                     new Claim("UserId", user.Id),
+                    new Claim("UserProfileImageId", userProfileImageId.HasValue ? userProfileImageId.Value.ToString(): null),
                 };
 
             var token = GenerateToken(authClaims);
@@ -278,7 +279,7 @@ namespace vws.web.Controllers._account
                         else
                         {
                             responseModel.Value.HasNickName = true;
-                            responseModel.Value.JwtToken = await GenerateJWT(user, userProfile.NickName);
+                            responseModel.Value.JwtToken = await GenerateJWT(user, userProfile.NickName, userProfile.ProfileImageGuid);
                             responseModel.Message = "Logged in successfully!";
                             return Ok(responseModel);
                         }
@@ -410,7 +411,7 @@ namespace vws.web.Controllers._account
                         else
                         {
                             responseModel.Value.HasNickName = true;
-                            responseModel.Value.JwtToken = await GenerateJWT(existedUser, userProfile.NickName);
+                            responseModel.Value.JwtToken = await GenerateJWT(existedUser, userProfile.NickName, userProfile.ProfileImageGuid);
                             responseModel.Message = "Logged in successfully!";
                             return Ok(responseModel);
                         }
@@ -805,7 +806,7 @@ namespace vws.web.Controllers._account
             userProfile.NickNameSecurityStamp = Guid.NewGuid();
             _vwsDbContext.Save();
 
-            responseModel.Value = await GenerateJWT(user, model.NickName);
+            responseModel.Value = await GenerateJWT(user, model.NickName, userProfile.ProfileImageGuid);
             responseModel.Message = "Logged in successfully!";
             return Ok(responseModel);
         }
