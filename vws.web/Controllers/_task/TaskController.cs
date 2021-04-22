@@ -108,19 +108,19 @@ namespace vws.web.Controllers._task
         {
             if (projectId != null)
             {
-                return _vwsDbContext.TaskStatuses.Where(status => status.ProjectId == projectId)
+                return _vwsDbContext.TaskStatuses.Where(status => status.ProjectId == projectId && !status.IsDeleted)
                                                           .OrderBy(status => status.EvenOrder)
                                                           .Select(status => new TaskStatusResponseModel() { Id = status.Id, Title = status.Title })
                                                           .ToList();
             }
             else if (teamId != null)
             {
-                return _vwsDbContext.TaskStatuses.Where(status => status.TeamId == teamId)
+                return _vwsDbContext.TaskStatuses.Where(status => status.TeamId == teamId && !status.IsDeleted)
                                                           .OrderBy(status => status.EvenOrder)
                                                           .Select(status => new TaskStatusResponseModel() { Id = status.Id, Title = status.Title })
                                                           .ToList();
             }
-            return _vwsDbContext.TaskStatuses.Where(status => status.UserProfileId == LoggedInUserId.Value)
+            return _vwsDbContext.TaskStatuses.Where(status => status.UserProfileId == LoggedInUserId.Value && !status.IsDeleted)
                                                       .OrderBy(status => status.EvenOrder)
                                                       .Select(status => new TaskStatusResponseModel() { Id = status.Id, Title = status.Title })
                                                       .ToList();
@@ -2062,7 +2062,7 @@ namespace vws.web.Controllers._task
             }
 
             var selectedStatus = _vwsDbContext.TaskStatuses.FirstOrDefault(status => status.Id == statusId);
-            if (selectedStatus == null)
+            if (selectedStatus == null || selectedStatus.IsDeleted)
             {
                 response.Message = "Status not found!";
                 response.AddError(_localizer["Status not found."]);
@@ -2140,7 +2140,7 @@ namespace vws.web.Controllers._task
             var response = new ResponseModel();
 
             var selectedStatus = _vwsDbContext.TaskStatuses.FirstOrDefault(status => status.Id == statusId);
-            if (selectedStatus == null)
+            if (selectedStatus == null || selectedStatus.IsDeleted)
             {
                 response.Message = "Status not found!";
                 response.AddError(_localizer["Status not found."]);
@@ -2165,7 +2165,7 @@ namespace vws.web.Controllers._task
                 return Ok(response);
             }
 
-            _vwsDbContext.DeleteTaskStatus(statusId);
+            selectedStatus.IsDeleted = true;
             _vwsDbContext.Save();
             ReorderStatuses(selectedStatus.TeamId, selectedStatus.ProjectId);
 

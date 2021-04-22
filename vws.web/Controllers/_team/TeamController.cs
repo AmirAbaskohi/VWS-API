@@ -157,8 +157,7 @@ namespace vws.web.Controllers._team
                 FromEmail = _configuration["EmailSender:RegistrationEmail:EmailAddress"],
                 ToEmail = "",
                 Subject = "Join Team",
-                Body = "https://app.seventask.com/en-US/inviteTeam?invitationCode=" + linkGuid.ToString(),
-                //Body = EmailTemplateUtility.GetEmailTemplate((int)EmailTemplateEnum.EmailVerificationCode).Replace("{0}", randomCode),
+                Body = $"{_configuration["Angular:Url"]}/en-US/inviteTeam?invitationCode=" + linkGuid.ToString(),
                 Credential = new NetworkCredential
                 {
                     UserName = _configuration["EmailSender:RegistrationEmail:UserName"],

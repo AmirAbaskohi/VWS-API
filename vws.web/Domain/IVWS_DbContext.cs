@@ -280,8 +280,6 @@ namespace vws.web.Domain
 
         public void AddTaskStatus(_task.TaskStatus taskStatus);
 
-        public void DeleteTaskStatus(int id);
-
         public void AddCheckList(TaskCheckList checkList);
 
         public void AddCheckListItem(TaskCheckListItem taskCheckListItem);

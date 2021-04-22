@@ -517,11 +517,6 @@ namespace vws.web.Domain
             TaskStatuses.Add(taskStatus);
         }
 
-        public void DeleteTaskStatus(int id)
-        {
-            TaskStatuses.Remove(TaskStatuses.FirstOrDefault(status => status.Id == id));
-        }
-
         public void AddCheckList(TaskCheckList checkList)
         {
             TaskCheckLists.Add(checkList);

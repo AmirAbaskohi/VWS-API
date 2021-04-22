@@ -24,6 +24,8 @@ namespace vws.web.Domain._task
 
         public int? TeamId { get; set; }
 
+        public bool IsDeleted { get; set; }
+
         public Guid? UserProfileId { get; set; }
 
         public virtual Project Project { get; set; }
