@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using vws.web.Domain._base;
+using vws.web.Domain._calendar;
 using vws.web.Domain._chat;
 using vws.web.Domain._department;
 using vws.web.Domain._feedback;
@@ -438,6 +439,34 @@ namespace vws.web.Domain
         #region methods
 
         public void AddFeedBack(FeedBack feedBack);
+
+        #endregion
+
+        #endregion
+
+        #region Calender
+
+        #region models
+
+        public IQueryable<Event> Events { get; }
+
+        public IQueryable<EventProject> EventProjects { get; }
+
+        public IQueryable<EventUser> EventUsers { get; }
+
+        #endregion
+
+        #region methods
+
+        public void AddEvent(Event newEvent);
+
+        public void AddEventProject(EventProject eventProject);
+
+        public void RemoveEventProject(EventProject eventProject);
+
+        public void AddEventUser(EventUser eventUser);
+
+        public void RemoveEventUser(EventUser eventUser);
 
         #endregion
 

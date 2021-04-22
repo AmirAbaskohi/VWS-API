@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using vws.web.Domain._calendar;
 using vws.web.Domain._file;
 using vws.web.Domain._task;
 
@@ -13,6 +14,7 @@ namespace vws.web.Domain._base
         public UserProfile()
         {
             TaskAssigns = new HashSet<TaskAssign>();
+            EventUsers = new HashSet<EventUser>();
         }
         [Key]
         public Guid UserId { get; set; }
@@ -39,5 +41,7 @@ namespace vws.web.Domain._base
         public virtual FileContainer ProfileImage { get; set; }
 
         public virtual ICollection<TaskAssign> TaskAssigns { get; set; }
+
+        public virtual ICollection<EventUser> EventUsers { get; set; }
     }
 }

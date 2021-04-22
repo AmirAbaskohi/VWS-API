@@ -32,6 +32,7 @@ using vws.web.Services._department;
 using vws.web.Services._team;
 using vws.web.Services._project;
 using vws.web.Services._task;
+using vws.web.Services._calender;
 
 namespace vws.web
 {
@@ -140,6 +141,8 @@ namespace vws.web
             services.AddScoped<INotificationService, NotificationService>();
 
             services.AddScoped<ITaskManagerService, TaskManagerService>();
+
+            services.AddScoped<ICalenderManagerService, CalenderManagerService>();
 
             services.AddScoped<TokenValidationFilterAttribute>();
 

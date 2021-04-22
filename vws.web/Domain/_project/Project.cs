@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using vws.web.Domain._calendar;
 using vws.web.Domain._department;
 using vws.web.Domain._file;
 using vws.web.Domain._task;
@@ -18,6 +19,7 @@ namespace vws.web.Domain._project
             ProjectDepartments = new HashSet<ProjectDepartment>();
             Tasks = new HashSet<GeneralTask>();
             TaskStatuses = new HashSet<TaskStatus>();
+            EventProjects = new HashSet<EventProject>();
         }
 
         public int Id { get; set; }
@@ -70,5 +72,7 @@ namespace vws.web.Domain._project
         public virtual ICollection<GeneralTask> Tasks { get; set; }
 
         public virtual ICollection<TaskStatus> TaskStatuses { get; set; }
+
+        public virtual ICollection<EventProject> EventProjects { get; set; }
     }
 }

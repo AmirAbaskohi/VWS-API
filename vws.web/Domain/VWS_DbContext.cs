@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
 using vws.web.Domain._notification;
 using vws.web.Domain._feedback;
+using vws.web.Domain._calendar;
 
 namespace vws.web.Domain
 {
@@ -803,6 +804,47 @@ namespace vws.web.Domain
 
         #endregion
 
+        #region calender
+
+        IQueryable<Event> IVWS_DbContext.Events { get => Events; }
+
+        public DbSet<Event> Events { get; set; }
+
+        IQueryable<EventProject> IVWS_DbContext.EventProjects { get => EventProjects; }
+
+        public DbSet<EventProject> EventProjects { get; set; }
+
+        IQueryable<EventUser> IVWS_DbContext.EventUsers { get => EventUsers; }
+
+        public DbSet<EventUser> EventUsers { get; set; }
+
+        public void AddEvent(Event newEvent)
+        {
+            Events.Add(newEvent);
+        }
+
+        public void AddEventProject(EventProject eventProject)
+        {
+            EventProjects.Add(eventProject);
+        }
+
+        public void RemoveEventProject(EventProject eventProject)
+        {
+            EventProjects.Remove(eventProject);
+        }
+
+        public void AddEventUser(EventUser eventUser)
+        {
+            EventUsers.Add(eventUser);
+        }
+
+        public void RemoveEventUser(EventUser eventUser)
+        {
+            EventUsers.Remove(eventUser);
+        }
+
+        #endregion
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -823,6 +865,28 @@ namespace vws.web.Domain
                 .HasOne(pd => pd.Department)
                 .WithMany(d => d.ProjectDepartments)
                 .HasForeignKey(pd => pd.DepartmentId);
+
+            builder.Entity<EventProject>()
+                .HasKey(ep => new { ep.ProjectId, ep.EventId });
+            builder.Entity<EventProject>()
+                .HasOne(ep => ep.Project)
+                .WithMany(p => p.EventProjects)
+                .HasForeignKey(ep => ep.ProjectId);
+            builder.Entity<EventProject>()
+                .HasOne(ep => ep.Event)
+                .WithMany(e => e.EventProjects)
+                .HasForeignKey(ep => ep.EventId);
+
+            builder.Entity<EventUser>()
+                .HasKey(eu => new { eu.UserProfileId, eu.EventId });
+            builder.Entity<EventUser>()
+                .HasOne(eu => eu.UserProfile)
+                .WithMany(u => u.EventUsers)
+                .HasForeignKey(eu => eu.UserProfileId);
+            builder.Entity<EventUser>()
+                .HasOne(eu => eu.Event)
+                .WithMany(e => e.EventUsers)
+                .HasForeignKey(eu => eu.EventId);
 
             builder.Entity<TaskTag>()
                 .HasKey(tt => new { tt.TagId, tt.GeneralTaskId });

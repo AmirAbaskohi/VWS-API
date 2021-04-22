@@ -21,6 +21,9 @@ namespace vws.web.Services
             var selectedProject = vwsDbContext.Projects.Include(project => project.ProjectDepartments)
                                                        .FirstOrDefault(project => project.Id == projectId);
 
+            if (selectedProject == null || selectedProject.IsDeleted == true)
+                return false;
+
             if (selectedProject.TeamId != null)
             {
                 List<Guid> projectUsers = new List<Guid>();
@@ -76,6 +79,10 @@ namespace vws.web.Services
                 return true;
 
             var selectedTask = vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == taskId);
+
+            if (selectedTask == null || selectedTask.IsDeleted)
+                return false;
+
             return selectedTask.CreatedBy == userId;
         }
 
