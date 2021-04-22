@@ -918,7 +918,8 @@ namespace vws.web.Controllers._team
                     DepartmentIds = teamProject.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
                     NumberOfUpdates = _vwsDbContext.ProjectHistories.Where(history => history.ProjectId == teamProject.Id).Count(),
                     Users = _projectManager.GetProjectUsers(teamProject.Id),
-                    NumberOfTasks = _projectManager.GetNumberOfProjectTasks(teamProject.Id)
+                    NumberOfTasks = _projectManager.GetNumberOfProjectTasks(teamProject.Id),
+                    SpentTimeInMinutes = _projectManager.GetProjectSpentTime(teamProject.Id)
                 });
 
             response.Value = projects;

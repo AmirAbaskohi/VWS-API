@@ -9,10 +9,12 @@ namespace vws.web.Services._project
 {
     public interface IProjectManagerService
     {
-        public List<UserModel> GetProjectUsers(int projectId);
+        public List<UserModel> GetProjectUsers(int id);
 
         public List<Project> GetAllUserProjects(Guid userId);
 
         public long GetNumberOfProjectTasks(int id);
+
+        public double GetProjectSpentTime(int id);
     }
 }

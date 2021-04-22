@@ -19,10 +19,10 @@ namespace vws.web.Services._project
             _vwsDbContext = vwsDbContext;
         }
 
-        public List<UserModel> GetProjectUsers(int projectId)
+        public List<UserModel> GetProjectUsers(int id)
         {
             var selectedProject = _vwsDbContext.Projects.Include(project => project.ProjectDepartments)
-                                                       .FirstOrDefault(project => project.Id == projectId);
+                                                       .FirstOrDefault(project => project.Id == id);
 
             List<UserProfile> projectUsers = new List<UserProfile>();
 
@@ -55,7 +55,7 @@ namespace vws.web.Services._project
                 projectUsers = _vwsDbContext.ProjectMembers.Include(projectMember => projectMember.UserProfile)
                                                           .Where(projectMember => !projectMember.IsDeleted &&
                                                                                   projectMember.IsPermittedByCreator == true &&
-                                                                                  projectMember.ProjectId == projectId)
+                                                                                  projectMember.ProjectId == id)
                                                           .Select(projectMember => projectMember.UserProfile)
                                                           .ToList();
             }
@@ -118,6 +118,24 @@ namespace vws.web.Services._project
         public long GetNumberOfProjectTasks(int id)
         {
             return _vwsDbContext.GeneralTasks.Where(task => task.ProjectId == id && !task.IsDeleted).Count();
+        }
+
+        public double GetProjectSpentTime(int projectId)
+        {
+            double result = 0;
+
+            var times = _vwsDbContext.TimeTracks.Include(timeTrack => timeTrack.GeneralTask)
+                                                .Where(timeTrack => timeTrack.GeneralTask.ProjectId == projectId);
+
+            foreach (var time in times)
+            {
+                if (time.TotalTimeInMinutes != null)
+                    result += (double)time.TotalTimeInMinutes;
+                else
+                    result += (DateTime.Now - time.StartDate).TotalMinutes;
+            }
+
+            return result;
         }
     }
 }
