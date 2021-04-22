@@ -97,7 +97,7 @@ namespace vws.web.Controllers._account
                     new Claim("UserEmail", user.Email),
                     new Claim("NickName", nickName),
                     new Claim("UserId", user.Id),
-                    new Claim("UserProfileImageId", userProfileImageId.HasValue ? userProfileImageId.Value.ToString(): null),
+                    new Claim("UserProfileImageId", userProfileImageId.HasValue ? userProfileImageId.Value.ToString(): string.Empty),
                 };
 
             var token = GenerateToken(authClaims);
