@@ -12,5 +12,6 @@ namespace vws.web.Services._team
     {
         public Task<Team> CreateTeam(TeamModel model, Guid userId);
         public Task<List<UserModel>> GetTeamMembers(int teamId);
+        public List<Team> GetAllUserTeams(Guid userId);
     }
 }

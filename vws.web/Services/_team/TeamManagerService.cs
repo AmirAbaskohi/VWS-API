@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,12 +15,10 @@ namespace vws.web.Services._team
 {
     public class TeamManagerService : ITeamManagerService
     {
-        private readonly IVWS_DbContext vwsDbContext;
-        private readonly UserManager<ApplicationUser> userManager;
-
-        public TeamManagerService(IVWS_DbContext _vwsDbContext)
+        private readonly IVWS_DbContext _vwsDbContext;
+        public TeamManagerService(IVWS_DbContext vwsDbContext)
         {
-            vwsDbContext = _vwsDbContext;
+            _vwsDbContext = vwsDbContext;
         }
 
         public async Task<Team> CreateTeam(TeamModel model, Guid userId)
@@ -38,15 +37,15 @@ namespace vws.web.Services._team
                 ModifiedBy = userId,
                 Guid = Guid.NewGuid()
             };
-            await vwsDbContext.AddTeamAsync(newTeam);
-            vwsDbContext.Save();
+            await _vwsDbContext.AddTeamAsync(newTeam);
+            _vwsDbContext.Save();
 
             model.Users.Add(userId);
             model.Users = model.Users.Distinct().ToList();
 
             foreach (var user in model.Users)
             {
-                await vwsDbContext.AddTeamMemberAsync(new TeamMember()
+                await _vwsDbContext.AddTeamMemberAsync(new TeamMember()
                 {
                     CreatedOn = creationTime,
                     IsDeleted = false,
@@ -54,7 +53,7 @@ namespace vws.web.Services._team
                     UserProfileId = user
                 });
             }
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             return newTeam;
         }
@@ -63,12 +62,12 @@ namespace vws.web.Services._team
         {
             var result = new List<UserModel>();
 
-            var members = vwsDbContext.TeamMembers.Where(member => member.TeamId == teamId && !member.IsDeleted)
+            var members = _vwsDbContext.TeamMembers.Where(member => member.TeamId == teamId && !member.IsDeleted)
                                                   .Select(member => member.UserProfileId);
 
             foreach (var member in members)
             {
-                UserProfile userProfile = await vwsDbContext.GetUserProfileAsync(member);
+                UserProfile userProfile = await _vwsDbContext.GetUserProfileAsync(member);
                 result.Add(new UserModel()
                 {
                     UserId = member,
@@ -78,6 +77,13 @@ namespace vws.web.Services._team
             }
 
             return result;
+        }
+
+        public List<Team> GetAllUserTeams(Guid userId)
+        {
+            return _vwsDbContext.TeamMembers.Include(teamMemeber => teamMemeber.Team)
+                                            .Where(teamMemeber => teamMemeber.UserProfileId == userId && !teamMemeber.Team.IsDeleted)
+                                            .Select(teamMemeber => teamMemeber.Team).ToList();
         }
     }
 }

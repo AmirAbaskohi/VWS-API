@@ -9,5 +9,8 @@ namespace vws.web.Models._task
     {
         public int Id { get; set; }
         public string Title { get; set; }
+        public int? TeamId { get; set; }
+        public int? ProjectId { get; set; }
+        public Guid? UserProfileId { get; set; }
     }
 }

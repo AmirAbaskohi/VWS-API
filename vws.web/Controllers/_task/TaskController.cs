@@ -2132,6 +2132,22 @@ namespace vws.web.Controllers._task
             return Ok(response);
         }
 
+        [HttpGet]
+        [Authorize]
+        [Route("getAllStatuses")]
+        public IEnumerable<TaskStatusResponseModel> GetAllStatuses()
+        {
+            var userId = LoggedInUserId.Value;
+
+            var userTeams = _teamManager.GetAllUserTeams(userId).Select(team => team.Id);
+            var userProjects = _projectManager.GetAllUserProjects(userId).Select(project => project.Id);
+
+            var statuses = _vwsDbContext.TaskStatuses.Where(status => (status.TeamId.HasValue && userTeams.Contains(status.TeamId.Value)) ||
+                                                                      (status.ProjectId.HasValue && userProjects.Contains(status.ProjectId.Value)) ||
+                                                                      (status.UserProfileId.HasValue && status.UserProfileId == userId));
+            return statuses.Select(status => new TaskStatusResponseModel() { Id = status.Id, ProjectId = status.ProjectId, TeamId = status.TeamId, Title = status.Title, UserProfileId = status.UserProfileId }).ToList();
+        }
+
         [HttpDelete]
         [Authorize]
         [Route("deleteStatus")]
