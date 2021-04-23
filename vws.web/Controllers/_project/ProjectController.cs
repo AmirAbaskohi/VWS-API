@@ -137,7 +137,8 @@ namespace vws.web.Controllers._project
 
             if (projectId != null)
                 projectUsers = _vwsDbContext.ProjectMembers.Where(projectMember => projectMember.ProjectId == projectId &&
-                                                                                      !projectMember.IsDeleted)
+                                                                                   projectMember.IsPermittedByCreator == true &&
+                                                                                   !projectMember.IsDeleted)
                                                           .Select(projectMember => projectMember.UserProfileId).ToList();
 
             List<Team> userTeams = _vwsDbContext.GetUserTeams(LoggedInUserId.Value).ToList();
@@ -1483,15 +1484,15 @@ namespace vws.web.Controllers._project
         #region ProjectMemberAPIS
         [HttpPost]
         [Authorize]
-        [Route("addUserToProject")]
-        public async Task<IActionResult> AddUserToProject([FromBody] AddUserToProjectModel model)
+        [Route("addUsersToProject")]
+        public async Task<IActionResult> AddUsersToProject([FromBody] AddUserToProjectModel model)
         {
             var response = new ResponseModel();
 
             var userId = LoggedInUserId.Value;
 
             var selectedProject = _vwsDbContext.Projects.Include(project => project.ProjectDepartments)
-                                                       .FirstOrDefault(project => project.Id == model.ProjectId);
+                                                        .FirstOrDefault(project => project.Id == model.ProjectId);
 
             if (selectedProject == null || selectedProject.IsDeleted)
             {
@@ -1514,217 +1515,218 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            if ((await _vwsDbContext.GetUserProfileAsync(model.UserId)) == null)
+            var projectUsers = _permissionService.GetUsersHaveAccessToProject(selectedProject.Id);
+            model.Users = model.Users.Except(projectUsers).ToList();
+
+            foreach (var modelUser in model.Users)
             {
-                response.AddError(_localizer["No user with such id exists."]);
-                response.Message = "No user with such id exists.";
+                if (!_vwsDbContext.UserProfiles.Any(profile => profile.UserId == modelUser))
+                {
+                    response.AddError(_localizer["Invalid users."]);
+                    response.Message = "Invalid users";
+                    return StatusCode(StatusCodes.Status400BadRequest, response);
+                }
+            }
+
+            var usersCanBeAddedToProject = GetAvailableUsersToAddProject(selectedProject.Id);
+            if (usersCanBeAddedToProject.Intersect(model.Users).Count() != model.Users.Count)
+            {
+                response.AddError(_localizer["Invalid users."]);
+                response.Message = "Invalid users";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             var user = await _vwsDbContext.GetUserProfileAsync(userId);
-            var addedUser = await _vwsDbContext.GetUserProfileAsync(model.UserId);
 
-            var selectedProjectMember = _vwsDbContext.ProjectMembers.FirstOrDefault(projectMember => projectMember.UserProfileId == model.UserId &&
-                                                                                                     projectMember.ProjectId == model.ProjectId &&
-                                                                                                     !projectMember.IsDeleted);
-
-            ProjectHistory newProjectHistory;
-            List<Guid> users;
-            string emailMessage;
-
-            if (selectedProjectMember != null && selectedProjectMember.IsPermittedByCreator == true)
+            foreach (var modelUser in model.Users)
             {
-                response.AddError(_localizer["User you want to add, is already a member of selected project."]);
-                response.Message = "Already member of project";
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-            else if (selectedProjectMember != null && selectedProjectMember.IsPermittedByCreator == null)
-            {
-                if (selectedProject.CreateBy != userId)
+
+                var addedUser = await _vwsDbContext.GetUserProfileAsync(modelUser);
+
+                var selectedProjectMember = _vwsDbContext.ProjectMembers.FirstOrDefault(projectMember => projectMember.UserProfileId == modelUser &&
+                                                                                                         projectMember.ProjectId == model.ProjectId &&
+                                                                                                        !projectMember.IsDeleted);
+
+                ProjectHistory newProjectHistory;
+                List<Guid> users;
+                string emailMessage;
+
+                if (selectedProjectMember != null && selectedProjectMember.IsPermittedByCreator == null)
                 {
-                    response.AddError(_localizer["User you want to add, is already a member of selected project."]);
-                    response.Message = "Already member of project";
-                    return StatusCode(StatusCodes.Status400BadRequest, response);
+                    if (selectedProject.CreateBy != userId)
+                        continue;
+
+                    selectedProjectMember.IsPermittedByCreator = true;
+                    selectedProjectMember.PermittedOn = DateTime.Now;
+                    _vwsDbContext.Save();
+
+                    #region HistoryAndEmail
+                    newProjectHistory = new ProjectHistory()
+                    {
+                        ProjectId = selectedProjectMember.ProjectId,
+                        Event = "{0} gave permission to user {1}.",
+                        EventTime = selectedProjectMember.PermittedOn
+                    };
+                    _vwsDbContext.AddProjectHistory(newProjectHistory);
+                    _vwsDbContext.Save();
+
+                    _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+                    {
+                        ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                        ProjectHistoryId = newProjectHistory.Id,
+                        Body = JsonConvert.SerializeObject(new UserModel()
+                        {
+                            NickName = user.NickName,
+                            ProfileImageGuid = user.ProfileImageGuid,
+                            UserId = user.UserId
+                        })
+                    });
+                    _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+                    {
+                        ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                        ProjectHistoryId = newProjectHistory.Id,
+                        Body = JsonConvert.SerializeObject(new UserModel()
+                        {
+                            NickName = addedUser.NickName,
+                            ProfileImageGuid = addedUser.ProfileImageGuid,
+                            UserId = addedUser.UserId
+                        })
+                    });
+                    _vwsDbContext.Save();
+
+                    string[] permissionArgs = { LoggedInNickName, selectedProject.Name };
+                    await _notificationService.SendSingleEmail((int)EmailTemplateEnum.NotificationEmail, "<b>«{0}»</b> gave permission to you for project <b>«{1}»</b>.", "Project Access", addedUser.UserId, permissionArgs);
+
+                    users = _projectManager.GetProjectUsers(selectedProjectMember.ProjectId).Select(user => user.UserId).ToList();
+                    users = users.Distinct().ToList();
+                    users.Remove(LoggedInUserId.Value);
+
+                    _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Project, newProjectHistory.Id);
+
+                    users.Remove(addedUser.UserId);
+                    emailMessage = "<b>«{0}»</b> gave permission to user <b>«{1}»</b> in project <b>«{2}»</b>.";
+                    string[] permissionArguments = { LoggedInNickName, addedUser.NickName, selectedProjectMember.Project.Name };
+                    await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", permissionArguments);
+                    #endregion
+
+                    response.Message = "User added successfully!";
+                    return Ok(response);
                 }
 
-                selectedProjectMember.IsPermittedByCreator = true;
-                selectedProjectMember.PermittedOn = DateTime.Now;
+                var newPorjectMember = new ProjectMember()
+                {
+                    CreatedOn = DateTime.Now,
+                    IsDeleted = false,
+                    ProjectId = model.ProjectId,
+                    UserProfileId = modelUser,
+                    IsPermittedByCreator = (userId == selectedProject.CreateBy) ? (bool?)true : null,
+                };
+                if (userId == selectedProject.CreateBy)
+                    newPorjectMember.PermittedOn = newPorjectMember.CreatedOn;
+                await _vwsDbContext.AddProjectMemberAsync(newPorjectMember);
                 _vwsDbContext.Save();
 
                 #region HistoryAndEmail
-                newProjectHistory = new ProjectHistory()
+                if (newPorjectMember.IsPermittedByCreator == true)
                 {
-                    ProjectId = selectedProjectMember.ProjectId,
-                    Event = "{0} gave permission to user {1}.",
-                    EventTime = selectedProjectMember.PermittedOn
-                };
-                _vwsDbContext.AddProjectHistory(newProjectHistory);
-                _vwsDbContext.Save();
-
-                _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
-                {
-                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
-                    ProjectHistoryId = newProjectHistory.Id,
-                    Body = JsonConvert.SerializeObject(new UserModel()
+                    newProjectHistory = new ProjectHistory()
                     {
-                        NickName = user.NickName,
-                        ProfileImageGuid = user.ProfileImageGuid,
-                        UserId = user.UserId
-                    })
-                });
-                _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
-                {
-                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
-                    ProjectHistoryId = newProjectHistory.Id,
-                    Body = JsonConvert.SerializeObject(new UserModel()
+                        ProjectId = model.ProjectId,
+                        Event = "{0} added {1} to the project.",
+                        EventTime = newPorjectMember.CreatedOn
+                    };
+                    _vwsDbContext.AddProjectHistory(newProjectHistory);
+                    _vwsDbContext.Save();
+
+                    _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
                     {
-                        NickName = addedUser.NickName,
-                        ProfileImageGuid = addedUser.ProfileImageGuid,
-                        UserId = addedUser.UserId
-                    })
-                });
-                _vwsDbContext.Save();
+                        ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                        ProjectHistoryId = newProjectHistory.Id,
+                        Body = JsonConvert.SerializeObject(new UserModel()
+                        {
+                            NickName = user.NickName,
+                            ProfileImageGuid = user.ProfileImageGuid,
+                            UserId = user.UserId
+                        })
+                    });
+                    _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+                    {
+                        ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                        ProjectHistoryId = newProjectHistory.Id,
+                        Body = JsonConvert.SerializeObject(new UserModel()
+                        {
+                            NickName = addedUser.NickName,
+                            ProfileImageGuid = addedUser.ProfileImageGuid,
+                            UserId = addedUser.UserId
+                        })
+                    });
+                    _vwsDbContext.Save();
 
-                string[] permissionArgs = { LoggedInNickName, selectedProject.Name };
-                await _notificationService.SendSingleEmail((int)EmailTemplateEnum.NotificationEmail, "<b>«{0}»</b> gave permission to you for project <b>«{1}»</b>.", "Project Access", addedUser.UserId, permissionArgs);
+                    string[] args = { LoggedInNickName, selectedProject.Name };
+                    await _notificationService.SendSingleEmail((int)EmailTemplateEnum.NotificationEmail, "<b>«{0}»</b> added you to project <b>«{1}»</b>.", "Project Access", addedUser.UserId, args);
 
-                users = _projectManager.GetProjectUsers(selectedProjectMember.ProjectId).Select(user => user.UserId).ToList();
-                users = users.Distinct().ToList();
-                users.Remove(LoggedInUserId.Value);
+                    users = _projectManager.GetProjectUsers(selectedProject.Id).Select(user => user.UserId).ToList();
+                    users = users.Distinct().ToList();
+                    users.Remove(LoggedInUserId.Value);
 
-                _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Project, newProjectHistory.Id);
+                    _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Project, newProjectHistory.Id);
 
-                users.Remove(addedUser.UserId);
-                emailMessage = "<b>«{0}»</b> gave permission to user <b>«{1}»</b> in project <b>«{2}»</b>.";
-                string[] permissionArguments = { LoggedInNickName, addedUser.NickName, selectedProjectMember.Project.Name };
-                await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", permissionArguments);
+                    users.Remove(userId);
+                    emailMessage = "<b>«{0}»</b> added <b>«{1}»</b> to project <b>«{2}»</b>.";
+                    string[] arguments = { LoggedInNickName, addedUser.NickName, selectedProject.Name };
+                    await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments);
+                }
+                else
+                {
+                    newProjectHistory = new ProjectHistory()
+                    {
+                        ProjectId = model.ProjectId,
+                        Event = "{0} requested to add {1} to the project.",
+                        EventTime = newPorjectMember.CreatedOn
+                    };
+                    _vwsDbContext.AddProjectHistory(newProjectHistory);
+                    _vwsDbContext.Save();
+
+                    _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+                    {
+                        ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                        ProjectHistoryId = newProjectHistory.Id,
+                        Body = JsonConvert.SerializeObject(new UserModel()
+                        {
+                            NickName = user.NickName,
+                            ProfileImageGuid = user.ProfileImageGuid,
+                            UserId = user.UserId
+                        })
+                    });
+                    _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+                    {
+                        ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                        ProjectHistoryId = newProjectHistory.Id,
+                        Body = JsonConvert.SerializeObject(new UserModel()
+                        {
+                            NickName = addedUser.NickName,
+                            ProfileImageGuid = addedUser.ProfileImageGuid,
+                            UserId = addedUser.UserId
+                        })
+                    });
+                    _vwsDbContext.Save();
+
+                    string[] args = { LoggedInNickName, selectedProject.Name };
+                    await _notificationService.SendSingleEmail((int)EmailTemplateEnum.NotificationEmail, "<b>«{0}»</b> requested to project creator to added you to project <b>«{1}»</b>.", "Project Access", addedUser.UserId, args);
+
+                    users = _projectManager.GetProjectUsers(selectedProject.Id).Select(user => user.UserId).ToList();
+                    users = users.Distinct().ToList();
+                    users.Remove(LoggedInUserId.Value);
+                    users.Remove(modelUser);
+                    emailMessage = "<b>«{0}»</b> requested to project creator <b>«{1}»</b> to project <b>«{2}»</b>.";
+                    string[] arguments = { LoggedInNickName, addedUser.NickName, selectedProject.Name };
+                    await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments);
+
+                    users.Add(modelUser);
+                    _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Project, newProjectHistory.Id);
+                }
                 #endregion
-
-                response.Message = "User added successfully!";
-                return Ok(response);
             }
-
-            var availableUsers = GetAvailableUsersToAddProject(selectedProject.Id);
-            if (!availableUsers.Contains(model.UserId))
-            {
-                response.AddError(_localizer["This user can not be added to project."]);
-                response.Message = "Can not be added project";
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-
-            var newPorjectMember = new ProjectMember()
-            {
-                CreatedOn = DateTime.Now,
-                IsDeleted = false,
-                ProjectId = model.ProjectId,
-                UserProfileId = model.UserId,
-                IsPermittedByCreator = (userId == selectedProject.CreateBy) ? (bool?)true : null,
-            };
-            if (userId == selectedProject.CreateBy)
-                newPorjectMember.PermittedOn = newPorjectMember.CreatedOn;
-            await _vwsDbContext.AddProjectMemberAsync(newPorjectMember);
-            _vwsDbContext.Save();
-
-            #region HistoryAndEmail
-            if (newPorjectMember.IsPermittedByCreator == true)
-            {
-                newProjectHistory = new ProjectHistory()
-                {
-                    ProjectId = model.ProjectId,
-                    Event = "{0} added {1} to the project.",
-                    EventTime = newPorjectMember.CreatedOn
-                };
-                _vwsDbContext.AddProjectHistory(newProjectHistory);
-                _vwsDbContext.Save();
-
-                _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
-                {
-                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
-                    ProjectHistoryId = newProjectHistory.Id,
-                    Body = JsonConvert.SerializeObject(new UserModel()
-                    {
-                        NickName = user.NickName,
-                        ProfileImageGuid = user.ProfileImageGuid,
-                        UserId = user.UserId
-                    })
-                });
-                _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
-                {
-                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
-                    ProjectHistoryId = newProjectHistory.Id,
-                    Body = JsonConvert.SerializeObject(new UserModel()
-                    {
-                        NickName = addedUser.NickName,
-                        ProfileImageGuid = addedUser.ProfileImageGuid,
-                        UserId = addedUser.UserId
-                    })
-                });
-                _vwsDbContext.Save();
-
-                string[] args = { LoggedInNickName, selectedProject.Name };
-                await _notificationService.SendSingleEmail((int)EmailTemplateEnum.NotificationEmail, "<b>«{0}»</b> added you to project <b>«{1}»</b>.", "Project Access", addedUser.UserId, args);
-
-                users = _projectManager.GetProjectUsers(selectedProject.Id).Select(user => user.UserId).ToList();
-                users = users.Distinct().ToList();
-                users.Remove(LoggedInUserId.Value);
-
-                _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Project, newProjectHistory.Id);
-
-                users.Remove(model.UserId);
-                emailMessage = "<b>«{0}»</b> added <b>«{1}»</b> to project <b>«{2}»</b>.";
-                string[] arguments = { LoggedInNickName, addedUser.NickName, selectedProject.Name };
-                await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments);
-            }
-            else
-            {
-                newProjectHistory = new ProjectHistory()
-                {
-                    ProjectId = model.ProjectId,
-                    Event = "{0} requested to add {1} to the project.",
-                    EventTime = newPorjectMember.CreatedOn
-                };
-                _vwsDbContext.AddProjectHistory(newProjectHistory);
-                _vwsDbContext.Save();
-
-                _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
-                {
-                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
-                    ProjectHistoryId = newProjectHistory.Id,
-                    Body = JsonConvert.SerializeObject(new UserModel()
-                    {
-                        NickName = user.NickName,
-                        ProfileImageGuid = user.ProfileImageGuid,
-                        UserId = user.UserId
-                    })
-                });
-                _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
-                {
-                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
-                    ProjectHistoryId = newProjectHistory.Id,
-                    Body = JsonConvert.SerializeObject(new UserModel()
-                    {
-                        NickName = addedUser.NickName,
-                        ProfileImageGuid = addedUser.ProfileImageGuid,
-                        UserId = addedUser.UserId
-                    })
-                });
-                _vwsDbContext.Save();
-
-                string[] args = { LoggedInNickName, selectedProject.Name };
-                await _notificationService.SendSingleEmail((int)EmailTemplateEnum.NotificationEmail, "<b>«{0}»</b> requested to project creator to added you to project <b>«{1}»</b>.", "Project Access", addedUser.UserId, args);
-
-                users = _projectManager.GetProjectUsers(selectedProject.Id).Select(user => user.UserId).ToList();
-                users = users.Distinct().ToList();
-                users.Remove(LoggedInUserId.Value);
-                users.Remove(model.UserId);
-                emailMessage = "<b>«{0}»</b> requested to project creator <b>«{1}»</b> to project <b>«{2}»</b>.";
-                string[] arguments = { LoggedInNickName, addedUser.NickName, selectedProject.Name };
-                await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Project Update", arguments);
-
-                users.Add(model.UserId);
-                _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Project, newProjectHistory.Id);
-            }
-            #endregion
 
             response.Message = "User added successfully!";
             return Ok(response);

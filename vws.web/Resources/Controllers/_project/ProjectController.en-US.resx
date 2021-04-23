@@ -162,6 +162,9 @@
   <data name="If your project is under department, you should specify the team." xml:space="preserve">
     <value>If your project is under department, you should specify the team.</value>
   </data>
+  <data name="Invalid users." xml:space="preserve">
+    <value>Invalid users.</value>
+  </data>
   <data name="Length of color is more than 6 characters." xml:space="preserve">
     <value>Length of color is more than 6 characters.</value>
   </data>

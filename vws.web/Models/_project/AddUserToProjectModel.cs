@@ -9,7 +9,7 @@ namespace vws.web.Models._project
     public class AddUserToProjectModel
     {
         [Required]
-        public Guid UserId { get; set; }
+        public List<Guid> Users { get; set; }
         [Required]
         public int ProjectId { get; set; }
     }
