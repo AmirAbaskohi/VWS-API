@@ -23,7 +23,7 @@ namespace vws.web.Services._calender
         {
             var result = new List<UserModel>();
 
-            var users = _vwsDbContext.EventUsers.Where(eventUser => eventUser.EventId == id).Select(eventUser => eventUser.UserProfileId);
+            var users = _vwsDbContext.EventUsers.Where(eventUser => eventUser.EventId == id && !eventUser.IsDeleted).Select(eventUser => eventUser.UserProfileId);
 
             foreach (var user in users)
             {

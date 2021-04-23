@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
@@ -34,6 +35,36 @@ namespace vws.web.Controllers._calender
             _calenderManager = calenderManager;
             _localizer = localizer;
             _permissionService = permissionService;
+        }
+        #endregion
+
+        #region PrivateMethods
+        private void AddEventProjects(int eventId, List<int> projectIds)
+        {
+            foreach (var project in projectIds)
+            {
+                _vwsDbContext.AddEventProject(new EventProject()
+                {
+                    EventId = eventId,
+                    ProjectId = project
+                });
+            }
+            _vwsDbContext.Save();
+        }
+
+        private void AddEventUsers(int eventId, List<Guid> userIds)
+        {
+            foreach (var user in userIds)
+            {
+                _vwsDbContext.AddEventUser(new EventMember()
+                {
+                    EventId = eventId,
+                    UserProfileId = user,
+                    IsDeleted = false,
+                    DeletedOn = null
+                });
+            }
+            _vwsDbContext.Save();
         }
         #endregion
 
@@ -159,25 +190,9 @@ namespace vws.web.Controllers._calender
             _vwsDbContext.AddEvent(newEvent);
             _vwsDbContext.Save();
 
-            foreach (var project in model.ProjectIds)
-            {
-                _vwsDbContext.AddEventProject(new EventProject()
-                {
-                    EventId = newEvent.Id,
-                    ProjectId = project
-                });
-            }
-            _vwsDbContext.Save();
-
-            foreach (var user in model.Users)
-            {
-                _vwsDbContext.AddEventUser(new EventMember()
-                {
-                    EventId = newEvent.Id,
-                    UserProfileId = user
-                });
-            }
-            _vwsDbContext.Save();
+            AddEventProjects(newEvent.Id, model.ProjectIds);
+            
+            AddEventUsers(newEvent.Id, model.Users);
 
             response.Value = new EventResponseModel()
             {
@@ -231,6 +246,8 @@ namespace vws.web.Controllers._calender
             }
 
             selectedEvent.Title = newTitle;
+            selectedEvent.ModifiedBy = userId;
+            selectedEvent.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
             response.Message = "Event title updated successfully!";
@@ -269,6 +286,8 @@ namespace vws.web.Controllers._calender
             }
 
             selectedEvent.Title = newDescription;
+            selectedEvent.ModifiedBy = userId;
+            selectedEvent.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
             response.Message = "Event description updated successfully!";
@@ -307,6 +326,8 @@ namespace vws.web.Controllers._calender
             }
 
             selectedEvent.StartTime = newStartTime;
+            selectedEvent.ModifiedBy = userId;
+            selectedEvent.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
             response.Message = "Event start time updated successfully!";
@@ -345,6 +366,8 @@ namespace vws.web.Controllers._calender
             }
 
             selectedEvent.EndTime = newEndTime;
+            selectedEvent.ModifiedBy = userId;
+            selectedEvent.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
             response.Message = "Event end time updated successfully!";
@@ -376,10 +399,48 @@ namespace vws.web.Controllers._calender
             }
 
             selectedEvent.IsAllDay = newIsAllDay;
+            selectedEvent.ModifiedBy = userId;
+            selectedEvent.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
             response.Message = "Event IsAllDay updated successfully!";
             return Ok(response);
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getAll")]
+        public async Task<IEnumerable<EventResponseModel>> GetAll()
+        {
+            var result = new List<EventResponseModel>();
+
+            var userId = LoggedInUserId.Value;
+
+            var userEvents = _vwsDbContext.EventUsers.Include(eventUser => eventUser.Event)
+                                                     .Where(eventUser => eventUser.UserProfileId == userId && !eventUser.Event.IsDeleted && !eventUser.IsDeleted)
+                                                     .Select(eventUser => eventUser.Event);
+
+            foreach (var userEvent in userEvents)
+            {
+                result.Add(new EventResponseModel()
+                {
+                    Id = userEvent.Id,
+                    Title = userEvent.Title,
+                    Description = userEvent.Description,
+                    IsAllDay = userEvent.IsAllDay,
+                    CreatedBy = (await _vwsDbContext.GetUserProfileAsync(userEvent.CreatedBy)).NickName,
+                    CreatedOn = userEvent.CreatedOn,
+                    ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(userEvent.ModifiedBy)).NickName,
+                    ModifiedOn = userEvent.ModifiedOn,
+                    StartTime = userEvent.StartTime,
+                    EndTime = userEvent.EndTime,
+                    Team = _calenderManager.GetEventTeam(userEvent.Id),
+                    Projects = _calenderManager.GetEventProjects(userEvent.Id),
+                    Users = await _calenderManager.GetEventUsers(userEvent.Id)
+                });
+            }
+
+            return result;
         }
 
         [HttpDelete]
@@ -407,6 +468,8 @@ namespace vws.web.Controllers._calender
             }
 
             selectedEvent.IsDeleted = true;
+            selectedEvent.ModifiedBy = userId;
+            selectedEvent.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
             response.Message = "Event IsAllDay updated successfully!";

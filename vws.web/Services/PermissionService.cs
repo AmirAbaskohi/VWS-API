@@ -85,7 +85,7 @@ namespace vws.web.Services
         public bool HasAccessToEvent(Guid userId, int eventId)
         {
             return vwsDbContext.EventUsers.Include(eventUser => eventUser.Event)
-                                          .Any(eventUser => eventUser.EventId == eventId && eventUser.UserProfileId == userId && !eventUser.Event.IsDeleted);
+                                          .Any(eventUser => eventUser.EventId == eventId && eventUser.UserProfileId == userId && !eventUser.IsDeleted && !eventUser.Event.IsDeleted);
         }
         public List<Guid> GetUsersHaveAccessToProject(int projectId)
         {
