@@ -11,6 +11,7 @@ namespace vws.web.Services
         public bool HasAccessToDepartment(Guid userId, int departmentId);
         public bool HasAccessToTeam(Guid userId, int teamId);
         public bool HasAccessToTask(Guid userId, long taskId);
+        public bool HasAccessToEvent(Guid userId, int eventId);
         public List<Guid> GetUsersHaveAccessToProject(int projectId);
         public List<Guid> GetUsersHaveAccessToDepartment(int departmentId);
         public List<Guid> GetUsersHaveAccessToTeam(int teamId);

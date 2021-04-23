@@ -51,6 +51,26 @@ namespace vws.web.Controllers._calender
                 model.TeamId = null;
 
             #region CheckModel
+            if (String.IsNullOrEmpty(model.Title) || model.Title.Length > 500)
+            {
+                response.Message = "Model has problem.";
+                response.AddError(_localizer["Title can not be empty or have more than 500 characters."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            if (!String.IsNullOrEmpty(model.Description) && model.Description.Length > 2500)
+            {
+                response.Message = "Model has problem.";
+                response.AddError(_localizer["Description can not have more than 2500 characters."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (model.StartTime > model.EndTime)
+            {
+                response.Message = "Model has problem.";
+                response.AddError(_localizer["Start time should be before end time."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
             foreach (var user in model.Users)
             {
                 if (!_vwsDbContext.UserProfiles.Any(profile => profile.UserId == user))
@@ -101,26 +121,6 @@ namespace vws.web.Controllers._calender
                         }
                     }
                 }
-            }
-
-            if (String.IsNullOrEmpty(model.Title) || model.Title.Length > 500)
-            {
-                response.Message = "Model has problem.";
-                response.AddError(_localizer["Title can not be empty or have more than 500 characters."]);
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-            if (!String.IsNullOrEmpty(model.Description) && model.Description.Length > 2500)
-            {
-                response.Message = "Model has problem.";
-                response.AddError(_localizer["Description can not have more than 2500 characters."]);
-                return StatusCode(StatusCodes.Status400BadRequest, response);
-            }
-
-            if (model.StartTime > model.EndTime)
-            {
-                response.Message = "Model has problem.";
-                response.AddError(_localizer["Start time should be before end time."]);
-                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             int? selectedTeamId = null;
@@ -200,6 +200,193 @@ namespace vws.web.Controllers._calender
             return Ok(response);
         }
 
+        [HttpPut]
+        [Authorize]
+        [Route("updateTitle")]
+        public IActionResult UpdateTitle(int id, string newTitle)
+        {
+            var response = new ResponseModel();
+
+            var userId = LoggedInUserId.Value;
+
+            if (String.IsNullOrEmpty(newTitle) || newTitle.Length > 500)
+            {
+                response.Message = "Model has problem.";
+                response.AddError(_localizer["Title can not be empty or have more than 500 characters."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var selectedEvent = _vwsDbContext.Events.FirstOrDefault(_event => _event.Id == id);
+            if (selectedEvent == null || selectedEvent.IsDeleted)
+            {
+                response.Message = "Event not found.";
+                response.AddError(_localizer["Event not found."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!_permissionService.HasAccessToEvent(userId, id))
+            {
+                response.Message = "Access denied.";
+                response.AddError(_localizer["You do not have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            selectedEvent.Title = newTitle;
+            _vwsDbContext.Save();
+
+            response.Message = "Event title updated successfully!";
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("updateDescription")]
+        public IActionResult UpdateDescription(int id, string newDescription)
+        {
+            var response = new ResponseModel();
+
+            var userId = LoggedInUserId.Value;
+
+            if (!String.IsNullOrEmpty(newDescription) && newDescription.Length > 2500)
+            {
+                response.Message = "Model has problem.";
+                response.AddError(_localizer["Description can not have more than 2500 characters."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var selectedEvent = _vwsDbContext.Events.FirstOrDefault(_event => _event.Id == id);
+            if (selectedEvent == null || selectedEvent.IsDeleted)
+            {
+                response.Message = "Event not found.";
+                response.AddError(_localizer["Event not found."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!_permissionService.HasAccessToEvent(userId, id))
+            {
+                response.Message = "Access denied.";
+                response.AddError(_localizer["You do not have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            selectedEvent.Title = newDescription;
+            _vwsDbContext.Save();
+
+            response.Message = "Event description updated successfully!";
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("updateStartTime")]
+        public IActionResult UpdateStartTime(int id, DateTime newStartTime)
+        {
+            var response = new ResponseModel();
+
+            var userId = LoggedInUserId.Value;
+
+            var selectedEvent = _vwsDbContext.Events.FirstOrDefault(_event => _event.Id == id);
+            if (selectedEvent == null || selectedEvent.IsDeleted)
+            {
+                response.Message = "Event not found.";
+                response.AddError(_localizer["Event not found."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!_permissionService.HasAccessToEvent(userId, id))
+            {
+                response.Message = "Access denied.";
+                response.AddError(_localizer["You do not have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            if (selectedEvent.EndTime < newStartTime)
+            {
+                response.Message = "Model has problem.";
+                response.AddError(_localizer["Start time should be before end time."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            selectedEvent.StartTime = newStartTime;
+            _vwsDbContext.Save();
+
+            response.Message = "Event start time updated successfully!";
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("updateEndTime")]
+        public IActionResult UpdateEndTime(int id, DateTime newEndTime)
+        {
+            var response = new ResponseModel();
+
+            var userId = LoggedInUserId.Value;
+
+            var selectedEvent = _vwsDbContext.Events.FirstOrDefault(_event => _event.Id == id);
+            if (selectedEvent == null || selectedEvent.IsDeleted)
+            {
+                response.Message = "Event not found.";
+                response.AddError(_localizer["Event not found."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!_permissionService.HasAccessToEvent(userId, id))
+            {
+                response.Message = "Access denied.";
+                response.AddError(_localizer["You do not have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            if (selectedEvent.StartTime > newEndTime)
+            {
+                response.Message = "Model has problem.";
+                response.AddError(_localizer["Start time should be before end time."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            selectedEvent.EndTime = newEndTime;
+            _vwsDbContext.Save();
+
+            response.Message = "Event end time updated successfully!";
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("updateIsAllDay")]
+        public IActionResult UpdateIsAllDay(int id, bool newIsAllDay)
+        {
+            var response = new ResponseModel();
+
+            var userId = LoggedInUserId.Value;
+
+            var selectedEvent = _vwsDbContext.Events.FirstOrDefault(_event => _event.Id == id);
+            if (selectedEvent == null || selectedEvent.IsDeleted)
+            {
+                response.Message = "Event not found.";
+                response.AddError(_localizer["Event not found."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!_permissionService.HasAccessToEvent(userId, id))
+            {
+                response.Message = "Access denied.";
+                response.AddError(_localizer["You do not have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            selectedEvent.IsAllDay = newIsAllDay;
+            _vwsDbContext.Save();
+
+            response.Message = "Event IsAllDay updated successfully!";
+            return Ok(response);
+        }
+
+        //[HttpPut]
+        //[Authorize]
+        //[Route("updateTeamAndProject")]
+        //public IActionResult UpdateTeamAndProject([FromBody] UpdateTeamAndProjectModel model)
         #endregion
     }
 }

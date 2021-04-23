@@ -15,7 +15,6 @@ namespace vws.web.Services
         {
             vwsDbContext = _vwsDbContext;
         }
-
         public bool HasAccessToProject(Guid userId, int projectId)
         {
             var selectedProject = vwsDbContext.Projects.Include(project => project.ProjectDepartments)
@@ -57,7 +56,6 @@ namespace vws.web.Services
 
             return selectedProjectMember != null;
         }
-
         public bool HasAccessToDepartment(Guid userId, int departmentId)
         {
             return vwsDbContext.DepartmentMembers.Any(departmentMember => departmentMember.UserProfileId == userId &&
@@ -70,7 +68,6 @@ namespace vws.web.Services
                                                               teamMember.TeamId == teamId &&
                                                               !teamMember.IsDeleted);
         }
-
         public bool HasAccessToTask(Guid userId, long taskId)
         {
             bool hasAccess = vwsDbContext.TaskAssigns.Any(assign => assign.UserProfileId == userId && assign.GeneralTaskId == taskId && !assign.IsDeleted);
@@ -85,7 +82,11 @@ namespace vws.web.Services
 
             return selectedTask.CreatedBy == userId;
         }
-
+        public bool HasAccessToEvent(Guid userId, int eventId)
+        {
+            return vwsDbContext.EventUsers.Include(eventUser => eventUser.Event)
+                                          .Any(eventUser => eventUser.EventId == eventId && eventUser.UserProfileId == userId && !eventUser.Event.IsDeleted);
+        }
         public List<Guid> GetUsersHaveAccessToProject(int projectId)
         {
             var selectedProject = vwsDbContext.Projects.Include(project => project.ProjectDepartments)
