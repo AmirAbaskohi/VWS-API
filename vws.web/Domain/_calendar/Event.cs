@@ -15,7 +15,7 @@ namespace vws.web.Domain._calendar
         public Event()
         {
             EventProjects = new HashSet<EventProject>();
-            EventUsers = new HashSet<EventUser>();
+            EventUsers = new HashSet<EventMember>();
         }
 
         public int Id { get; set; }
@@ -38,8 +38,6 @@ namespace vws.web.Domain._calendar
 
         public bool IsDeleted { get; set; }
 
-        public DateTime? DeletedOn { get; set; }
-
         public DateTime CreatedOn { get; set; }
 
         public Guid CreatedBy { get; set; }
@@ -52,6 +50,6 @@ namespace vws.web.Domain._calendar
 
         public virtual ICollection<EventProject> EventProjects { get; set; }
 
-        public virtual ICollection<EventUser> EventUsers { get; set; }
+        public virtual ICollection<EventMember> EventUsers { get; set; }
     }
 }

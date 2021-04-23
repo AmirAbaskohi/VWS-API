@@ -814,9 +814,9 @@ namespace vws.web.Domain
 
         public DbSet<EventProject> EventProjects { get; set; }
 
-        IQueryable<EventUser> IVWS_DbContext.EventUsers { get => EventUsers; }
+        IQueryable<EventMember> IVWS_DbContext.EventUsers { get => EventUsers; }
 
-        public DbSet<EventUser> EventUsers { get; set; }
+        public DbSet<EventMember> EventUsers { get; set; }
 
         public void AddEvent(Event newEvent)
         {
@@ -833,12 +833,12 @@ namespace vws.web.Domain
             EventProjects.Remove(eventProject);
         }
 
-        public void AddEventUser(EventUser eventUser)
+        public void AddEventUser(EventMember eventUser)
         {
             EventUsers.Add(eventUser);
         }
 
-        public void RemoveEventUser(EventUser eventUser)
+        public void RemoveEventUser(EventMember eventUser)
         {
             EventUsers.Remove(eventUser);
         }
@@ -876,17 +876,6 @@ namespace vws.web.Domain
                 .HasOne(ep => ep.Event)
                 .WithMany(e => e.EventProjects)
                 .HasForeignKey(ep => ep.EventId);
-
-            builder.Entity<EventUser>()
-                .HasKey(eu => new { eu.UserProfileId, eu.EventId });
-            builder.Entity<EventUser>()
-                .HasOne(eu => eu.UserProfile)
-                .WithMany(u => u.EventUsers)
-                .HasForeignKey(eu => eu.UserProfileId);
-            builder.Entity<EventUser>()
-                .HasOne(eu => eu.Event)
-                .WithMany(e => e.EventUsers)
-                .HasForeignKey(eu => eu.EventId);
 
             builder.Entity<TaskTag>()
                 .HasKey(tt => new { tt.TagId, tt.GeneralTaskId });

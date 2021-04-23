@@ -14,7 +14,7 @@ namespace vws.web.Domain._base
         public UserProfile()
         {
             TaskAssigns = new HashSet<TaskAssign>();
-            EventUsers = new HashSet<EventUser>();
+            EventUsers = new HashSet<EventMember>();
         }
         [Key]
         public Guid UserId { get; set; }
@@ -42,6 +42,6 @@ namespace vws.web.Domain._base
 
         public virtual ICollection<TaskAssign> TaskAssigns { get; set; }
 
-        public virtual ICollection<EventUser> EventUsers { get; set; }
+        public virtual ICollection<EventMember> EventUsers { get; set; }
     }
 }

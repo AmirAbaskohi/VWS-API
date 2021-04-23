@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using vws.web.Domain;
 
 namespace vws.web.Migrations
 {
     [DbContext(typeof(VWS_DbContext))]
-    partial class VWS_DbContextModelSnapshot : ModelSnapshot
+    [Migration("20210423115540_UpdatedEventTables")]
+    partial class UpdatedEventTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -367,7 +369,22 @@ namespace vws.web.Migrations
                     b.ToTable("Calender_Event");
                 });
 
-            modelBuilder.Entity("vws.web.Domain._calendar.EventMember", b =>
+            modelBuilder.Entity("vws.web.Domain._calendar.EventProject", b =>
+                {
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EventId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProjectId", "EventId");
+
+                    b.HasIndex("EventId");
+
+                    b.ToTable("Calender_EventProject");
+                });
+
+            modelBuilder.Entity("vws.web.Domain._calendar.EventUser", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -392,22 +409,7 @@ namespace vws.web.Migrations
 
                     b.HasIndex("UserProfileId");
 
-                    b.ToTable("Calender_EventMember");
-                });
-
-            modelBuilder.Entity("vws.web.Domain._calendar.EventProject", b =>
-                {
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("EventId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ProjectId", "EventId");
-
-                    b.HasIndex("EventId");
-
-                    b.ToTable("Calender_EventProject");
+                    b.ToTable("Calender_EventUser");
                 });
 
             modelBuilder.Entity("vws.web.Domain._chat.ChannelTransaction", b =>
@@ -1924,25 +1926,6 @@ namespace vws.web.Migrations
                     b.Navigation("Team");
                 });
 
-            modelBuilder.Entity("vws.web.Domain._calendar.EventMember", b =>
-                {
-                    b.HasOne("vws.web.Domain._calendar.Event", "Event")
-                        .WithMany("EventUsers")
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("vws.web.Domain._base.UserProfile", "UserProfile")
-                        .WithMany("EventUsers")
-                        .HasForeignKey("UserProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Event");
-
-                    b.Navigation("UserProfile");
-                });
-
             modelBuilder.Entity("vws.web.Domain._calendar.EventProject", b =>
                 {
                     b.HasOne("vws.web.Domain._calendar.Event", "Event")
@@ -1960,6 +1943,25 @@ namespace vws.web.Migrations
                     b.Navigation("Event");
 
                     b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("vws.web.Domain._calendar.EventUser", b =>
+                {
+                    b.HasOne("vws.web.Domain._calendar.Event", "Event")
+                        .WithMany("EventUsers")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("vws.web.Domain._base.UserProfile", "UserProfile")
+                        .WithMany("EventUsers")
+                        .HasForeignKey("UserProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Event");
+
+                    b.Navigation("UserProfile");
                 });
 
             modelBuilder.Entity("vws.web.Domain._chat.Message", b =>

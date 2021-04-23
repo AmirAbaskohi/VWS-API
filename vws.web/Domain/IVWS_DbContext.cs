@@ -452,7 +452,7 @@ namespace vws.web.Domain
 
         public IQueryable<EventProject> EventProjects { get; }
 
-        public IQueryable<EventUser> EventUsers { get; }
+        public IQueryable<EventMember> EventUsers { get; }
 
         #endregion
 
@@ -464,9 +464,9 @@ namespace vws.web.Domain
 
         public void RemoveEventProject(EventProject eventProject);
 
-        public void AddEventUser(EventUser eventUser);
+        public void AddEventUser(EventMember eventUser);
 
-        public void RemoveEventUser(EventUser eventUser);
+        public void RemoveEventUser(EventMember eventUser);
 
         #endregion
 

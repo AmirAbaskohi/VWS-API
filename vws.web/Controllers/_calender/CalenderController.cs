@@ -155,7 +155,6 @@ namespace vws.web.Controllers._calender
                 TeamId = model.ProjectIds.Count == 0 ? model.TeamId : selectedTeamId,
                 Guid = Guid.NewGuid(),
                 IsDeleted = false,
-                DeletedOn = null
             };
             _vwsDbContext.AddEvent(newEvent);
             _vwsDbContext.Save();
@@ -172,7 +171,7 @@ namespace vws.web.Controllers._calender
 
             foreach (var user in model.Users)
             {
-                _vwsDbContext.AddEventUser(new EventUser()
+                _vwsDbContext.AddEventUser(new EventMember()
                 {
                     EventId = newEvent.Id,
                     UserProfileId = user
@@ -383,10 +382,36 @@ namespace vws.web.Controllers._calender
             return Ok(response);
         }
 
-        //[HttpPut]
-        //[Authorize]
-        //[Route("updateTeamAndProject")]
-        //public IActionResult UpdateTeamAndProject([FromBody] UpdateTeamAndProjectModel model)
+        [HttpDelete]
+        [Authorize]
+        [Route("deleteEvent")]
+        public IActionResult DeleteEvent(int id)
+        {
+            var response = new ResponseModel();
+
+            var userId = LoggedInUserId.Value;
+
+            var selectedEvent = _vwsDbContext.Events.FirstOrDefault(_event => _event.Id == id);
+            if (selectedEvent == null || selectedEvent.IsDeleted)
+            {
+                response.Message = "Event not found.";
+                response.AddError(_localizer["Event not found."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!_permissionService.HasAccessToEvent(userId, id))
+            {
+                response.Message = "Access denied.";
+                response.AddError(_localizer["You do not have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            selectedEvent.IsDeleted = true;
+            _vwsDbContext.Save();
+
+            response.Message = "Event IsAllDay updated successfully!";
+            return Ok(response);
+        }
         #endregion
     }
 }
