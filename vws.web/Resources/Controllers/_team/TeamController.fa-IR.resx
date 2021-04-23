@@ -132,6 +132,12 @@
   <data name="High" xml:space="preserve">
     <value>بالا</value>
   </data>
+  <data name="Invalid emails." xml:space="preserve">
+    <value>ایمیل ها نامعتبر اند.</value>
+  </data>
+  <data name="Invalid users." xml:space="preserve">
+    <value>کاربران نامعتبر اند.</value>
+  </data>
   <data name="Invite link with id {0} revoked by {1}." xml:space="preserve">
     <value>لینک با آی دی {0} توسط {1} منقضی شد.</value>
   </data>
@@ -212,6 +218,9 @@
   </data>
   <data name="Your file does not have extension." xml:space="preserve">
     <value>فایل شما پسوند ندارد.</value>
+  </data>
+  <data name="{0} added {1} to team." xml:space="preserve">
+    <value>{0} {1} را به تیم اضافه کرد.</value>
   </data>
   <data name="{0} created new invite link with id {1}." xml:space="preserve">
     <value>{0} لینک دعوت جدیدی با آی دی {1} ایجاد کرد.</value>

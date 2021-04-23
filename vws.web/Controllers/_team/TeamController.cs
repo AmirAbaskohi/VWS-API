@@ -28,6 +28,7 @@ using vws.web.Models._project;
 using vws.web.Services._project;
 using vws.web.Models._task;
 using vws.web.Services._task;
+using System.ComponentModel.DataAnnotations;
 
 namespace vws.web.Controllers._team
 {
@@ -48,6 +49,7 @@ namespace vws.web.Controllers._team
         private readonly IProjectManagerService _projectManager;
         private readonly ITaskManagerService _taskManagerService;
         private readonly INotificationService _notificationService;
+        private readonly EmailAddressAttribute _emailChecker;
         #endregion
 
         #region Ctor
@@ -55,7 +57,7 @@ namespace vws.web.Controllers._team
             IVWS_DbContext vwsDbContext, IFileManager fileManager, IDepartmentManagerService departmentManager,
             ITeamManagerService teamManager, IEmailSender emailSender, IConfiguration configuration, IPermissionService permissionService,
             IProjectManagerService projectManager, ITaskManagerService taskManagerService,
-            INotificationService notificationService)
+            INotificationService notificationService, EmailAddressAttribute emailChecker)
         {
             _userManager = userManager;
             _localizer = localizer;
@@ -69,6 +71,7 @@ namespace vws.web.Controllers._team
             _projectManager = projectManager;
             _taskManagerService = taskManagerService;
             _notificationService = notificationService;
+            _emailChecker = emailChecker;
         }
         #endregion
 
@@ -238,6 +241,11 @@ namespace vws.web.Controllers._team
                 response.Message = "Team model data has problem.";
                 response.AddError(_localizer["Length of color is more than 6 characters."]);
             }
+            foreach (var email in model.EmailsForInvite)
+            {
+                response.AddError(_localizer["Invalid emails."]);
+                response.Message = "Invalid emails";
+            }
             var teammates = GetUserTeammates();
             if (teammates.Intersect(model.Users).Count() != model.Users.Count)
             {
@@ -253,9 +261,16 @@ namespace vws.web.Controllers._team
                 response.Message = "Team model data has problem.";
                 response.AddError(_localizer["You are a member of a team with that name."]);
             }
+
             if (response.HasError)
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             #endregion
+
+            List<string> userEmails = new List<string>();
+            userEmails.Add((await _userManager.FindByIdAsync(LoggedInUserId.Value.ToString())).Email);
+            foreach (var modelUser in model.Users)
+                userEmails.Add((await _userManager.FindByIdAsync(modelUser.ToString())).Email);
+            model.EmailsForInvite = model.EmailsForInvite.Except(userEmails).ToList();
 
             var newTeam = await _teamManager.CreateTeam(model, userId);
 
@@ -1339,6 +1354,142 @@ namespace vws.web.Controllers._team
         #endregion
 
         #region TeamMemberAPIS
+        [HttpPost]
+        [Authorize]
+        [Route("addMembersToTeam")]
+        public async Task<IActionResult> AddMemebersToTeam([FromBody] AddMembersToTeamModel model)
+        {
+            var response = new ResponseModel();
+            var userId = LoggedInUserId.Value;
+            var actorUser = await _vwsDbContext.GetUserProfileAsync(userId);
+
+            model.EmailsForInvite = model.EmailsForInvite.Distinct().ToList();
+            model.Users = model.Users;
+
+            #region CheckModel
+            var selectedTeam = _vwsDbContext.Teams.FirstOrDefault(team => team.Id == model.TeamId);
+            if (selectedTeam == null || selectedTeam.IsDeleted)
+            {
+                response.Message = "Team not found";
+                response.AddError(_localizer["There is no team with given Id."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (_permissionService.HasAccessToTeam(userId, selectedTeam.Id))
+            {
+                response.AddError(_localizer["You are not a member of team."]);
+                response.Message = "Not member of team";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            foreach (var email in model.EmailsForInvite)
+            {
+                if (!_emailChecker.IsValid(email))
+                {
+                    response.AddError(_localizer["Invalid emails."]);
+                    response.Message = "Invalid emails";
+                    return StatusCode(StatusCodes.Status400BadRequest, response);
+                }
+            }
+
+            foreach (var user in model.Users)
+            {
+                if (!_vwsDbContext.UserProfiles.Any(profile => profile.UserId == user))
+                {
+                    response.AddError(_localizer["Invalid users."]);
+                    response.Message = "Invalid users";
+                    return StatusCode(StatusCodes.Status400BadRequest, response);
+                }
+            }
+
+            var teamMembers = _permissionService.GetUsersHaveAccessToTeam(selectedTeam.Id);
+            var userTeammates = GetUserTeammates();
+            var usersCanBeAddedToTeam = userTeammates.Except(teamMembers).ToList();
+
+            if (usersCanBeAddedToTeam.Intersect(model.Users).Count() != model.Users.Count)
+            {
+                response.AddError(_localizer["Invalid users."]);
+                response.Message = "Invalid users";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            List<string> teamMemberEmails = new List<string>();
+            foreach (var teamMember in teamMembers)
+                teamMemberEmails.Add((await _userManager.FindByIdAsync(teamMember.ToString())).Email);
+
+            model.EmailsForInvite = model.EmailsForInvite.Except(teamMemberEmails).ToList();
+            #endregion
+
+            foreach (var user in model.Users)
+            {
+                var newTeamMember = new TeamMember()
+                {
+                    CreatedOn = DateTime.Now,
+                    IsDeleted = false,
+                    TeamId = selectedTeam.Id,
+                    UserProfileId = user
+                };
+                await _vwsDbContext.AddTeamMemberAsync(newTeamMember);
+                _vwsDbContext.Save();
+
+                var addedUser = await _vwsDbContext.GetUserProfileAsync(user);
+
+                #region HistoryAndNotif
+                var newHistory = new TeamHistory()
+                {
+                    TeamId = selectedTeam.Id,
+                    EventTime = newTeamMember.CreatedOn,
+                    Event = "{0} added {1} to team."
+                };
+                _vwsDbContext.AddTeamHistory(newHistory);
+                _vwsDbContext.Save();
+
+                _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+                {
+                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                    Body = JsonConvert.SerializeObject(new UserModel()
+                    {
+                        NickName = actorUser.NickName,
+                        ProfileImageGuid = actorUser.ProfileImageGuid,
+                        UserId = actorUser.UserId
+                    }),
+                    TeamHistoryId = newHistory.Id
+                });
+                _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+                {
+                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                    Body = JsonConvert.SerializeObject(new UserModel()
+                    {
+                        NickName = addedUser.NickName,
+                        ProfileImageGuid = addedUser.ProfileImageGuid,
+                        UserId = addedUser.UserId
+                    }),
+                    TeamHistoryId = newHistory.Id
+                });
+                _vwsDbContext.Save();
+
+                string[] args = { LoggedInNickName, selectedTeam.Name }; 
+                _notificationService.SendSingleEmail((int)EmailTemplateEnum.NotificationEmail, "<b>«{0}»</b> added you to team <b>«{1}»</b>.", "New Team", addedUser.UserId, args);
+
+                var users = (await _teamManager.GetTeamMembers(selectedTeam.Id)).Select(user => user.UserId).ToList();
+                users = users.Distinct().ToList();
+                users.Remove(LoggedInUserId.Value);
+
+                _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Team, newHistory.Id);
+
+                users.Remove(addedUser.UserId);
+                string emailMessage = "<b>«{0}»</b> added <b>«{1}»</b> to team <b>«{2}»</b>.";
+                string[] arguments = { LoggedInNickName, addedUser.NickName, selectedTeam.Name };
+                await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Team Update", arguments);
+                #endregion
+            }
+
+            await SendJoinTeamInvitaionLinks(model.EmailsForInvite, selectedTeam.Id);
+
+            response.Message = "Uses added successfully!";
+            return Ok(response);
+        }
+
         [HttpPost]
         [Authorize]
         [Route("join")]

@@ -1491,6 +1491,8 @@ namespace vws.web.Controllers._project
 
             var userId = LoggedInUserId.Value;
 
+            model.Users = model.Users.Distinct().ToList();
+
             var selectedProject = _vwsDbContext.Projects.Include(project => project.ProjectDepartments)
                                                         .FirstOrDefault(project => project.Id == model.ProjectId);
 
