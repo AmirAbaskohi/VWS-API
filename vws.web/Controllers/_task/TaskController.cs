@@ -2053,11 +2053,14 @@ namespace vws.web.Controllers._task
             var userStatuses = _vwsDbContext.TaskStatuses.Where(status => status.UserProfileId == LoggedInUserId.Value && !status.IsDeleted)
                                                         .OrderByDescending(status => status.EvenOrder);
 
+            if (userStatuses.Count() != 0)
+                lastStatus = userStatuses.First().EvenOrder;
+
             newStatus = new Domain._task.TaskStatus() { EvenOrder = lastStatus + 2, TeamId = null, ProjectId = null, Title = title, UserProfileId = LoggedInUserId.Value };
             _vwsDbContext.AddTaskStatus(newStatus);
             _vwsDbContext.Save();
 
-            response.Value = new TaskStatusResponseModel() { Id = newStatus.Id, Title = newStatus.Title };
+            response.Value = new TaskStatusResponseModel() { Id = newStatus.Id, Title = newStatus.Title, ProjectId = newStatus.ProjectId, TeamId = newStatus.TeamId, UserProfileId = newStatus.UserProfileId };
             response.Message = "New status added successfully!";
             return Ok(response);
         }
