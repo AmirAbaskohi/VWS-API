@@ -43,7 +43,7 @@ namespace vws.web.Controllers._notification
         [Route("markAsSeen")]
         public IActionResult MarkNotificationAsSeen(long id)
         {
-            var response = new ResponseModel(); 
+            var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
 
             var selectedNotification = _vwsDbContext.Notifications.FirstOrDefault(notification => notification.Id == id);
@@ -75,7 +75,8 @@ namespace vws.web.Controllers._notification
         public Object GetNotfications()
         {
             var userId = LoggedInUserId.Value;
-            var userCulture = _vwsDbContext.UserProfiles.Include(userProfile => userProfile.Culture).FirstOrDefault(userProfile => userProfile.UserId == userId).Culture.CultureAbbreviation;
+            var selectedUser = _vwsDbContext.UserProfiles.Include(userProfile => userProfile.Culture).FirstOrDefault(userProfile => userProfile.UserId == userId);
+            var userCulture = selectedUser.Culture != null ? selectedUser.Culture.CultureAbbreviation : "en-US";
             var userNotifs = _vwsDbContext.Notifications.Where(notification => notification.UserProfileId == userId);
             var seenNotifications = new List<NotificationModel>();
             var unSeenNotifications = new List<NotificationModel>();
