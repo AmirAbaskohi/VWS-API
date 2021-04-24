@@ -57,7 +57,7 @@ namespace vws.web.Controllers._team
             IVWS_DbContext vwsDbContext, IFileManager fileManager, IDepartmentManagerService departmentManager,
             ITeamManagerService teamManager, IEmailSender emailSender, IConfiguration configuration, IPermissionService permissionService,
             IProjectManagerService projectManager, ITaskManagerService taskManagerService,
-            INotificationService notificationService, EmailAddressAttribute emailChecker)
+            INotificationService notificationService)
         {
             _userManager = userManager;
             _localizer = localizer;
@@ -71,7 +71,7 @@ namespace vws.web.Controllers._team
             _projectManager = projectManager;
             _taskManagerService = taskManagerService;
             _notificationService = notificationService;
-            _emailChecker = emailChecker;
+            _emailChecker = new EmailAddressAttribute();
         }
         #endregion
 
@@ -168,7 +168,7 @@ namespace vws.web.Controllers._team
                 },
                 IsBodyHtml = false
             };
-            Task.Run(async () => 
+            Task.Run(async () =>
             {
                 foreach (var email in emails)
                 {
@@ -300,7 +300,7 @@ namespace vws.web.Controllers._team
             _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
-                Body = JsonConvert.SerializeObject(new UserModel() 
+                Body = JsonConvert.SerializeObject(new UserModel()
                 {
                     NickName = user.NickName,
                     ProfileImageGuid = user.ProfileImageGuid,
@@ -432,7 +432,7 @@ namespace vws.web.Controllers._team
             users = users.Distinct().ToList();
             users.Remove(LoggedInUserId.Value);
             string emailMessage = "<b>«{0}»</b> updated team name from <b>«{1}»</b> to <b>«{2}»</b>.";
-            string[] arguments = { LoggedInNickName, lastName , selectedTeam.Name };
+            string[] arguments = { LoggedInNickName, lastName, selectedTeam.Name };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Team Update", arguments);
 
             _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Team, newHistory.Id);
@@ -1192,7 +1192,7 @@ namespace vws.web.Controllers._team
             _vwsDbContext.AddTeamHistory(newHistory);
             _vwsDbContext.Save();
 
-            var user = await _vwsDbContext.GetUserProfileAsync(userId) ;
+            var user = await _vwsDbContext.GetUserProfileAsync(userId);
             _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -1468,7 +1468,7 @@ namespace vws.web.Controllers._team
                 });
                 _vwsDbContext.Save();
 
-                string[] args = { LoggedInNickName, selectedTeam.Name }; 
+                string[] args = { LoggedInNickName, selectedTeam.Name };
                 _notificationService.SendSingleEmail((int)EmailTemplateEnum.NotificationEmail, "<b>«{0}»</b> added you to team <b>«{1}»</b>.", "New Team", addedUser.UserId, args);
 
                 var users = (await _teamManager.GetTeamMembers(selectedTeam.Id)).Select(user => user.UserId).ToList();
