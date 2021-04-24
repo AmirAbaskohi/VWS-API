@@ -110,19 +110,19 @@ namespace vws.web.Controllers._task
             {
                 return _vwsDbContext.TaskStatuses.Where(status => status.ProjectId == projectId && !status.IsDeleted)
                                                           .OrderBy(status => status.EvenOrder)
-                                                          .Select(status => new TaskStatusResponseModel() { Id = status.Id, Title = status.Title })
+                                                          .Select(status => new TaskStatusResponseModel() { Id = status.Id, Title = status.Title, ProjectId = status.ProjectId, TeamId = status.TeamId, UserProfileId = status.UserProfileId })
                                                           .ToList();
             }
             else if (teamId != null)
             {
                 return _vwsDbContext.TaskStatuses.Where(status => status.TeamId == teamId && !status.IsDeleted)
                                                           .OrderBy(status => status.EvenOrder)
-                                                          .Select(status => new TaskStatusResponseModel() { Id = status.Id, Title = status.Title })
+                                                          .Select(status => new TaskStatusResponseModel() { Id = status.Id, Title = status.Title, ProjectId = status.ProjectId, TeamId = status.TeamId, UserProfileId = status.UserProfileId })
                                                           .ToList();
             }
             return _vwsDbContext.TaskStatuses.Where(status => status.UserProfileId == LoggedInUserId.Value && !status.IsDeleted)
                                                       .OrderBy(status => status.EvenOrder)
-                                                      .Select(status => new TaskStatusResponseModel() { Id = status.Id, Title = status.Title })
+                                                      .Select(status => new TaskStatusResponseModel() { Id = status.Id, Title = status.Title, ProjectId = status.ProjectId, TeamId = status.TeamId, UserProfileId = status.UserProfileId })
                                                       .ToList();
         }
 
@@ -234,8 +234,8 @@ namespace vws.web.Controllers._task
                 userId = null;
 
             int startOrder = 2;
-            var statuses = _vwsDbContext.TaskStatuses.Where(status => status.TeamId == teamId && status.ProjectId == projectId && status.UserProfileId == userId)
-                                                    .OrderBy(status => status.EvenOrder);
+            var statuses = _vwsDbContext.TaskStatuses.Where(status => status.TeamId == teamId && status.ProjectId == projectId && status.UserProfileId == userId && !status.IsDeleted)
+                                                     .OrderBy(status => status.EvenOrder);
             foreach (var status in statuses)
             {
                 status.EvenOrder = startOrder;
@@ -2019,8 +2019,8 @@ namespace vws.web.Controllers._task
 
             if (teamId != null)
             {
-                var teamStatuses = _vwsDbContext.TaskStatuses.Where(status => status.TeamId == teamId)
-                                                            .OrderByDescending(status => status.EvenOrder);
+                var teamStatuses = _vwsDbContext.TaskStatuses.Where(status => status.TeamId == teamId && !status.IsDeleted)
+                                                             .OrderByDescending(status => status.EvenOrder);
                 
                 if (teamStatuses.Count() != 0)
                     lastStatus = teamStatuses.First().EvenOrder;
@@ -2035,7 +2035,7 @@ namespace vws.web.Controllers._task
             }
             else if (projectId != null)
             {
-                var projectStatuses = _vwsDbContext.TaskStatuses.Where(status => status.ProjectId == projectId)
+                var projectStatuses = _vwsDbContext.TaskStatuses.Where(status => status.ProjectId == projectId && !status.IsDeleted)
                                                                .OrderByDescending(status => status.EvenOrder);
 
                 if (projectStatuses.Count() != 0)
@@ -2050,7 +2050,7 @@ namespace vws.web.Controllers._task
                 response.Message = "New status added successfully!";
                 return Ok(response);
             }
-            var userStatuses = _vwsDbContext.TaskStatuses.Where(status => status.UserProfileId == LoggedInUserId.Value)
+            var userStatuses = _vwsDbContext.TaskStatuses.Where(status => status.UserProfileId == LoggedInUserId.Value && !status.IsDeleted)
                                                         .OrderByDescending(status => status.EvenOrder);
 
             newStatus = new Domain._task.TaskStatus() { EvenOrder = lastStatus + 2, TeamId = null, ProjectId = null, Title = title, UserProfileId = LoggedInUserId.Value };
@@ -2157,9 +2157,9 @@ namespace vws.web.Controllers._task
             var userTeams = _teamManager.GetAllUserTeams(userId).Select(team => team.Id);
             var userProjects = _projectManager.GetAllUserProjects(userId).Select(project => project.Id);
 
-            var statuses = _vwsDbContext.TaskStatuses.Where(status => (status.TeamId.HasValue && userTeams.Contains(status.TeamId.Value)) ||
+            var statuses = _vwsDbContext.TaskStatuses.Where(status => ((status.TeamId.HasValue && userTeams.Contains(status.TeamId.Value)) ||
                                                                       (status.ProjectId.HasValue && userProjects.Contains(status.ProjectId.Value)) ||
-                                                                      (status.UserProfileId.HasValue && status.UserProfileId == userId));
+                                                                      (status.UserProfileId.HasValue && status.UserProfileId == userId)) && !status.IsDeleted);
             return statuses.Select(status => new TaskStatusResponseModel() { Id = status.Id, ProjectId = status.ProjectId, TeamId = status.TeamId, Title = status.Title, UserProfileId = status.UserProfileId }).ToList();
         }
 

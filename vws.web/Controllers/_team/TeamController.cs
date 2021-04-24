@@ -769,17 +769,17 @@ namespace vws.web.Controllers._team
         [HttpGet]
         [Authorize]
         [Route("getAll")]
-        public async Task<IEnumerable<TeamResponseModel>> GetAllTeams()
+        public async Task<IEnumerable<TeamExcludingUsersAndDepartmentsResponseModel>> GetAllTeams()
         {
             Guid userId = LoggedInUserId.Value;
 
-            List<TeamResponseModel> response = new List<TeamResponseModel>();
+            List<TeamExcludingUsersAndDepartmentsResponseModel> response = new List<TeamExcludingUsersAndDepartmentsResponseModel>();
 
             var userTeams = _vwsDbContext.GetUserTeams(userId);
 
             foreach (var userTeam in userTeams)
             {
-                response.Add(new TeamResponseModel()
+                response.Add(new TeamExcludingUsersAndDepartmentsResponseModel()
                 {
                     Id = userTeam.Id,
                     TeamTypeId = userTeam.TeamTypeId,
@@ -795,7 +795,7 @@ namespace vws.web.Controllers._team
                     NumberOfDepartments = _vwsDbContext.Departments.Where(department => department.TeamId == userTeam.Id && !department.IsDeleted).Count(),
                     NumberOfMembers = _vwsDbContext.TeamMembers.Where(teamMember => teamMember.TeamId == userTeam.Id && !teamMember.IsDeleted).Count(),
                     NumberOfTasks = _vwsDbContext.GeneralTasks.Where(task => task.TeamId == userTeam.Id && !task.IsDeleted).Count(),
-                    NumberOfProjects = _vwsDbContext.Projects.Where(project => project.TeamId == userTeam.Id && !project.IsDeleted).Count()
+                    NumberOfProjects = _vwsDbContext.Projects.Where(project => project.TeamId == userTeam.Id && !project.IsDeleted).Count(),
                 });
             }
             return response;
