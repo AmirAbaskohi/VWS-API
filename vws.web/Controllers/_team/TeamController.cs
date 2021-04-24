@@ -1589,7 +1589,7 @@ namespace vws.web.Controllers._team
 
         [HttpDelete]
         [Authorize]
-        [Route("deleteTeamMemeber")]
+        [Route("deleteTeamMember")]
         public async Task<IActionResult> DeleteTeamMember(int id, Guid userId)
         {
             var response = new ResponseModel();
