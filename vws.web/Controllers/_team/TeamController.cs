@@ -1609,8 +1609,8 @@ namespace vws.web.Controllers._team
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            var selectedTeamMemeber = _vwsDbContext.TeamMembers.FirstOrDefault(teamMemeber => teamMemeber.UserProfileId == userId && teamMemeber.TeamId == id);
-            if (selectedTeamMemeber == null || selectedTeam.IsDeleted)
+            var selectedTeamMemeber = _vwsDbContext.TeamMembers.FirstOrDefault(teamMemeber => teamMemeber.UserProfileId == userId && teamMemeber.TeamId == id && !teamMemeber.IsDeleted);
+            if (selectedTeamMemeber == null)
             {
                 response.Message = "Member not found";
                 response.AddError(_localizer["Member not found."]);

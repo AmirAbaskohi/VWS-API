@@ -2106,7 +2106,7 @@ namespace vws.web.Controllers._project
             }
 
             var requestedUsers = _vwsDbContext.ProjectMembers.Include(projectMember => projectMember.UserProfile)
-                                                            .Where(projectMember => projectMember.ProjectId == id &&
+                                                             .Where(projectMember => projectMember.ProjectId == id &&
                                                                                     !projectMember.IsDeleted &&
                                                                                     projectMember.IsPermittedByCreator == null);
 
@@ -2159,8 +2159,8 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var selectedProjectMember = _vwsDbContext.ProjectMembers.FirstOrDefault(projectMember => projectMember.ProjectId == id && projectMember.UserProfileId == userId);
-            if (selectedProjectMember == null || selectedProjectMember.IsPermittedByCreator == false || selectedProjectMember.IsDeleted)
+            var selectedProjectMember = _vwsDbContext.ProjectMembers.FirstOrDefault(projectMember => projectMember.ProjectId == id && projectMember.UserProfileId == userId && !projectMember.IsDeleted && projectMember.IsPermittedByCreator != false);
+            if (selectedProjectMember == null)
             {
                 response.AddError(_localizer["There is no member with such id in given project."]);
                 response.Message = "Project member not found";

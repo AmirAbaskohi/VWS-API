@@ -1713,6 +1713,8 @@ namespace vws.web.Controllers._task
             var successfulAssignedUsers = new List<Guid>();
             var failedToAssignUsers = new List<Guid>();
 
+            model.Users = model.Users.Distinct().ToList();
+
             var selectedTask = await _vwsDbContext.GetTaskAsync(model.TaskId);
             if (selectedTask == null || selectedTask.IsDeleted)
             {
@@ -1730,12 +1732,14 @@ namespace vws.web.Controllers._task
 
             var taskUsers = _taskManager.GetAssignedTo(model.TaskId).Select(user => user.UserId).ToList();
 
+            var usersCanBeAssigned = GetUsersCanBeAddedToTask(selectedTask.TeamId, selectedTask.ProjectId);
+
             var assignTime = DateTime.Now;
 
             foreach (var user in model.Users)
             {
                 if (!_vwsDbContext.UserProfiles.Any(profile => profile.UserId == user) ||
-                    taskUsers.Contains(user))
+                    taskUsers.Contains(user) || !usersCanBeAssigned.Contains(user))
                 {
                     failedToAssignUsers.Add(user);
                     continue;
