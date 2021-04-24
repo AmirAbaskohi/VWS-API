@@ -1384,7 +1384,7 @@ namespace vws.web.Controllers._team
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (_permissionService.HasAccessToTeam(userId, selectedTeam.Id))
+            if (!_permissionService.HasAccessToTeam(userId, selectedTeam.Id))
             {
                 response.AddError(_localizer["You are not a member of team."]);
                 response.Message = "Not member of team";
