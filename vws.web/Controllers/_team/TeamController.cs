@@ -297,6 +297,7 @@ namespace vws.web.Controllers._team
                 Body = newTeam.Name,
                 TeamHistoryId = newHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -408,12 +409,14 @@ namespace vws.web.Controllers._team
                 Body = lastName,
                 TeamHistoryId = newHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
                 Body = selectedTeam.Name,
                 TeamHistoryId = newHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -494,6 +497,7 @@ namespace vws.web.Controllers._team
                 Body = selectedTeam.Name,
                 TeamHistoryId = newHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -574,12 +578,14 @@ namespace vws.web.Controllers._team
                 Body = lastColor,
                 TeamHistoryId = newHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Color,
                 Body = selectedTeam.Color,
                 TeamHistoryId = newHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -718,6 +724,7 @@ namespace vws.web.Controllers._team
                 }),
                 TeamHistoryId = newHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -1204,6 +1211,7 @@ namespace vws.web.Controllers._team
                 }),
                 TeamHistoryId = newHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
@@ -1289,6 +1297,7 @@ namespace vws.web.Controllers._team
                 Body = selectedInviteLink.LinkGuid.ToString(),
                 TeamHistoryId = newHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -1455,6 +1464,7 @@ namespace vws.web.Controllers._team
                     }),
                     TeamHistoryId = newHistory.Id
                 });
+                _vwsDbContext.Save();
                 _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
                 {
                     ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -1554,6 +1564,7 @@ namespace vws.web.Controllers._team
                 }),
                 TeamHistoryId = newHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,

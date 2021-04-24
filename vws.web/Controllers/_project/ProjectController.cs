@@ -291,6 +291,7 @@ namespace vws.web.Controllers._project
                 ProjectHistoryId = newProjectHistory.Id,
                 Body = newProject.Name
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -402,12 +403,14 @@ namespace vws.web.Controllers._project
                 ProjectHistoryId = newProjectHistory.Id,
                 Body = lastName
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
                 ProjectHistoryId = newProjectHistory.Id,
                 Body = selectedProject.Name
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -485,12 +488,14 @@ namespace vws.web.Controllers._project
                 ProjectHistoryId = newProjectHistory.Id,
                 Body = selectedProject.Description
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
                 ProjectHistoryId = newProjectHistory.Id,
                 Body = selectedProject.Name
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -568,12 +573,14 @@ namespace vws.web.Controllers._project
                 ProjectHistoryId = newProjectHistory.Id,
                 Body = lastColor
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Color,
                 ProjectHistoryId = newProjectHistory.Id,
                 Body = selectedProject.Color
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -652,6 +659,7 @@ namespace vws.web.Controllers._project
                 Body = lastStartDate == null ? "NoTime" : lastStartDate.ToString(),
                 ShouldBeLocalized = lastStartDate == null ? true : false
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
@@ -659,6 +667,7 @@ namespace vws.web.Controllers._project
                 Body = selectedProject.StartDate == null ? "NoTime" : selectedProject.StartDate.ToString(),
                 ShouldBeLocalized = selectedProject.StartDate == null ? true : false
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -737,12 +746,14 @@ namespace vws.web.Controllers._project
                 ProjectHistoryId = newProjectHistory.Id,
                 Body = lastEndDate == null ? "NoTime" : lastEndDate.ToString()
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
                 ProjectHistoryId = newProjectHistory.Id,
                 Body = selectedProject.EndDate == null ? "NoTime" : selectedProject.EndDate.ToString()
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -1034,7 +1045,8 @@ namespace vws.web.Controllers._project
                     FileContainerGuid = fileResponse.Value.FileContainerGuid,
                     Size = fileResponse.Value.Size
                 })
-            }); ;
+            });
+            _vwsDbContext.Save();
             _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -1124,6 +1136,7 @@ namespace vws.web.Controllers._project
                 Body = ((SeedDataEnum.ProjectStatuses)lastStatus).ToString(),
                 ShouldBeLocalized = true
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
@@ -1131,6 +1144,7 @@ namespace vws.web.Controllers._project
                 Body = ((SeedDataEnum.ProjectStatuses)selectedProject.StatusId).ToString(),
                 ShouldBeLocalized = true
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -1583,6 +1597,7 @@ namespace vws.web.Controllers._project
                             UserId = user.UserId
                         })
                     });
+                    _vwsDbContext.Save();
                     _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
                     {
                         ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -1651,6 +1666,7 @@ namespace vws.web.Controllers._project
                             UserId = user.UserId
                         })
                     });
+                    _vwsDbContext.Save();
                     _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
                     {
                         ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -1700,6 +1716,7 @@ namespace vws.web.Controllers._project
                             UserId = user.UserId
                         })
                     });
+                    _vwsDbContext.Save();
                     _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
                     {
                         ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -1801,6 +1818,7 @@ namespace vws.web.Controllers._project
                     UserId = user.UserId
                 })
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -1899,6 +1917,7 @@ namespace vws.web.Controllers._project
                     UserId = user.UserId
                 })
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -2174,6 +2193,7 @@ namespace vws.web.Controllers._project
                     UserId = user.UserId
                 })
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,

@@ -352,7 +352,6 @@ namespace vws.web.Controllers._task
                 GeneralTaskId = taskResponseModel.Id
             };
             _vwsDbContext.AddTaskHistory(newTaskHistory);
-            _vwsDbContext.AddTaskHistory(newTaskHistory);
             _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
@@ -360,6 +359,7 @@ namespace vws.web.Controllers._task
                 Body = taskResponseModel.Title,
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -466,6 +466,7 @@ namespace vws.web.Controllers._task
                     Body = userModelSerialized,
                     TaskHistoryId = newHistory.Id,
                 });
+                _vwsDbContext.Save();
                 _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
                 {
                     ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -722,12 +723,14 @@ namespace vws.web.Controllers._task
                 Body = lastTitle,
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
                 Body = selectedTask.Title,
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -807,6 +810,7 @@ namespace vws.web.Controllers._task
                 Body = selectedTask.Description,
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -887,6 +891,7 @@ namespace vws.web.Controllers._task
                 TaskHistoryId = newTaskHistory.Id,
                 ShouldBeLocalized = true
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
@@ -894,6 +899,7 @@ namespace vws.web.Controllers._task
                 TaskHistoryId = newTaskHistory.Id,
                 ShouldBeLocalized = true
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -1057,6 +1063,7 @@ namespace vws.web.Controllers._task
                 TaskHistoryId = newTaskHistory.Id,
                 ShouldBeLocalized = emailMessageArgumentsLocalize[1]
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
@@ -1064,6 +1071,7 @@ namespace vws.web.Controllers._task
                 TaskHistoryId = newTaskHistory.Id,
                 ShouldBeLocalized = emailMessageArgumentsLocalize[2]
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -1145,6 +1153,7 @@ namespace vws.web.Controllers._task
                 TaskHistoryId = newTaskHistory.Id,
                 ShouldBeLocalized = lastStartDate == null ? true : false
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
@@ -1152,6 +1161,7 @@ namespace vws.web.Controllers._task
                 TaskHistoryId = newTaskHistory.Id,
                 ShouldBeLocalized = selectedTask.StartDate == null ? true : false
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -1235,6 +1245,7 @@ namespace vws.web.Controllers._task
                 TaskHistoryId = newTaskHistory.Id,
                 ShouldBeLocalized = lastEndDate == null ? true : false
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
@@ -1242,6 +1253,7 @@ namespace vws.web.Controllers._task
                 TaskHistoryId = newTaskHistory.Id,
                 ShouldBeLocalized = selectedTask.EndDate == null ? true : false
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -1327,12 +1339,14 @@ namespace vws.web.Controllers._task
                 Body = lastStatus,
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
                 Body = newStatus,
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -1918,6 +1932,7 @@ namespace vws.web.Controllers._task
                 }),
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -2265,6 +2280,7 @@ namespace vws.web.Controllers._task
                 }),
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
@@ -2364,12 +2380,14 @@ namespace vws.web.Controllers._task
                 Body = lastTitle,
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
                 Body = selectedCheckList.Title,
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -2457,6 +2475,7 @@ namespace vws.web.Controllers._task
                 }),
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
@@ -2560,12 +2579,14 @@ namespace vws.web.Controllers._task
                 }),
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
                 Body = newCheckListItem.Title,
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
@@ -2666,12 +2687,14 @@ namespace vws.web.Controllers._task
                 Body = lastTitle,
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
                 Body = selectedCheckListItem.Title,
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -2759,6 +2782,7 @@ namespace vws.web.Controllers._task
                 Body = selectedCheckListItem.Title,
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
@@ -2766,6 +2790,7 @@ namespace vws.web.Controllers._task
                 TaskHistoryId = newTaskHistory.Id,
                 ShouldBeLocalized = true
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
@@ -2773,6 +2798,7 @@ namespace vws.web.Controllers._task
                 TaskHistoryId = newTaskHistory.Id,
                 ShouldBeLocalized = true
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -2859,6 +2885,7 @@ namespace vws.web.Controllers._task
                 Body = selectedCheckListItem.Title,
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
@@ -3040,6 +3067,7 @@ namespace vws.web.Controllers._task
                 }),
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
@@ -3299,6 +3327,7 @@ namespace vws.web.Controllers._task
                 }),
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
@@ -3391,6 +3420,7 @@ namespace vws.web.Controllers._task
                 }),
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
@@ -3494,12 +3524,14 @@ namespace vws.web.Controllers._task
                 }),
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
                 Body = lastBody,
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
@@ -3579,6 +3611,7 @@ namespace vws.web.Controllers._task
                 }),
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
@@ -3661,12 +3694,14 @@ namespace vws.web.Controllers._task
                     }),
                     TaskHistoryId = newTaskHistory.Id
                 });
+                _vwsDbContext.Save();
                 _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
                 {
                     ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
                     Body = selectedComment.Body,
                     TaskHistoryId = newTaskHistory.Id
                 });
+                _vwsDbContext.Save();
                 _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
                 {
                     ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.ListOfFiles,
@@ -3754,12 +3789,14 @@ namespace vws.web.Controllers._task
                 }),
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
                 Body = fileName,
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
@@ -3840,6 +3877,7 @@ namespace vws.web.Controllers._task
                     }),
                     TaskHistoryId = newTaskHistory.Id
                 });
+                _vwsDbContext.Save();
                 _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
                 {
                     ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.ListOfFiles,
@@ -3927,6 +3965,7 @@ namespace vws.web.Controllers._task
                 }),
                 TaskHistoryId = newTaskHistory.Id
             });
+            _vwsDbContext.Save();
             _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
             {
                 ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
