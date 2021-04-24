@@ -1586,6 +1586,96 @@ namespace vws.web.Controllers._team
             response.Message = "User added to team successfully!";
             return Ok(response);
         }
+
+        [HttpDelete]
+        [Authorize]
+        [Route("deleteTeamMemeber")]
+        public async Task<IActionResult> DeleteTeamMember(int id, Guid userId)
+        {
+            var response = new ResponseModel();
+
+            var selectedTeam = _vwsDbContext.Teams.FirstOrDefault(team => team.Id == id);
+            if (selectedTeam == null || selectedTeam.IsDeleted)
+            {
+                response.Message = "Team not found";
+                response.AddError(_localizer["There is no team with given Id."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!_permissionService.HasAccessToTeam(userId, selectedTeam.Id))
+            {
+                response.AddError(_localizer["You are not a member of team."]);
+                response.Message = "Not member of team";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            var selectedTeamMemeber = _vwsDbContext.TeamMembers.FirstOrDefault(teamMemeber => teamMemeber.UserProfileId == userId && teamMemeber.TeamId == id);
+            if (selectedTeamMemeber == null || selectedTeam.IsDeleted)
+            {
+                response.Message = "Member not found";
+                response.AddError(_localizer["Member not found."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            selectedTeamMemeber.IsDeleted = true;
+            selectedTeamMemeber.DeletedOn = DateTime.Now;
+            _vwsDbContext.Save();
+
+            var deletedUser = await _vwsDbContext.GetUserProfileAsync(userId);
+            var actorUser = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+
+            #region History
+            var newHistory = new TeamHistory()
+            {
+                TeamId = selectedTeam.Id,
+                EventTime = selectedTeamMemeber.DeletedOn.Value,
+                Event = "{0} removed {1} from team."
+            };
+            _vwsDbContext.AddTeamHistory(newHistory);
+            _vwsDbContext.Save();
+            _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = actorUser.NickName,
+                    ProfileImageGuid = actorUser.ProfileImageGuid,
+                    UserId = actorUser.UserId
+                }),
+                TeamHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = deletedUser.NickName,
+                    ProfileImageGuid = deletedUser.ProfileImageGuid,
+                    UserId = deletedUser.UserId
+                }),
+                TeamHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
+            string[] args = { LoggedInNickName, selectedTeam.Name };
+            await _notificationService.SendSingleEmail((int)EmailTemplateEnum.NotificationEmail, "<b>«{0}»</b> removed you from team <b>«{1}»</b>.", "Team Update", deletedUser.UserId, args);
+
+            var users = (await _teamManager.GetTeamMembers(selectedTeam.Id)).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            users.Remove(userId);
+            string emailMessage = "<b>«{0}»</b> removed <b>«{1}»</b> from team <b>«{2}»</b>.";
+            string[] arguments = { LoggedInNickName, deletedUser.NickName, selectedTeam.Name };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Team Update", arguments);
+
+            users.Add(userId);
+            _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Team, newHistory.Id);
+
+            response.Message = "User deleted successfully!";
+            return Ok(response);
+        }
         #endregion
 
         #region TeammateAPIS

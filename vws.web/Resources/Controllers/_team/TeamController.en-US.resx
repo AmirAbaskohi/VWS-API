@@ -162,6 +162,9 @@
   <data name="Medium" xml:space="preserve">
     <value>Medium</value>
   </data>
+  <data name="Member not found." xml:space="preserve">
+    <value>Member not found.</value>
+  </data>
   <data name="No Time" xml:space="preserve">
     <value>No Time</value>
   </data>
@@ -230,6 +233,9 @@
   </data>
   <data name="{0} joined the team using invite link with guid {1}." xml:space="preserve">
     <value>{0} joined the team using invite link with guid {1}.</value>
+  </data>
+  <data name="{0} removed {1} from team." xml:space="preserve">
+    <value>{0} removed {1} from team.</value>
   </data>
   <data name="{0} updated team image." xml:space="preserve">
     <value>{0} updated team image.</value>

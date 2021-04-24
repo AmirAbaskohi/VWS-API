@@ -204,6 +204,12 @@
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; removed &lt;b&gt;«{1}»&lt;/b&gt; from project &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; &lt;b&gt;«{1}»&lt;/b&gt; را از پروژه &lt;b&gt;«{2}»&lt;/b&gt; حذف کرد.</value>
   </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; removed &lt;b&gt;«{1}»&lt;/b&gt; from team &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; &lt;b&gt;«{1}»&lt;/b&gt; را از تیم &lt;b&gt;«{2}»&lt;/b&gt; حذف کرد.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; removed you from team &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; شما را از تیم &lt;b&gt;«{1}»&lt;/b&gt; حذف کرد.</value>
+  </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; requested to project creator &lt;b&gt;«{1}»&lt;/b&gt; to project &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; درخواست اضافه شدن &lt;b&gt;«{1}»&lt;/b&gt; به پروژه &lt;b&gt;«{2}»&lt;/b&gt; را به سازنده پروژه داد.</value>
   </data>

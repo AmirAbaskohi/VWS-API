@@ -82,7 +82,7 @@ namespace vws.web.Services._team
         public List<Team> GetAllUserTeams(Guid userId)
         {
             return _vwsDbContext.TeamMembers.Include(teamMemeber => teamMemeber.Team)
-                                            .Where(teamMemeber => teamMemeber.UserProfileId == userId && !teamMemeber.Team.IsDeleted)
+                                            .Where(teamMemeber => teamMemeber.UserProfileId == userId && !teamMemeber.IsDeleted && !teamMemeber.Team.IsDeleted)
                                             .Select(teamMemeber => teamMemeber.Team).ToList();
         }
     }
