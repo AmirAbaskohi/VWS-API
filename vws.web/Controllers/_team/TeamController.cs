@@ -1036,7 +1036,7 @@ namespace vws.web.Controllers._team
             }
 
             var events = new List<HistoryModel>();
-            var teamEvents = _vwsDbContext.TeamHistories.Where(teamHistory => teamHistory.TeamId == id);
+            var teamEvents = _vwsDbContext.TeamHistories.Where(teamHistory => teamHistory.TeamId == id).OrderByDescending(teamHistory => teamHistory.EventTime);
             foreach (var teamEvent in teamEvents)
             {
                 var parameters = _vwsDbContext.TeamHistoryParameters.Where(param => param.TeamHistoryId == teamEvent.Id)

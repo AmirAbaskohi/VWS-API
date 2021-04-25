@@ -171,6 +171,9 @@
   <data name="Personal" xml:space="preserve">
     <value>شخصی</value>
   </data>
+  <data name="Task {0} created by {1} for this team." xml:space="preserve">
+    <value>تسک {0} برای این تیم توسط {1} ساخته شد.</value>
+  </data>
   <data name="Task {0} created by {1} under this team." xml:space="preserve">
     <value>تسک {0} توسط {1} تحت این تیم ایجاد شد.</value>
   </data>

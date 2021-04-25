@@ -405,7 +405,7 @@ namespace vws.web.Controllers._task
                 var newTeamHistory = new TeamHistory()
                 {
                     EventTime = taskResponseModel.CreatedOn,
-                    Event = "Task {0} created by {1} for this project.",
+                    Event = "Task {0} created by {1} for this team.",
                     TeamId = taskResponseModel.TeamId.Value
                 };
                 _vwsDbContext.AddTeamHistory(newTeamHistory);
@@ -1594,7 +1594,7 @@ namespace vws.web.Controllers._task
             }
 
             var events = new List<HistoryModel>();
-            var taskEvents = _vwsDbContext.TaskHistories.Where(taskHistory => taskHistory.GeneralTaskId == id);
+            var taskEvents = _vwsDbContext.TaskHistories.Where(taskHistory => taskHistory.GeneralTaskId == id).OrderByDescending(taskHistory => taskHistory.EventTime);
             foreach (var taskEvent in taskEvents)
             {
                 var parameters = _vwsDbContext.TaskHistoryParameters.Where(param => param.TaskHistoryId == taskEvent.Id)

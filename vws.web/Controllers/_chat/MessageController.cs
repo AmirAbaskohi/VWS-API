@@ -62,7 +62,8 @@ namespace vws.web.Controllers._chat
                     ReplyTo = message.ReplyTo,
                     IsEdited = message.IsEdited,
                     IsPinned = message.IsPinned,
-                    MessageTypeId = message.MessageTypeId
+                    MessageTypeId = message.MessageTypeId,
+                    FromUserId = message.FromUserId
                 }); ;
             }
             return messageResponseModels;

@@ -243,6 +243,9 @@
   <data name="Status id is not valid." xml:space="preserve">
     <value>وضعیت وارد شده معتبر نیست.</value>
   </data>
+  <data name="Task {0} created by {1} for this project." xml:space="preserve">
+    <value>تسک {0} برای این پروژه توسط {1} ساخته شد.</value>
+  </data>
   <data name="Task {0} created by {1} under this project." xml:space="preserve">
     <value>تسک {0} توسط {1} تحت این پروژه ایجاد شد.</value>
   </data>

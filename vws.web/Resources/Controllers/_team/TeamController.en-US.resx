@@ -171,6 +171,9 @@
   <data name="Personal" xml:space="preserve">
     <value>Personal</value>
   </data>
+  <data name="Task {0} created by {1} for this team." xml:space="preserve">
+    <value>Task {0} created by {1} for this team.</value>
+  </data>
   <data name="Task {0} created by {1} under this team." xml:space="preserve">
     <value>Task {0} created by {1} under this team.</value>
   </data>

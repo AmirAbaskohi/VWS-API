@@ -243,6 +243,9 @@
   <data name="Status id is not valid." xml:space="preserve">
     <value>Status id is not valid.</value>
   </data>
+  <data name="Task {0} created by {1} for this project." xml:space="preserve">
+    <value>Task {0} created by {1} for this project.</value>
+  </data>
   <data name="Task {0} created by {1} under this project." xml:space="preserve">
     <value>Task {0} created by {1} under this project.</value>
   </data>

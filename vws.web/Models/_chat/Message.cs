@@ -7,6 +7,8 @@ namespace vws.web.Models._chat
 
         public string FromNickName { get; set; }
 
+        public Guid FromUserId { get; set; }
+
         public string Body { get; set; }
 
         public DateTime SendOn { get; set; }

@@ -1397,7 +1397,7 @@ namespace vws.web.Controllers._project
             }
 
             var events = new List<HistoryModel>();
-            var projectEvents = _vwsDbContext.ProjectHistories.Where(projectHistory => projectHistory.ProjectId == id);
+            var projectEvents = _vwsDbContext.ProjectHistories.Where(projectHistory => projectHistory.ProjectId == id).OrderByDescending(projectHistory => projectHistory.EventTime);
             foreach (var projectEvent in projectEvents)
             {
                 var parameters = _vwsDbContext.ProjectHistoryParameters.Where(param => param.ProjectHistoryId == projectEvent.Id)
