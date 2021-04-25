@@ -243,8 +243,12 @@ namespace vws.web.Controllers._team
             }
             foreach (var email in model.EmailsForInvite)
             {
-                response.AddError(_localizer["Invalid emails."]);
-                response.Message = "Invalid emails";
+                if (!_emailChecker.IsValid(email))
+                {
+                    response.AddError(_localizer["Invalid emails."]);
+                    response.Message = "Invalid emails";
+                    break;
+                }
             }
             var teammates = GetUserTeammates();
             if (teammates.Intersect(model.Users).Count() != model.Users.Count)
