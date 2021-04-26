@@ -219,6 +219,8 @@ namespace vws.web.Hubs
             vwsDbContext.Save();
 
             UpdateChannelTransaction(channelId, channelTypeId, LoggedInUserId, newMessage.SendOn);
+            if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+                UpdateChannelTransaction(LoggedInUserId, channelTypeId, channelId, newMessage.SendOn);
 
             var fromUserProfile = await vwsDbContext.GetUserProfileAsync(newMessage.FromUserId);
 
