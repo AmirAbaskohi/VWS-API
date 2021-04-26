@@ -178,6 +178,19 @@ namespace vws.web.Controllers._project
             _vwsDbContext.Save();
         }
 
+        private void DeleteProjectTasks(int projectId, DateTime deleteTime)
+        {
+            var projectTasks = _vwsDbContext.GeneralTasks.Where(task => task.ProjectId == projectId && !task.IsDeleted);
+
+            foreach (var projectTask in projectTasks)
+            {
+                projectTask.IsDeleted = true;
+                projectTask.ModifiedBy = LoggedInUserId.Value;
+                projectTask.ModifiedOn = deleteTime;
+                _vwsDbContext.Save();
+            }
+        }
+
         #endregion
 
         #region ProjectAPIS
@@ -1457,6 +1470,9 @@ namespace vws.web.Controllers._project
             selectedProject.IsDeleted = true;
             selectedProject.ModifiedBy = userId;
             selectedProject.ModifiedOn = modificationTime;
+            _vwsDbContext.Save();
+
+            DeleteProjectTasks(selectedProject.Id, selectedProject.ModifiedOn);
 
             var newProjectHistory = new ProjectHistory()
             {
