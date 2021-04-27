@@ -187,8 +187,8 @@ namespace vws.web.Controllers._project
                 projectTask.IsDeleted = true;
                 projectTask.ModifiedBy = LoggedInUserId.Value;
                 projectTask.ModifiedOn = deleteTime;
-                _vwsDbContext.Save();
             }
+            _vwsDbContext.Save();
         }
 
         #endregion
