@@ -129,6 +129,41 @@ namespace vws.web.Controllers._chat
             }
         }
 
+        private void SetChannelLastMessage(ref List<ChannelResponseModel> channelResponseModels)
+        {
+            for (int i = 0; i < channelResponseModels.Count; i++)
+            {
+                byte channelType = channelResponseModels[i].ChannelTypeId;
+                Guid channelId = channelResponseModels[i].Guid;
+                Message lastMessage;
+                if (channelResponseModels[i].ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+                {
+                    var privateMessages = _vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelType &&
+                                                                                ((message.ChannelId == channelId && message.FromUserId == LoggedInUserId) ||
+                                                                                (message.ChannelId == LoggedInUserId && message.FromUserId == channelId)) &&
+                                                                                !message.IsDeleted).ToList();
+                    privateMessages = privateMessages.OrderBy(message => message.SendOn).ToList();
+                    lastMessage = privateMessages.Count == 0 ? null : privateMessages[privateMessages.Count - 1];
+                }
+                else
+                {
+                    var publicMessages = _vwsDbContext.Messages.Where(message => message.ChannelTypeId == channelType && message.ChannelId == channelId && !message.IsDeleted).ToList();
+                    publicMessages = publicMessages.OrderBy(message => message.SendOn).ToList();
+                    lastMessage = publicMessages.Count == 0 ? null : publicMessages[publicMessages.Count - 1];
+                }
+                if (lastMessage == null)
+                    continue;
+                channelResponseModels[i].LastMessage = new MessageSummary()
+                {
+                    FromNickName = _vwsDbContext.UserProfiles.FirstOrDefault(profile => profile.UserId == lastMessage.FromUserId).NickName,
+                    Body = lastMessage.Body,
+                    MessageTypeId = lastMessage.MessageTypeId,
+                    FromUserId = lastMessage.FromUserId,
+                    SendOn = lastMessage.SendOn
+                };
+            }
+        }
+
         private List<Guid> GetChannelUserIds(List<ChannelResponseModel> channelResponseModels)
         {
             var result = new List<Guid>();
@@ -178,6 +213,8 @@ namespace vws.web.Controllers._chat
             SetChannelLastTransactionDateTime(ref channelResponseModels);
 
             SetChannelUnreadMessages(ref channelResponseModels, GetChannelUserIds(channelResponseModels));
+
+            SetChannelLastMessage(ref channelResponseModels);
 
             channelResponseModels = channelResponseModels.OrderByDescending(channelResponseModel => channelResponseModel.LastTransactionDateTime).ToList();
             channelResponseModels = channelResponseModels.OrderByDescending(channelResponseModel => channelResponseModel.EvenOrder).ToList();

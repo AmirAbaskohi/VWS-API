@@ -20,5 +20,7 @@ namespace vws.web.Models._chat
         public Guid? ProfileImageGuid { get; set; }
 
         public DateTime LastTransactionDateTime { get; set; }
+
+        public MessageSummary LastMessage { get; set; }
     }
 }
