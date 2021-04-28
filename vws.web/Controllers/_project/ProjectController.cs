@@ -1228,6 +1228,7 @@ namespace vws.web.Controllers._project
             Guid userId = LoggedInUserId.Value;
 
             var userProjects = _projectManager.GetAllUserProjects(userId).Where(project => project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Active);
+            userProjects = userProjects.OrderByDescending(project => project.CreatedOn);
 
             foreach (var project in userProjects)
             {
@@ -1264,6 +1265,7 @@ namespace vws.web.Controllers._project
             Guid userId = LoggedInUserId.Value;
 
             var userProjects = _projectManager.GetAllUserProjects(userId).Where(project => project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Hold);
+            userProjects = userProjects.OrderByDescending(project => project.CreatedOn);
 
             foreach (var project in userProjects)
             {
@@ -1300,6 +1302,7 @@ namespace vws.web.Controllers._project
             Guid userId = LoggedInUserId.Value;
 
             var userProjects = _projectManager.GetAllUserProjects(userId).Where(project => project.StatusId == (byte)SeedDataEnum.ProjectStatuses.DoneOrArchived);
+            userProjects = userProjects.OrderByDescending(project => project.CreatedOn);
 
             foreach (var project in userProjects)
             {
@@ -1351,6 +1354,8 @@ namespace vws.web.Controllers._project
             }
 
             var projectTasks = _vwsDbContext.GeneralTasks.Where(task => task.ProjectId == id && !task.IsArchived && !task.IsDeleted);
+            projectTasks = projectTasks.OrderByDescending(task => task.CreatedOn);
+
             foreach (var projectTask in projectTasks)
             {
                 result.Add(new TaskResponseModel()

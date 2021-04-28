@@ -1459,6 +1459,8 @@ namespace vws.web.Controllers._task
             List<TaskResponseModel> response = new List<TaskResponseModel>();
 
             var userTasks = GetUserTasks(userId);
+            userTasks = userTasks.OrderByDescending(task => task.CreatedOn).ToList();
+
             foreach (var userTask in userTasks)
             {
                 if (userTask.IsDeleted || userTask.IsArchived)
@@ -1508,7 +1510,6 @@ namespace vws.web.Controllers._task
                                                           .Select(timeTrack => new RunningTaskResponseModel() { IsPaused = false, StartDate = timeTrack.StartDate, TaskId = timeTrack.GeneralTaskId });
 
             var allRunningTasks = pausedTaskIds.Union(notEndedTaskIds);
-
             return allRunningTasks;
         }
 
@@ -1522,6 +1523,8 @@ namespace vws.web.Controllers._task
             List<TaskResponseModel> response = new List<TaskResponseModel>();
 
             var userTasks = GetUserTasks(userId);
+            userTasks = userTasks.OrderByDescending(task => task.CreatedOn).ToList();
+
             foreach (var userTask in userTasks)
             {
                 if (userTask.IsArchived && !userTask.IsDeleted)

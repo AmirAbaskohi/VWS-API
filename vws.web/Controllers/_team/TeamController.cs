@@ -780,6 +780,7 @@ namespace vws.web.Controllers._team
             List<TeamExcludingUsersAndDepartmentsResponseModel> response = new List<TeamExcludingUsersAndDepartmentsResponseModel>();
 
             var userTeams = _vwsDbContext.GetUserTeams(userId);
+            userTeams = userTeams.OrderByDescending(team => team.CreatedOn);
 
             foreach (var userTeam in userTeams)
             {
@@ -878,7 +879,7 @@ namespace vws.web.Controllers._team
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var teamDepartments = _vwsDbContext.Departments.Where(department => department.TeamId == id && !department.IsDeleted);
+            var teamDepartments = _vwsDbContext.Departments.Where(department => department.TeamId == id && !department.IsDeleted).OrderByDescending(department => department.CreatedOn);
 
             foreach (var teamDepartment in teamDepartments)
                 departments.Add(new DepartmentResponseModel()
@@ -926,7 +927,7 @@ namespace vws.web.Controllers._team
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var teamProjects = _vwsDbContext.Projects.Where(project => project.TeamId == id && !project.IsDeleted);
+            var teamProjects = _vwsDbContext.Projects.Where(project => project.TeamId == id && !project.IsDeleted).OrderByDescending(project => project.CreatedOn);
             foreach (var teamProject in teamProjects)
                 projects.Add(new ProjectResponseModel()
                 {
@@ -977,7 +978,7 @@ namespace vws.web.Controllers._team
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var teamTasks = _vwsDbContext.GeneralTasks.Where(task => task.TeamId == id && !task.IsDeleted);
+            var teamTasks = _vwsDbContext.GeneralTasks.Where(task => task.TeamId == id && !task.IsDeleted).OrderByDescending(task => task.CreatedOn);
             foreach (var teamTask in teamTasks)
                 tasks.Add(new TaskResponseModel()
                 {
