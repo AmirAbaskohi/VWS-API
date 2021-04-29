@@ -31,7 +31,8 @@ namespace vws.web.Services._chat
             List<Department> userDepartments = _vwsDbContext.GetUserDepartments(userId).ToList();
 
             var userProjectsUnderTeams = _vwsDbContext.Projects.Include(project => project.ProjectDepartments)
-                                                             .Where(project => project.TeamId != null && userTeams.Select(userTeam => userTeam.Id).Contains((int)project.TeamId));
+                                                               .Where(project => project.TeamId != null && !project.IsDeleted && userTeams.Select(userTeam => userTeam.Id).Contains((int)project.TeamId));
+
             foreach (var userProjectUnderTeams in userProjectsUnderTeams)
             {
                 if (userProjectUnderTeams.ProjectDepartments.Count == 0)
