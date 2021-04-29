@@ -44,11 +44,11 @@ namespace vws.web.Controllers._chat
         {
             List<MessageResponseModel> messageResponseModels = new List<MessageResponseModel>();
             HashSet<Guid> messageSenderUserIds = messages.Select(message => message.FromUserId).ToHashSet();
-            Dictionary<Guid, string> messageSenderNickNames = new Dictionary<Guid, string>();
+            Dictionary<Guid, UserProfile> messageSenderNickNames = new Dictionary<Guid, UserProfile>();
             foreach (var messageSenderUserId in messageSenderUserIds)
             {
-                var userProfile = _vwsDbContext.GetUserProfileAsync(messageSenderUserId).Result;
-                messageSenderNickNames.Add(messageSenderUserId, userProfile.NickName);
+                var userProfile = _vwsDbContext.UserProfiles.FirstOrDefault(profile => profile.UserId == messageSenderUserId);
+                messageSenderNickNames.Add(messageSenderUserId, userProfile);
             }
             foreach (var message in messages)
             {
@@ -57,13 +57,14 @@ namespace vws.web.Controllers._chat
                     Id = message.Id,
                     Body = message.Body,
                     SendOn = message.SendOn,
-                    FromNickName = messageSenderNickNames[message.FromUserId],
+                    FromNickName = messageSenderNickNames[message.FromUserId].NickName,
                     SendFromMe = message.FromUserId == LoggedInUserId ? true : false,
                     ReplyTo = message.ReplyTo,
                     IsEdited = message.IsEdited,
                     IsPinned = message.IsPinned,
                     MessageTypeId = message.MessageTypeId,
-                    FromUserId = message.FromUserId
+                    FromUserId = message.FromUserId,
+                    FromUserImageId = messageSenderNickNames[message.FromUserId].ProfileImageGuid
                 }); ;
             }
             return messageResponseModels;

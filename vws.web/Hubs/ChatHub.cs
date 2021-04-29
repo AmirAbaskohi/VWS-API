@@ -229,17 +229,20 @@ namespace vws.web.Hubs
                 var groupName = CombineTwoGuidsInOrder(LoggedInUserId, newMessage.ChannelId);
                 await Clients.OthersInGroup(groupName).ReceiveMessage(newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
                                                                                 false, newMessage.ChannelTypeId, LoggedInUserId,
-                                                                                newMessage.SendOn, fromUserProfile.NickName, newMessage.FromUserId, newMessage.ReplyTo);
+                                                                                newMessage.SendOn, fromUserProfile.NickName, newMessage.FromUserId,
+                                                                                fromUserProfile.ProfileImageGuid ,newMessage.ReplyTo);
 
             }
             else
                 await Clients.OthersInGroup(channelId.ToString()).ReceiveMessage(newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
                                                                                 false, newMessage.ChannelTypeId, newMessage.ChannelId,
-                                                                                newMessage.SendOn, fromUserProfile.NickName, newMessage.FromUserId, newMessage.ReplyTo);
+                                                                                newMessage.SendOn, fromUserProfile.NickName, newMessage.FromUserId,
+                                                                                fromUserProfile.ProfileImageGuid, newMessage.ReplyTo);
 
             await Clients.Caller.ReceiveMessage(newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
                                                    true, newMessage.ChannelTypeId, newMessage.ChannelId,
-                                                   newMessage.SendOn, fromUserProfile.NickName, newMessage.FromUserId, newMessage.ReplyTo);
+                                                   newMessage.SendOn, fromUserProfile.NickName, newMessage.FromUserId,
+                                                   fromUserProfile.ProfileImageGuid, newMessage.ReplyTo);
         }
 
         public async Task DeleteMessage(long messageId)
