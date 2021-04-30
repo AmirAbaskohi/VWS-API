@@ -171,6 +171,9 @@
   <data name="No Time" xml:space="preserve">
     <value>بدون زمان</value>
   </data>
+  <data name="Non-Urgent" xml:space="preserve">
+    <value>غیر اورژانسی</value>
+  </data>
   <data name="Personal" xml:space="preserve">
     <value>شخصی</value>
   </data>
@@ -212,6 +215,9 @@
   </data>
   <data name="Task does not have the tag." xml:space="preserve">
     <value>تسک دارای تگ انتخاب شده نیست.</value>
+  </data>
+  <data name="Task emergency updated updated from {0} to {1} by {2}." xml:space="preserve">
+    <value>وضعیت اورژانس تسک از {0} به {1} تغییر کرد.</value>
   </data>
   <data name="Task end date updated from {0} to {1} by {2}." xml:space="preserve">
     <value>تاریخ شروع تسک از {0} به {1} توسط {2} به روز شد.</value>
@@ -260,6 +266,9 @@
   </data>
   <data name="UnderDone" xml:space="preserve">
     <value>انجام نشده</value>
+  </data>
+  <data name="Urgent" xml:space="preserve">
+    <value>اورژانسی</value>
   </data>
   <data name="User does not exist." xml:space="preserve">
     <value>کاربر وجود ندارد.</value>

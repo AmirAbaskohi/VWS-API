@@ -1382,7 +1382,8 @@ namespace vws.web.Controllers._project
                     CheckLists = _taskManagerService.GetCheckLists(projectTask.Id),
                     Tags = _taskManagerService.GetTaskTags(projectTask.Id),
                     Comments = await _taskManagerService.GetTaskComments(projectTask.Id),
-                    Attachments = _taskManagerService.GetTaskAttachments(projectTask.Id)
+                    Attachments = _taskManagerService.GetTaskAttachments(projectTask.Id),
+                    IsUrgent = projectTask.IsUrgent
                 });
             }
             response.Value = result;

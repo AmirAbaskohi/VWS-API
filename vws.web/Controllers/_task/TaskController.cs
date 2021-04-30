@@ -613,7 +613,8 @@ namespace vws.web.Controllers._task
                 Guid = Guid.NewGuid(),
                 TaskPriorityId = model.PriorityId,
                 TeamId = model.TeamId,
-                TaskStatusId = (int)model.StatusId
+                TaskStatusId = (int)model.StatusId,
+                IsUrgent = model.IsUrgent
             };
 
             if (newTask.TeamId == null && model.ProjectId != null)
@@ -660,7 +661,8 @@ namespace vws.web.Controllers._task
                 CheckLists = _taskManager.GetCheckLists(newTask.Id),
                 Tags = _taskManager.GetTaskTags(newTask.Id),
                 Comments = await _taskManager.GetTaskComments(newTask.Id),
-                Attachments = _taskManager.GetTaskAttachments(newTask.Id)
+                Attachments = _taskManager.GetTaskAttachments(newTask.Id),
+                IsUrgent = newTask.IsUrgent
             };
 
             await AddCreateTaaskHistory(newTaskResponseModel, newTask.CreatedBy);
@@ -920,7 +922,90 @@ namespace vws.web.Controllers._task
             usersAssignedTo.Remove(LoggedInUserId.Value);
             string[] arguments = { selectedTask.Title, ((SeedDataEnum.TaskPriority)lastPriority).ToString(), ((SeedDataEnum.TaskPriority)selectedTask.TaskPriorityId).ToString(), LoggedInNickName };
             bool[] argumentsLocalize = { false, true, true, false };
-            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "Your task priority with title <b>«{0}»</b> has been updated from <b>«{1}»</b>. to <b>«{2}»</b>. by <b>«{3}»</b>.", "Task Update", arguments, argumentsLocalize);
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "Your task priority with title <b>«{0}»</b> has been updated from <b>«{1}»</b> to <b>«{2}»</b> by <b>«{3}»</b>.", "Task Update", arguments, argumentsLocalize);
+
+            _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
+
+            response.Message = "Task priority updated successfully!";
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("updateUrgent")]
+        public async Task<IActionResult> UpdateTaskUrgent(long id, bool isUrgent)
+        {
+            var response = new ResponseModel();
+
+            var selectedTask = await _vwsDbContext.GetTaskAsync(id);
+            if (selectedTask == null || selectedTask.IsDeleted)
+            {
+                response.Message = "Task not found";
+                response.AddError(_localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!_permissionService.HasAccessToTask(LoggedInUserId.Value, id))
+            {
+                response.AddError(_localizer["You don't have access to this task."]);
+                response.Message = "Task access forbidden";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            var lastIsUrgent = selectedTask.IsUrgent;
+
+            selectedTask.IsUrgent = isUrgent;
+            selectedTask.ModifiedBy = LoggedInUserId.Value;
+            selectedTask.ModifiedOn = DateTime.Now;
+            _vwsDbContext.Save();
+
+            #region History
+            var newTaskHistory = new TaskHistory()
+            {
+                EventTime = selectedTask.ModifiedOn,
+                Event = "Task emergency updated updated from {0} to {1} by {2}.",
+                GeneralTaskId = selectedTask.Id
+            };
+            _vwsDbContext.AddTaskHistory(newTaskHistory);
+            _vwsDbContext.Save();
+            var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = lastIsUrgent ? "Urgent" : "Non-Urgent",
+                TaskHistoryId = newTaskHistory.Id,
+                ShouldBeLocalized = true
+            });
+            _vwsDbContext.Save();
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedTask.IsUrgent ? "Urgent" : "Non-Urgent",
+                TaskHistoryId = newTaskHistory.Id,
+                ShouldBeLocalized = true
+            });
+            _vwsDbContext.Save();
+            _vwsDbContext.AddTaskHistoryParameter(new TaskHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                TaskHistoryId = newTaskHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
+            var usersAssignedTo = _taskManager.GetAssignedTo(id).Select(user => user.UserId).ToList();
+            usersAssignedTo.Add(selectedTask.CreatedBy);
+            usersAssignedTo = usersAssignedTo.Distinct().ToList();
+            usersAssignedTo.Remove(LoggedInUserId.Value);
+            string[] arguments = { selectedTask.Title, lastIsUrgent ? "Urgent" : "Non-Urgent", selectedTask.IsUrgent ? "Urgent" : "Non-Urgent", LoggedInNickName };
+            bool[] argumentsLocalize = { false, true, true, false };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, usersAssignedTo, "Your task emergency with title <b>«{0}»</b> has been updated from <b>«{1}»</b> to <b>«{2}»</b> by <b>«{3}»</b>.", "Task Update", arguments, argumentsLocalize);
 
             _notificationService.SendMultipleNotification(usersAssignedTo, (byte)SeedDataEnum.NotificationTypes.Task, newTaskHistory.Id);
 
@@ -1490,7 +1575,8 @@ namespace vws.web.Controllers._task
                     CheckLists = _taskManager.GetCheckLists(userTask.Id),
                     Tags = _taskManager.GetTaskTags(userTask.Id),
                     Comments = await _taskManager.GetTaskComments(userTask.Id),
-                    Attachments = _taskManager.GetTaskAttachments(userTask.Id)
+                    Attachments = _taskManager.GetTaskAttachments(userTask.Id),
+                    IsUrgent = userTask.IsUrgent
                 });
             }
             return response;
@@ -1553,7 +1639,8 @@ namespace vws.web.Controllers._task
                         CheckLists = _taskManager.GetCheckLists(userTask.Id),
                         Tags = _taskManager.GetTaskTags(userTask.Id),
                         Comments = await _taskManager.GetTaskComments(userTask.Id),
-                        Attachments = _taskManager.GetTaskAttachments(userTask.Id)
+                        Attachments = _taskManager.GetTaskAttachments(userTask.Id),
+                        IsUrgent = userTask.IsUrgent
                     });
                 }
             }

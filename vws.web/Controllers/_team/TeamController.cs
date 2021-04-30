@@ -1023,7 +1023,8 @@ namespace vws.web.Controllers._team
                     CheckLists = _taskManagerService.GetCheckLists(teamTask.Id),
                     Tags = _taskManagerService.GetTaskTags(teamTask.Id),
                     Comments = await _taskManagerService.GetTaskComments(teamTask.Id),
-                    Attachments = _taskManagerService.GetTaskAttachments(teamTask.Id)
+                    Attachments = _taskManagerService.GetTaskAttachments(teamTask.Id),
+                    IsUrgent = teamTask.IsUrgent
                 });
 
             response.Value = tasks;

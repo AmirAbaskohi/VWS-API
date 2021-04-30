@@ -297,6 +297,9 @@
   <data name="No Time" xml:space="preserve">
     <value>No Time</value>
   </data>
+  <data name="Non-Urgent" xml:space="preserve">
+    <value>Non-Urgent</value>
+  </data>
   <data name="Personal" xml:space="preserve">
     <value>Personal</value>
   </data>
@@ -306,17 +309,23 @@
   <data name="UnderDone" xml:space="preserve">
     <value>UnderDone</value>
   </data>
+  <data name="Urgent" xml:space="preserve">
+    <value>Urgent</value>
+  </data>
   <data name="You have been unassigned from task with title &lt;b&gt;«{0}»&lt;/b&gt; by &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
     <value>You have been unassigned from task with title &lt;b&gt;«{0}»&lt;/b&gt; by &lt;b&gt;«{1}»&lt;/b&gt;.</value>
   </data>
   <data name="Your task desciption with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>Your task desciption with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;.</value>
   </data>
+  <data name="Your task emergency with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>Your task emergency with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;.</value>
+  </data>
   <data name="Your task end date with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>Your task end date with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;.</value>
   </data>
-  <data name="Your task priority with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt;. to &lt;b&gt;«{2}»&lt;/b&gt;. by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>Your task priority with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt;. to &lt;b&gt;«{2}»&lt;/b&gt;. by &lt;b&gt;«{3}»&lt;/b&gt;.</value>
+  <data name="Your task priority with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>Your task priority with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;.</value>
   </data>
   <data name="Your task start date with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>Your task start date with title &lt;b&gt;«{0}»&lt;/b&gt; has been updated from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; by &lt;b&gt;«{3}»&lt;/b&gt;.</value>

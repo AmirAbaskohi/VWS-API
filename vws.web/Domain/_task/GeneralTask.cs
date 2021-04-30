@@ -55,6 +55,8 @@ namespace vws.web.Domain._task
         
         public int TaskStatusId { get; set; }
 
+        public bool IsUrgent { get; set; }
+
         public virtual TaskPriority TaskPriority { get; set; }
 
         public virtual TaskScheduleType TaskScheduleType { get; set; }
