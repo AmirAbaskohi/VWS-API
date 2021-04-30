@@ -89,13 +89,13 @@ namespace vws.web.Services
                 Bitmap final = Resize(image, new Size(size, size), format);
                 final.Save(path);
             }
+
+            image.Dispose();
         }
 
         public bool IsImage(IFormFile postedFile)
         {
-            //-------------------------------------------
             //  Check the image mime types
-            //-------------------------------------------
             if (postedFile.ContentType.ToLower() != "image/jpg" &&
                         postedFile.ContentType.ToLower() != "image/jpeg" &&
                         postedFile.ContentType.ToLower() != "image/pjpeg" &&
@@ -106,9 +106,7 @@ namespace vws.web.Services
                 return false;
             }
 
-            //-------------------------------------------
             //  Check the image extension
-            //-------------------------------------------
             if (Path.GetExtension(postedFile.FileName).ToLower() != ".jpg"
                 && Path.GetExtension(postedFile.FileName).ToLower() != ".png"
                 && Path.GetExtension(postedFile.FileName).ToLower() != ".jpeg")
@@ -116,18 +114,14 @@ namespace vws.web.Services
                 return false;
             }
 
-            //-------------------------------------------
             //  Attempt to read the file and check the first bytes
-            //-------------------------------------------
             try
             {
                 if (!postedFile.OpenReadStream().CanRead)
                 {
                     return false;
                 }
-                //------------------------------------------
                 //check whether the image size exceeding the limit or not
-                //------------------------------------------ 
                 if (postedFile.Length < ImageMinimumBytes)
                 {
                     return false;
@@ -147,10 +141,7 @@ namespace vws.web.Services
                 return false;
             }
 
-            //-------------------------------------------
-            //  Try to instantiate new Bitmap, if .NET will throw exception
-            //  we can assume that it's not a valid image
-            //-------------------------------------------
+            // Try to instantiate new Bitmap, if .NET will throw exception we can assume that it's not a valid image
 
             try
             {
@@ -174,7 +165,7 @@ namespace vws.web.Services
         {
             using (var img = Image.FromStream(image.OpenReadStream()))
             {
-                if (img.Width != img.Height)
+                if (Math.Abs(img.Width - img.Height) <= 5)
                     return false;
                 return true;
             }
