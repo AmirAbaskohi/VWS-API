@@ -16,6 +16,8 @@ namespace vws.web.Domain._notification
         
         public bool IsSeen { get; set; }
 
+        public bool IsReceived { get; set; }
+
         public byte NotificationTypeId { get; set; }
 
         public long ActivityId { get; set; }

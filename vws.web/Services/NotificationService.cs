@@ -238,7 +238,7 @@ namespace vws.web.Services
                         UserHandler.ConnectedIds[userIds[i].ToString()]
                                    .ConnectionIds
                                    .ForEach(connectionId => _hub.Clients.Client(connectionId)
-                                                                        .ReceiveNotification(new NotificationModel()
+                                                                        .ReceiveNotification(new NotificationResponseModel()
                                                                         {
                                                                             Id = notificationIds[i],
                                                                             Message = LocalizeActivityByType(message, cultures[i], notificationTypeId),

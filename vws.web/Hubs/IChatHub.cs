@@ -17,7 +17,7 @@ namespace vws.web.Hubs
 
         Task UnmuteChannel(Guid channelId, byte channelTypeId);
 
-        Task ReceiveNotification(NotificationModel notification);
+        Task ReceiveNotification(NotificationResponseModel notification);
 
         Task ReceiveDeleteMessage(long messageId, Guid channelId, byte channelTypeId);
 

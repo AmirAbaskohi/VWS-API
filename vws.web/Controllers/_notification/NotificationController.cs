@@ -69,6 +69,35 @@ namespace vws.web.Controllers._notification
             return Ok(response);
         }
 
+        [HttpPut]
+        [Authorize]
+        [Route("markAsReceived")]
+        public IActionResult MarkAsReceived()
+        {
+            var response = new ResponseModel();
+            var userId = LoggedInUserId.Value;
+
+            var allNonReceivedNotifs = _vwsDbContext.Notifications.Where(notif => notif.UserProfileId == userId && !notif.IsReceived);
+            foreach (var nonReceivedNotif in allNonReceivedNotifs)
+            {
+                nonReceivedNotif.IsReceived = true;
+            }
+            _vwsDbContext.Save();
+
+            response.Message = "Notifications marked as received.";
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getNumberOfNonReceived")]
+        public long GetNumberOfNonReceivedNotifications()
+        {
+            var userId = LoggedInUserId.Value;
+
+            return _vwsDbContext.Notifications.Where(notif => notif.UserProfileId == userId && !notif.IsReceived).LongCount();
+        }
+
         [HttpGet]
         [Authorize]
         [Route("get")]
@@ -78,8 +107,8 @@ namespace vws.web.Controllers._notification
             var selectedUser = _vwsDbContext.UserProfiles.Include(userProfile => userProfile.Culture).FirstOrDefault(userProfile => userProfile.UserId == userId);
             var userCulture = selectedUser.Culture != null ? selectedUser.Culture.CultureAbbreviation : "en-US";
             var userNotifs = _vwsDbContext.Notifications.Where(notification => notification.UserProfileId == userId);
-            var seenNotifications = new List<NotificationModel>();
-            var unSeenNotifications = new List<NotificationModel>();
+            var seenNotifications = new List<NotificationResponseModel>();
+            var unSeenNotifications = new List<NotificationResponseModel>();
 
             string message;
             List<string> parameters;
@@ -123,7 +152,7 @@ namespace vws.web.Controllers._notification
                     notifiedOnName = history.GeneralTask.Title;
                     eventTime = history.EventTime;
                 }
-                var notifModel = new NotificationModel()
+                var notifModel = new NotificationResponseModel()
                 {
                     Id = userNotif.Id,
                     Message = _notificationService.LocalizeActivityByType(message, userCulture, userNotif.NotificationTypeId),
@@ -133,7 +162,8 @@ namespace vws.web.Controllers._notification
                     NotifiedOnName = notifiedOnName,
                     Parameters = _notificationService.LocalizeActivityParametersByType(parameters, parametersShouldBeLocalized, userCulture, userNotif.NotificationTypeId),
                     ParameterTypes = parametersType,
-                    IsSeen = false
+                    IsSeen = userNotif.IsSeen,
+                    IsReceived = userNotif.IsReceived
                 };
                 if (userNotif.IsSeen)
                     seenNotifications.Add(notifModel);
