@@ -32,6 +32,7 @@
     <PackageReference Include="Swashbuckle.Core" Version="5.6.0" />
     <PackageReference Include="Google.Apis.Auth" Version="1.49.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="5.0.2" />
+    <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
   </ItemGroup>
 
   <ItemGroup>

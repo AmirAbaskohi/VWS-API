@@ -29,6 +29,7 @@ using vws.web.Services._project;
 using vws.web.Models._task;
 using vws.web.Services._task;
 using System.ComponentModel.DataAnnotations;
+using System.Drawing;
 
 namespace vws.web.Controllers._team
 {
@@ -50,6 +51,7 @@ namespace vws.web.Controllers._team
         private readonly ITaskManagerService _taskManagerService;
         private readonly INotificationService _notificationService;
         private readonly EmailAddressAttribute _emailChecker;
+        private readonly IImageService _imageService;
         #endregion
 
         #region Ctor
@@ -57,7 +59,7 @@ namespace vws.web.Controllers._team
             IVWS_DbContext vwsDbContext, IFileManager fileManager, IDepartmentManagerService departmentManager,
             ITeamManagerService teamManager, IEmailSender emailSender, IConfiguration configuration, IPermissionService permissionService,
             IProjectManagerService projectManager, ITaskManagerService taskManagerService,
-            INotificationService notificationService)
+            INotificationService notificationService, IImageService imageService)
         {
             _userManager = userManager;
             _localizer = localizer;
@@ -71,6 +73,7 @@ namespace vws.web.Controllers._team
             _projectManager = projectManager;
             _taskManagerService = taskManagerService;
             _notificationService = notificationService;
+            _imageService = imageService;
             _emailChecker = new EmailAddressAttribute();
         }
         #endregion
@@ -660,6 +663,20 @@ namespace vws.web.Controllers._team
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
+            if (!_imageService.IsImage(uploadedImage))
+            {
+                response.AddError(_localizer["Invalid file."]);
+                response.Message = "Invalid file";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!_imageService.IsImageSquare(uploadedImage))
+            {
+                response.AddError(_localizer["Image must be square."]);
+                response.Message = "Invalid aspect ratio";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
             ResponseModel<File> fileResponse;
 
             if (selectedTeam.TeamImage != null)
@@ -751,6 +768,8 @@ namespace vws.web.Controllers._team
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Team Update", arguments);
 
             _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Team, newHistory.Id);
+
+            _imageService.SaveInOtherQualities(fileResponse.Value);
 
             response.Value = fileResponse.Value.FileContainerGuid;
             response.Message = "Team image added successfully!";

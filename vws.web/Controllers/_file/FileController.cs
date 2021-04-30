@@ -179,7 +179,7 @@ namespace vws.web.Controllers._file
 
         [HttpGet]
         [Route("get")]
-        public async Task<IActionResult> GetFile(Guid id)
+        public async Task<IActionResult> GetFile(Guid id, string quality)
         {
             var response = new ResponseModel();
             var fileContainer = await _vwsDbContext.GetFileContainerAsync(id);
@@ -193,6 +193,29 @@ namespace vws.web.Controllers._file
             string address = selectedFile.Address;
             string fileName = selectedFile.Name;
 
+            if (!System.IO.File.Exists(address))
+            {
+                response.AddError(_localizer["File not found."]);
+                response.Message = "File not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!String.IsNullOrEmpty(quality))
+            {
+                var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), $"Upload{Path.DirectorySeparatorChar}");
+                string filePath = address;
+                filePath = filePath.Replace(uploadPath, "");
+                string[] subs = filePath.Split(Path.DirectorySeparatorChar);
+                filePath = "";
+                for (int i = 0; i < subs.Length - 1; i++)
+                {
+                    filePath += subs[i];
+                    if (i != subs.Length - 2)
+                        filePath += Path.DirectorySeparatorChar;
+                }
+                var path = uploadPath + Path.DirectorySeparatorChar + filePath + Path.DirectorySeparatorChar + selectedFile.Id.ToString() + "-" + quality + "." + selectedFile.Extension;
+                address = System.IO.File.Exists(path) ? path : address;
+            }
 
             var memory = new MemoryStream();
             using (var stream = new FileStream(address, FileMode.Open))

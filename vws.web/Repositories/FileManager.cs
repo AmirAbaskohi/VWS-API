@@ -100,7 +100,8 @@ namespace vws.web.Repositories
 
         public void DeleteFile(string path)
         {
-            File.Delete(path);
+            if (File.Exists(path))
+                File.Delete(path);
         }
     }
 }

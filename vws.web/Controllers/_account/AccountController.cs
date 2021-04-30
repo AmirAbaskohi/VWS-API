@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Drawing;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net;
@@ -26,6 +27,7 @@ using vws.web.Enums;
 using vws.web.Models;
 using vws.web.Models._account;
 using vws.web.Repositories;
+using vws.web.Services;
 using static vws.web.EmailTemplates.EmailTemplateTypes;
 
 namespace vws.web.Controllers._account
@@ -44,12 +46,13 @@ namespace vws.web.Controllers._account
         private readonly Random _random;
         private readonly IVWS_DbContext _vwsDbContext;
         private readonly IFileManager _fileManager;
+        private readonly IImageService _imageService;
         #endregion
 
         #region Ctor
         public AccountController(UserManager<ApplicationUser> userManager, IConfiguration configuration, IEmailSender emailSender,
             IPasswordHasher<ApplicationUser> passwordHasher, IStringLocalizer<AccountController> localizer,
-            IVWS_DbContext vwsDbContext, IFileManager fileManager)
+            IVWS_DbContext vwsDbContext, IFileManager fileManager, IImageService imageService)
         {
             _userManager = userManager;
             _configuration = configuration;
@@ -60,6 +63,7 @@ namespace vws.web.Controllers._account
             _random = new Random();
             _vwsDbContext = vwsDbContext;
             _fileManager = fileManager;
+            _imageService = imageService;
         }
         #endregion
 
@@ -190,6 +194,20 @@ namespace vws.web.Controllers._account
             }
             var uploadedImage = formFiles.Count == 0 ? image : formFiles[0];
 
+            if (!_imageService.IsImage(uploadedImage))
+            {
+                response.AddError(_localizer["Invalid file."]);
+                response.Message = "Invalid file";
+                return response;
+            }
+
+            if (!_imageService.IsImageSquare(uploadedImage))
+            {
+                response.AddError(_localizer["Image must be square."]);
+                response.Message = "Invalid aspect ratio";
+                return response;
+            }
+
             ResponseModel<File> fileResponse;
             UserProfile userProfile = await _vwsDbContext.GetUserProfileAsync(userId);
             if (userProfile.ProfileImage != null)
@@ -235,6 +253,9 @@ namespace vws.web.Controllers._account
                 userProfile.ProfileImageSecurityStamp = Guid.NewGuid();
                 _vwsDbContext.Save();
             }
+
+            _imageService.SaveInOtherQualities(fileResponse.Value);
+
             response.Value = fileResponse.Value.FileContainerGuid;
             response.Message = "User image added successfully!";
             return response;

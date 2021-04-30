@@ -16,6 +16,7 @@ using vws.web.Domain._department;
 using System.Collections.Generic;
 using vws.web.Domain._file;
 using vws.web.Services._department;
+using vws.web.Services;
 
 namespace vws.web.Controllers._department
 {
@@ -28,16 +29,19 @@ namespace vws.web.Controllers._department
         private readonly IVWS_DbContext _vwsDbContext;
         private readonly IFileManager _fileManager;
         private readonly IDepartmentManagerService _departmentManager;
+        private readonly IImageService _imageService;
         #endregion
         
         #region Ctorr
         public DepartmentController(IStringLocalizer<DepartmentController> localizer, IVWS_DbContext vwsDbContext,
-                                    IFileManager fileManager, IDepartmentManagerService departmentManager)
+                                    IFileManager fileManager, IDepartmentManagerService departmentManager,
+                                    IImageService imageService)
         {
             _localizer = localizer;
             _vwsDbContext = vwsDbContext;
             _fileManager = fileManager;
             _departmentManager = departmentManager;
+            _imageService = imageService;
         }
         #endregion
 
@@ -280,6 +284,20 @@ namespace vws.web.Controllers._department
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
+            if (!_imageService.IsImage(uploadedImage))
+            {
+                response.AddError(_localizer["Invalid file."]);
+                response.Message = "Invalid file";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!_imageService.IsImageSquare(uploadedImage))
+            {
+                response.AddError(_localizer["Image must be square."]);
+                response.Message = "Invalid aspect ratio";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
             ResponseModel<File> fileResponse;
 
             if (selectedDepartment.DepartmentImage != null)
@@ -324,6 +342,8 @@ namespace vws.web.Controllers._department
             selectedDepartment.ModifiedBy = LoggedInUserId.Value;
             selectedDepartment.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
+
+            _imageService.SaveInOtherQualities(fileResponse.Value);
 
             response.Value = fileResponse.Value.FileContainerGuid;
             response.Message = "Department image added successfully!";

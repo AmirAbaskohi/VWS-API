@@ -132,8 +132,14 @@
   <data name="High" xml:space="preserve">
     <value>High</value>
   </data>
+  <data name="Image must be square." xml:space="preserve">
+    <value>Image must be square.</value>
+  </data>
   <data name="Invalid emails." xml:space="preserve">
     <value>Invalid emails.</value>
+  </data>
+  <data name="Invalid file." xml:space="preserve">
+    <value>Invalid file.</value>
   </data>
   <data name="Invalid users." xml:space="preserve">
     <value>Invalid users.</value>

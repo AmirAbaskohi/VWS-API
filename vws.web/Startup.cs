@@ -144,6 +144,8 @@ namespace vws.web
 
             services.AddScoped<ICalenderManagerService, CalenderManagerService>();
 
+            services.AddScoped<IImageService, ImageService>();
+
             services.AddScoped<TokenValidationFilterAttribute>();
 
             services

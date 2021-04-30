@@ -123,6 +123,9 @@
   <data name="File extension is not allowed." xml:space="preserve">
     <value>File extension is not allowed.</value>
   </data>
+  <data name="File not found." xml:space="preserve">
+    <value>File not found.</value>
+  </data>
   <data name="File size is not allowed." xml:space="preserve">
     <value>File size is not allowed.</value>
   </data>

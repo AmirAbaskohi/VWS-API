@@ -126,8 +126,14 @@
   <data name="File size is not allowed." xml:space="preserve">
     <value>حجم فایل معتبر نیست.</value>
   </data>
+  <data name="Image must be square." xml:space="preserve">
+    <value>تصویر باید مربع باشد.</value>
+  </data>
   <data name="Invalid department users." xml:space="preserve">
     <value>اعضای دپارتمان نامعتبر است.</value>
+  </data>
+  <data name="Invalid file." xml:space="preserve">
+    <value>فایل نامعتبر است.</value>
   </data>
   <data name="Invalid team users." xml:space="preserve">
     <value>اعضای تیم نامعتبر است.</value>

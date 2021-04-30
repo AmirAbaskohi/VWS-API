@@ -126,8 +126,14 @@
   <data name="File size is not allowed." xml:space="preserve">
     <value>File size is not allowed.</value>
   </data>
+  <data name="Image must be square." xml:space="preserve">
+    <value>Image must be square.</value>
+  </data>
   <data name="Invalid department users." xml:space="preserve">
     <value>Invalid department users.</value>
+  </data>
+  <data name="Invalid file." xml:space="preserve">
+    <value>Invalid file.</value>
   </data>
   <data name="Invalid team users." xml:space="preserve">
     <value>Invalid team users.</value>

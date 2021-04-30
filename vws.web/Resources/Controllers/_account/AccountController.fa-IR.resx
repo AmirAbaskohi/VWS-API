@@ -204,4 +204,10 @@
   <data name="Invalid security stamp." xml:space="preserve">
     <value>توکن نامعتبر. لطفا دوباره وارد شوید.</value>
   </data>
+  <data name="Image must be square." xml:space="preserve">
+    <value>تصویر باید مربع باشد.</value>
+  </data>
+  <data name="Invalid file." xml:space="preserve">
+    <value>فایل نامعتبر است.</value>
+  </data>
 </root>

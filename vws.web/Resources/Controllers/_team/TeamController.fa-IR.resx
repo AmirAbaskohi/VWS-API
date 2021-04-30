@@ -132,8 +132,14 @@
   <data name="High" xml:space="preserve">
     <value>بالا</value>
   </data>
+  <data name="Image must be square." xml:space="preserve">
+    <value>تصویر باید مربع باشد.</value>
+  </data>
   <data name="Invalid emails." xml:space="preserve">
     <value>ایمیل ها نامعتبر اند.</value>
+  </data>
+  <data name="Invalid file." xml:space="preserve">
+    <value>فایل نامعتبر است.</value>
   </data>
   <data name="Invalid users." xml:space="preserve">
     <value>کاربران نامعتبر اند.</value>
