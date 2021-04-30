@@ -765,7 +765,7 @@ namespace vws.web.Controllers._task
         {
             var response = new ResponseModel();
 
-            if (newDescription.Length > 2000)
+            if (!String.IsNullOrEmpty(newDescription) && newDescription.Length > 2000)
             {
                 response.Message = "Task model data has problem";
                 response.AddError(_localizer["Length of description is more than 2000 characters."]);
