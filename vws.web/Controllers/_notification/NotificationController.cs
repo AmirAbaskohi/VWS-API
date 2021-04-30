@@ -141,8 +141,8 @@ namespace vws.web.Controllers._notification
                     unSeenNotifications.Add(notifModel);
             }
 
-            seenNotifications = seenNotifications.OrderBy(notifModel => notifModel.NotificationTime).ToList();
-            unSeenNotifications = unSeenNotifications.OrderBy(notifModel => notifModel.NotificationTime).ToList();
+            seenNotifications = seenNotifications.OrderByDescending(notifModel => notifModel.NotificationTime).ToList();
+            unSeenNotifications = unSeenNotifications.OrderByDescending(notifModel => notifModel.NotificationTime).ToList();
 
             return new { SeenNotifs = seenNotifications, UnSeenNotifs = unSeenNotifications };
         }
