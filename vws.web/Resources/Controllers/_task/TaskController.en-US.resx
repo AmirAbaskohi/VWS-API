@@ -228,6 +228,9 @@
   <data name="Task has been archived by {0}." xml:space="preserve">
     <value>Task has been archived by {0}.</value>
   </data>
+  <data name="Task is archived already." xml:space="preserve">
+    <value>Task is archived already.</value>
+  </data>
   <data name="Task is assigned to user before." xml:space="preserve">
     <value>Task is assigned to user before.</value>
   </data>

@@ -225,6 +225,9 @@
   <data name="Task has been archived by {0}." xml:space="preserve">
     <value>تسک توسط {0} آرشیو شد.</value>
   </data>
+  <data name="Task is archived already." xml:space="preserve">
+    <value>تسک در حال حاضر آرشیو شده است.</value>
+  </data>
   <data name="Task is assigned to user before." xml:space="preserve">
     <value>تسک قبلا به کاربر اختصاص داده شده است.</value>
   </data>

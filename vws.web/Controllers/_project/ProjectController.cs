@@ -395,11 +395,19 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
+            if (selectedProject.Name == newName)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
+            }
+
             var lastName = selectedProject.Name;
 
             selectedProject.Name = newName;
             selectedProject.ModifiedOn = DateTime.Now;
             selectedProject.ModifiedBy = userId;
+            _vwsDbContext.Save();
+
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = selectedProject.Id,
@@ -478,6 +486,12 @@ namespace vws.web.Controllers._project
                 response.AddError(_localizer["Length of description is more than 2000 characters."]);
                 response.Message = "Invalid model.";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (selectedProject.Description == newDescription)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
             }
 
             var lastDescription = selectedProject.Description;
@@ -565,11 +579,19 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
+            if (selectedProject.Color == newColor)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
+            }
+
             var lastColor = selectedProject.Color;
 
             selectedProject.Color = newColor;
             selectedProject.ModifiedOn = DateTime.Now;
             selectedProject.ModifiedBy = userId;
+            _vwsDbContext.Save();
+
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = selectedProject.Id,
@@ -650,11 +672,19 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
+            if (selectedProject.StartDate == newStartDate)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
+            }
+
             var lastStartDate = selectedProject.StartDate;
 
             selectedProject.StartDate = newStartDate;
             selectedProject.ModifiedOn = DateTime.Now;
             selectedProject.ModifiedBy = userId;
+            _vwsDbContext.Save();
+
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = selectedProject.Id,
@@ -738,11 +768,19 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
+            if (selectedProject.EndDate == newEndDate)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
+            }
+
             var lastEndDate = selectedProject.EndDate;
 
             selectedProject.EndDate = newEndDate;
             selectedProject.ModifiedOn = DateTime.Now;
             selectedProject.ModifiedBy = userId;
+            _vwsDbContext.Save();
+
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = selectedProject.Id,
@@ -883,6 +921,12 @@ namespace vws.web.Controllers._project
 
             List<int> shouldBeRemoved = projectDepartmentsIds.Except(model.DepartmentIds).ToList();
             List<int> shouldBeAdded = model.DepartmentIds.Except(projectDepartmentsIds).ToList();
+
+            if ((isProjectPersonal && willBeProjectPersonal) || (selectedProject.TeamId == model.TeamId && shouldBeAdded.Count == 0 && shouldBeRemoved.Count == 0))
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
+            }
 
             foreach (var rmProjectDepartment in shouldBeRemoved)
             {
@@ -1126,11 +1170,18 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
+            if (selectedProject.StatusId == statusId)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
+            }
+
             var lastStatus = selectedProject.StatusId;
 
             selectedProject.StatusId = statusId;
             selectedProject.ModifiedOn = DateTime.Now;
             selectedProject.ModifiedBy = userId;
+            _vwsDbContext.Save();
 
             var newProjectHistory = new ProjectHistory()
             {

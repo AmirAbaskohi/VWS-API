@@ -381,6 +381,12 @@ namespace vws.web.Controllers._team
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
+            if (selectedTeam.Name == newName)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
+            }
+
             var hasTeamWithSameName = _vwsDbContext.TeamMembers.Any(teamMember => teamMember.UserProfileId == userId &&
                                                                     teamMember.Team.Name == newName &&
                                                                     teamMember.Team.IsDeleted == false &&
@@ -480,6 +486,12 @@ namespace vws.web.Controllers._team
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
+            if (selectedTeam.Description == newDescription)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
+            }
+
             var lastDescription = selectedTeam.Description;
 
             selectedTeam.ModifiedBy = userId;
@@ -559,6 +571,12 @@ namespace vws.web.Controllers._team
                 response.Message = "Access team is forbidden";
                 response.AddError(_localizer["You are not a member of team."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (selectedTeam.Color == newColor)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
             }
 
             var lastColor = selectedTeam.Color;
@@ -1303,13 +1321,15 @@ namespace vws.web.Controllers._team
             }
 
             selectedInviteLink.IsRevoked = true;
+            selectedTeam.ModifiedBy = userId;
+            selectedTeam.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
 
             #region History
             var newHistory = new TeamHistory()
             {
                 TeamId = selectedInviteLink.TeamId,
-                EventTime = DateTime.Now,
+                EventTime = selectedTeam.ModifiedOn,
                 Event = "Invite link with id {0} revoked by {1}."
             };
             _vwsDbContext.AddTeamHistory(newHistory);

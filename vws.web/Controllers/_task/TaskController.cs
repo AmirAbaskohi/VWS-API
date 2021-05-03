@@ -702,6 +702,12 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
+            if (selectedTask.Title == newTitle)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
+            }
+
             string lastTitle = selectedTask.Title;
 
             selectedTask.Title = newTitle;
@@ -789,6 +795,12 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
+            if (selectedTask.Description == newDescription)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
+            }
+
             string lastDescription = selectedTask.Description;
 
             selectedTask.Description = newDescription;
@@ -867,6 +879,12 @@ namespace vws.web.Controllers._task
                 response.AddError(_localizer["You don't have access to this task."]);
                 response.Message = "Task access forbidden";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            if (selectedTask.TaskPriorityId == newPriority)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
             }
 
             var lastPriority = selectedTask.TaskPriorityId;
@@ -950,6 +968,12 @@ namespace vws.web.Controllers._task
                 response.AddError(_localizer["You don't have access to this task."]);
                 response.Message = "Task access forbidden";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            if (selectedTask.IsUrgent == isUrgent)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
             }
 
             var lastIsUrgent = selectedTask.IsUrgent;
@@ -1068,6 +1092,14 @@ namespace vws.web.Controllers._task
                 response.Message = "Task access forbidden";
                 response.AddError(_localizer["You don't have access to this task."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            if ((selectedTask.ProjectId == null && selectedTask.TeamId == null && projectId == null && teamId == null) ||
+                (selectedTask.ProjectId == null && selectedTask.TeamId != null && projectId == null && selectedTask.TeamId == teamId) ||
+                (selectedTask.ProjectId != null && selectedTask.ProjectId == projectId))
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
             }
 
             #region CreatingEmailAndActivityMessage
@@ -1214,6 +1246,12 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
             }
 
+            if (selectedTask.StartDate == newStartDate)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
+            }
+
             var lastStartDate = selectedTask.StartDate;
 
             selectedTask.StartDate = newStartDate;
@@ -1304,6 +1342,12 @@ namespace vws.web.Controllers._task
                 response.Message = "Task model data has problem";
                 response.AddError(_localizer["Start Date should be before End Date."]);
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
+
+            if (selectedTask.EndDate == newEndDate)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
             }
 
             var lastEndDate = selectedTask.EndDate;
@@ -1398,6 +1442,12 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
+            if (selectedTask.TaskStatusId == newStatusId)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
+            }
+
             var lastStatus = selectedTask.Status.Title;
             var lastStatusId = selectedTask.TaskStatusId;
 
@@ -1483,6 +1533,12 @@ namespace vws.web.Controllers._task
             {
                 response.Message = "Task not found";
                 response.AddError(_localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+            if (selectedTask.IsArchived)
+            {
+                response.Message = "Task archived already";
+                response.AddError(_localizer["Task is archived already."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
             if (!_permissionService.HasAccessToTask(userId, id))
@@ -2192,6 +2248,12 @@ namespace vws.web.Controllers._task
             }
             #endregion
 
+            if (selectedStatus.Title == newTitle)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
+            }
+
             selectedStatus.Title = newTitle;
             _vwsDbContext.Save();
 
@@ -2450,6 +2512,12 @@ namespace vws.web.Controllers._task
                 response.Message = "Task access forbidden";
                 response.AddError(_localizer["You don't have access to this task."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            if (selectedCheckList.Title == newTitle)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
             }
 
             var lastTitle = selectedCheckList.Title;
@@ -2757,6 +2825,12 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
+            if (selectedCheckListItem.Title == newTitle)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
+            }
+
             var lastTitle = selectedCheckListItem.Title;
 
             selectedCheckListItem.Title = newTitle;
@@ -2850,6 +2924,12 @@ namespace vws.web.Controllers._task
                 response.Message = "Task access forbidden";
                 response.AddError(_localizer["You don't have access to this task."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            if (selectedCheckListItem.IsChecked == isChecked)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
             }
 
             var lastStatus = selectedCheckListItem.IsChecked;
@@ -3220,6 +3300,12 @@ namespace vws.web.Controllers._task
             }
             #endregion
 
+            if (selectedTag.Title == newTitle)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
+            }
+
             selectedTag.Title = newTitle;
             _vwsDbContext.Save();
 
@@ -3259,6 +3345,12 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
             #endregion
+
+            if (selectedTag.Color == newColor)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
+            }
 
             selectedTag.Color = newColor;
             _vwsDbContext.Save();
@@ -3590,6 +3682,12 @@ namespace vws.web.Controllers._task
                 response.AddError(_localizer["You can not edit and delete comment before 5 minutes of your last change."]);
                 response.Message = "Can not edit and delete comment before 5 minutes of your last change";
                 return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (selectedComment.Body == newBody)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
             }
 
             string lastBody = selectedComment.Body;
