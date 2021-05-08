@@ -111,15 +111,15 @@ namespace vws.web.Controllers._chat
 
                 if (channelResponseModels[i].ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
                     readMessagesCount = _vwsDbContext.MessageReads.Include(messageRead => messageRead.Message)
-                                                                 .Where(messageRead => messageRead.ChannelId == LoggedInUserId && messageRead.Message.FromUserId == userIds[i] && messageRead.ReadBy == LoggedInUserId.Value && !messageRead.Message.IsDeleted)
+                                                                 .Where(messageRead => messageRead.ChannelId == LoggedInUserId.Value && messageRead.Message.FromUserId == userIds[i] && messageRead.ReadBy == LoggedInUserId.Value && !messageRead.Message.IsDeleted)
                                                                  .Count();
                 else
                     readMessagesCount = _vwsDbContext.MessageReads.Include(messageRead => messageRead.Message)
-                                                                  .Where(messageRead => messageRead.ChannelId == channelId && messageRead.ReadBy == LoggedInUserId.Value && !messageRead.Message.IsDeleted)
+                                                                  .Where(messageRead => messageRead.ChannelId == channelId && messageRead.Message.FromUserId != LoggedInUserId.Value && messageRead.ReadBy == LoggedInUserId.Value && !messageRead.Message.IsDeleted)
                                                                   .Count();
 
                 if (channelResponseModels[i].ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
-                    allMessagesCount = _vwsDbContext.Messages.Where(message => message.ChannelId == LoggedInUserId && message.FromUserId == userIds[i] && !message.IsDeleted)
+                    allMessagesCount = _vwsDbContext.Messages.Where(message => message.ChannelId == LoggedInUserId.Value && message.FromUserId == userIds[i] && !message.IsDeleted)
                                                              .Count();
                 else
                     allMessagesCount = _vwsDbContext.Messages.Where(message => message.ChannelId == channelId && message.FromUserId != LoggedInUserId.Value && !message.IsDeleted)
@@ -221,6 +221,51 @@ namespace vws.web.Controllers._chat
 
             return Ok(new ResponseModel<List<ChannelResponseModel>>(channelResponseModels));
 
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getNumberOfUnreadMessages")]
+        public async Task<IActionResult> GetNumberOfUnreadMessages(Guid channelId, byte channelTypeId)
+        {
+            var response = new ResponseModel<int>();
+            var userId = LoggedInUserId.Value;
+
+            if (!_channelService.DoesChannelExist(channelId, channelTypeId))
+            {
+                response.AddError(_localizer["There is no channel with given information."]);
+                response.Message = "Channel not found";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!_channelService.HasUserAccessToChannel(userId, channelId, channelTypeId))
+            {
+                response.AddError(_localizer["You do not have access to this channel."]);
+                response.Message = "Channel access denied";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            int readMessagesCount;
+            int allMessagesCount;
+            if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+                readMessagesCount = _vwsDbContext.MessageReads.Include(messageRead => messageRead.Message)
+                                                              .Where(messageRead => messageRead.ChannelId == userId && messageRead.Message.FromUserId == channelId && messageRead.ReadBy == userId && !messageRead.Message.IsDeleted)
+                                                              .Count();
+            else
+                readMessagesCount = _vwsDbContext.MessageReads.Include(messageRead => messageRead.Message)
+                                                              .Where(messageRead => messageRead.ChannelId == channelId && messageRead.Message.FromUserId != userId && messageRead.ReadBy == LoggedInUserId.Value && !messageRead.Message.IsDeleted)
+                                                              .Count();
+
+            if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+                allMessagesCount = _vwsDbContext.Messages.Where(message => message.ChannelId == LoggedInUserId && message.FromUserId == channelId && !message.IsDeleted)
+                                                         .Count();
+            else
+                allMessagesCount = _vwsDbContext.Messages.Where(message => message.ChannelId == channelId && message.FromUserId != userId && !message.IsDeleted)
+                                                         .Count();
+
+            response.Value = allMessagesCount - readMessagesCount;
+            response.Message = "Number of unread messages returned successully!";
+            return Ok(response);
         }
         #endregion
 
