@@ -70,7 +70,11 @@ namespace vws.web.Services
                 format = img.RawFormat;
             }
 
-            int[] wantedSizes = { 250, 500, 750 };
+            int[] wantedSizes = { 100, 250, 500 };
+            var minDimensionSize = Math.Min(image.Width, image.Height);
+
+            if (minDimensionSize < wantedSizes.Min())
+                return;
 
             var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), $"Upload{Path.DirectorySeparatorChar}");
             string filePath = fileResponse.Address;
@@ -83,8 +87,11 @@ namespace vws.web.Services
                 if (i != subs.Length - 2)
                     filePath += Path.DirectorySeparatorChar;
             }
+
             foreach (var size in wantedSizes)
             {
+                if (minDimensionSize < size)
+                    continue;
                 var path = uploadPath + Path.DirectorySeparatorChar + filePath + Path.DirectorySeparatorChar + fileResponse.Id.ToString() + "-" + size.ToString() + "." + fileResponse.Extension;
                 Bitmap final = Resize(image, new Size(size, size), format);
                 final.Save(path);
