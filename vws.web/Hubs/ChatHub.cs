@@ -239,10 +239,13 @@ namespace vws.web.Hubs
                                                                                 newMessage.SendOn, fromUserProfile.NickName, newMessage.FromUserId,
                                                                                 fromUserProfile.ProfileImageGuid, newMessage.ReplyTo);
 
-            await Clients.Caller.ReceiveMessage(newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
-                                                   true, newMessage.ChannelTypeId, newMessage.ChannelId,
-                                                   newMessage.SendOn, fromUserProfile.NickName, newMessage.FromUserId,
-                                                   fromUserProfile.ProfileImageGuid, newMessage.ReplyTo);
+            UserHandler.ConnectedIds[LoggedInUserId.ToString()]
+                       .ConnectionIds
+                       .ForEach(connectionId => Clients.Client(connectionId)
+                                                       .ReceiveMessage(newMessage.Id, newMessage.Body, newMessage.MessageTypeId,
+                                                                       true, newMessage.ChannelTypeId, newMessage.ChannelId,
+                                                                       newMessage.SendOn, fromUserProfile.NickName, newMessage.FromUserId,
+                                                                       fromUserProfile.ProfileImageGuid, newMessage.ReplyTo));
         }
 
         public async Task DeleteMessage(long messageId)
@@ -275,8 +278,11 @@ namespace vws.web.Hubs
             if (selectedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
             {
                 var groupName = CombineTwoGuidsInOrder(LoggedInUserId, selectedMessage.ChannelId);
-                await Clients.Caller.ReceiveDeleteMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId);
                 await Clients.OthersInGroup(groupName).ReceiveDeleteMessage(messageId, LoggedInUserId, selectedMessage.ChannelTypeId);
+                UserHandler.ConnectedIds[LoggedInUserId.ToString()]
+                       .ConnectionIds
+                       .ForEach(connectionId => Clients.Client(connectionId)
+                                                       .ReceiveDeleteMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId));
             }
             else
             {
@@ -312,8 +318,11 @@ namespace vws.web.Hubs
             if (selectedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
             {
                 var groupName = CombineTwoGuidsInOrder(LoggedInUserId, selectedMessage.ChannelId);
-                await Clients.Caller.ReceivePinMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId);
                 await Clients.OthersInGroup(groupName).ReceivePinMessage(messageId, LoggedInUserId, selectedMessage.ChannelTypeId);
+                UserHandler.ConnectedIds[LoggedInUserId.ToString()]
+                       .ConnectionIds
+                       .ForEach(connectionId => Clients.Client(connectionId)
+                                                       .ReceivePinMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId));
             }
             else
             {
@@ -346,8 +355,11 @@ namespace vws.web.Hubs
             if (selectedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
             {
                 var groupName = CombineTwoGuidsInOrder(LoggedInUserId, selectedMessage.ChannelId);
-                await Clients.Caller.ReceiveUnpinMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId);
                 await Clients.OthersInGroup(groupName).ReceiveUnpinMessage(messageId, LoggedInUserId, selectedMessage.ChannelTypeId);
+                UserHandler.ConnectedIds[LoggedInUserId.ToString()]
+                       .ConnectionIds
+                       .ForEach(connectionId => Clients.Client(connectionId)
+                                                       .ReceiveUnpinMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId));
             }
             else
             {
@@ -393,8 +405,11 @@ namespace vws.web.Hubs
             if (selectedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
             {
                 var groupName = CombineTwoGuidsInOrder(LoggedInUserId, selectedMessage.ChannelId);
-                await Clients.Caller.ReceiveEditMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId, newBody);
                 await Clients.OthersInGroup(groupName).ReceiveEditMessage(messageId, LoggedInUserId, selectedMessage.ChannelTypeId, newBody);
+                UserHandler.ConnectedIds[LoggedInUserId.ToString()]
+                       .ConnectionIds
+                       .ForEach(connectionId => Clients.Client(connectionId)
+                                                       .ReceiveEditMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId, newBody));
             }
             else
             {
@@ -429,8 +444,11 @@ namespace vws.web.Hubs
                 if (markedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
                 {
                     var groupName = CombineTwoGuidsInOrder(LoggedInUserId, markedMessage.ChannelId);
-                    await Clients.Caller.ReceiveReadMessage(messageId, markedMessage.ChannelId, markedMessage.ChannelTypeId);
                     await Clients.OthersInGroup(groupName).ReceiveReadMessage(messageId, LoggedInUserId, markedMessage.ChannelTypeId);
+                    UserHandler.ConnectedIds[LoggedInUserId.ToString()]
+                       .ConnectionIds
+                       .ForEach(connectionId => Clients.Client(connectionId)
+                                                       .ReceiveReadMessage(messageId, markedMessage.ChannelId, markedMessage.ChannelTypeId));
                 }
                 else
                 {
@@ -468,8 +486,11 @@ namespace vws.web.Hubs
             if (selectedMessage.ChannelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
             {
                 var groupName = CombineTwoGuidsInOrder(LoggedInUserId, selectedMessage.ChannelId);
-                await Clients.Caller.ReceiveDeliverMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId);
                 await Clients.OthersInGroup(groupName).ReceiveDeliverMessage(messageId, LoggedInUserId, selectedMessage.ChannelTypeId);
+                UserHandler.ConnectedIds[LoggedInUserId.ToString()]
+                       .ConnectionIds
+                       .ForEach(connectionId => Clients.Client(connectionId)
+                                                       .ReceiveDeliverMessage(messageId, selectedMessage.ChannelId, selectedMessage.ChannelTypeId));
             }
             else
             {
