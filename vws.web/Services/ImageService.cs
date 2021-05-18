@@ -173,8 +173,8 @@ namespace vws.web.Services
             using (var img = Image.FromStream(image.OpenReadStream()))
             {
                 if (Math.Abs(img.Width - img.Height) <= 5)
-                    return false;
-                return true;
+                    return true;
+                return false;
             }
         }
     }
