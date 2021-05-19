@@ -156,21 +156,21 @@ namespace vws.web.Services
 
             // Try to instantiate new Bitmap, if .NET will throw exception we can assume that it's not a valid image
 
-            try
-            {
-                using (var bitmap = new Bitmap(postedFile.OpenReadStream()))
-                {
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.LogInformation(e.Message);
-                return false;
-            }
-            finally
-            {
-                postedFile.OpenReadStream().Position = 0;
-            }
+            //try
+            //{
+            //    using (var bitmap = new Bitmap(postedFile.OpenReadStream()))
+            //    {
+            //    }
+            //}
+            //catch (Exception e)
+            //{
+            //    _logger.LogInformation(e.Message);
+            //    return false;
+            //}
+            //finally
+            //{
+            //    postedFile.OpenReadStream().Position = 0;
+            //}
 
             return true;
         }
