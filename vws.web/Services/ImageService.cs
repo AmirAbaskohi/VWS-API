@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -14,12 +15,12 @@ namespace vws.web.Services
 {
     public class ImageService : IImageService
     {
-        private readonly IVWS_DbContext _vwsDbContext;
+        private ILogger _logger;
         private const int ImageMinimumBytes = 512;
 
-        public ImageService(IVWS_DbContext vwsDbContext)
+        public ImageService(ILogger<IImageService> logger)
         {
-            _vwsDbContext = vwsDbContext;
+            _logger = logger;
         }
 
         private Bitmap Resize(Bitmap imgPhoto, Size objSize, ImageFormat enuType)
@@ -110,6 +111,7 @@ namespace vws.web.Services
                         postedFile.ContentType.ToLower() != "image/x-png" &&
                         postedFile.ContentType.ToLower() != "image/png")
             {
+                _logger.LogInformation("IsImage : check the image mime types");
                 return false;
             }
 
@@ -118,6 +120,7 @@ namespace vws.web.Services
                 && Path.GetExtension(postedFile.FileName).ToLower() != ".png"
                 && Path.GetExtension(postedFile.FileName).ToLower() != ".jpeg")
             {
+                _logger.LogInformation("IsImage : check image extension");
                 return false;
             }
 
@@ -126,11 +129,13 @@ namespace vws.web.Services
             {
                 if (!postedFile.OpenReadStream().CanRead)
                 {
+                    _logger.LogInformation("IsImage : can read");
                     return false;
                 }
                 //check whether the image size exceeding the limit or not
                 if (postedFile.Length < ImageMinimumBytes)
                 {
+                    _logger.LogInformation("IsImage : exceeding the limit");
                     return false;
                 }
 
@@ -140,6 +145,7 @@ namespace vws.web.Services
                 if (Regex.IsMatch(content, @"<script|<html|<head|<title|<body|<pre|<table|<a\s+href|<img|<plaintext|<cross\-domain\-policy",
                     RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Multiline))
                 {
+                    _logger.LogInformation("IsImage : last if");
                     return false;
                 }
             }
@@ -158,6 +164,7 @@ namespace vws.web.Services
             }
             catch (Exception)
             {
+                _logger.LogInformation("IsImage : Catch");
                 return false;
             }
             finally
