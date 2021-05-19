@@ -162,9 +162,9 @@ namespace vws.web.Services
                 {
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                _logger.LogInformation("IsImage : Catch");
+                _logger.LogInformation(e.Message);
                 return false;
             }
             finally
