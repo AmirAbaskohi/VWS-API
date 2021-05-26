@@ -129,6 +129,9 @@
   <data name="File size is not allowed." xml:space="preserve">
     <value>حجم فایل معتبر نیست.</value>
   </data>
+  <data name="Invalid form." xml:space="preserve">
+    <value>فرم نامعتبر است.</value>
+  </data>
   <data name="There is more than one file." xml:space="preserve">
     <value>بیشتر از یک فایل آپلود شده است.</value>
   </data>

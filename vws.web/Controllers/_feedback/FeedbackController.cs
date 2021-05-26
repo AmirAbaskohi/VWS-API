@@ -11,7 +11,6 @@ using vws.web.Domain._feedback;
 using vws.web.Domain._file;
 using vws.web.Models;
 using vws.web.Models._account;
-using vws.web.Models._feedback;
 using vws.web.Repositories;
 
 namespace vws.web.Controllers._feedback
@@ -39,18 +38,33 @@ namespace vws.web.Controllers._feedback
         [HttpPost]
         [Authorize]
         [Route("sendFeedback")]
-        public async Task<IActionResult> SendFeedback(IFormFile attachment, [FromForm] FeedbackModel model)
+        public async Task<IActionResult> SendFeedback(IFormFile attachment)
         {
             var response = new ResponseModel();
 
-            if (String.IsNullOrEmpty(model.Title) || model.Title.Length > 250)
+            string title = "";
+            string description = "";
+
+            try
+            {
+                title = Request.Form.First(e => e.Key == "title").Value.ToString();
+                description = Request.Form.First(e => e.Key == "description").Value.ToString();
+            }
+            catch(Exception)
+            {
+                response.AddError(_localizer["Invalid form."]);
+                response.Message = "Invalid form.";
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (String.IsNullOrEmpty(title) || title.Length > 250)
             {
                 response.Message = "Invalid model";
                 response.AddError(_localizer["Title can not be empty or tp have more than 250 characters."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (!String.IsNullOrEmpty(model.Description) && model.Description.Length > 1000)
+            if (!String.IsNullOrEmpty(description) && description.Length > 1000)
             {
                 response.Message = "Invalid model";
                 response.AddError(_localizer["Description can not be empty or tp have more than 1000 characters."]);
@@ -104,8 +118,8 @@ namespace vws.web.Controllers._feedback
             {
                 AttachmentGuid = uploadedAttachment == null ? null : (Guid?)attachmentContainer.Guid,
                 AttachmentId = uploadedAttachment == null ? null : (int?)attachmentContainer.Id,
-                Description = model.Description,
-                Title = model.Title,
+                Description = description,
+                Title = title,
                 UserProfileId = userId
             });
             _vwsDbContext.Save();

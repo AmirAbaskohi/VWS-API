@@ -129,6 +129,9 @@
   <data name="File size is not allowed." xml:space="preserve">
     <value>File size is not allowed.</value>
   </data>
+  <data name="Invalid form." xml:space="preserve">
+    <value>Invalid form.</value>
+  </data>
   <data name="There is more than one file." xml:space="preserve">
     <value>There is more than one file.</value>
   </data>
