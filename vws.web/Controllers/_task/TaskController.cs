@@ -1590,6 +1590,135 @@ namespace vws.web.Controllers._task
             return Ok(response);
         }
 
+        [HttpPut]
+        [Authorize]
+        [Route("archiveStatusTasks")]
+        public async Task<IActionResult> ArchiveAllStatusTasks(int statusId)
+        {
+            var response = new ResponseModel();
+
+            Guid userId = LoggedInUserId.Value;
+
+            var selectedStatus = _vwsDbContext.TaskStatuses.FirstOrDefault(status => status.Id == statusId);
+            if (selectedStatus == null || selectedStatus.IsDeleted)
+            {
+                response.Message = "Status not found!";
+                response.AddError(_localizer["Status not found."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            #region CheckAccess
+            if ((selectedStatus.ProjectId != null && !_permissionService.HasAccessToProject(LoggedInUserId.Value, (int)selectedStatus.ProjectId)) ||
+                (selectedStatus.TeamId != null && !_permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)selectedStatus.TeamId)) ||
+                selectedStatus.UserProfileId != null && selectedStatus.UserProfileId != LoggedInUserId.Value)
+            {
+                response.Message = "Task Status access denied";
+                response.AddError(_localizer["You do not have access to task status."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+            #endregion
+
+            bool isPersonal = (selectedStatus.UserProfileId != null);
+            bool isForTeam = (selectedStatus.TeamId != null);
+            int? id = isPersonal ? null : (isForTeam ? selectedStatus.TeamId : selectedStatus.ProjectId);
+
+            var modificationTime = DateTime.Now;
+            var allStatusTasks = _vwsDbContext.GeneralTasks.Where(task => task.TaskStatusId == statusId && !task.IsArchived && !task.IsDeleted);
+            foreach (var statusTask in allStatusTasks)
+            {
+                statusTask.ModifiedBy = userId;
+                statusTask.ModifiedOn = modificationTime;
+                statusTask.IsArchived = true;
+            }
+            _vwsDbContext.Save();
+
+            if (!isPersonal && isForTeam)
+            {
+                #region History
+                var newTeamHistory = new TeamHistory()
+                {
+                    EventTime = modificationTime,
+                    Event = "{0} archived all tasks in status {1}.",
+                    TeamId = (int)id
+                };
+                _vwsDbContext.AddTeamHistory(newTeamHistory);
+                _vwsDbContext.Save();
+                var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+                _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+                {
+                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                    Body = JsonConvert.SerializeObject(new UserModel()
+                    {
+                        NickName = user.NickName,
+                        ProfileImageGuid = user.ProfileImageGuid,
+                        UserId = user.UserId
+                    }),
+                    TeamHistoryId = newTeamHistory.Id
+                });
+                _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+                {
+                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                    Body = selectedStatus.Title,
+                    TeamHistoryId = newTeamHistory.Id
+                });
+                _vwsDbContext.Save();
+                #endregion
+
+                var selectedTeam = _vwsDbContext.Teams.FirstOrDefault(team => team.Id == (int)newTeamHistory.TeamId);
+                var teamMemebers = (await _teamManager.GetTeamMembers(newTeamHistory.TeamId)).Select(user => user.UserId).ToList();
+                teamMemebers = teamMemebers.Distinct().ToList();
+                teamMemebers.Remove(LoggedInUserId.Value);
+                string[] arguments = { selectedStatus.Title, LoggedInNickName, selectedTeam.Name };
+                await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, teamMemebers, "All tasks in status <b>«{0}»</b> archived by <b>«{1}»</b> in your team with name <b>«{2}»</b>.", "Team Update", arguments);
+
+                _notificationService.SendMultipleNotification(teamMemebers, (byte)SeedDataEnum.NotificationTypes.Team, newTeamHistory.Id);
+            }
+            else if (!isPersonal && !isForTeam)
+            {
+                #region History
+                var newProjectHistory = new ProjectHistory()
+                {
+                    EventTime = modificationTime,
+                    Event = "{0} archived all tasks in status {1}.",
+                    ProjectId = (int)id
+                };
+                _vwsDbContext.AddProjectHistory(newProjectHistory);
+                _vwsDbContext.Save();
+                var user = await _vwsDbContext.GetUserProfileAsync(LoggedInUserId.Value);
+                _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+                {
+                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                    Body = JsonConvert.SerializeObject(new UserModel()
+                    {
+                        NickName = user.NickName,
+                        ProfileImageGuid = user.ProfileImageGuid,
+                        UserId = user.UserId
+                    }),
+                    ProjectHistoryId = newProjectHistory.Id
+                });
+                _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+                {
+                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                    Body = selectedStatus.Title,
+                    ProjectHistoryId = newProjectHistory.Id
+                });
+                _vwsDbContext.Save();
+                #endregion
+
+                var selectedProject = _vwsDbContext.Projects.FirstOrDefault(project => project.Id == (int)newProjectHistory.ProjectId);
+                var projectMemebers = _projectManager.GetProjectUsers(newProjectHistory.ProjectId).Select(user => user.UserId).ToList();
+                projectMemebers = projectMemebers.Distinct().ToList();
+                projectMemebers.Remove(LoggedInUserId.Value);
+                string[] arguments = { selectedStatus.Title, LoggedInNickName, selectedProject.Name };
+                await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, projectMemebers, "All tasks in status <b>«{0}»</b> archived by <b>«{1}»</b> in your project with name <b>«{2}»</b>.", "Team Update", arguments);
+
+                _notificationService.SendMultipleNotification(projectMemebers, (byte)SeedDataEnum.NotificationTypes.Project, newProjectHistory.Id);
+            }
+
+            response.Message = "Status's tasks archived successfully!";
+            return Ok(response);
+        }
+
         [HttpGet]
         [Authorize]
         [Route("get")]

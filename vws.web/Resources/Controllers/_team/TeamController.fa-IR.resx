@@ -234,6 +234,9 @@
   <data name="{0} added {1} to team." xml:space="preserve">
     <value>{0} {1} را به تیم اضافه کرد.</value>
   </data>
+  <data name="{0} archived all tasks in status {1}." xml:space="preserve">
+    <value>{0} تمام تسک های موجود در وضعیت {1} را آرشیو کرد.</value>
+  </data>
   <data name="{0} created new invite link with id {1}." xml:space="preserve">
     <value>{0} لینک دعوت جدیدی با آی دی {1} ایجاد کرد.</value>
   </data>

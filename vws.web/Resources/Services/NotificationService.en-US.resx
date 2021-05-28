@@ -267,6 +267,12 @@
   <data name="Active" xml:space="preserve">
     <value>Active</value>
   </data>
+  <data name="All tasks in status &lt;b&gt;«{0}»&lt;/b&gt; archived by &lt;b&gt;«{1}»&lt;/b&gt; in your project with name &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>All tasks in status &lt;b&gt;«{0}»&lt;/b&gt; archived by &lt;b&gt;«{1}»&lt;/b&gt; in your project with name &lt;b&gt;«{2}»&lt;/b&gt;.</value>
+  </data>
+  <data name="All tasks in status &lt;b&gt;«{0}»&lt;/b&gt; archived by &lt;b&gt;«{1}»&lt;/b&gt; in your team with name &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>All tasks in status &lt;b&gt;«{0}»&lt;/b&gt; archived by &lt;b&gt;«{1}»&lt;/b&gt; in your team with name &lt;b&gt;«{2}»&lt;/b&gt;.</value>
+  </data>
   <data name="Does not have access" xml:space="preserve">
     <value>Does not have access</value>
   </data>

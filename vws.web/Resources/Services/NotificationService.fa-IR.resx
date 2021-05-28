@@ -273,6 +273,12 @@
   <data name="Active" xml:space="preserve">
     <value>فعال</value>
   </data>
+  <data name="All tasks in status &lt;b&gt;«{0}»&lt;/b&gt; archived by &lt;b&gt;«{1}»&lt;/b&gt; in your project with name &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>تمام تسک های موجود در وضعیت &lt;b&gt;«{0}»&lt;/b&gt; توسط &lt;b&gt;«{1}»&lt;/b&gt; در پروژه شما با نام &lt;b&gt;«{2}»&lt;/b&gt; آرشیو شد.</value>
+  </data>
+  <data name="All tasks in status &lt;b&gt;«{0}»&lt;/b&gt; archived by &lt;b&gt;«{1}»&lt;/b&gt; in your team with name &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>تمام تسک های موجود در وضعیت &lt;b&gt;«{0}»&lt;/b&gt; توسط &lt;b&gt;«{1}»&lt;/b&gt; در تیم شما با نام &lt;b&gt;«{2}»&lt;/b&gt; آرشیو شد.</value>
+  </data>
   <data name="Does not have access" xml:space="preserve">
     <value>دسترسی ندارد</value>
   </data>

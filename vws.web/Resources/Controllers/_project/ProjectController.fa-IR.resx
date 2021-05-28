@@ -324,6 +324,9 @@
   <data name="{0} added {1} to the project." xml:space="preserve">
     <value>{0} {1} را به پروژه اضافه کرد.</value>
   </data>
+  <data name="{0} archived all tasks in status {1}." xml:space="preserve">
+    <value>{0} تمام تسک های موجود در وضعیت {1} را آرشیو کرد.</value>
+  </data>
   <data name="{0} changed permission of user {1} from {2} to {3}." xml:space="preserve">
     <value>{0} دسترسی {1} را از {2} به {3} به روز کرد.</value>
   </data>

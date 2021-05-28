@@ -324,6 +324,9 @@
   <data name="{0} added {1} to the project." xml:space="preserve">
     <value>{0} added {1} to the project.</value>
   </data>
+  <data name="{0} archived all tasks in status {1}." xml:space="preserve">
+    <value>{0} archived all tasks in status {1}.</value>
+  </data>
   <data name="{0} changed permission of user {1} from {2} to {3}." xml:space="preserve">
     <value>{0} change permission of user {1} from {2} to {3}.</value>
   </data>

@@ -234,6 +234,9 @@
   <data name="{0} added {1} to team." xml:space="preserve">
     <value>{0} added {1} to team.</value>
   </data>
+  <data name="{0} archived all tasks in status {1}." xml:space="preserve">
+    <value>{0} archived all tasks in status {1}.</value>
+  </data>
   <data name="{0} created new invite link with id {1}." xml:space="preserve">
     <value>{0} created new invite link with id {1}.</value>
   </data>
