@@ -79,6 +79,66 @@ namespace vws.web.Controllers._chat
             }
         }
 
+        private DateTime UpdateChannelTransaction(Guid channelId, Guid userId, byte channelTypeId)
+        {
+            DateTime transaction = new DateTime();
+            bool isValid = false;
+
+            if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private)
+            {
+                var firstUserTeams = _vwsDbContext.TeamMembers.Where(teamMemeber => teamMemeber.UserProfileId == userId && !teamMemeber.IsDeleted);
+                var secondUserTeams = _vwsDbContext.TeamMembers.Where(teamMemeber => teamMemeber.UserProfileId == channelId && !teamMemeber.IsDeleted);
+                
+                var commonTeams = firstUserTeams.Select(teamMemeber => teamMemeber.TeamId).Intersect(secondUserTeams.Select(teamMemeber => teamMemeber.TeamId));
+                if (commonTeams.Count() == 0)
+                    return new DateTime();
+                isValid = true;
+                var secondUserJoinDates = secondUserTeams.Where(teamMember => commonTeams.Contains(teamMember.TeamId)).Select(teamMemeber => teamMemeber.CreatedOn);
+                transaction = secondUserJoinDates.Min();
+            }
+            else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Team)
+            {
+                var selectedTeam = _vwsDbContext.Teams.FirstOrDefault(team => team.Guid == channelId);
+                if (selectedTeam != null)
+                {
+                    isValid = true;
+                    transaction = selectedTeam.CreatedOn;
+                }
+            }
+            else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Project)
+            {
+                var selectedProject = _vwsDbContext.Projects.FirstOrDefault(project => project.Guid == channelId);
+                if (selectedProject != null)
+                {
+                    isValid = true;
+                    transaction = selectedProject.CreatedOn;
+                }
+            }
+            else if (channelTypeId == (byte)SeedDataEnum.ChannelTypes.Department)
+            {
+                var selectedDepartment = _vwsDbContext.Departments.FirstOrDefault(department => department.Guid == channelId);
+                if (selectedDepartment != null)
+                {
+                    isValid = true;
+                    transaction = selectedDepartment.CreatedOn;
+                }
+            }
+
+            if (isValid)
+            {
+                _vwsDbContext.AddChannelTransaction(new ChannelTransaction()
+                {
+                    LastTransactionDateTime = transaction,
+                    ChannelId = channelId,
+                    ChannelTypeId = channelTypeId,
+                    UserProfileId = channelTypeId == (byte)SeedDataEnum.ChannelTypes.Private ? userId : (Guid?)null
+                });
+                _vwsDbContext.Save();
+            }
+
+            return transaction;
+        }
+
         private void SetChannelLastTransactionDateTime(ref List<ChannelResponseModel> channelResponseModels)
         {
             var userId = LoggedInUserId.Value;
@@ -98,6 +158,8 @@ namespace vws.web.Controllers._chat
 
                 if (channelTransaction != null)
                     channelResponseModel.LastTransactionDateTime = channelTransaction.LastTransactionDateTime;
+                else
+                    channelResponseModel.LastTransactionDateTime = UpdateChannelTransaction(channelResponseModel.Guid, userId, channelResponseModel.ChannelTypeId);
             }
         }
 
