@@ -75,4 +75,25 @@ namespace vws.web.Domain._project
 
         public virtual ICollection<EventProject> EventProjects { get; set; }
     }
+
+    class ProjectComparer : IEqualityComparer<Project>
+    {
+        public bool Equals(Project firstProject, Project secondProject)
+        {
+
+            if (Object.ReferenceEquals(firstProject, secondProject)) return true;
+
+            if (Object.ReferenceEquals(firstProject, null) || Object.ReferenceEquals(secondProject, null))
+                return false;
+
+            return firstProject.Id == secondProject.Id;
+        }
+
+        public int GetHashCode(Project project)
+        {
+            if (Object.ReferenceEquals(project, null)) return 0;
+
+            return project.Id.GetHashCode();
+        }
+    }
 }

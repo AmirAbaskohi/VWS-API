@@ -237,6 +237,8 @@ namespace vws.web
             // Run engineService
             ChannelEngine.CheckAndSetMutedChannels(app);
 
+            ActivityEngine.UpdateTeamAndProjectOrder(app);
+
             // Automatically Create database and tables and do the migrations
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {

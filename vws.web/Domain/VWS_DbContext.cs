@@ -331,6 +331,14 @@ namespace vws.web.Domain
 
         public DbSet<ProjectHistoryParameter> ProjectHistoryParameters { get; set; }
 
+        IQueryable<UserProjectOrder> IVWS_DbContext.UserProjectOrders { get => UserProjectOrders; }
+
+        public DbSet<UserProjectOrder> UserProjectOrders { get; set; }
+
+        IQueryable<UserProjectActivity> IVWS_DbContext.UserProjectActivities { get => UserProjectActivities; }
+
+        public DbSet<UserProjectActivity> UserProjectActivities { get; set; }
+
         public IQueryable<Project> GetUserPrivateProjects(Guid userId)
         {
             return ProjectMembers.Include(projectMember => projectMember.Project)
@@ -393,6 +401,21 @@ namespace vws.web.Domain
         public void DeleteProjectMember(ProjectMember projectMember)
         {
             ProjectMembers.Remove(projectMember);
+        }
+
+        public void AddUserProjectActivity(UserProjectActivity userProjectActivity)
+        {
+            UserProjectActivities.Add(userProjectActivity);
+        }
+
+        public void AddUserProjectOrder(UserProjectOrder userProjectOrder)
+        {
+            UserProjectOrders.Add(userProjectOrder);
+        }
+
+        public void DeleteUserProjectOrders(IEnumerable<int> userProjectOrdersIds)
+        {
+            UserProjectOrders.RemoveRange(UserProjectOrders.Where(userProjectOrder => userProjectOrdersIds.Contains(userProjectOrder.Id)));
         }
 
         #endregion
@@ -639,6 +662,14 @@ namespace vws.web.Domain
 
         public DbSet<TeamHistoryParameter> TeamHistoryParameters { get; set; }
 
+        IQueryable<UserTeamOrder> IVWS_DbContext.UserTeamOrders { get => UserTeamOrders; }
+
+        public DbSet<UserTeamOrder> UserTeamOrders { get; set; }
+
+        IQueryable<UserTeamActivity> IVWS_DbContext.UserTeamActivities { get => UserTeamActivities; }
+
+        public DbSet<UserTeamActivity> UserTeamActivities { get; set; }
+
         public async Task<Team> AddTeamAsync(Team team)
         {
             await Teams.AddAsync(team);
@@ -709,6 +740,21 @@ namespace vws.web.Domain
         public void AddTeamHistoryParameter(TeamHistoryParameter teamHistoryParameter)
         {
             TeamHistoryParameters.Add(teamHistoryParameter);
+        }
+
+        public void AddUserTeamActivity(UserTeamActivity userTeamActivity)
+        {
+            UserTeamActivities.Add(userTeamActivity);
+        }
+
+        public void AddUserTeamOrder(UserTeamOrder userTeamOrder)
+        {
+            UserTeamOrders.Add(userTeamOrder);
+        }
+
+        public void DeleteUserTeamOrders(IEnumerable<int> userTeamOrdersIds)
+        {
+            UserTeamOrders.RemoveRange(UserTeamOrders.Where(userTeamOrder => userTeamOrdersIds.Contains(userTeamOrder.Id)));
         }
 
         #endregion

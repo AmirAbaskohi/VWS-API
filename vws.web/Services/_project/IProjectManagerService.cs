@@ -16,5 +16,7 @@ namespace vws.web.Services._project
         public long GetNumberOfProjectTasks(int id);
 
         public double GetProjectSpentTime(int id);
+
+        public DateTime GetUserJoinDateTime(Guid userId, int projectId);
     }
 }

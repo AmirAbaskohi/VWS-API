@@ -1278,10 +1278,42 @@ namespace vws.web.Controllers._project
             var response = new List<ProjectResponseModel>();
             Guid userId = LoggedInUserId.Value;
 
-            var userProjects = _projectManager.GetAllUserProjects(userId).Where(project => project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Active);
-            userProjects = userProjects.OrderByDescending(project => project.CreatedOn);
+            var userProjects = _projectManager.GetAllUserProjects(userId).Where(project => project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Active).ToList();
 
-            foreach (var project in userProjects)
+            var userProjectOrders = _vwsDbContext.UserProjectOrders.Include(userProjectOrder => userProjectOrder.Project)
+                                                                   .Where(userProjectOrder => userProjectOrder.UserProfileId == userId && userProjectOrder.Project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Active)
+                                                                   .ToList();
+
+            var validProjectOrdersProjects = userProjectOrders.Where(userProjectOrder => userProjects.Contains(userProjectOrder.Project))
+                                                              .OrderBy(userProjectOrder => userProjectOrder.Order)
+                                                              .Select(userProjectOrder => userProjectOrder.Project)
+                                                              .ToList();
+
+            var userProjectsNotIncluded = validProjectOrdersProjects.Count == userProjects.Count ? new List<Project>() : userProjects.Except(validProjectOrdersProjects);
+
+            foreach (var project in validProjectOrdersProjects)
+            {
+                response.Add(new ProjectResponseModel()
+                {
+                    Id = project.Id,
+                    Description = project.Description,
+                    Color = project.Color,
+                    EndDate = project.EndDate,
+                    Guid = project.Guid,
+                    Name = project.Name,
+                    StartDate = project.StartDate,
+                    StatusId = project.StatusId,
+                    TeamId = project.TeamId,
+                    TeamName = project.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == project.TeamId).Name,
+                    ProjectImageGuid = project.ProjectImageGuid,
+                    DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
+                    NumberOfUpdates = _vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
+                    Users = _projectManager.GetProjectUsers(project.Id),
+                    NumberOfTasks = _projectManager.GetNumberOfProjectTasks(project.Id),
+                    SpentTimeInMinutes = _projectManager.GetProjectSpentTime(project.Id)
+                });
+            }
+            foreach (var project in userProjectsNotIncluded)
             {
                 response.Add(new ProjectResponseModel()
                 {
@@ -1315,10 +1347,42 @@ namespace vws.web.Controllers._project
             var response = new List<ProjectResponseModel>();
             Guid userId = LoggedInUserId.Value;
 
-            var userProjects = _projectManager.GetAllUserProjects(userId).Where(project => project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Hold);
-            userProjects = userProjects.OrderByDescending(project => project.CreatedOn);
+            var userProjects = _projectManager.GetAllUserProjects(userId).Where(project => project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Hold).ToList();
 
-            foreach (var project in userProjects)
+            var userProjectOrders = _vwsDbContext.UserProjectOrders.Include(userProjectOrder => userProjectOrder.Project)
+                                                                   .Where(userProjectOrder => userProjectOrder.UserProfileId == userId && userProjectOrder.Project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Hold)
+                                                                   .ToList();
+
+            var validProjectOrdersProjects = userProjectOrders.Where(userProjectOrder => userProjects.Contains(userProjectOrder.Project))
+                                                              .OrderBy(userProjectOrder => userProjectOrder.Order)
+                                                              .Select(userProjectOrder => userProjectOrder.Project)
+                                                              .ToList();
+
+            var userProjectsNotIncluded = validProjectOrdersProjects.Count == userProjects.Count ? new List<Project>() : userProjects.Except(validProjectOrdersProjects);
+
+            foreach (var project in validProjectOrdersProjects)
+            {
+                response.Add(new ProjectResponseModel()
+                {
+                    Id = project.Id,
+                    Description = project.Description,
+                    Color = project.Color,
+                    EndDate = project.EndDate,
+                    Guid = project.Guid,
+                    Name = project.Name,
+                    StartDate = project.StartDate,
+                    StatusId = project.StatusId,
+                    TeamId = project.TeamId,
+                    TeamName = project.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == project.TeamId).Name,
+                    ProjectImageGuid = project.ProjectImageGuid,
+                    DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
+                    NumberOfUpdates = _vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
+                    Users = _projectManager.GetProjectUsers(project.Id),
+                    NumberOfTasks = _projectManager.GetNumberOfProjectTasks(project.Id),
+                    SpentTimeInMinutes = _projectManager.GetProjectSpentTime(project.Id)
+                });
+            }
+            foreach (var project in userProjectsNotIncluded)
             {
                 response.Add(new ProjectResponseModel()
                 {
@@ -1352,10 +1416,20 @@ namespace vws.web.Controllers._project
             var response = new List<ProjectResponseModel>();
             Guid userId = LoggedInUserId.Value;
 
-            var userProjects = _projectManager.GetAllUserProjects(userId).Where(project => project.StatusId == (byte)SeedDataEnum.ProjectStatuses.DoneOrArchived);
-            userProjects = userProjects.OrderByDescending(project => project.CreatedOn);
+            var userProjects = _projectManager.GetAllUserProjects(userId).Where(project => project.StatusId == (byte)SeedDataEnum.ProjectStatuses.DoneOrArchived).ToList();
 
-            foreach (var project in userProjects)
+            var userProjectOrders = _vwsDbContext.UserProjectOrders.Include(userProjectOrder => userProjectOrder.Project)
+                                                                   .Where(userProjectOrder => userProjectOrder.UserProfileId == userId && userProjectOrder.Project.StatusId == (byte)SeedDataEnum.ProjectStatuses.DoneOrArchived)
+                                                                   .ToList();
+
+            var validProjectOrdersProjects = userProjectOrders.Where(userProjectOrder => userProjects.Contains(userProjectOrder.Project))
+                                                              .OrderBy(userProjectOrder => userProjectOrder.Order)
+                                                              .Select(userProjectOrder => userProjectOrder.Project)
+                                                              .ToList();
+
+            var userProjectsNotIncluded = validProjectOrdersProjects.Count == userProjects.Count ? new List<Project>() : userProjects.Except(validProjectOrdersProjects);
+
+            foreach (var project in validProjectOrdersProjects)
             {
                 response.Add(new ProjectResponseModel()
                 {
@@ -1371,6 +1445,29 @@ namespace vws.web.Controllers._project
                     TeamName = project.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == project.TeamId).Name,
                     ProjectImageGuid = project.ProjectImageGuid,
                     DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
+                    NumberOfUpdates = _vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
+                    Users = _projectManager.GetProjectUsers(project.Id),
+                    NumberOfTasks = _projectManager.GetNumberOfProjectTasks(project.Id),
+                    SpentTimeInMinutes = _projectManager.GetProjectSpentTime(project.Id)
+                });
+            }
+            foreach (var project in userProjectsNotIncluded)
+            {
+                response.Add(new ProjectResponseModel()
+                {
+                    Id = project.Id,
+                    Description = project.Description,
+                    Color = project.Color,
+                    EndDate = project.EndDate,
+                    Guid = project.Guid,
+                    Name = project.Name,
+                    StartDate = project.StartDate,
+                    StatusId = project.StatusId,
+                    TeamId = project.TeamId,
+                    TeamName = project.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == project.TeamId).Name,
+                    ProjectImageGuid = project.ProjectImageGuid,
+                    DepartmentIds = project.ProjectDepartments.Select(projectDepartment => projectDepartment.DepartmentId).ToList(),
+                    NumberOfUpdates = _vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
                     Users = _projectManager.GetProjectUsers(project.Id),
                     NumberOfTasks = _projectManager.GetNumberOfProjectTasks(project.Id),
                     SpentTimeInMinutes = _projectManager.GetProjectSpentTime(project.Id)

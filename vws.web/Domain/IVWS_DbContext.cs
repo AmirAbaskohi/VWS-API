@@ -188,6 +188,10 @@ namespace vws.web.Domain
 
         public IQueryable<ProjectHistoryParameter> ProjectHistoryParameters { get; }
 
+        public IQueryable<UserProjectActivity> UserProjectActivities { get; }
+
+        public IQueryable<UserProjectOrder> UserProjectOrders { get; }
+
         #endregion
 
         #region methods
@@ -213,6 +217,12 @@ namespace vws.web.Domain
         public void DeleteProjectDepartment(ProjectDepartment projectDepartment);
 
         public void DeleteProjectMember(ProjectMember projectMember);
+
+        public void AddUserProjectActivity(UserProjectActivity userProjectActivity);
+
+        public void AddUserProjectOrder(UserProjectOrder userProjectOrder);
+
+        public void DeleteUserProjectOrders(IEnumerable<int> userProjectOrdersIds);
 
         #endregion
 
@@ -338,6 +348,10 @@ namespace vws.web.Domain
 
         public IQueryable<TeamHistoryParameter> TeamHistoryParameters { get; }
 
+        public IQueryable<UserTeamActivity> UserTeamActivities { get; }
+
+        public IQueryable<UserTeamOrder> UserTeamOrders { get; }
+
         #endregion
 
         #region methods
@@ -367,6 +381,12 @@ namespace vws.web.Domain
         public void AddTeamHistory(TeamHistory teamHistory);
 
         public void AddTeamHistoryParameter(TeamHistoryParameter teamHistoryParameter);
+
+        public void AddUserTeamActivity(UserTeamActivity userTeamActivity);
+
+        public void AddUserTeamOrder(UserTeamOrder userTeamActivitiy);
+
+        public void DeleteUserTeamOrders(IEnumerable<int> userTeamOrdersIds);
 
 
         #endregion
@@ -443,6 +463,7 @@ namespace vws.web.Domain
         #endregion
 
         #endregion
+
 
         #region Calender
 

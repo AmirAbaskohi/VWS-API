@@ -137,5 +137,27 @@ namespace vws.web.Services._project
 
             return result;
         }
+
+        public DateTime GetUserJoinDateTime(Guid userId, int projectId)
+        {
+            var selectedProject = _vwsDbContext.Projects.Include(project => project.ProjectDepartments)
+                                                        .FirstOrDefault(project => project.Id == projectId);
+
+            if (selectedProject == null || selectedProject.IsDeleted)
+                return new DateTime();
+
+            if (selectedProject.TeamId != null)
+                return selectedProject.CreatedOn;
+
+            var selectedProjectMember = _vwsDbContext.ProjectMembers.FirstOrDefault(projectMember => !projectMember.IsDeleted &&
+                                                                                                    projectMember.IsPermittedByCreator == true &&
+                                                                                                    projectMember.ProjectId == projectId &&
+                                                                                                    projectMember.UserProfileId == userId);
+
+            if (selectedProjectMember == null || selectedProjectMember.IsDeleted)
+                return new DateTime();
+
+            return selectedProjectMember.CreatedOn;
+        }
     }
 }

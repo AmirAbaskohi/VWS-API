@@ -480,6 +480,32 @@ namespace vws.web.Controllers._task
 
             return result;
         }
+
+        private void UpdateUserTeamAndProjectActivity(int? teamId, int? projectId, DateTime time)
+        {
+            var userId = LoggedInUserId.Value;
+            if (teamId != null)
+            {
+                _vwsDbContext.AddUserTeamActivity(new UserTeamActivity()
+                {
+                    TeamId = (int)teamId,
+                    Time = time,
+                    UserProfileId = userId
+                });
+                _vwsDbContext.Save();
+            }
+            if (projectId != null)
+            {
+                _vwsDbContext.AddUserProjectActivity(new UserProjectActivity()
+                {
+                    ProjectId = (int)projectId,
+                    Time = time,
+                    UserProfileId = userId
+                });
+                _vwsDbContext.Save();
+            }
+        }
+
         #endregion
 
         #region TaskAPIS
@@ -636,6 +662,8 @@ namespace vws.web.Controllers._task
             model.Users.Remove(userId);
             string[] arguments = { newTask.Title, LoggedInNickName };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, model.Users, "New task with title <b>«{0}»</b> has been assigned to you by <b>«{1}»</b>.", "Task Assign", arguments);
+
+            UpdateUserTeamAndProjectActivity(newTask.TeamId, newTask.ProjectId, newTask.CreatedOn);
 
             var newTaskResponseModel = new TaskResponseModel()
             {

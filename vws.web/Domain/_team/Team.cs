@@ -60,4 +60,25 @@ namespace vws.web.Domain._team
 
         public virtual ICollection<TaskStatus> TaskStatuses { get; set; }
     }
+
+    class TeamComparer : IEqualityComparer<Team>
+    {
+        public bool Equals(Team firstTeam, Team secondTeam)
+        {
+
+            if (Object.ReferenceEquals(firstTeam, secondTeam)) return true;
+
+            if (Object.ReferenceEquals(firstTeam, null) || Object.ReferenceEquals(secondTeam, null))
+                return false;
+
+            return firstTeam.Id == secondTeam.Id;
+        }
+
+        public int GetHashCode(Team team)
+        {
+            if (Object.ReferenceEquals(team, null)) return 0;
+
+            return team.Id.GetHashCode();
+        }
+    }
 }

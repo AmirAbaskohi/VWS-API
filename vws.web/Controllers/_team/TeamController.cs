@@ -816,30 +816,62 @@ namespace vws.web.Controllers._team
 
             List<TeamExcludingUsersAndDepartmentsResponseModel> response = new List<TeamExcludingUsersAndDepartmentsResponseModel>();
 
-            var userTeams = _vwsDbContext.GetUserTeams(userId);
-            userTeams = userTeams.OrderByDescending(team => team.CreatedOn);
+            var userTeamOrders = _vwsDbContext.UserTeamOrders.Include(userTeamOrder => userTeamOrder.Team)
+                                                             .Where(userTeamOrder => userTeamOrder.UserProfileId == userId)
+                                                             .ToList();
 
-            foreach (var userTeam in userTeams)
+            var userTeams = _teamManager.GetAllUserTeams(userId);
+
+            var validTeamOrdersTeams = userTeamOrders.Where(userTeamOrder => userTeams.Contains(userTeamOrder.Team))
+                                                     .OrderBy(userTeamOrder => userTeamOrder.Order)
+                                                     .Select(userTeamOrder => userTeamOrder.Team)
+                                                     .ToList();
+
+            var userTeamsNotIncluded = validTeamOrdersTeams.Count == userTeams.Count ? new List<Team>() : userTeams.Except(validTeamOrdersTeams);
+
+            foreach (var validTeamOrderTeam in validTeamOrdersTeams)
             {
                 response.Add(new TeamExcludingUsersAndDepartmentsResponseModel()
                 {
-                    Id = userTeam.Id,
-                    TeamTypeId = userTeam.TeamTypeId,
-                    Name = userTeam.Name,
-                    Description = userTeam.Description,
-                    Color = userTeam.Color,
-                    CreatedBy = (await _vwsDbContext.GetUserProfileAsync(userTeam.CreatedBy)).NickName,
-                    ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(userTeam.ModifiedBy)).NickName,
-                    CreatedOn = userTeam.CreatedOn,
-                    ModifiedOn = userTeam.ModifiedOn,
-                    Guid = userTeam.Guid,
-                    TeamImageGuid = userTeam.TeamImageGuid,
-                    NumberOfDepartments = _vwsDbContext.Departments.Where(department => department.TeamId == userTeam.Id && !department.IsDeleted).Count(),
-                    NumberOfMembers = _vwsDbContext.TeamMembers.Where(teamMember => teamMember.TeamId == userTeam.Id && !teamMember.IsDeleted).Count(),
-                    NumberOfTasks = _vwsDbContext.GeneralTasks.Where(task => task.TeamId == userTeam.Id && !task.IsDeleted).Count(),
-                    NumberOfProjects = _vwsDbContext.Projects.Where(project => project.TeamId == userTeam.Id && !project.IsDeleted).Count(),
+                    Id = validTeamOrderTeam.Id,
+                    TeamTypeId = validTeamOrderTeam.TeamTypeId,
+                    Name = validTeamOrderTeam.Name,
+                    Description = validTeamOrderTeam.Description,
+                    Color = validTeamOrderTeam.Color,
+                    CreatedBy = (await _vwsDbContext.GetUserProfileAsync(validTeamOrderTeam.CreatedBy)).NickName,
+                    ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(validTeamOrderTeam.ModifiedBy)).NickName,
+                    CreatedOn = validTeamOrderTeam.CreatedOn,
+                    ModifiedOn = validTeamOrderTeam.ModifiedOn,
+                    Guid = validTeamOrderTeam.Guid,
+                    TeamImageGuid = validTeamOrderTeam.TeamImageGuid,
+                    NumberOfDepartments = _vwsDbContext.Departments.Where(department => department.TeamId == validTeamOrderTeam.Id && !department.IsDeleted).Count(),
+                    NumberOfMembers = _vwsDbContext.TeamMembers.Where(teamMember => teamMember.TeamId == validTeamOrderTeam.Id && !teamMember.IsDeleted).Count(),
+                    NumberOfTasks = _vwsDbContext.GeneralTasks.Where(task => task.TeamId == validTeamOrderTeam.Id && !task.IsDeleted).Count(),
+                    NumberOfProjects = _vwsDbContext.Projects.Where(project => project.TeamId == validTeamOrderTeam.Id && !project.IsDeleted).Count(),
                 });
             }
+            foreach (var userTeamNotIncluded in userTeamsNotIncluded)
+            {
+                response.Add(new TeamExcludingUsersAndDepartmentsResponseModel()
+                {
+                    Id = userTeamNotIncluded.Id,
+                    TeamTypeId = userTeamNotIncluded.TeamTypeId,
+                    Name = userTeamNotIncluded.Name,
+                    Description = userTeamNotIncluded.Description,
+                    Color = userTeamNotIncluded.Color,
+                    CreatedBy = (await _vwsDbContext.GetUserProfileAsync(userTeamNotIncluded.CreatedBy)).NickName,
+                    ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(userTeamNotIncluded.ModifiedBy)).NickName,
+                    CreatedOn = userTeamNotIncluded.CreatedOn,
+                    ModifiedOn = userTeamNotIncluded.ModifiedOn,
+                    Guid = userTeamNotIncluded.Guid,
+                    TeamImageGuid = userTeamNotIncluded.TeamImageGuid,
+                    NumberOfDepartments = _vwsDbContext.Departments.Where(department => department.TeamId == userTeamNotIncluded.Id && !department.IsDeleted).Count(),
+                    NumberOfMembers = _vwsDbContext.TeamMembers.Where(teamMember => teamMember.TeamId == userTeamNotIncluded.Id && !teamMember.IsDeleted).Count(),
+                    NumberOfTasks = _vwsDbContext.GeneralTasks.Where(task => task.TeamId == userTeamNotIncluded.Id && !task.IsDeleted).Count(),
+                    NumberOfProjects = _vwsDbContext.Projects.Where(project => project.TeamId == userTeamNotIncluded.Id && !project.IsDeleted).Count(),
+                });
+            }
+
             return response;
         }
 
