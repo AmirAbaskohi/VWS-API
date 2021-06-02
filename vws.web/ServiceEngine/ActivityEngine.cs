@@ -102,7 +102,7 @@ namespace vws.web.ServiceEngine
                                     var projectOrder = projectOrders[i];
                                     var selectedUserProjectOrder = vwsDbContext.UserProjectOrders.FirstOrDefault(upOrder => upOrder.UserProfileId == userId && upOrder.ProjectId == projectOrder.Id);
                                     if (selectedUserProjectOrder == null)
-                                        vwsDbContext.AddUserTeamOrder(new Domain._team.UserTeamOrder() { UserProfileId = userId, TeamId = projectOrder.Id, Order = i + 1 });
+                                        vwsDbContext.AddUserProjectOrder(new Domain._project.UserProjectOrder() { UserProfileId = userId, ProjectId = projectOrder.Id, Order = i + 1 });
                                     else
                                         selectedUserProjectOrder.Order = i + 1;
                                 }
