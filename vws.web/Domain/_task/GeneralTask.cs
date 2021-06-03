@@ -79,4 +79,25 @@ namespace vws.web.Domain._task
 
         public ICollection<TaskAttachment> TaskAttachments { get; set; }
     }
+
+    class GeneralTaskComparer : IEqualityComparer<GeneralTask>
+    {
+        public bool Equals(GeneralTask firstTeam, GeneralTask secondTeam)
+        {
+
+            if (Object.ReferenceEquals(firstTeam, secondTeam)) return true;
+
+            if (Object.ReferenceEquals(firstTeam, null) || Object.ReferenceEquals(secondTeam, null))
+                return false;
+
+            return firstTeam.Id == secondTeam.Id;
+        }
+
+        public int GetHashCode(GeneralTask task)
+        {
+            if (Object.ReferenceEquals(task, null)) return 0;
+
+            return task.Id.GetHashCode();
+        }
+    }
 }

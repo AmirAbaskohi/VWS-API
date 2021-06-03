@@ -1797,6 +1797,73 @@ namespace vws.web.Controllers._task
 
         [HttpGet]
         [Authorize]
+        [Route("getTasksUsers")]
+        public IActionResult GetTasksUsers(int? teamId, int? projectId, bool forAll)
+        {
+            var response = new ResponseModel<HashSet<UserModel>>();
+            var users = new HashSet<UserModel>();
+            var userId = LoggedInUserId.Value;
+
+            var userTasks = GetUserTasks(userId);
+            var selectedTasks = new List<GeneralTask>();
+
+            if (forAll)
+                selectedTasks = userTasks;
+            else
+            {
+                if (teamId != null && projectId != null)
+                    teamId = null;
+
+                #region CheckTeamAndProjectExistance
+                if (projectId != null && !_vwsDbContext.Projects.Any(p => p.Id == projectId && !p.IsDeleted))
+                {
+                    response.Message = "Project not found";
+                    response.AddError(_localizer["Project not found."]);
+                    return StatusCode(StatusCodes.Status400BadRequest, response);
+                }
+                if (teamId != null && !_vwsDbContext.Teams.Any(t => t.Id == teamId && !t.IsDeleted))
+                {
+                    response.Message = "Team not found";
+                    response.AddError(_localizer["Team not found."]);
+                    return StatusCode(StatusCodes.Status400BadRequest, response);
+                }
+                #endregion
+
+                #region CheckTeamAndProjectAccess
+                if (projectId != null && !_permissionService.HasAccessToProject(LoggedInUserId.Value, (int)projectId))
+                {
+                    response.Message = "Project access denied";
+                    response.AddError(_localizer["You do not have access to project."]);
+                    return StatusCode(StatusCodes.Status403Forbidden, response);
+                }
+                if (teamId != null && !_permissionService.HasAccessToTeam(LoggedInUserId.Value, (int)teamId))
+                {
+                    response.Message = "Team access denied";
+                    response.AddError(_localizer["You do not have access to team."]);
+                    return StatusCode(StatusCodes.Status403Forbidden, response);
+                }
+                #endregion
+
+                selectedTasks = _vwsDbContext.GeneralTasks.Where(task => ((teamId == null && projectId != null && task.ProjectId == projectId) ||
+                                                                              (teamId == null && projectId == null && task.TeamId == teamId && task.ProjectId == projectId && task.CreatedBy == userId) ||
+                                                                              (task.TeamId == teamId && task.ProjectId == projectId)) &&
+                                                                              !task.IsArchived && !task.IsDeleted)
+                                                          .ToList();
+            }
+
+            foreach (var userTask in selectedTasks)
+            {
+                users.UnionWith(_taskManager.GetAssignedTo(userTask.Id));
+                var creator = _vwsDbContext.UserProfiles.FirstOrDefault(profile => profile.UserId == userTask.CreatedBy);
+                users.Add(new UserModel() { UserId = creator.UserId, NickName = creator.NickName, ProfileImageGuid = creator.ProfileImageGuid });
+            }
+            response.Value = users;
+            response.Message = "Users returned successfully";
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Authorize]
         [Route("getRunningTasks")]
         public IEnumerable<RunningTaskResponseModel> GetRunningTasks()
         {
