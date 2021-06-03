@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace vws.web.Models._task
 {
-    public class TaskResponseModel
+    public class FullRunningTaskResponseModel
     {
-        public TaskResponseModel()
+        public FullRunningTaskResponseModel()
         {
             UsersAssignedTo = new List<UserModel>();
             CheckLists = new List<CheckListResponseModel>();
@@ -39,5 +39,28 @@ namespace vws.web.Models._task
         public List<TagResponseModel> Tags { get; set; }
         public List<CommentResponseModel> Comments { get; set; }
         public List<FileModel> Attachments { get; set; }
+        public bool IsPaused { get; set; }
+        public DateTime? TimeTrackStartDate { get; set; }
+    }
+
+    class FullRunningTaskResponseModelComparer : IEqualityComparer<FullRunningTaskResponseModel>
+    {
+        public bool Equals(FullRunningTaskResponseModel first, FullRunningTaskResponseModel second)
+        {
+
+            if (Object.ReferenceEquals(first, second)) return true;
+
+            if (Object.ReferenceEquals(first, null) || Object.ReferenceEquals(second, null))
+                return false;
+
+            return first.Id == second.Id;
+        }
+
+        public int GetHashCode(FullRunningTaskResponseModel model)
+        {
+            if (Object.ReferenceEquals(model, null)) return 0;
+
+            return model.Id.GetHashCode();
+        }
     }
 }

@@ -1814,6 +1814,95 @@ namespace vws.web.Controllers._task
 
         [HttpGet]
         [Authorize]
+        [Route("getRunningTasksWithDetails")]
+        public async Task<IEnumerable<FullRunningTaskResponseModel>> GetRunningTasksWithDetails()
+        {
+            Guid userId = LoggedInUserId.Value;
+
+            var pausedTasks = _vwsDbContext.TimeTrackPauses.Include(timeTrackPause => timeTrackPause.GeneralTask)
+                                                           .Where(timeTrackPause => timeTrackPause.UserProfileId == userId);
+
+            var notEndedTasks = _vwsDbContext.TimeTracks.Include(timeTrackPause => timeTrackPause.GeneralTask)
+                                                        .Where(timeTrack => timeTrack.UserProfileId == userId && timeTrack.EndDate == null);
+
+            var pausedTasksResponse = new List<FullRunningTaskResponseModel>();
+            var notEndedTasksResponse = new List<FullRunningTaskResponseModel>();
+
+            #region paused
+            foreach (var pausedTask in pausedTasks)
+            {
+                pausedTasksResponse.Add(new FullRunningTaskResponseModel()
+                {
+                    Id = pausedTask.GeneralTask.Id,
+                    Title = pausedTask.GeneralTask.Title,
+                    Description = pausedTask.GeneralTask.Description,
+                    StartDate = pausedTask.GeneralTask.StartDate,
+                    EndDate = pausedTask.GeneralTask.EndDate,
+                    CreatedOn = pausedTask.GeneralTask.CreatedOn,
+                    ModifiedOn = pausedTask.GeneralTask.ModifiedOn,
+                    CreatedBy = (await _vwsDbContext.GetUserProfileAsync(pausedTask.GeneralTask.CreatedBy)).NickName,
+                    ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(pausedTask.GeneralTask.ModifiedBy)).NickName,
+                    Guid = pausedTask.GeneralTask.Guid,
+                    PriorityId = pausedTask.GeneralTask.TaskPriorityId,
+                    PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)pausedTask.GeneralTask.TaskPriorityId).ToString()],
+                    UsersAssignedTo = _taskManager.GetAssignedTo(pausedTask.GeneralTask.Id),
+                    ProjectId = pausedTask.GeneralTask.ProjectId,
+                    TeamId = pausedTask.GeneralTask.TeamId,
+                    TeamName = pausedTask.GeneralTask.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == pausedTask.GeneralTask.TeamId).Name,
+                    ProjectName = pausedTask.GeneralTask.ProjectId == null ? null : _vwsDbContext.Projects.FirstOrDefault(project => project.Id == pausedTask.GeneralTask.ProjectId).Name,
+                    StatusId = pausedTask.GeneralTask.TaskStatusId,
+                    StatusTitle = _vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == pausedTask.GeneralTask.TaskStatusId).Title,
+                    CheckLists = _taskManager.GetCheckLists(pausedTask.GeneralTask.Id),
+                    Tags = _taskManager.GetTaskTags(pausedTask.GeneralTask.Id),
+                    Comments = await _taskManager.GetTaskComments(pausedTask.GeneralTask.Id),
+                    Attachments = _taskManager.GetTaskAttachments(pausedTask.GeneralTask.Id),
+                    IsUrgent = pausedTask.GeneralTask.IsUrgent,
+                    TimeTrackStartDate = null,
+                    IsPaused = true
+                });
+            }
+            #endregion
+
+            #region notEnded
+            foreach (var notEndedTask in notEndedTasks)
+            {
+                notEndedTasksResponse.Add(new FullRunningTaskResponseModel()
+                {
+                    Id = notEndedTask.GeneralTask.Id,
+                    Title = notEndedTask.GeneralTask.Title,
+                    Description = notEndedTask.GeneralTask.Description,
+                    StartDate = notEndedTask.GeneralTask.StartDate,
+                    EndDate = notEndedTask.GeneralTask.EndDate,
+                    CreatedOn = notEndedTask.GeneralTask.CreatedOn,
+                    ModifiedOn = notEndedTask.GeneralTask.ModifiedOn,
+                    CreatedBy = (await _vwsDbContext.GetUserProfileAsync(notEndedTask.GeneralTask.CreatedBy)).NickName,
+                    ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(notEndedTask.GeneralTask.ModifiedBy)).NickName,
+                    Guid = notEndedTask.GeneralTask.Guid,
+                    PriorityId = notEndedTask.GeneralTask.TaskPriorityId,
+                    PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)notEndedTask.GeneralTask.TaskPriorityId).ToString()],
+                    UsersAssignedTo = _taskManager.GetAssignedTo(notEndedTask.GeneralTask.Id),
+                    ProjectId = notEndedTask.GeneralTask.ProjectId,
+                    TeamId = notEndedTask.GeneralTask.TeamId,
+                    TeamName = notEndedTask.GeneralTask.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == notEndedTask.GeneralTask.TeamId).Name,
+                    ProjectName = notEndedTask.GeneralTask.ProjectId == null ? null : _vwsDbContext.Projects.FirstOrDefault(project => project.Id == notEndedTask.GeneralTask.ProjectId).Name,
+                    StatusId = notEndedTask.GeneralTask.TaskStatusId,
+                    StatusTitle = _vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == notEndedTask.GeneralTask.TaskStatusId).Title,
+                    CheckLists = _taskManager.GetCheckLists(notEndedTask.GeneralTask.Id),
+                    Tags = _taskManager.GetTaskTags(notEndedTask.GeneralTask.Id),
+                    Comments = await _taskManager.GetTaskComments(notEndedTask.GeneralTask.Id),
+                    Attachments = _taskManager.GetTaskAttachments(notEndedTask.GeneralTask.Id),
+                    IsUrgent = notEndedTask.GeneralTask.IsUrgent,
+                    IsPaused = false,
+                    TimeTrackStartDate = notEndedTask.StartDate
+                });
+            }
+            #endregion
+
+            return pausedTasksResponse.Union(notEndedTasksResponse);
+        }
+
+        [HttpGet]
+        [Authorize]
         [Route("getArchived")]
         public async Task<IEnumerable<TaskResponseModel>> GetArchivedTasks()
         {
