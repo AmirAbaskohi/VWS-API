@@ -35,7 +35,7 @@ namespace vws.web.Controllers._task
         private void DeletePausedTimeTrack(long taskId)
         {
             var selectedPausedTimeTrack = _vwsDbContext.TimeTrackPauses.FirstOrDefault(timeTrackPause => timeTrackPause.GeneralTaskId == taskId &&
-                                                                                                         timeTrackPause.UserProfileId == LoggedInUserId);
+                                                                                                         timeTrackPause.UserProfileId == LoggedInUserId.Value);
 
             if (selectedPausedTimeTrack != null)
             {

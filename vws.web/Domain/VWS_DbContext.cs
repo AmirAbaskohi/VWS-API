@@ -634,6 +634,11 @@ namespace vws.web.Domain
             TaskStatusHistories.Add(taskStatusHistory);
         }
 
+        public void DeleteTimeTrackPauses(IEnumerable<TimeTrackPause> timeTrackPauses)
+        {
+            TimeTrackPauses.RemoveRange(timeTrackPauses);
+        }
+
         #endregion
 
         #region team

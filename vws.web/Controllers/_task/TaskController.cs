@@ -506,6 +506,17 @@ namespace vws.web.Controllers._task
             }
         }
 
+        private void StopRunningTimes(long taskId, DateTime endTime)
+        {
+            var unfinishedTasks = _vwsDbContext.TimeTracks.Where(timeTrack => timeTrack.GeneralTaskId == taskId && timeTrack.EndDate == null).ToList();
+            unfinishedTasks.ForEach(timeTrack => { timeTrack.EndDate = endTime; timeTrack.TotalTimeInMinutes = (endTime - timeTrack.StartDate).TotalMinutes; });
+            _vwsDbContext.Save();
+
+            var pausedTimeTracks = _vwsDbContext.TimeTrackPauses.Where(timeTrackPause => timeTrackPause.GeneralTaskId == taskId);
+            _vwsDbContext.DeleteTimeTrackPauses(pausedTimeTracks);
+            _vwsDbContext.Save();
+        }
+
         #endregion
 
         #region TaskAPIS
@@ -1869,10 +1880,12 @@ namespace vws.web.Controllers._task
         {
             Guid userId = LoggedInUserId.Value;
 
-            var pausedTaskIds = _vwsDbContext.TimeTrackPauses.Where(timeTrackPause => timeTrackPause.UserProfileId == userId)
+            var pausedTaskIds = _vwsDbContext.TimeTrackPauses.Include(timeTrackPause => timeTrackPause.GeneralTask)
+                                                             .Where(timeTrackPause => timeTrackPause.UserProfileId == userId && !timeTrackPause.GeneralTask.IsDeleted)
                                                              .Select(timeTrackPause => new RunningTaskResponseModel() { IsPaused = true, StartDate = null, TaskId = timeTrackPause.GeneralTaskId });
 
-            var notEndedTaskIds = _vwsDbContext.TimeTracks.Where(timeTrack => timeTrack.UserProfileId == userId && timeTrack.EndDate == null)
+            var notEndedTaskIds = _vwsDbContext.TimeTracks.Include(timeTrack => timeTrack.GeneralTask)
+                                                          .Where(timeTrack => timeTrack.UserProfileId == userId && timeTrack.EndDate == null && !timeTrack.GeneralTask.IsDeleted)
                                                           .Select(timeTrack => new RunningTaskResponseModel() { IsPaused = false, StartDate = timeTrack.StartDate, TaskId = timeTrack.GeneralTaskId });
 
             var allRunningTasks = pausedTaskIds.Union(notEndedTaskIds);
@@ -1887,10 +1900,10 @@ namespace vws.web.Controllers._task
             Guid userId = LoggedInUserId.Value;
 
             var pausedTasks = _vwsDbContext.TimeTrackPauses.Include(timeTrackPause => timeTrackPause.GeneralTask)
-                                                           .Where(timeTrackPause => timeTrackPause.UserProfileId == userId);
+                                                           .Where(timeTrackPause => timeTrackPause.UserProfileId == userId && !timeTrackPause.GeneralTask.IsDeleted);
 
-            var notEndedTasks = _vwsDbContext.TimeTracks.Include(timeTrackPause => timeTrackPause.GeneralTask)
-                                                        .Where(timeTrack => timeTrack.UserProfileId == userId && timeTrack.EndDate == null);
+            var notEndedTasks = _vwsDbContext.TimeTracks.Include(timeTrack => timeTrack.GeneralTask)
+                                                        .Where(timeTrack => timeTrack.UserProfileId == userId && timeTrack.EndDate == null && !timeTrack.GeneralTask.IsDeleted);
 
             var pausedTasksResponse = new List<FullRunningTaskResponseModel>();
             var notEndedTasksResponse = new List<FullRunningTaskResponseModel>();
@@ -2121,6 +2134,8 @@ namespace vws.web.Controllers._task
             selectedTask.ModifiedBy = userId;
             selectedTask.ModifiedOn = DateTime.Now;
             _vwsDbContext.Save();
+
+            StopRunningTimes(selectedTask.Id, selectedTask.ModifiedOn);
 
             #region History
             var newTaskHistory = new TaskHistory()

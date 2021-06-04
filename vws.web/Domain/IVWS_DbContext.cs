@@ -327,6 +327,8 @@ namespace vws.web.Domain
 
         public void AddTaskStatusHistory(TaskStatusHistory taskStatusHistory);
 
+        public void DeleteTimeTrackPauses(IEnumerable<TimeTrackPause> timeTrackPauses);
+
         #endregion
 
         #endregion
