@@ -63,10 +63,11 @@ namespace vws.web.Services
 
         public void SaveInOtherQualities(Domain._file.File fileResponse)
         {
-            Bitmap image = new Bitmap(fileResponse.Address);
+            var address = Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + fileResponse.Address;
+            Bitmap image = new Bitmap(address);
 
             ImageFormat format;
-            using (Image img = Image.FromFile(fileResponse.Address))
+            using (Image img = Image.FromFile(address))
             {
                 format = img.RawFormat;
             }
@@ -78,7 +79,7 @@ namespace vws.web.Services
                 return;
 
             var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), $"Upload{Path.DirectorySeparatorChar}");
-            string filePath = fileResponse.Address;
+            string filePath = address;
             filePath = filePath.Replace(uploadPath, "");
             string[] subs = filePath.Split(Path.DirectorySeparatorChar);
             filePath = "";

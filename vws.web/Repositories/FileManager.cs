@@ -73,7 +73,7 @@ namespace vws.web.Repositories
                 var newFile = new Domain._file.File()
                 {
                     Id = fileGuid,
-                    Address = path,
+                    Address = "Upload" + Path.DirectorySeparatorChar + address + Path.DirectorySeparatorChar + fileName,
                     Extension = extension,
                     Name = file.FileName,
                     UploadedBy = userId,
@@ -100,6 +100,7 @@ namespace vws.web.Repositories
 
         public void DeleteFile(string path)
         {
+            path = Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar+ path; 
             if (File.Exists(path))
                 File.Delete(path);
         }

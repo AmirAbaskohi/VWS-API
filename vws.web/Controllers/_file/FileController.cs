@@ -144,7 +144,7 @@ namespace vws.web.Controllers._file
 
             var recentFile = _vwsDbContext.Files.FirstOrDefault(file => file.Id == selectedContainer.RecentFileId);
             var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), $"Upload{Path.DirectorySeparatorChar}");
-            string filePath = recentFile.Address;
+            string filePath = Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + recentFile.Address;
             filePath = filePath.Replace(uploadPath, "");
             string[] subs = filePath.Split(Path.DirectorySeparatorChar);
             if (subs[0] == "profileImages")
@@ -190,7 +190,7 @@ namespace vws.web.Controllers._file
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
             var selectedFile = (await _vwsDbContext.GetFileAsync(fileContainer.RecentFileId));
-            string address = selectedFile.Address;
+            string address = Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + selectedFile.Address;
             string fileName = selectedFile.Name;
 
             if (!System.IO.File.Exists(address))
