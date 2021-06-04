@@ -1,11 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Linq;
 using vws.web.Domain;
 using vws.web.Domain._task;
+using vws.web.Hubs;
 using vws.web.Models;
 using vws.web.Services;
 
@@ -19,15 +22,17 @@ namespace vws.web.Controllers._task
         private readonly IVWS_DbContext _vwsDbContext;
         private readonly IPermissionService _permissionService;
         private readonly IStringLocalizer<TimeController> _localizer;
+        private readonly IHubContext<ChatHub, IChatHub> _hub;
         #endregion
 
         #region Ctor
         public TimeController(IVWS_DbContext vwsDbContext, IPermissionService permissionService,
-                              IStringLocalizer<TimeController> localizer)
+                              IStringLocalizer<TimeController> localizer, IHubContext<ChatHub, IChatHub> hub)
         {
             _vwsDbContext = vwsDbContext;
             _permissionService = permissionService;
             _localizer = localizer;
+            _hub = hub;
         }
         #endregion
 
@@ -90,6 +95,12 @@ namespace vws.web.Controllers._task
             _vwsDbContext.AddTimeTrack(newTimeTrack);
             _vwsDbContext.Save();
 
+            if (UserHandler.ConnectedIds.Keys.Contains(userId.ToString()))
+                UserHandler.ConnectedIds[userId.ToString()]
+                           .ConnectionIds
+                           .ForEach(connectionId => _hub.Clients.Client(connectionId)
+                                                                .ReceiveStartTime(newTimeTrack.GeneralTaskId, newTimeTrack.StartDate));
+
             response.Message = "Time tracking started";
             return Ok(response);
         }
@@ -140,6 +151,12 @@ namespace vws.web.Controllers._task
             _vwsDbContext.AddTimeTrackPause(newTimeTrackPause);
             _vwsDbContext.Save();
 
+            if (UserHandler.ConnectedIds.Keys.Contains(userId.ToString()))
+                UserHandler.ConnectedIds[userId.ToString()]
+                           .ConnectionIds
+                           .ForEach(connectionId => _hub.Clients.Client(connectionId)
+                                                                .ReceivePauseTime(unfinishedTimeTrack.GeneralTaskId, unfinishedTimeTrack.StartDate, unfinishedTimeTrack.EndDate.Value, unfinishedTimeTrack.TotalTimeInMinutes.Value));
+
             response.Message = "Time tracking paused";
             return Ok(response);
         }
@@ -170,14 +187,33 @@ namespace vws.web.Controllers._task
             var unfinishedTimeTrack = _vwsDbContext.TimeTracks.FirstOrDefault(timeTrack => timeTrack.GeneralTaskId == taskId &&
                                                                                            timeTrack.UserProfileId == userId &&
                                                                                            timeTrack.EndDate == null);
+
+            var pausedTimeTrack = _vwsDbContext.TimeTrackPauses.Include(timeTrackPause => timeTrackPause.TimeTrack)
+                                                               .FirstOrDefault(timeTrackPause => timeTrackPause.GeneralTaskId == taskId &&
+                                                                                                 timeTrackPause.UserProfileId == LoggedInUserId.Value);
+
+            if (pausedTimeTrack == null && unfinishedTimeTrack == null)
+            {
+                response.Message = "Nothing to stop";
+                response.AddError(_localizer["Nothing to stop."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
             if (unfinishedTimeTrack != null)
             {
                 unfinishedTimeTrack.EndDate = DateTime.Now;
                 unfinishedTimeTrack.TotalTimeInMinutes = (unfinishedTimeTrack.EndDate.Value - unfinishedTimeTrack.StartDate).TotalMinutes;
                 _vwsDbContext.Save();
             }
-
             DeletePausedTimeTrack(taskId);
+
+            var wantedTimeTrack = unfinishedTimeTrack == null ? pausedTimeTrack.TimeTrack : unfinishedTimeTrack;
+
+            if (UserHandler.ConnectedIds.Keys.Contains(userId.ToString()))
+                UserHandler.ConnectedIds[userId.ToString()]
+                           .ConnectionIds
+                           .ForEach(connectionId => _hub.Clients.Client(connectionId)
+                                                                .ReceiveStopTime(wantedTimeTrack.GeneralTaskId, wantedTimeTrack.StartDate, wantedTimeTrack.EndDate.Value, wantedTimeTrack.TotalTimeInMinutes.Value));
 
             response.Message = "Time tracking stoped";
             return Ok(response);

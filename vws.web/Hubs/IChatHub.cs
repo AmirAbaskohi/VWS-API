@@ -30,5 +30,11 @@ namespace vws.web.Hubs
         Task ReceiveReadMessage(long messageId, Guid channelId, byte channelTypeId);
 
         Task ReceiveDeliverMessage(long messageId, Guid channelId, byte channelTypeId);
+
+        Task ReceiveStartTime(long taskId, DateTime startDate);
+
+        Task ReceivePauseTime(long taskId, DateTime startDate, DateTime endDate, double totalMinutes);
+
+        Task ReceiveStopTime(long taskId, DateTime startDate, DateTime endDate, double totalMinutes);
     }
 }

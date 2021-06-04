@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
@@ -15,6 +16,7 @@ using vws.web.Domain._project;
 using vws.web.Domain._task;
 using vws.web.Domain._team;
 using vws.web.Enums;
+using vws.web.Hubs;
 using vws.web.Models;
 using vws.web.Models._task;
 using vws.web.Repositories;
@@ -40,13 +42,14 @@ namespace vws.web.Controllers._task
         private readonly ITaskManagerService _taskManager;
         private readonly IProjectManagerService _projectManager;
         private readonly ITeamManagerService _teamManager;
+        private readonly IHubContext<ChatHub, IChatHub> _hub;
         #endregion
 
         #region Ctor
         public TaskController(IStringLocalizer<TaskController> localizer, IVWS_DbContext vwsDbContext,
             IPermissionService permissionService, IConfiguration configuration, IFileManager fileManager,
             INotificationService notificationService, ITaskManagerService taskManager,
-            IProjectManagerService projectManager, ITeamManagerService teamManager)
+            IProjectManagerService projectManager, ITeamManagerService teamManager, IHubContext<ChatHub, IChatHub> hub)
         {
             _localizer = localizer;
             _vwsDbContext = vwsDbContext;
@@ -57,6 +60,7 @@ namespace vws.web.Controllers._task
             _taskManager = taskManager;
             _teamManager = teamManager;
             _projectManager = projectManager;
+            _hub = hub;
         }
         #endregion
 
@@ -509,10 +513,27 @@ namespace vws.web.Controllers._task
         private void StopRunningTimes(long taskId, DateTime endTime)
         {
             var unfinishedTasks = _vwsDbContext.TimeTracks.Where(timeTrack => timeTrack.GeneralTaskId == taskId && timeTrack.EndDate == null).ToList();
-            unfinishedTasks.ForEach(timeTrack => { timeTrack.EndDate = endTime; timeTrack.TotalTimeInMinutes = (endTime - timeTrack.StartDate).TotalMinutes; });
+            unfinishedTasks.ForEach(timeTrack => 
+            {
+                timeTrack.EndDate = endTime;
+                timeTrack.TotalTimeInMinutes = (endTime - timeTrack.StartDate).TotalMinutes;
+                if (UserHandler.ConnectedIds.Keys.Contains(timeTrack.UserProfileId.ToString()))
+                    UserHandler.ConnectedIds[timeTrack.UserProfileId.ToString()]
+                               .ConnectionIds
+                               .ForEach(connectionId => _hub.Clients.Client(connectionId)
+                                                                    .ReceiveStopTime(timeTrack.GeneralTaskId, timeTrack.StartDate, endTime, (endTime - timeTrack.StartDate).TotalMinutes));
+            });
             _vwsDbContext.Save();
 
-            var pausedTimeTracks = _vwsDbContext.TimeTrackPauses.Where(timeTrackPause => timeTrackPause.GeneralTaskId == taskId);
+            var pausedTimeTracks = _vwsDbContext.TimeTrackPauses.Include(timeTrackPause => timeTrackPause.TimeTrack).Where(timeTrackPause => timeTrackPause.GeneralTaskId == taskId);
+            foreach (var pausedTimeTrack in pausedTimeTracks)
+            {
+                if (UserHandler.ConnectedIds.Keys.Contains(pausedTimeTrack.UserProfileId.ToString()))
+                    UserHandler.ConnectedIds[pausedTimeTrack.UserProfileId.ToString()]
+                               .ConnectionIds
+                               .ForEach(connectionId => _hub.Clients.Client(connectionId)
+                                                                    .ReceiveStopTime(pausedTimeTrack.TimeTrack.GeneralTaskId, pausedTimeTrack.TimeTrack.StartDate, pausedTimeTrack.TimeTrack.EndDate.Value, pausedTimeTrack.TimeTrack.TotalTimeInMinutes.Value));
+            }
             _vwsDbContext.DeleteTimeTrackPauses(pausedTimeTracks);
             _vwsDbContext.Save();
         }
