@@ -20,5 +20,7 @@ namespace vws.web.Services._task
         public List<FileModel> GetCommentAttachments(long commentId);
 
         public List<TagResponseModel> GetTaskTags(long taskId);
+
+        public void StopRunningTimes(long taskId, DateTime endTime);
     }
 }

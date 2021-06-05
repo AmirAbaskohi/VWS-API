@@ -38,7 +38,7 @@ namespace vws.web.Controllers._project
         private readonly IFileManager _fileManager;
         private readonly IPermissionService _permissionService;
         private readonly IProjectManagerService _projectManager;
-        private readonly ITaskManagerService _taskManagerService;
+        private readonly ITaskManagerService _taskManager;
         private readonly INotificationService _notificationService;
         #endregion
 
@@ -54,7 +54,7 @@ namespace vws.web.Controllers._project
             _fileManager = fileManager;
             _permissionService = permissionService;
             _projectManager = projectManager;
-            _taskManagerService = taskManagerService;
+            _taskManager = taskManagerService;
             _notificationService = notificationService;
         }
         #endregion
@@ -1520,17 +1520,17 @@ namespace vws.web.Controllers._project
                     Guid = projectTask.Guid,
                     PriorityId = projectTask.TaskPriorityId,
                     PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)projectTask.TaskPriorityId).ToString()],
-                    UsersAssignedTo = _taskManagerService.GetAssignedTo(projectTask.Id),
+                    UsersAssignedTo = _taskManager.GetAssignedTo(projectTask.Id),
                     ProjectId = projectTask.ProjectId,
                     TeamId = projectTask.TeamId,
                     TeamName = projectTask.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == projectTask.TeamId).Name,
                     ProjectName = projectTask.ProjectId == null ? null : _vwsDbContext.Projects.FirstOrDefault(project => project.Id == projectTask.ProjectId).Name,
                     StatusId = projectTask.TaskStatusId,
                     StatusTitle = _vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == projectTask.TaskStatusId).Title,
-                    CheckLists = _taskManagerService.GetCheckLists(projectTask.Id),
-                    Tags = _taskManagerService.GetTaskTags(projectTask.Id),
-                    Comments = await _taskManagerService.GetTaskComments(projectTask.Id),
-                    Attachments = _taskManagerService.GetTaskAttachments(projectTask.Id),
+                    CheckLists = _taskManager.GetCheckLists(projectTask.Id),
+                    Tags = _taskManager.GetTaskTags(projectTask.Id),
+                    Comments = await _taskManager.GetTaskComments(projectTask.Id),
+                    Attachments = _taskManager.GetTaskAttachments(projectTask.Id),
                     IsUrgent = projectTask.IsUrgent
                 });
             }
@@ -1627,6 +1627,10 @@ namespace vws.web.Controllers._project
             _vwsDbContext.Save();
 
             DeleteProjectTasks(selectedProject.Id, selectedProject.ModifiedOn);
+
+            var projectTasks = _vwsDbContext.GeneralTasks.Where(task => task.ProjectId == selectedProject.Id && !task.IsDeleted);
+            foreach (var projectTask in projectTasks)
+                _taskManager.StopRunningTimes(projectTask.Id, selectedProject.ModifiedOn);
 
             var newProjectHistory = new ProjectHistory()
             {

@@ -48,7 +48,7 @@ namespace vws.web.Controllers._team
         private readonly IConfiguration _configuration;
         private readonly IPermissionService _permissionService;
         private readonly IProjectManagerService _projectManager;
-        private readonly ITaskManagerService _taskManagerService;
+        private readonly ITaskManagerService _taskManager;
         private readonly INotificationService _notificationService;
         private readonly EmailAddressAttribute _emailChecker;
         private readonly IImageService _imageService;
@@ -71,7 +71,7 @@ namespace vws.web.Controllers._team
             _configuration = configuration;
             _permissionService = permissionService;
             _projectManager = projectManager;
-            _taskManagerService = taskManagerService;
+            _taskManager = taskManagerService;
             _notificationService = notificationService;
             _imageService = imageService;
             _emailChecker = new EmailAddressAttribute();
@@ -202,6 +202,19 @@ namespace vws.web.Controllers._team
                 string[] args = { LoggedInNickName, department.Name };
                 await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, departmentUsers, departmentEmailMessage, "Department Creation", args);
             }
+        }
+
+        private void DeleteTeamTasks(int teamId, DateTime deleteTime)
+        {
+            var teamTasks = _vwsDbContext.GeneralTasks.Where(task => task.TeamId == teamId && !task.IsDeleted);
+
+            foreach (var teamTask in teamTasks)
+            {
+                teamTask.IsDeleted = true;
+                teamTask.ModifiedBy = LoggedInUserId.Value;
+                teamTask.ModifiedOn = deleteTime;
+            }
+            _vwsDbContext.Save();
         }
 
         #endregion
@@ -1063,17 +1076,17 @@ namespace vws.web.Controllers._team
                     Guid = teamTask.Guid,
                     PriorityId = teamTask.TaskPriorityId,
                     PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)teamTask.TaskPriorityId).ToString()],
-                    UsersAssignedTo = _taskManagerService.GetAssignedTo(teamTask.Id),
+                    UsersAssignedTo = _taskManager.GetAssignedTo(teamTask.Id),
                     ProjectId = teamTask.ProjectId,
                     TeamId = teamTask.TeamId,
                     TeamName = teamTask.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == teamTask.TeamId).Name,
                     ProjectName = teamTask.ProjectId == null ? null : _vwsDbContext.Projects.FirstOrDefault(project => project.Id == teamTask.ProjectId).Name,
                     StatusId = teamTask.TaskStatusId,
                     StatusTitle = _vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == teamTask.TaskStatusId).Title,
-                    CheckLists = _taskManagerService.GetCheckLists(teamTask.Id),
-                    Tags = _taskManagerService.GetTaskTags(teamTask.Id),
-                    Comments = await _taskManagerService.GetTaskComments(teamTask.Id),
-                    Attachments = _taskManagerService.GetTaskAttachments(teamTask.Id),
+                    CheckLists = _taskManager.GetCheckLists(teamTask.Id),
+                    Tags = _taskManager.GetTaskTags(teamTask.Id),
+                    Comments = await _taskManager.GetTaskComments(teamTask.Id),
+                    Attachments = _taskManager.GetTaskAttachments(teamTask.Id),
                     IsUrgent = teamTask.IsUrgent
                 });
 
@@ -1181,6 +1194,12 @@ namespace vws.web.Controllers._team
                 teamDepartment.ModifiedOn = deletionTime;
             }
             _vwsDbContext.Save();
+
+            DeleteTeamTasks(selectedTeam.Id, selectedTeam.ModifiedOn);
+
+            var teamTasks = _vwsDbContext.GeneralTasks.Where(task => task.TeamId == selectedTeam.Id && !task.IsDeleted);
+            foreach (var teamTask in teamTasks)
+                _taskManager.StopRunningTimes(teamTask.Id, selectedTeam.ModifiedOn);
 
             #region History
             var newHistory = new TeamHistory()
