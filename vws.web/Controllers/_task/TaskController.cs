@@ -61,18 +61,6 @@ namespace vws.web.Controllers._task
         #endregion
 
         #region PrivateMethods
-        private List<GeneralTask> GetUserTasks(Guid userId)
-        {
-            var assignedTasks = _vwsDbContext.TaskAssigns.Include(taskAssign => taskAssign.GeneralTask)
-                                                        .Where(taskAssign => taskAssign.UserProfileId == userId && !taskAssign.IsDeleted && taskAssign.CreatedBy != userId)
-                                                        .Select(taskAssign => taskAssign.GeneralTask)
-                                                        .ToList();
-
-            assignedTasks.AddRange(_vwsDbContext.GeneralTasks.Where(task => task.CreatedBy == userId && !task.IsDeleted));
-
-            return assignedTasks;
-        }
-
         private async Task AddUsersToTask(long taskId, List<Guid> users)
         {
             var creationTime = DateTime.UtcNow;
@@ -1756,7 +1744,7 @@ namespace vws.web.Controllers._task
 
             List<TaskResponseModel> response = new List<TaskResponseModel>();
 
-            var userTasks = GetUserTasks(userId);
+            var userTasks = _taskManager.GetUserTasks(userId);
             userTasks = userTasks.OrderByDescending(task => task.CreatedOn).ToList();
 
             foreach (var userTask in userTasks)
@@ -1804,7 +1792,7 @@ namespace vws.web.Controllers._task
             var users = new HashSet<UserModel>();
             var userId = LoggedInUserId.Value;
 
-            var userTasks = GetUserTasks(userId);
+            var userTasks = _taskManager.GetUserTasks(userId);
             var selectedTasks = new List<GeneralTask>();
 
             if (forAll)
@@ -1979,7 +1967,7 @@ namespace vws.web.Controllers._task
 
             List<TaskResponseModel> response = new List<TaskResponseModel>();
 
-            var userTasks = GetUserTasks(userId);
+            var userTasks = _taskManager.GetUserTasks(userId);
             userTasks = userTasks.OrderByDescending(task => task.CreatedOn).ToList();
 
             foreach (var userTask in userTasks)

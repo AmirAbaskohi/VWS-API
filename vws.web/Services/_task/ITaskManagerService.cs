@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using vws.web.Domain._task;
 using vws.web.Models;
 using vws.web.Models._task;
 
@@ -22,5 +23,7 @@ namespace vws.web.Services._task
         public List<TagResponseModel> GetTaskTags(long taskId);
 
         public void StopRunningTimes(long taskId, DateTime endTime);
+
+        public List<GeneralTask> GetUserTasks(Guid userId);
     }
 }

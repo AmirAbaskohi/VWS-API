@@ -14,6 +14,7 @@ using vws.web.Models;
 using vws.web.Models._calender;
 using vws.web.Services;
 using vws.web.Services._calender;
+using vws.web.Services._task;
 
 namespace vws.web.Controllers._calender
 {
@@ -25,16 +26,19 @@ namespace vws.web.Controllers._calender
         private readonly IVWS_DbContext _vwsDbContext;
         private readonly ICalenderManagerService _calenderManager;
         private readonly IPermissionService _permissionService;
+        private readonly ITaskManagerService _taskManager;
         private readonly IStringLocalizer<CalenderController> _localizer;
         #endregion
 
         #region Ctor
-        public CalenderController(IVWS_DbContext vwsDbContext, ICalenderManagerService calenderManager, IStringLocalizer<CalenderController> localizer, IPermissionService permissionService)
+        public CalenderController(IVWS_DbContext vwsDbContext, ICalenderManagerService calenderManager, IStringLocalizer<CalenderController> localizer,
+            IPermissionService permissionService, ITaskManagerService taskManager)
         {
             _vwsDbContext = vwsDbContext;
             _calenderManager = calenderManager;
             _localizer = localizer;
             _permissionService = permissionService;
+            _taskManager = taskManager;
         }
         #endregion
 
@@ -441,6 +445,39 @@ namespace vws.web.Controllers._calender
             }
 
             return result;
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getNumberOfTaksAndEvent")]
+        public IActionResult GetNumberOfTaksAndEvent(DateTime from, DateTime to)
+        {
+            var response = new ResponseModel<Object>();
+            var userId = LoggedInUserId.Value;
+
+            if (from > to)
+            {
+                response.Message = "Invalid period";
+                response.AddError(_localizer["From should be before To."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var selectedTasks = _vwsDbContext.GeneralTasks.Where(task => ((task.StartDate != null && task.StartDate > from && task.StartDate < to) ||
+                                                                         (task.EndDate != null && task.EndDate > from && task.EndDate < to)) &&
+                                                                         !task.IsDeleted && !task.IsArchived)
+                                                          .ToList();
+            var userTasks = _taskManager.GetUserTasks(userId);
+
+            var selectedEventsCount = _vwsDbContext.EventUsers.Include(eventUser => eventUser.Event)
+                                                              .Where(eventUser => eventUser.UserProfileId == userId &&
+                                                                                  !eventUser.Event.IsDeleted && !eventUser.IsDeleted &&
+                                                                                  eventUser.Event.StartTime > from && eventUser.Event.StartTime < to &&
+                                                                                  eventUser.Event.EndTime > from && eventUser.Event.EndTime < to)
+                                                              .Count();
+
+            response.Value = new { NumberOfTasks = selectedTasks.Intersect(userTasks).Count(), NumberOfEvents = selectedEventsCount };
+            response.Message = "Number of task and event in wanted period are returned.";
+            return Ok(response);
         }
 
         [HttpDelete]

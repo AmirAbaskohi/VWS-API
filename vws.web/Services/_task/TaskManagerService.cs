@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using vws.web.Domain;
+using vws.web.Domain._task;
 using vws.web.Hubs;
 using vws.web.Models;
 using vws.web.Models._task;
@@ -183,6 +184,18 @@ namespace vws.web.Services._task
             }
             _vwsDbContext.DeleteTimeTrackPauses(pausedTimeTracks);
             _vwsDbContext.Save();
+        }
+
+        public List<GeneralTask> GetUserTasks(Guid userId)
+        {
+            var assignedTasks = _vwsDbContext.TaskAssigns.Include(taskAssign => taskAssign.GeneralTask)
+                                                        .Where(taskAssign => taskAssign.UserProfileId == userId && !taskAssign.IsDeleted && taskAssign.CreatedBy != userId)
+                                                        .Select(taskAssign => taskAssign.GeneralTask)
+                                                        .ToList();
+
+            assignedTasks.AddRange(_vwsDbContext.GeneralTasks.Where(task => task.CreatedBy == userId && !task.IsDeleted));
+
+            return assignedTasks;
         }
     }
 }

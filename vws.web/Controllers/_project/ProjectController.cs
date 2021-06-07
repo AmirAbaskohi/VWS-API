@@ -191,6 +191,32 @@ namespace vws.web.Controllers._project
             _vwsDbContext.Save();
         }
 
+        private void DeleteProjectEvents(int projectId, DateTime daleteTime)
+        {
+            var relatedEvents = _vwsDbContext.Events.Include(_event => _event.EventProjects)
+                                                    .Where(_event => !_event.IsDeleted &&
+                                                                     _event.EventProjects.Count > 0 &&
+                                                                     _event.EventProjects.Select(eventProject => eventProject.ProjectId)
+                                                                                         .Contains(projectId))
+                                                    .ToList();
+
+            foreach (var relatedEvent in relatedEvents)
+            {
+                if (relatedEvent.EventProjects.Count == 1)
+                {
+                    relatedEvent.IsDeleted = true;
+                    relatedEvent.ModifiedOn = daleteTime;
+                    relatedEvent.ModifiedBy = LoggedInUserId.Value;
+                }
+                else
+                {
+                    var selectedEventProject = _vwsDbContext.EventProjects.FirstOrDefault(eventProject => eventProject.EventId == relatedEvent.Id && eventProject.ProjectId == projectId);
+                    _vwsDbContext.RemoveEventProject(selectedEventProject);
+                }
+            }
+            _vwsDbContext.Save();
+        }
+
         #endregion
 
         #region ProjectAPIS
@@ -1627,6 +1653,7 @@ namespace vws.web.Controllers._project
             _vwsDbContext.Save();
 
             DeleteProjectTasks(selectedProject.Id, selectedProject.ModifiedOn);
+            DeleteProjectEvents(selectedProject.Id, selectedProject.ModifiedOn);
 
             var projectTasks = _vwsDbContext.GeneralTasks.Where(task => task.ProjectId == selectedProject.Id && !task.IsDeleted);
             foreach (var projectTask in projectTasks)
