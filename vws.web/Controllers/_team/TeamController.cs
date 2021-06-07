@@ -30,6 +30,7 @@ using vws.web.Models._task;
 using vws.web.Services._task;
 using System.ComponentModel.DataAnnotations;
 using System.Drawing;
+using Microsoft.Extensions.Logging;
 
 namespace vws.web.Controllers._team
 {
@@ -52,6 +53,7 @@ namespace vws.web.Controllers._team
         private readonly INotificationService _notificationService;
         private readonly EmailAddressAttribute _emailChecker;
         private readonly IImageService _imageService;
+        private readonly ILogger<TeamController> _logger;
         #endregion
 
         #region Ctor
@@ -59,7 +61,7 @@ namespace vws.web.Controllers._team
             IVWS_DbContext vwsDbContext, IFileManager fileManager, IDepartmentManagerService departmentManager,
             ITeamManagerService teamManager, IEmailSender emailSender, IConfiguration configuration, IPermissionService permissionService,
             IProjectManagerService projectManager, ITaskManagerService taskManagerService,
-            INotificationService notificationService, IImageService imageService)
+            INotificationService notificationService, IImageService imageService, ILogger<TeamController> logger)
         {
             _userManager = userManager;
             _localizer = localizer;
@@ -75,6 +77,7 @@ namespace vws.web.Controllers._team
             _notificationService = notificationService;
             _imageService = imageService;
             _emailChecker = new EmailAddressAttribute();
+            _logger = logger;
         }
         #endregion
 
@@ -864,6 +867,9 @@ namespace vws.web.Controllers._team
         public async Task<IEnumerable<TeamExcludingUsersAndDepartmentsResponseModel>> GetAllTeams()
         {
             Guid userId = LoggedInUserId.Value;
+
+            _logger.LogInformation("User IP is : " + Request.HttpContext.Connection.RemoteIpAddress.ToString());
+            _logger.LogInformation("User Browser is : " + Request.Headers["User-Agent"].ToString());
 
             List<TeamExcludingUsersAndDepartmentsResponseModel> response = new List<TeamExcludingUsersAndDepartmentsResponseModel>();
 
