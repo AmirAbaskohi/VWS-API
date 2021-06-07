@@ -217,6 +217,44 @@ namespace vws.web.Controllers._team
             _vwsDbContext.Save();
         }
 
+        private void DeleteTeamProjects(int teamId, DateTime deleteTime)
+        {
+            var teamProjects = _vwsDbContext.Projects.Where(project => project.TeamId == teamId && !project.IsDeleted);
+
+            foreach (var teamProject in teamProjects)
+            {
+                teamProject.IsDeleted = true;
+                teamProject.ModifiedBy = LoggedInUserId.Value;
+                teamProject.ModifiedOn = deleteTime;
+            }
+            _vwsDbContext.Save();
+        }
+        private void DeleteTeamDepartments(int teamId, DateTime deleteTime)
+        {
+            var teamDepartments = _vwsDbContext.Departments.Where(department => department.TeamId == teamId && !department.IsDeleted);
+
+            foreach (var teamDepartment in teamDepartments)
+            {
+                teamDepartment.IsDeleted = true;
+                teamDepartment.ModifiedBy = LoggedInUserId.Value;
+                teamDepartment.ModifiedOn = deleteTime;
+            }
+            _vwsDbContext.Save();
+        }
+
+        private void DeleteTeamEvents(int teamId, DateTime deleteTime)
+        {
+            var teamEvents = _vwsDbContext.Events.Where(_event => _event.TeamId == teamId && !_event.IsDeleted);
+
+            foreach (var teamEvent in teamEvents)
+            {
+                teamEvent.IsDeleted = true;
+                teamEvent.ModifiedBy = LoggedInUserId.Value;
+                teamEvent.ModifiedOn = deleteTime;
+            }
+            _vwsDbContext.Save();
+        }
+
         #endregion
 
         #region TeamAPIS
@@ -1196,6 +1234,9 @@ namespace vws.web.Controllers._team
             _vwsDbContext.Save();
 
             DeleteTeamTasks(selectedTeam.Id, selectedTeam.ModifiedOn);
+            DeleteTeamProjects(selectedTeam.Id, selectedTeam.ModifiedOn);
+            DeleteTeamDepartments(selectedTeam.Id, selectedTeam.ModifiedOn);
+            DeleteTeamEvents(selectedTeam.Id, selectedTeam.ModifiedOn);
 
             var teamTasks = _vwsDbContext.GeneralTasks.Where(task => task.TeamId == selectedTeam.Id && !task.IsDeleted);
             foreach (var teamTask in teamTasks)
