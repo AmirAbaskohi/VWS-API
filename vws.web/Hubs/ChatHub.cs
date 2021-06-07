@@ -69,8 +69,8 @@ namespace vws.web.Hubs
                     UserHandler.ConnectedIds.Add(userIdToString, new SignalRUser
                     {
                         ConnectionIds = new List<string>() { connectionId },
-                        ConnectionStart = DateTime.Now,
-                        LatestTransaction = DateTime.Now,
+                        ConnectionStart = DateTime.UtcNow,
+                        LatestTransaction = DateTime.UtcNow,
                         NickName = LoggedInNickName
                     });
                 }
@@ -84,7 +84,7 @@ namespace vws.web.Hubs
             {
                 if (!UserHandler.ConnectedIds[userIdToString].ConnectionIds.Contains(connectionId))
                     UserHandler.ConnectedIds[userIdToString].ConnectionIds.Add(connectionId);
-                UserHandler.ConnectedIds[userIdToString].LatestTransaction = DateTime.Now;
+                UserHandler.ConnectedIds[userIdToString].LatestTransaction = DateTime.UtcNow;
             }
         }
 
@@ -208,7 +208,7 @@ namespace vws.web.Hubs
             var newMessage = new Domain._chat.Message
             {
                 Body = message,
-                SendOn = DateTime.Now,
+                SendOn = DateTime.UtcNow,
                 ChannelId = channelId,
                 ChannelTypeId = channelTypeId,
                 FromUserId = LoggedInUserId,

@@ -51,7 +51,7 @@ namespace vws.web.Controllers._chat
 
                 if (mutedChannel != null && mutedChannel.IsMuted)
                 {
-                    if (mutedChannel.ForEver || mutedChannel.MuteUntil >= DateTime.Now)
+                    if (mutedChannel.ForEver || mutedChannel.MuteUntil >= DateTime.UtcNow)
                         channelResponseModel.IsMuted = true;
                     else
                         mutedChannel.IsMuted = false;
@@ -334,7 +334,7 @@ namespace vws.web.Controllers._chat
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
 
-            var muteUntil = DateTime.Now.AddMinutes(model.MuteMinutes);
+            var muteUntil = DateTime.UtcNow.AddMinutes(model.MuteMinutes);
 
             if (!_channelService.DoesChannelExist(model.ChannelId, model.ChannelTypeId))
             {

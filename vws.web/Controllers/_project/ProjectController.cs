@@ -153,7 +153,7 @@ namespace vws.web.Controllers._project
 
         private async Task AddProjectUsers(int projectId, List<Guid> users)
         {
-            var creationTime = DateTime.Now;
+            var creationTime = DateTime.UtcNow;
             foreach (var user in users)
             {
                 await _vwsDbContext.AddProjectMemberAsync(new ProjectMember()
@@ -266,7 +266,7 @@ namespace vws.web.Controllers._project
             model.Users.Add(userId);
             model.Users = model.Users.Distinct().ToList();
 
-            DateTime creationTime = DateTime.Now;
+            DateTime creationTime = DateTime.UtcNow;
 
             var newProject = new Project()
             {
@@ -404,7 +404,7 @@ namespace vws.web.Controllers._project
             var lastName = selectedProject.Name;
 
             selectedProject.Name = newName;
-            selectedProject.ModifiedOn = DateTime.Now;
+            selectedProject.ModifiedOn = DateTime.UtcNow;
             selectedProject.ModifiedBy = userId;
             _vwsDbContext.Save();
 
@@ -497,7 +497,7 @@ namespace vws.web.Controllers._project
             var lastDescription = selectedProject.Description;
 
             selectedProject.Description = newDescription;
-            selectedProject.ModifiedOn = DateTime.Now;
+            selectedProject.ModifiedOn = DateTime.UtcNow;
             selectedProject.ModifiedBy = userId;
             var newProjectHistory = new ProjectHistory()
             {
@@ -588,7 +588,7 @@ namespace vws.web.Controllers._project
             var lastColor = selectedProject.Color;
 
             selectedProject.Color = newColor;
-            selectedProject.ModifiedOn = DateTime.Now;
+            selectedProject.ModifiedOn = DateTime.UtcNow;
             selectedProject.ModifiedBy = userId;
             _vwsDbContext.Save();
 
@@ -681,7 +681,7 @@ namespace vws.web.Controllers._project
             var lastStartDate = selectedProject.StartDate;
 
             selectedProject.StartDate = newStartDate;
-            selectedProject.ModifiedOn = DateTime.Now;
+            selectedProject.ModifiedOn = DateTime.UtcNow;
             selectedProject.ModifiedBy = userId;
             _vwsDbContext.Save();
 
@@ -777,7 +777,7 @@ namespace vws.web.Controllers._project
             var lastEndDate = selectedProject.EndDate;
 
             selectedProject.EndDate = newEndDate;
-            selectedProject.ModifiedOn = DateTime.Now;
+            selectedProject.ModifiedOn = DateTime.UtcNow;
             selectedProject.ModifiedBy = userId;
             _vwsDbContext.Save();
 
@@ -948,7 +948,7 @@ namespace vws.web.Controllers._project
             }
 
             selectedProject.TeamId = model.TeamId;
-            selectedProject.ModifiedOn = DateTime.Now;
+            selectedProject.ModifiedOn = DateTime.UtcNow;
             selectedProject.ModifiedBy = userId;
             var newProjectHistory = new ProjectHistory()
             {
@@ -1053,7 +1053,7 @@ namespace vws.web.Controllers._project
             }
             else
             {
-                var time = DateTime.Now;
+                var time = DateTime.UtcNow;
                 var newFileContainer = new FileContainer
                 {
                     ModifiedOn = time,
@@ -1079,7 +1079,7 @@ namespace vws.web.Controllers._project
                 selectedProject.ProjectImageGuid = newFileContainer.Guid;
             }
             selectedProject.ModifiedBy = LoggedInUserId.Value;
-            selectedProject.ModifiedOn = DateTime.Now;
+            selectedProject.ModifiedOn = DateTime.UtcNow;
 
             var newProjectHistory = new ProjectHistory()
             {
@@ -1179,7 +1179,7 @@ namespace vws.web.Controllers._project
             var lastStatus = selectedProject.StatusId;
 
             selectedProject.StatusId = statusId;
-            selectedProject.ModifiedOn = DateTime.Now;
+            selectedProject.ModifiedOn = DateTime.UtcNow;
             selectedProject.ModifiedBy = userId;
             _vwsDbContext.Save();
 
@@ -1619,7 +1619,7 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            var modificationTime = DateTime.Now;
+            var modificationTime = DateTime.UtcNow;
 
             selectedProject.IsDeleted = true;
             selectedProject.ModifiedBy = userId;
@@ -1747,7 +1747,7 @@ namespace vws.web.Controllers._project
                         continue;
 
                     selectedProjectMember.IsPermittedByCreator = true;
-                    selectedProjectMember.PermittedOn = DateTime.Now;
+                    selectedProjectMember.PermittedOn = DateTime.UtcNow;
                     _vwsDbContext.Save();
 
                     #region HistoryAndEmail
@@ -1806,7 +1806,7 @@ namespace vws.web.Controllers._project
 
                 var newPorjectMember = new ProjectMember()
                 {
-                    CreatedOn = DateTime.Now,
+                    CreatedOn = DateTime.UtcNow,
                     IsDeleted = false,
                     ProjectId = model.ProjectId,
                     UserProfileId = modelUser,
@@ -1967,7 +1967,7 @@ namespace vws.web.Controllers._project
             }
 
             selectedProjectMember.IsPermittedByCreator = true;
-            selectedProjectMember.PermittedOn = DateTime.Now;
+            selectedProjectMember.PermittedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             var newProjectHistory = new ProjectHistory()
@@ -2066,7 +2066,7 @@ namespace vws.web.Controllers._project
 
             selectedProjectMember.IsPermittedByCreator = false;
             selectedProjectMember.IsDeleted = true;
-            selectedProjectMember.DeletedOn = DateTime.Now;
+            selectedProjectMember.DeletedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             var newProjectHistory = new ProjectHistory()
@@ -2342,7 +2342,7 @@ namespace vws.web.Controllers._project
             }
 
             selectedProjectMember.IsDeleted = true;
-            selectedProjectMember.DeletedOn = DateTime.Now;
+            selectedProjectMember.DeletedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             var newProjectHistory = new ProjectHistory()

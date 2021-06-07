@@ -76,7 +76,7 @@ namespace vws.web.Controllers._account
             var token = new JwtSecurityToken(
                 issuer: _configuration["JWT:Issuer"],
                 audience: _configuration["JWT:Audience"],
-                expires: DateTime.Now.AddMinutes(Int16.Parse(_configuration["JWT:ValidTimeInMinutes"])),
+                expires: DateTime.UtcNow.AddMinutes(Int16.Parse(_configuration["JWT:ValidTimeInMinutes"])),
                 claims: claims.ToList(),
                 signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
                 );
@@ -226,7 +226,7 @@ namespace vws.web.Controllers._account
             }
             else
             {
-                var time = DateTime.Now;
+                var time = DateTime.UtcNow;
                 var newFileContainer = new FileContainer
                 {
                     ModifiedOn = time,
@@ -535,7 +535,7 @@ namespace vws.web.Controllers._account
 
             if (user.EmailVerificationSendTime != null)
             {
-                var timeDiff = DateTime.Now - user.EmailVerificationSendTime;
+                var timeDiff = DateTime.UtcNow - user.EmailVerificationSendTime;
                 if (timeDiff.TotalDays < 365 && timeDiff.TotalMinutes < Int16.Parse(_configuration["EmailCode:EmailTimeDifferenceInMinutes"]))
                 {
                     errors.Add(_localizer["Too many requests."]);
@@ -545,7 +545,7 @@ namespace vws.web.Controllers._account
 
             var randomCode = new string(Enumerable.Repeat(_configuration["EmailCode:CodeCharSet"], Int16.Parse(_configuration["EmailCode:SizeOfCode"])).Select(s => s[_random.Next(s.Length)]).ToArray());
 
-            user.EmailVerificationSendTime = DateTime.Now;
+            user.EmailVerificationSendTime = DateTime.UtcNow;
             user.EmailVerificationCode = randomCode;
             var result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)
@@ -594,7 +594,7 @@ namespace vws.web.Controllers._account
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "User does not exist!", Errors = errors });
             }
 
-            var timeDiff = user.EmailVerificationSendTime - DateTime.Now;
+            var timeDiff = user.EmailVerificationSendTime - DateTime.UtcNow;
 
             if (user.EmailConfirmed)
             {
@@ -642,7 +642,7 @@ namespace vws.web.Controllers._account
 
             if (user.ResetPasswordSendTime != null)
             {
-                var timeDiff = DateTime.Now - user.ResetPasswordSendTime;
+                var timeDiff = DateTime.UtcNow - user.ResetPasswordSendTime;
                 if (timeDiff.TotalDays < 365 && timeDiff.TotalMinutes < Int16.Parse(_configuration["EmailCode:EmailTimeDifferenceInMinutes"]))
                 {
                     errors.Add(_localizer["Too many requests."]);
@@ -652,7 +652,7 @@ namespace vws.web.Controllers._account
 
             var randomCode = new string(Enumerable.Repeat(_configuration["EmailCode:CodeCharSet"], Int16.Parse(_configuration["EmailCode:SizeOfCode"])).Select(s => s[_random.Next(s.Length)]).ToArray());
 
-            user.ResetPasswordSendTime = DateTime.Now;
+            user.ResetPasswordSendTime = DateTime.UtcNow;
             user.ResetPasswordCode = randomCode;
             user.ResetPasswordCodeIsValid = true;
             var result = await _userManager.UpdateAsync(user);
@@ -700,7 +700,7 @@ namespace vws.web.Controllers._account
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "User does not exist!", Errors = errors });
             }
 
-            var timeDiff = user.ResetPasswordSendTime - DateTime.Now;
+            var timeDiff = user.ResetPasswordSendTime - DateTime.UtcNow;
 
             if (!user.ResetPasswordCodeIsValid)
             {

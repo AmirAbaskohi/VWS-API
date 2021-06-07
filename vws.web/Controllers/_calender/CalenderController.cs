@@ -171,7 +171,7 @@ namespace vws.web.Controllers._calender
             }
             #endregion
 
-            var creationTime = DateTime.Now;
+            var creationTime = DateTime.UtcNow;
             var newEvent = new Event()
             {
                 Title = model.Title,
@@ -247,7 +247,7 @@ namespace vws.web.Controllers._calender
 
             selectedEvent.Title = newTitle;
             selectedEvent.ModifiedBy = userId;
-            selectedEvent.ModifiedOn = DateTime.Now;
+            selectedEvent.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             response.Message = "Event title updated successfully!";
@@ -287,7 +287,7 @@ namespace vws.web.Controllers._calender
 
             selectedEvent.Title = newDescription;
             selectedEvent.ModifiedBy = userId;
-            selectedEvent.ModifiedOn = DateTime.Now;
+            selectedEvent.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             response.Message = "Event description updated successfully!";
@@ -327,7 +327,7 @@ namespace vws.web.Controllers._calender
 
             selectedEvent.StartTime = newStartTime;
             selectedEvent.ModifiedBy = userId;
-            selectedEvent.ModifiedOn = DateTime.Now;
+            selectedEvent.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             response.Message = "Event start time updated successfully!";
@@ -367,7 +367,7 @@ namespace vws.web.Controllers._calender
 
             selectedEvent.EndTime = newEndTime;
             selectedEvent.ModifiedBy = userId;
-            selectedEvent.ModifiedOn = DateTime.Now;
+            selectedEvent.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             response.Message = "Event end time updated successfully!";
@@ -400,7 +400,7 @@ namespace vws.web.Controllers._calender
 
             selectedEvent.IsAllDay = newIsAllDay;
             selectedEvent.ModifiedBy = userId;
-            selectedEvent.ModifiedOn = DateTime.Now;
+            selectedEvent.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             response.Message = "Event IsAllDay updated successfully!";
@@ -469,7 +469,7 @@ namespace vws.web.Controllers._calender
 
             selectedEvent.IsDeleted = true;
             selectedEvent.ModifiedBy = userId;
-            selectedEvent.ModifiedOn = DateTime.Now;
+            selectedEvent.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             response.Message = "Event IsAllDay updated successfully!";

@@ -75,7 +75,7 @@ namespace vws.web.Controllers._task
 
         private async Task AddUsersToTask(long taskId, List<Guid> users)
         {
-            var creationTime = DateTime.Now;
+            var creationTime = DateTime.UtcNow;
             foreach (var user in users)
             {
                 await _vwsDbContext.AddTaskAssignAsync(new TaskAssign()
@@ -162,11 +162,11 @@ namespace vws.web.Controllers._task
                 var newCheckList = new TaskCheckList()
                 {
                     CreatedBy = LoggedInUserId.Value,
-                    CreatedOn = DateTime.Now,
+                    CreatedOn = DateTime.UtcNow,
                     IsDeleted = false,
                     GeneralTaskId = id,
                     ModifiedBy = LoggedInUserId.Value,
-                    ModifiedOn = DateTime.Now,
+                    ModifiedOn = DateTime.UtcNow,
                     Title = checkList.Title
                 };
                 _vwsDbContext.AddCheckList(newCheckList);
@@ -180,7 +180,7 @@ namespace vws.web.Controllers._task
         private List<CheckListItemResponseModel> AddCheckListItems(long checkListId, List<CheckListItemModel> items)
         {
             var taskCheckListItems = new List<TaskCheckListItem>();
-            var creationTime = DateTime.Now;
+            var creationTime = DateTime.UtcNow;
             
             taskCheckListItems = items.Select(item => new TaskCheckListItem
             {
@@ -593,7 +593,7 @@ namespace vws.web.Controllers._task
 
             model.Users = model.Users.Distinct().ToList();
 
-            DateTime creationTime = DateTime.Now;
+            DateTime creationTime = DateTime.UtcNow;
 
             if (!AreTagsValid(model.Tags, model.ProjectId, model.TeamId))
             {
@@ -740,7 +740,7 @@ namespace vws.web.Controllers._task
 
             selectedTask.Title = newTitle;
             selectedTask.ModifiedBy = LoggedInUserId.Value;
-            selectedTask.ModifiedOn = DateTime.Now;
+            selectedTask.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             #region History
@@ -833,7 +833,7 @@ namespace vws.web.Controllers._task
 
             selectedTask.Description = newDescription;
             selectedTask.ModifiedBy = LoggedInUserId.Value;
-            selectedTask.ModifiedOn = DateTime.Now;
+            selectedTask.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             #region History
@@ -919,7 +919,7 @@ namespace vws.web.Controllers._task
 
             selectedTask.TaskPriorityId = newPriority;
             selectedTask.ModifiedBy = LoggedInUserId.Value;
-            selectedTask.ModifiedOn = DateTime.Now;
+            selectedTask.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             #region History
@@ -1008,7 +1008,7 @@ namespace vws.web.Controllers._task
 
             selectedTask.IsUrgent = isUrgent;
             selectedTask.ModifiedBy = LoggedInUserId.Value;
-            selectedTask.ModifiedOn = DateTime.Now;
+            selectedTask.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             #region History
@@ -1188,7 +1188,7 @@ namespace vws.web.Controllers._task
                 selectedTask.TeamId = selectedProj.TeamId;
             }
             selectedTask.ModifiedBy = userId;
-            selectedTask.ModifiedOn = DateTime.Now;
+            selectedTask.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             #region History
@@ -1284,7 +1284,7 @@ namespace vws.web.Controllers._task
 
             selectedTask.StartDate = newStartDate;
             selectedTask.ModifiedBy = userId;
-            selectedTask.ModifiedOn = DateTime.Now;
+            selectedTask.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             #region History
@@ -1382,7 +1382,7 @@ namespace vws.web.Controllers._task
 
             selectedTask.EndDate = newEndDate;
             selectedTask.ModifiedBy = userId;
-            selectedTask.ModifiedOn = DateTime.Now;
+            selectedTask.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             #region History
@@ -1481,7 +1481,7 @@ namespace vws.web.Controllers._task
 
             selectedTask.TaskStatusId = newStatusId;
             selectedTask.ModifiedBy = userId;
-            selectedTask.ModifiedOn = DateTime.Now;
+            selectedTask.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             var newStatus = _vwsDbContext.TaskStatuses.FirstOrDefault(status => status.Id == selectedTask.TaskStatusId).Title;
@@ -1578,7 +1578,7 @@ namespace vws.web.Controllers._task
 
             selectedTask.IsArchived = true;
             selectedTask.ModifiedBy = userId;
-            selectedTask.ModifiedOn = DateTime.Now;
+            selectedTask.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             #region History
@@ -1650,7 +1650,7 @@ namespace vws.web.Controllers._task
             bool isForTeam = (selectedStatus.TeamId != null);
             int? id = isPersonal ? null : (isForTeam ? selectedStatus.TeamId : selectedStatus.ProjectId);
 
-            var modificationTime = DateTime.Now;
+            var modificationTime = DateTime.UtcNow;
             var allStatusTasks = _vwsDbContext.GeneralTasks.Where(task => task.TaskStatusId == statusId && !task.IsArchived && !task.IsDeleted);
             foreach (var statusTask in allStatusTasks)
             {
@@ -2121,7 +2121,7 @@ namespace vws.web.Controllers._task
             }
             selectedTask.IsDeleted = true;
             selectedTask.ModifiedBy = userId;
-            selectedTask.ModifiedOn = DateTime.Now;
+            selectedTask.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             _taskManager.StopRunningTimes(selectedTask.Id, selectedTask.ModifiedOn);
@@ -2197,7 +2197,7 @@ namespace vws.web.Controllers._task
 
             var usersCanBeAssigned = GetUsersCanBeAddedToTask(selectedTask.TeamId, selectedTask.ProjectId);
 
-            var assignTime = DateTime.Now;
+            var assignTime = DateTime.UtcNow;
 
             foreach (var user in model.Users)
             {
@@ -2374,7 +2374,7 @@ namespace vws.web.Controllers._task
 
             selectedUserAssignedTask.IsDeleted = true;
             selectedUserAssignedTask.DeletedBy = LoggedInUserId.Value;
-            selectedUserAssignedTask.DeletedOn = DateTime.Now;
+            selectedUserAssignedTask.DeletedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             #region History
@@ -2723,15 +2723,15 @@ namespace vws.web.Controllers._task
             var newCheckList = new TaskCheckList()
             {
                 CreatedBy = userId,
-                CreatedOn = DateTime.Now,
+                CreatedOn = DateTime.UtcNow,
                 IsDeleted = false,
                 GeneralTaskId = id,
                 ModifiedBy = userId,
-                ModifiedOn = DateTime.Now,
+                ModifiedOn = DateTime.UtcNow,
                 Title = model.Title
             };
             _vwsDbContext.AddCheckList(newCheckList);
-            selectedTask.ModifiedOn = DateTime.Now;
+            selectedTask.ModifiedOn = DateTime.UtcNow;
             selectedTask.ModifiedBy = userId;
             _vwsDbContext.Save();
 
@@ -2840,10 +2840,10 @@ namespace vws.web.Controllers._task
             var lastTitle = selectedCheckList.Title;
 
             selectedCheckList.Title = newTitle;
-            selectedCheckList.GeneralTask.ModifiedOn = DateTime.Now;
+            selectedCheckList.GeneralTask.ModifiedOn = DateTime.UtcNow;
             selectedCheckList.GeneralTask.ModifiedBy = userId;
             selectedCheckList.ModifiedBy = userId;
-            selectedCheckList.ModifiedOn = DateTime.Now;
+            selectedCheckList.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             #region History
@@ -2930,10 +2930,10 @@ namespace vws.web.Controllers._task
             }
 
             selectedCheckList.IsDeleted = true;
-            selectedCheckList.GeneralTask.ModifiedOn = DateTime.Now;
+            selectedCheckList.GeneralTask.ModifiedOn = DateTime.UtcNow;
             selectedCheckList.GeneralTask.ModifiedBy = userId;
             selectedCheckList.ModifiedBy = userId;
-            selectedCheckList.ModifiedOn = DateTime.Now;
+            selectedCheckList.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             #region History
@@ -3021,7 +3021,7 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            var creationTime = DateTime.Now;
+            var creationTime = DateTime.UtcNow;
             var newCheckListItem = new TaskCheckListItem()
             {
                 CreatedBy = userId,
@@ -3034,10 +3034,10 @@ namespace vws.web.Controllers._task
                 Title = model.Title
             };
             _vwsDbContext.AddCheckListItem(newCheckListItem);
-            selectedCheckList.GeneralTask.ModifiedOn = DateTime.Now;
+            selectedCheckList.GeneralTask.ModifiedOn = DateTime.UtcNow;
             selectedCheckList.GeneralTask.ModifiedBy = userId;
             selectedCheckList.ModifiedBy = userId;
-            selectedCheckList.ModifiedOn = DateTime.Now;
+            selectedCheckList.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             #region History
@@ -3151,11 +3151,11 @@ namespace vws.web.Controllers._task
             var lastTitle = selectedCheckListItem.Title;
 
             selectedCheckListItem.Title = newTitle;
-            selectedCheckListItem.ModifiedOn = DateTime.Now;
+            selectedCheckListItem.ModifiedOn = DateTime.UtcNow;
             selectedCheckListItem.ModifiedBy = userId;
-            selectedCheckListItem.TaskCheckList.ModifiedOn = DateTime.Now;
+            selectedCheckListItem.TaskCheckList.ModifiedOn = DateTime.UtcNow;
             selectedCheckListItem.TaskCheckList.CreatedBy = userId;
-            selectedCheckListItem.TaskCheckList.GeneralTask.ModifiedOn = DateTime.Now;
+            selectedCheckListItem.TaskCheckList.GeneralTask.ModifiedOn = DateTime.UtcNow;
             selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy = userId;
             _vwsDbContext.Save();
 
@@ -3252,11 +3252,11 @@ namespace vws.web.Controllers._task
             var lastStatus = selectedCheckListItem.IsChecked;
 
             selectedCheckListItem.IsChecked = isChecked;
-            selectedCheckListItem.ModifiedOn = DateTime.Now;
+            selectedCheckListItem.ModifiedOn = DateTime.UtcNow;
             selectedCheckListItem.ModifiedBy = userId;
-            selectedCheckListItem.TaskCheckList.ModifiedOn = DateTime.Now;
+            selectedCheckListItem.TaskCheckList.ModifiedOn = DateTime.UtcNow;
             selectedCheckListItem.TaskCheckList.CreatedBy = userId;
-            selectedCheckListItem.TaskCheckList.GeneralTask.ModifiedOn = DateTime.Now;
+            selectedCheckListItem.TaskCheckList.GeneralTask.ModifiedOn = DateTime.UtcNow;
             selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy = userId;
             _vwsDbContext.Save();
 
@@ -3355,11 +3355,11 @@ namespace vws.web.Controllers._task
             }
 
             selectedCheckListItem.IsDeleted = true;
-            selectedCheckListItem.ModifiedOn = DateTime.Now;
+            selectedCheckListItem.ModifiedOn = DateTime.UtcNow;
             selectedCheckListItem.ModifiedBy = userId;
-            selectedCheckListItem.TaskCheckList.ModifiedOn = DateTime.Now;
+            selectedCheckListItem.TaskCheckList.ModifiedOn = DateTime.UtcNow;
             selectedCheckListItem.TaskCheckList.CreatedBy = userId;
-            selectedCheckListItem.TaskCheckList.GeneralTask.ModifiedOn = DateTime.Now;
+            selectedCheckListItem.TaskCheckList.GeneralTask.ModifiedOn = DateTime.UtcNow;
             selectedCheckListItem.TaskCheckList.GeneralTask.CreatedBy = userId;
             _vwsDbContext.Save();
 
@@ -3536,7 +3536,7 @@ namespace vws.web.Controllers._task
             }
 
             AddTaskTags(id, tagArray);
-            selectedTask.ModifiedOn = DateTime.Now;
+            selectedTask.ModifiedOn = DateTime.UtcNow;
             selectedTask.ModifiedBy = userId;
             _vwsDbContext.Save();
 
@@ -3809,7 +3809,7 @@ namespace vws.web.Controllers._task
 
             _vwsDbContext.DeleteTaskTag(selectedTaskTag.GeneralTaskId, selectedTaskTag.TagId);
             selectedTask.ModifiedBy = userId;
-            selectedTask.ModifiedOn = DateTime.Now;
+            selectedTask.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             #region History
@@ -3890,7 +3890,7 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            var creationTime = DateTime.Now;
+            var creationTime = DateTime.UtcNow;
             var newComment = new TaskComment()
             {
                 Body = model.Body,
@@ -3900,7 +3900,7 @@ namespace vws.web.Controllers._task
                 GeneralTaskId = selectedTask.Id
             };
             _vwsDbContext.AddTaskComment(newComment);
-            selectedTask.ModifiedOn = DateTime.Now;
+            selectedTask.ModifiedOn = DateTime.UtcNow;
             selectedTask.ModifiedBy = userId;
             _vwsDbContext.Save();
             AddCommentAttachments(newComment.Id, model.Attachments);
@@ -3994,7 +3994,7 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if ((DateTime.Now - selectedComment.ModifiedOn).TotalMinutes < Int16.Parse(_configuration["TimeDifference:EditTaskComment"]))
+            if ((DateTime.UtcNow - selectedComment.ModifiedOn).TotalMinutes < Int16.Parse(_configuration["TimeDifference:EditTaskComment"]))
             {
                 response.AddError(_localizer["You can not edit and delete comment before 5 minutes of your last change."]);
                 response.Message = "Can not edit and delete comment before 5 minutes of your last change";
@@ -4010,8 +4010,8 @@ namespace vws.web.Controllers._task
             string lastBody = selectedComment.Body;
 
             selectedComment.Body = newBody;
-            selectedComment.ModifiedOn = DateTime.Now;
-            selectedComment.GeneralTask.ModifiedOn = DateTime.Now;
+            selectedComment.ModifiedOn = DateTime.UtcNow;
+            selectedComment.GeneralTask.ModifiedOn = DateTime.UtcNow;
             selectedComment.GeneralTask.ModifiedBy = userId;
             _vwsDbContext.Save();
 
@@ -4089,7 +4089,7 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if ((DateTime.Now - selectedComment.ModifiedOn).TotalMinutes < Int16.Parse(_configuration["TimeDifference:EditTaskComment"]))
+            if ((DateTime.UtcNow - selectedComment.ModifiedOn).TotalMinutes < Int16.Parse(_configuration["TimeDifference:EditTaskComment"]))
             {
                 response.AddError(_localizer["You can not edit and delete comment before 5 minutes of your last change."]);
                 response.Message = "Can not edit and delete comment before 5 minutes of your last change";
@@ -4097,8 +4097,8 @@ namespace vws.web.Controllers._task
             }
 
             DeleteTaskComment(commentId);
-            selectedComment.ModifiedOn = DateTime.Now;
-            selectedComment.GeneralTask.ModifiedOn = DateTime.Now;
+            selectedComment.ModifiedOn = DateTime.UtcNow;
+            selectedComment.GeneralTask.ModifiedOn = DateTime.UtcNow;
             selectedComment.GeneralTask.ModifiedBy = userId;
             _vwsDbContext.Save();
 
@@ -4176,8 +4176,8 @@ namespace vws.web.Controllers._task
 
             if (response.Value.Count() != 0)
             {
-                selectedComment.ModifiedOn = DateTime.Now;
-                selectedComment.GeneralTask.ModifiedOn = DateTime.Now;
+                selectedComment.ModifiedOn = DateTime.UtcNow;
+                selectedComment.GeneralTask.ModifiedOn = DateTime.UtcNow;
                 selectedComment.GeneralTask.ModifiedBy = userId;
                 _vwsDbContext.Save();
                 string links = "";
@@ -4275,8 +4275,8 @@ namespace vws.web.Controllers._task
             var selectedContainer = _vwsDbContext.FileContainers.FirstOrDefault(container => container.Id == selectedAttachment.FileContainerId);
             var fileName = _vwsDbContext.Files.FirstOrDefault(file => file.Id == selectedContainer.RecentFileId).Name;
             _vwsDbContext.DeleteFileContainer(selectedContainer);
-            selectedComment.ModifiedOn = DateTime.Now;
-            selectedComment.GeneralTask.ModifiedOn = DateTime.Now;
+            selectedComment.ModifiedOn = DateTime.UtcNow;
+            selectedComment.GeneralTask.ModifiedOn = DateTime.UtcNow;
             selectedComment.GeneralTask.ModifiedBy = userId;
             _vwsDbContext.Save();
 
@@ -4360,7 +4360,7 @@ namespace vws.web.Controllers._task
 
             if (response.Value.Count() != 0)
             {
-                selectedTask.ModifiedOn = DateTime.Now;
+                selectedTask.ModifiedOn = DateTime.UtcNow;
                 selectedTask.ModifiedBy = userId;
                 _vwsDbContext.Save();
                 string links = "";
@@ -4452,7 +4452,7 @@ namespace vws.web.Controllers._task
             var selectedContainer = _vwsDbContext.FileContainers.FirstOrDefault(container => container.Id == selectedAttachment.FileContainerId);
             var fileName = _vwsDbContext.Files.FirstOrDefault(file => file.Id == selectedContainer.RecentFileId).Name;
             _vwsDbContext.DeleteFileContainer(selectedContainer);
-            selectedTask.ModifiedOn = DateTime.Now;
+            selectedTask.ModifiedOn = DateTime.UtcNow;
             selectedTask.ModifiedBy = userId;
             _vwsDbContext.Save();
 

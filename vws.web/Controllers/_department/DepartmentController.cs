@@ -211,7 +211,7 @@ namespace vws.web.Controllers._department
             selectedDepartment.TeamId = model.TeamId;
             selectedDepartment.Name = model.Name;
             selectedDepartment.ModifiedBy = userId;
-            selectedDepartment.ModifiedOn = DateTime.Now;
+            selectedDepartment.ModifiedOn = DateTime.UtcNow;
             selectedDepartment.Color = model.Color;
             selectedDepartment.Description = model.Description;
 
@@ -314,7 +314,7 @@ namespace vws.web.Controllers._department
             }
             else
             {
-                var time = DateTime.Now;
+                var time = DateTime.UtcNow;
                 var newFileContainer = new FileContainer
                 {
                     ModifiedOn = time,
@@ -340,7 +340,7 @@ namespace vws.web.Controllers._department
                 selectedDepartment.DepartmentImageGuid = newFileContainer.Guid;
             }
             selectedDepartment.ModifiedBy = LoggedInUserId.Value;
-            selectedDepartment.ModifiedOn = DateTime.Now;
+            selectedDepartment.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             _imageService.SaveInOtherQualities(fileResponse.Value);
@@ -462,7 +462,7 @@ namespace vws.web.Controllers._department
 
             selectedDepartment.IsDeleted = true;
             selectedDepartment.ModifiedBy = userId;
-            selectedDepartment.ModifiedOn = DateTime.Now;
+            selectedDepartment.ModifiedOn = DateTime.UtcNow;
 
             _vwsDbContext.Save();
 

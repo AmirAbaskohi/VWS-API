@@ -22,7 +22,7 @@ namespace vws.web.Services._department
 
         public async Task<Department> CreateDepartment(DepartmentModel model, Guid userId)
         {
-            var creationTime = DateTime.Now;
+            var creationTime = DateTime.UtcNow;
             var newDepartment = new Department()
             {
                 Name = model.Name,
@@ -83,7 +83,7 @@ namespace vws.web.Services._department
         {
             await vwsDbContext.AddDepartmentMemberAsync(new DepartmentMember()
             {
-                CreatedOn = DateTime.Now,
+                CreatedOn = DateTime.UtcNow,
                 IsDeleted = false,
                 DepartmentId = departmentId,
                 UserProfileId = user

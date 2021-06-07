@@ -150,8 +150,8 @@ namespace vws.web.Controllers._team
                 TeamId = teamId,
                 CreatedBy = LoggedInUserId.Value,
                 ModifiedBy = LoggedInUserId.Value,
-                CreatedOn = DateTime.Now,
-                ModifiedOn = DateTime.Now,
+                CreatedOn = DateTime.UtcNow,
+                ModifiedOn = DateTime.UtcNow,
                 LinkGuid = linkGuid,
                 IsRevoked = false
             };
@@ -414,7 +414,7 @@ namespace vws.web.Controllers._team
             var lastName = selectedTeam.Name;
 
             selectedTeam.ModifiedBy = userId;
-            selectedTeam.ModifiedOn = DateTime.Now;
+            selectedTeam.ModifiedOn = DateTime.UtcNow;
             selectedTeam.Name = newName;
             _vwsDbContext.Save();
 
@@ -508,7 +508,7 @@ namespace vws.web.Controllers._team
             var lastDescription = selectedTeam.Description;
 
             selectedTeam.ModifiedBy = userId;
-            selectedTeam.ModifiedOn = DateTime.Now;
+            selectedTeam.ModifiedOn = DateTime.UtcNow;
             selectedTeam.Description = newDescription;
             _vwsDbContext.Save();
 
@@ -595,7 +595,7 @@ namespace vws.web.Controllers._team
             var lastColor = selectedTeam.Color;
 
             selectedTeam.ModifiedBy = userId;
-            selectedTeam.ModifiedOn = DateTime.Now;
+            selectedTeam.ModifiedOn = DateTime.UtcNow;
             selectedTeam.Color = newColor;
             _vwsDbContext.Save();
 
@@ -724,7 +724,7 @@ namespace vws.web.Controllers._team
             }
             else
             {
-                var time = DateTime.Now;
+                var time = DateTime.UtcNow;
                 var newFileContainer = new FileContainer
                 {
                     ModifiedOn = time,
@@ -750,7 +750,7 @@ namespace vws.web.Controllers._team
                 selectedTeam.TeamImageGuid = newFileContainer.Guid;
             }
             selectedTeam.ModifiedBy = LoggedInUserId.Value;
-            selectedTeam.ModifiedOn = DateTime.Now;
+            selectedTeam.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             #region History
@@ -1168,7 +1168,7 @@ namespace vws.web.Controllers._team
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            var deletionTime = DateTime.Now;
+            var deletionTime = DateTime.UtcNow;
 
             selectedTeam.IsDeleted = true;
             selectedTeam.ModifiedBy = userId;
@@ -1265,7 +1265,7 @@ namespace vws.web.Controllers._team
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            DateTime creationTime = DateTime.Now;
+            DateTime creationTime = DateTime.UtcNow;
 
             Guid inviteLinkGuid = Guid.NewGuid();
 
@@ -1373,7 +1373,7 @@ namespace vws.web.Controllers._team
 
             selectedInviteLink.IsRevoked = true;
             selectedTeam.ModifiedBy = userId;
-            selectedTeam.ModifiedOn = DateTime.Now;
+            selectedTeam.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             #region History
@@ -1529,7 +1529,7 @@ namespace vws.web.Controllers._team
             {
                 var newTeamMember = new TeamMember()
                 {
-                    CreatedOn = DateTime.Now,
+                    CreatedOn = DateTime.UtcNow,
                     IsDeleted = false,
                     TeamId = selectedTeam.Id,
                     UserProfileId = user
@@ -1632,7 +1632,7 @@ namespace vws.web.Controllers._team
             var newTeamMember = new TeamMember()
             {
                 TeamId = selectedTeamLink.TeamId,
-                CreatedOn = DateTime.Now,
+                CreatedOn = DateTime.UtcNow,
                 UserProfileId = userId
             };
             await _vwsDbContext.AddTeamMemberAsync(newTeamMember);
@@ -1714,7 +1714,7 @@ namespace vws.web.Controllers._team
             }
 
             selectedTeamMemeber.IsDeleted = true;
-            selectedTeamMemeber.DeletedOn = DateTime.Now;
+            selectedTeamMemeber.DeletedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
 
             var deletedUser = await _vwsDbContext.GetUserProfileAsync(userId);

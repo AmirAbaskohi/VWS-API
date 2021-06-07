@@ -33,7 +33,7 @@ namespace vws.web.ServiceEngine
                             Thread.Sleep(1000 * 60 * 5);
                           
                             var mutedChannels = vwsDbContext.MutedChannels.Where(mutedChannel => mutedChannel.IsMuted == true && mutedChannel.ForEver == false).ToList();
-                            mutedChannels = mutedChannels.Where(mutedChannel => mutedChannel.MuteUntil <= DateTime.Now).ToList();
+                            mutedChannels = mutedChannels.Where(mutedChannel => mutedChannel.MuteUntil <= DateTime.UtcNow).ToList();
                             foreach (var mutedChannel in mutedChannels)
                             {
                                 mutedChannel.IsMuted = false;

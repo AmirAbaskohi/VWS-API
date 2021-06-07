@@ -88,7 +88,7 @@ namespace vws.web.Controllers._task
             {
                 GeneralTaskId = taskId,
                 UserProfileId = userId,
-                StartDate = DateTime.Now,
+                StartDate = DateTime.UtcNow,
                 EndDate = null,
                 TotalTimeInMinutes = null
             };
@@ -139,7 +139,7 @@ namespace vws.web.Controllers._task
 
             DeletePausedTimeTrack(taskId);
 
-            unfinishedTimeTrack.EndDate = DateTime.Now;
+            unfinishedTimeTrack.EndDate = DateTime.UtcNow;
             unfinishedTimeTrack.TotalTimeInMinutes = (unfinishedTimeTrack.EndDate.Value - unfinishedTimeTrack.StartDate).TotalMinutes;
 
             var newTimeTrackPause = new TimeTrackPause()
@@ -201,7 +201,7 @@ namespace vws.web.Controllers._task
 
             if (unfinishedTimeTrack != null)
             {
-                unfinishedTimeTrack.EndDate = DateTime.Now;
+                unfinishedTimeTrack.EndDate = DateTime.UtcNow;
                 unfinishedTimeTrack.TotalTimeInMinutes = (unfinishedTimeTrack.EndDate.Value - unfinishedTimeTrack.StartDate).TotalMinutes;
                 _vwsDbContext.Save();
             }

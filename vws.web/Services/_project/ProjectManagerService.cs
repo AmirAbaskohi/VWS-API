@@ -132,7 +132,7 @@ namespace vws.web.Services._project
                 if (time.TotalTimeInMinutes != null)
                     result += (double)time.TotalTimeInMinutes;
                 else
-                    result += (DateTime.Now - time.StartDate).TotalMinutes;
+                    result += (DateTime.UtcNow - time.StartDate).TotalMinutes;
             }
 
             return result;

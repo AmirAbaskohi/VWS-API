@@ -89,7 +89,7 @@ namespace vws.web.Controllers._feedback
 
             if (uploadedAttachment != null)
             {
-                var time = DateTime.Now;
+                var time = DateTime.UtcNow;
                 attachmentContainer = new FileContainer
                 {
                     ModifiedOn = time,

@@ -65,7 +65,7 @@ namespace vws.web.Controllers._file
 
             List<Domain._file.FileContainer> unsuccessfullyFileContainers = new List<Domain._file.FileContainer>();
 
-            var time = DateTime.Now;
+            var time = DateTime.UtcNow;
 
             foreach (var file in files)
             {
@@ -169,7 +169,7 @@ namespace vws.web.Controllers._file
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
             }
             selectedContainer.RecentFileId = fileResponse.Value.Id;
-            selectedContainer.ModifiedOn = DateTime.Now;
+            selectedContainer.ModifiedOn = DateTime.UtcNow;
             selectedContainer.ModifiedBy = LoggedInUserId.Value;
             _vwsDbContext.Save();
 

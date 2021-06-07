@@ -23,7 +23,7 @@ namespace vws.web.Services._team
 
         public async Task<Team> CreateTeam(TeamModel model, Guid userId)
         {
-            var creationTime = DateTime.Now;
+            var creationTime = DateTime.UtcNow;
 
             var newTeam = new Team()
             {
