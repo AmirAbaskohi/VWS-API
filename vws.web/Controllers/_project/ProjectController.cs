@@ -1367,6 +1367,16 @@ namespace vws.web.Controllers._project
 
         [HttpGet]
         [Authorize]
+        [Route("getNumberOfActiveProjects")]
+        public int GetNumberOfActiveProjects()
+        {
+            Guid userId = LoggedInUserId.Value;
+
+            return _projectManager.GetAllUserProjects(userId).Where(project => project.StatusId == (byte)SeedDataEnum.ProjectStatuses.Active).Count(); 
+        }
+
+        [HttpGet]
+        [Authorize]
         [Route("getHold")]
         public IEnumerable<ProjectResponseModel> GetHoldProject()
         {

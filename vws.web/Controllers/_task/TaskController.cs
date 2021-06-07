@@ -1785,6 +1785,61 @@ namespace vws.web.Controllers._task
 
         [HttpGet]
         [Authorize]
+        [Route("getNumberOfTasks")]
+        public long GetNumberOfTasks()
+        {
+            Guid userId = LoggedInUserId.Value;
+
+            return _taskManager.GetUserTasks(userId).LongCount();
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("getUrgentTasks")]
+        public async Task<IEnumerable<TaskResponseModel>> GetUrgentTasks()
+        {
+            Guid userId = LoggedInUserId.Value;
+
+            List<TaskResponseModel> response = new List<TaskResponseModel>();
+
+            var userUrgentTasks = _taskManager.GetUserTasks(userId).Where(task => task.IsUrgent && !task.IsArchived && !task.IsDeleted);
+            userUrgentTasks = userUrgentTasks.OrderByDescending(task => task.CreatedOn).ToList();
+
+            foreach (var userUrgentTask in userUrgentTasks)
+            {
+                response.Add(new TaskResponseModel()
+                {
+                    Id = userUrgentTask.Id,
+                    Title = userUrgentTask.Title,
+                    Description = userUrgentTask.Description,
+                    StartDate = userUrgentTask.StartDate,
+                    EndDate = userUrgentTask.EndDate,
+                    CreatedOn = userUrgentTask.CreatedOn,
+                    ModifiedOn = userUrgentTask.ModifiedOn,
+                    CreatedBy = (await _vwsDbContext.GetUserProfileAsync(userUrgentTask.CreatedBy)).NickName,
+                    ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(userUrgentTask.ModifiedBy)).NickName,
+                    Guid = userUrgentTask.Guid,
+                    PriorityId = userUrgentTask.TaskPriorityId,
+                    PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)userUrgentTask.TaskPriorityId).ToString()],
+                    UsersAssignedTo = _taskManager.GetAssignedTo(userUrgentTask.Id),
+                    ProjectId = userUrgentTask.ProjectId,
+                    TeamId = userUrgentTask.TeamId,
+                    TeamName = userUrgentTask.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == userUrgentTask.TeamId).Name,
+                    ProjectName = userUrgentTask.ProjectId == null ? null : _vwsDbContext.Projects.FirstOrDefault(project => project.Id == userUrgentTask.ProjectId).Name,
+                    StatusId = userUrgentTask.TaskStatusId,
+                    StatusTitle = _vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == userUrgentTask.TaskStatusId).Title,
+                    CheckLists = _taskManager.GetCheckLists(userUrgentTask.Id),
+                    Tags = _taskManager.GetTaskTags(userUrgentTask.Id),
+                    Comments = await _taskManager.GetTaskComments(userUrgentTask.Id),
+                    Attachments = _taskManager.GetTaskAttachments(userUrgentTask.Id),
+                    IsUrgent = userUrgentTask.IsUrgent
+                });
+            }
+            return response;
+        }
+
+        [HttpGet]
+        [Authorize]
         [Route("getTasksUsers")]
         public IActionResult GetTasksUsers(int? teamId, int? projectId, bool forAll)
         {

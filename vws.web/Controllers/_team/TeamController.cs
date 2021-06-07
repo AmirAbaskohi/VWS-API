@@ -977,6 +977,16 @@ namespace vws.web.Controllers._team
 
         [HttpGet]
         [Authorize]
+        [Route("getNumberOfTeams")]
+        public int GetNumberOfTeams()
+        {
+            Guid userId = LoggedInUserId.Value;
+
+            return _teamManager.GetAllUserTeams(userId).Count;
+        }
+
+        [HttpGet]
+        [Authorize]
         [Route("getDepartments")]
         public async Task<IActionResult> GetTeamDepartments(int id)
         {
