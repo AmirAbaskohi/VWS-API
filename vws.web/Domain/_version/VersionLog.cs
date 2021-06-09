@@ -19,6 +19,8 @@ namespace vws.web.Domain._version
 
         public int Order { get; set; }
 
+        public string Key { get; set; }
+
         public virtual Version Version { get; set; }
     }
 }
