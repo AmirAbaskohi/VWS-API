@@ -245,7 +245,7 @@ namespace vws.web.Controllers._calender
             if (!_permissionService.HasAccessToEvent(userId, id))
             {
                 response.Message = "Access denied.";
-                response.AddError(_localizer["You do not have access to this task."]);
+                response.AddError(_localizer["You do not have access to this event."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
@@ -285,7 +285,7 @@ namespace vws.web.Controllers._calender
             if (!_permissionService.HasAccessToEvent(userId, id))
             {
                 response.Message = "Access denied.";
-                response.AddError(_localizer["You do not have access to this task."]);
+                response.AddError(_localizer["You do not have access to this event."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
@@ -318,7 +318,7 @@ namespace vws.web.Controllers._calender
             if (!_permissionService.HasAccessToEvent(userId, id))
             {
                 response.Message = "Access denied.";
-                response.AddError(_localizer["You do not have access to this task."]);
+                response.AddError(_localizer["You do not have access to this event."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
@@ -358,7 +358,7 @@ namespace vws.web.Controllers._calender
             if (!_permissionService.HasAccessToEvent(userId, id))
             {
                 response.Message = "Access denied.";
-                response.AddError(_localizer["You do not have access to this task."]);
+                response.AddError(_localizer["You do not have access to this event."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
@@ -398,7 +398,7 @@ namespace vws.web.Controllers._calender
             if (!_permissionService.HasAccessToEvent(userId, id))
             {
                 response.Message = "Access denied.";
-                response.AddError(_localizer["You do not have access to this task."]);
+                response.AddError(_localizer["You do not have access to this event."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
@@ -500,7 +500,7 @@ namespace vws.web.Controllers._calender
             if (!_permissionService.HasAccessToEvent(userId, id))
             {
                 response.Message = "Access denied.";
-                response.AddError(_localizer["You do not have access to this task."]);
+                response.AddError(_localizer["You do not have access to this event."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
