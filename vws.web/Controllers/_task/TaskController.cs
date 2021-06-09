@@ -114,6 +114,56 @@ namespace vws.web.Controllers._task
                                                       .ToList();
         }
 
+        private TaskStatusResponseModel AddStatusPrivate(int? projectId, int? teamId, string title)
+        {
+            if (teamId != null && projectId != null)
+                teamId = null;
+
+            Domain._task.TaskStatus newStatus;
+            int lastStatus = 0;
+
+            if (teamId != null)
+            {
+                var teamStatuses = _vwsDbContext.TaskStatuses.Where(status => status.TeamId == teamId && !status.IsDeleted)
+                                                             .OrderByDescending(status => status.EvenOrder);
+
+                if (teamStatuses.Count() != 0)
+                    lastStatus = teamStatuses.First().EvenOrder;
+
+                newStatus = new Domain._task.TaskStatus() { EvenOrder = lastStatus + 2, TeamId = teamId, ProjectId = null, Title = title, UserProfileId = null };
+                _vwsDbContext.AddTaskStatus(newStatus);
+                _vwsDbContext.Save();
+
+                return new TaskStatusResponseModel() { Id = newStatus.Id, Title = newStatus.Title };
+            }
+            else if (projectId != null)
+            {
+                var projectStatuses = _vwsDbContext.TaskStatuses.Where(status => status.ProjectId == projectId && !status.IsDeleted)
+                                                               .OrderByDescending(status => status.EvenOrder);
+
+                if (projectStatuses.Count() != 0)
+                    lastStatus = projectStatuses.First().EvenOrder;
+
+
+                newStatus = new Domain._task.TaskStatus() { EvenOrder = lastStatus + 2, TeamId = null, ProjectId = projectId, Title = title, UserProfileId = null };
+                _vwsDbContext.AddTaskStatus(newStatus);
+                _vwsDbContext.Save();
+
+                return new TaskStatusResponseModel() { Id = newStatus.Id, Title = newStatus.Title };
+            }
+            var userStatuses = _vwsDbContext.TaskStatuses.Where(status => status.UserProfileId == LoggedInUserId.Value && !status.IsDeleted)
+                                                        .OrderByDescending(status => status.EvenOrder);
+
+            if (userStatuses.Count() != 0)
+                lastStatus = userStatuses.First().EvenOrder;
+
+            newStatus = new Domain._task.TaskStatus() { EvenOrder = lastStatus + 2, TeamId = null, ProjectId = null, Title = title, UserProfileId = LoggedInUserId.Value };
+            _vwsDbContext.AddTaskStatus(newStatus);
+            _vwsDbContext.Save();
+
+            return new TaskStatusResponseModel() { Id = newStatus.Id, Title = newStatus.Title, ProjectId = newStatus.ProjectId, TeamId = newStatus.TeamId, UserProfileId = newStatus.UserProfileId };
+        }
+
         private List<TagResponseModel> GetAvailableTags(int? projectId, int? teamId)
         {
             if (projectId != null)
@@ -598,16 +648,15 @@ namespace vws.web.Controllers._task
             }
 
             var statuses = GetTaskStatuses(model.ProjectId, model.TeamId).Select(status => status.Id);
-            if (statuses.Count() == 0)
-            {
-                response.Message = "No status";
-                response.AddError(_localizer["There is no status to give task."]);
-                return StatusCode(StatusCodes.Status424FailedDependency, response);
+            bool dontCheck = false;
+            if (statuses.Count() == 0 && model.StatusId == null) {
+                model.StatusId = AddStatusPrivate(model.ProjectId, model.TeamId, "Untitled").Id;
+                dontCheck = true;
             }
             if (model.StatusId == null)
                 model.StatusId = statuses.First();
 
-            if (!statuses.Contains((int)model.StatusId))
+            if (!dontCheck && !statuses.Contains((int)model.StatusId))
             {
                 response.Message = "Invalid status";
                 response.AddError(_localizer["Invalid status."]);
@@ -2524,53 +2573,7 @@ namespace vws.web.Controllers._task
             }
             #endregion
 
-            Domain._task.TaskStatus newStatus;
-            int lastStatus = 0;
-
-            if (teamId != null)
-            {
-                var teamStatuses = _vwsDbContext.TaskStatuses.Where(status => status.TeamId == teamId && !status.IsDeleted)
-                                                             .OrderByDescending(status => status.EvenOrder);
-                
-                if (teamStatuses.Count() != 0)
-                    lastStatus = teamStatuses.First().EvenOrder;
-
-                newStatus = new Domain._task.TaskStatus() { EvenOrder = lastStatus + 2, TeamId = teamId, ProjectId = null, Title = title, UserProfileId = null };
-                _vwsDbContext.AddTaskStatus(newStatus);
-                _vwsDbContext.Save();
-
-                response.Value = new TaskStatusResponseModel() { Id = newStatus.Id, Title = newStatus.Title };
-                response.Message = "New status added successfully!";
-                return Ok(response);
-            }
-            else if (projectId != null)
-            {
-                var projectStatuses = _vwsDbContext.TaskStatuses.Where(status => status.ProjectId == projectId && !status.IsDeleted)
-                                                               .OrderByDescending(status => status.EvenOrder);
-
-                if (projectStatuses.Count() != 0)
-                    lastStatus = projectStatuses.First().EvenOrder;
-
-
-                newStatus = new Domain._task.TaskStatus() { EvenOrder = lastStatus + 2, TeamId = null, ProjectId = projectId, Title = title, UserProfileId = null };
-                _vwsDbContext.AddTaskStatus(newStatus);
-                _vwsDbContext.Save();
-
-                response.Value = new TaskStatusResponseModel() { Id = newStatus.Id, Title = newStatus.Title };
-                response.Message = "New status added successfully!";
-                return Ok(response);
-            }
-            var userStatuses = _vwsDbContext.TaskStatuses.Where(status => status.UserProfileId == LoggedInUserId.Value && !status.IsDeleted)
-                                                        .OrderByDescending(status => status.EvenOrder);
-
-            if (userStatuses.Count() != 0)
-                lastStatus = userStatuses.First().EvenOrder;
-
-            newStatus = new Domain._task.TaskStatus() { EvenOrder = lastStatus + 2, TeamId = null, ProjectId = null, Title = title, UserProfileId = LoggedInUserId.Value };
-            _vwsDbContext.AddTaskStatus(newStatus);
-            _vwsDbContext.Save();
-
-            response.Value = new TaskStatusResponseModel() { Id = newStatus.Id, Title = newStatus.Title, ProjectId = newStatus.ProjectId, TeamId = newStatus.TeamId, UserProfileId = newStatus.UserProfileId };
+            response.Value = AddStatusPrivate(projectId, teamId, title);
             response.Message = "New status added successfully!";
             return Ok(response);
         }
@@ -2712,7 +2715,7 @@ namespace vws.web.Controllers._task
             {
                 response.Message = "You can not delete status";
                 response.AddError(_localizer["You can not delete status which has task."]);
-                return Ok(response);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
             selectedStatus.IsDeleted = true;
