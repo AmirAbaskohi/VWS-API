@@ -71,7 +71,7 @@ namespace vws.web.Controllers._version
                 Logs = logs.Select(log => new VersionLogModel()
                 {
                     Log = _localizer[log.Key] == log.Key ? log.Log : _localizer[log.Key],
-                    ImageUrl = String.IsNullOrEmpty(log.ImageName) ? null : $"{this.Request.Scheme}://{this.Request.Host}{this.Request.PathBase}:/whatsnew/{log.ImageName}"
+                    ImageUrl = String.IsNullOrEmpty(log.ImageName) ? null : $"{this.Request.Scheme}://{this.Request.Host}{this.Request.PathBase}/whatsnew/{log.ImageName}"
                 })
             };
             response.Message = "Logs returned successfully!";
