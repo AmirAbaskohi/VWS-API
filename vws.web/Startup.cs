@@ -197,7 +197,8 @@ namespace vws.web
                 app.UseHsts();
             }
 
-            app.UseCors(builder => builder.WithOrigins(Configuration["Angular:Url"])
+            app.UseCors(builder => builder/*TODO:TODO:TODO: WithOrigins(Configuration["Angular:Url"])*/
+                    .AllowAnyOrigin() //TODO:TODO:TODO: REMOVE THIS!, IT WAS ADDED FOR FLUTTER CORS PROBLEM
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials());
