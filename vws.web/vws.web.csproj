@@ -39,11 +39,13 @@
     <Folder Include="Domain\_base\" />
     <Folder Include="Domain\_department\" />
     <Folder Include="Upload\files\" />
+    <Folder Include="wwwroot\whatsnew\" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="appsettings.json.template" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="appsettings1.json" />
+    <Content Remove="wwwroot\whatsnew\" />
   </ItemGroup>
 </Project>
