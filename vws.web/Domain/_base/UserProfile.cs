@@ -36,6 +36,10 @@ namespace vws.web.Domain._base
 
         public Guid ProfileImageSecurityStamp { get; set; }
 
+        public DateTime CreatedOn { get; set; }
+
+        public DateTime ModifiedOn { get; set; }
+
         public virtual Culture Culture { get; set; }
 
         public virtual FileContainer ProfileImage { get; set; }
