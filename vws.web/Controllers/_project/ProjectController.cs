@@ -165,6 +165,8 @@ namespace vws.web.Controllers._project
                     ProjectId = projectId,
                     PermittedOn = creationTime
                 });
+                if (user != LoggedInUserId.Value)
+                    _vwsDbContext.AddUsersActivity(new UsersActivity() { Time = creationTime, UserId = user, UserProfileId = LoggedInUserId.Value });
             }
             _vwsDbContext.Save();
         }
@@ -1765,6 +1767,7 @@ namespace vws.web.Controllers._project
 
             var user = await _vwsDbContext.GetUserProfileAsync(userId);
 
+            var addTime = DateTime.UtcNow;
             foreach (var modelUser in model.Users)
             {
 
@@ -1843,7 +1846,7 @@ namespace vws.web.Controllers._project
 
                 var newPorjectMember = new ProjectMember()
                 {
-                    CreatedOn = DateTime.UtcNow,
+                    CreatedOn = addTime,
                     IsDeleted = false,
                     ProjectId = model.ProjectId,
                     UserProfileId = modelUser,
@@ -1852,6 +1855,7 @@ namespace vws.web.Controllers._project
                 if (userId == selectedProject.CreateBy)
                     newPorjectMember.PermittedOn = newPorjectMember.CreatedOn;
                 await _vwsDbContext.AddProjectMemberAsync(newPorjectMember);
+                _vwsDbContext.AddUsersActivity(new UsersActivity() { Time = addTime, UserId = modelUser, UserProfileId = LoggedInUserId.Value });
                 _vwsDbContext.Save();
 
                 #region HistoryAndEmail
@@ -2197,8 +2201,27 @@ namespace vws.web.Controllers._project
             }
 
             var availableUsers = GetAvailableUsersToAddProject(Id);
+            var usersOrders = _vwsDbContext.UsersOrders.Where(userOrder => userOrder.UserProfileId == LoggedInUserId.Value).ToList();
 
-            foreach (var availableUserId in availableUsers)
+            var validUsersFromUsersOrders = usersOrders.Where(usersOrder => availableUsers.Contains(usersOrder.UserProfileId))
+                                                       .OrderBy(usersOrder => usersOrder.Order)
+                                                       .Select(usersOrder => usersOrder.UserId)
+                                                       .ToList();
+
+            var usersNotIncluded = validUsersFromUsersOrders.Count == availableUsers.Count ? new List<Guid>() : availableUsers.Except(validUsersFromUsersOrders);
+
+            foreach (var availableUserId in validUsersFromUsersOrders)
+            {
+                var user = await _userManager.FindByIdAsync(availableUserId.ToString());
+                var userProfile = await _vwsDbContext.GetUserProfileAsync(availableUserId);
+                users.Add(new UserModel()
+                {
+                    UserId = availableUserId,
+                    ProfileImageGuid = userProfile.ProfileImageGuid,
+                    NickName = userProfile.NickName
+                });
+            }
+            foreach (var availableUserId in usersNotIncluded)
             {
                 var user = await _userManager.FindByIdAsync(availableUserId.ToString());
                 var userProfile = await _vwsDbContext.GetUserProfileAsync(availableUserId);

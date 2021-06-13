@@ -75,6 +75,7 @@ namespace vws.web.Controllers._task
                     Guid = Guid.NewGuid(),
                     GeneralTaskId = taskId
                 });
+                _vwsDbContext.AddUsersActivity(new UsersActivity() { Time = creationTime, UserId = user, UserProfileId = LoggedInUserId.Value });
             }
             _vwsDbContext.Save();
         }
@@ -695,6 +696,7 @@ namespace vws.web.Controllers._task
             AddTaskAttachments(newTask.Id, model.Attachments);
 
             await AddUsersToTask(newTask.Id, model.Users);
+
             AddCheckLists(newTask.Id, model.CheckLists);
             model.Users.Remove(userId);
             string[] arguments = { newTask.Title, LoggedInNickName };
@@ -2309,6 +2311,7 @@ namespace vws.web.Controllers._task
                     CreatedOn = assignTime
                 };
                 await _vwsDbContext.AddTaskAssignAsync(newTaskAssign);
+                _vwsDbContext.AddUsersActivity(new UsersActivity() { Time = assignTime, UserId = user, UserProfileId = LoggedInUserId.Value });
                 successfulAssignedUsers.Add(user);
             }
             _vwsDbContext.Save();
@@ -2381,7 +2384,27 @@ namespace vws.web.Controllers._task
             #endregion
 
             var users = GetUsersCanBeAddedToTask(teamId, projectId);
-            foreach (var user in users)
+
+            var usersOrders = _vwsDbContext.UsersOrders.Where(userOrder => userOrder.UserProfileId == LoggedInUserId.Value).ToList();
+
+            var validUsersFromUsersOrders = usersOrders.Where(usersOrder => users.Contains(usersOrder.UserProfileId))
+                                                       .OrderBy(usersOrder => usersOrder.Order)
+                                                       .Select(usersOrder => usersOrder.UserId)
+                                                       .ToList();
+
+            var usersNotIncluded = validUsersFromUsersOrders.Count == users.Count ? new List<Guid>() : users.Except(validUsersFromUsersOrders);
+
+            foreach (var user in validUsersFromUsersOrders)
+            {
+                var selectedUser = _vwsDbContext.UserProfiles.FirstOrDefault(profile => profile.UserId == user);
+                result.Add(new UserModel()
+                {
+                    UserId = user,
+                    NickName = selectedUser.NickName,
+                    ProfileImageGuid = selectedUser.ProfileImageGuid
+                });
+            }
+            foreach (var user in usersNotIncluded)
             {
                 var selectedUser = _vwsDbContext.UserProfiles.FirstOrDefault(profile => profile.UserId == user);
                 result.Add(new UserModel()

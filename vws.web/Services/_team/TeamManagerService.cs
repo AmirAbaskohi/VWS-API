@@ -52,6 +52,8 @@ namespace vws.web.Services._team
                     TeamId = newTeam.Id,
                     UserProfileId = user
                 });
+                if (userId != user)
+                    _vwsDbContext.AddUsersActivity(new UsersActivity() { Time = creationTime, UserId = user, UserProfileId = userId });
             }
             _vwsDbContext.Save();
 

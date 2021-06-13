@@ -1574,16 +1574,18 @@ namespace vws.web.Controllers._team
             model.EmailsForInvite = model.EmailsForInvite.Except(teamMemberEmails).ToList();
             #endregion
 
+            var addTime = DateTime.UtcNow;
             foreach (var user in model.Users)
             {
                 var newTeamMember = new TeamMember()
                 {
-                    CreatedOn = DateTime.UtcNow,
+                    CreatedOn = addTime,
                     IsDeleted = false,
                     TeamId = selectedTeam.Id,
                     UserProfileId = user
                 };
                 await _vwsDbContext.AddTeamMemberAsync(newTeamMember);
+                _vwsDbContext.AddUsersActivity(new UsersActivity() { Time = addTime, UserId = user, UserProfileId = LoggedInUserId.Value });
                 _vwsDbContext.Save();
 
                 var addedUser = await _vwsDbContext.GetUserProfileAsync(user);
@@ -1878,8 +1880,27 @@ namespace vws.web.Controllers._team
             var result = new List<UserModel>();
 
             var userTeamMates = _teamManager.GetUserTeammates(LoggedInUserId.Value);
+            var usersOrders = _vwsDbContext.UsersOrders.Where(userOrder => userOrder.UserProfileId == LoggedInUserId.Value).ToList();
 
-            foreach (var userId in userTeamMates)
+            var validUsersFromUsersOrders = usersOrders.Where(usersOrder => userTeamMates.Contains(usersOrder.UserProfileId))
+                                                       .OrderBy(usersOrder => usersOrder.Order)
+                                                       .Select(usersOrder => usersOrder.UserId)
+                                                       .ToList();
+
+            var usersNotIncluded = validUsersFromUsersOrders.Count == userTeamMates.Count ? new List<Guid>() : userTeamMates.Except(validUsersFromUsersOrders);
+
+            foreach (var userId in validUsersFromUsersOrders)
+            {
+                var user = await _userManager.FindByIdAsync(userId.ToString());
+                var userProfile = await _vwsDbContext.GetUserProfileAsync(userId);
+                result.Add(new UserModel()
+                {
+                    UserId = userId,
+                    ProfileImageGuid = userProfile.ProfileImageGuid,
+                    NickName = userProfile.NickName
+                });
+            }
+            foreach (var userId in usersNotIncluded)
             {
                 var user = await _userManager.FindByIdAsync(userId.ToString());
                 var userProfile = await _vwsDbContext.GetUserProfileAsync(userId);
