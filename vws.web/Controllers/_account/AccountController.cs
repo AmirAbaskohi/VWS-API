@@ -155,12 +155,15 @@ namespace vws.web.Controllers._account
 
         private async Task<UserProfile> CreateUserProfile(Guid userId)
         {
+            var time = DateTime.UtcNow;
             UserProfile userProfile = new UserProfile()
             {
                 UserId = userId,
                 ThemeColorCode = "",
                 NickNameSecurityStamp = Guid.NewGuid(),
-                ProfileImageSecurityStamp = Guid.NewGuid()
+                ProfileImageSecurityStamp = Guid.NewGuid(),
+                CreatedOn = time,
+                ModifiedOn = time
             };
             var createdUserProfile = await _vwsDbContext.AddUserProfileAsync(userProfile);
             _vwsDbContext.Save();
