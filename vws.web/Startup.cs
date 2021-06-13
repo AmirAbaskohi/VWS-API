@@ -239,6 +239,8 @@ namespace vws.web
 
             ActivityEngine.UpdateTeamAndProjectOrder(app);
 
+            //ActivityEngine.UpdateUsersOrder(app);
+
             // Automatically Create database and tables and do the migrations
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {

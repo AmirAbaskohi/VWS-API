@@ -59,6 +59,11 @@ namespace vws.web.Domain
 
         public IQueryable<Culture> Cultures { get; }
 
+        public IQueryable<UsersOrder> UsersOrders { get; }
+
+        public IQueryable<UsersActivity> UsersActivities { get; }
+
+
         #endregion
 
         #region methods
@@ -80,6 +85,14 @@ namespace vws.web.Domain
         public string GetCulture(byte id);
 
         public void UpdateCulture(byte id, string name);
+
+        public void AddUsersOrder(UsersOrder usersOrder);
+
+        public void AddUsersActivity(UsersActivity usersActivity);
+
+        public void DeleteUsersOrder(UsersOrder usersOrder);
+
+        public void DeleteUsersOrdersOfSpecificUser(List<Guid> usersOrdersIds, Guid userId);
 
         #endregion
 

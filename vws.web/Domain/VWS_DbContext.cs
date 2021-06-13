@@ -83,6 +83,14 @@ namespace vws.web.Domain
 
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
+        IQueryable<UsersOrder> IVWS_DbContext.UsersOrders { get => UsersOrders; }
+
+        public DbSet<UsersOrder> UsersOrders { get; set; }
+
+        IQueryable<UsersActivity> IVWS_DbContext.UsersActivities { get => UsersActivities; }
+
+        public DbSet<UsersActivity> UsersActivities { get; set; }
+
         public void DeleteUserProfile(UserProfile userProfile)
         {
             UserProfiles.Remove(userProfile);
@@ -131,6 +139,26 @@ namespace vws.web.Domain
         {
             var item = Cultures.FirstOrDefault(culture => culture.Id == id);
             item.CultureAbbreviation = name;
+        }
+
+        public void AddUsersOrder(UsersOrder usersOrder)
+        {
+            UsersOrders.Add(usersOrder);
+        }
+
+        public void AddUsersActivity(UsersActivity usersActivity)
+        {
+            UsersActivities.Add(usersActivity);
+        }
+
+        public void DeleteUsersOrder(UsersOrder usersOrder)
+        {
+            UsersOrders.Remove(usersOrder);
+        }
+
+        public void DeleteUsersOrdersOfSpecificUser(List<Guid> usersOrdersIds, Guid userId)
+        {
+            UsersOrders.RemoveRange(UsersOrders.Where(usersOrder => usersOrder.UserProfileId == userId && usersOrdersIds.Contains(usersOrder.UserId)));
         }
 
         #endregion

@@ -91,14 +91,6 @@ namespace vws.web.Controllers._team
             _vwsDbContext.Save();
         }
 
-        private List<Guid> GetUserTeammates()
-        {
-            List<Team> userTeams = _vwsDbContext.GetUserTeams(LoggedInUserId.Value).ToList();
-            return _vwsDbContext.TeamMembers
-                               .Where(teamMember => userTeams.Select(userTeam => userTeam.Id).Contains(teamMember.TeamId) && !teamMember.IsDeleted)
-                               .Select(teamMember => teamMember.UserProfileId).Distinct().Where(id => id != LoggedInUserId.Value).ToList();
-        }
-
         private async Task<List<DepartmentResponseModel>> GetDepartments(int teamId)
         {
             var result = new List<DepartmentResponseModel>();
@@ -307,7 +299,7 @@ namespace vws.web.Controllers._team
                     break;
                 }
             }
-            var teammates = GetUserTeammates();
+            var teammates = _teamManager.GetUserTeammates(LoggedInUserId.Value);
             if (teammates.Intersect(model.Users).Count() != model.Users.Count)
             {
                 response.Message = "Team model data has problem.";
@@ -1565,7 +1557,7 @@ namespace vws.web.Controllers._team
             }
 
             var teamMembers = _permissionService.GetUsersHaveAccessToTeam(selectedTeam.Id);
-            var userTeammates = GetUserTeammates();
+            var userTeammates = _teamManager.GetUserTeammates(LoggedInUserId.Value);
             var usersCanBeAddedToTeam = userTeammates.Except(teamMembers).ToList();
 
             if (usersCanBeAddedToTeam.Intersect(model.Users).Count() != model.Users.Count)
@@ -1885,7 +1877,7 @@ namespace vws.web.Controllers._team
         {
             var result = new List<UserModel>();
 
-            var userTeamMates = GetUserTeammates();
+            var userTeamMates = _teamManager.GetUserTeammates(LoggedInUserId.Value);
 
             foreach (var userId in userTeamMates)
             {

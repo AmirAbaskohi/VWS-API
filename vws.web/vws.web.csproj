@@ -36,7 +36,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Domain\_base\" />
     <Folder Include="Domain\_department\" />
     <Folder Include="Upload\files\" />
     <Folder Include="wwwroot\whatsnew\" />

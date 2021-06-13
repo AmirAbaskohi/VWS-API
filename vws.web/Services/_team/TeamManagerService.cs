@@ -85,5 +85,13 @@ namespace vws.web.Services._team
                                             .Where(teamMemeber => teamMemeber.UserProfileId == userId && !teamMemeber.IsDeleted && !teamMemeber.Team.IsDeleted)
                                             .Select(teamMemeber => teamMemeber.Team).ToList();
         }
+
+        public List<Guid> GetUserTeammates(Guid userId)
+        {
+            List<Team> userTeams = _vwsDbContext.GetUserTeams(userId).ToList();
+            return _vwsDbContext.TeamMembers
+                               .Where(teamMember => userTeams.Select(userTeam => userTeam.Id).Contains(teamMember.TeamId) && !teamMember.IsDeleted)
+                               .Select(teamMember => teamMember.UserProfileId).Distinct().Where(id => id != userId).ToList();
+        }
     }
 }
