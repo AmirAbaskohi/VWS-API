@@ -1846,6 +1846,29 @@ namespace vws.web.Controllers._task
 
         [HttpGet]
         [Authorize]
+        [Route("getNumberOfTasksInEachProioritiy")]
+        public IEnumerable<PriorityTaskNumberResponseModel> GetNumberOfTasksInEachProioritiy()
+        {
+            var response = new List<PriorityTaskNumberResponseModel>();
+            var userId = LoggedInUserId.Value;
+
+            var userTasks = _taskManager.GetUserTasks(userId);
+
+            foreach (var priority in Enum.GetValues(typeof(SeedDataEnum.TaskPriority)))
+            {
+                response.Add(new PriorityTaskNumberResponseModel()
+                {
+                    PriorityId = (byte)priority,
+                    PriorityName = _localizer[priority.ToString()],
+                    TaskNumber = userTasks.Where(userTask => userTask.TaskPriorityId == (byte)priority).LongCount()
+                });
+            }
+
+            return response;
+        }
+
+        [HttpGet]
+        [Authorize]
         [Route("getUrgentTasks")]
         public async Task<IEnumerable<TaskResponseModel>> GetUrgentTasks()
         {
