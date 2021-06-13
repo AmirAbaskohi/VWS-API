@@ -2143,7 +2143,7 @@ namespace vws.web.Controllers._task
             List<Object> result = new List<Object>();
 
             foreach (var priority in Enum.GetValues(typeof(SeedDataEnum.TaskPriority)))
-                result.Add(new { Id = (byte)priority, Name = priority.ToString() });
+                result.Add(new { Id = (byte)priority, Name = _localizer[priority.ToString()].ToString() });
 
             return result;
         }
@@ -2176,8 +2176,8 @@ namespace vws.web.Controllers._task
             foreach (var taskEvent in taskEvents)
             {
                 var parameters = _vwsDbContext.TaskHistoryParameters.Where(param => param.TaskHistoryId == taskEvent.Id)
-                                                             .OrderBy(param => param.Id)
-                                                             .ToList();
+                                                                    .OrderBy(param => param.Id)
+                                                                    .ToList();
                 for (int i = 0; i < parameters.Count(); i++)
                 {
                     if (parameters[i].ActivityParameterTypeId == (byte)SeedDataEnum.ActivityParameterTypes.Text && parameters[i].ShouldBeLocalized)
