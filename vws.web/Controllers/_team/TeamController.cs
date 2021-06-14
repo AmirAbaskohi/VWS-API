@@ -1214,6 +1214,13 @@ namespace vws.web.Controllers._team
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
+            if (userId != selectedTeam.CreatedBy)
+            {
+                response.AddError(_localizer["Teams can only get deleted by the creator."]);
+                response.Message = "Delete team access denied";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
             var deletionTime = DateTime.UtcNow;
 
             selectedTeam.IsDeleted = true;
@@ -1762,6 +1769,14 @@ namespace vws.web.Controllers._team
                 response.Message = "Member not found";
                 response.AddError(_localizer["Member not found."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if ((selectedTeam.CreatedBy == LoggedInUserId.Value && userId == LoggedInUserId.Value) ||
+                (selectedTeam.CreatedBy != LoggedInUserId.Value && userId != LoggedInUserId.Value))
+            {
+                response.AddError(_localizer["You do not have permission to do this member removal."]);
+                response.Message = "Invalid memeber removal";
+                return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
             selectedTeamMemeber.IsDeleted = true;

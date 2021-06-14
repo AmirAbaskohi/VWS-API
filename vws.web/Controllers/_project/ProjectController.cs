@@ -306,7 +306,7 @@ namespace vws.web.Controllers._project
                 EndDate = model.EndDate,
                 Guid = Guid.NewGuid(),
                 IsDeleted = false,
-                CreateBy = userId,
+                CreatedBy = userId,
                 ModifiedBy = userId,
                 CreatedOn = creationTime,
                 ModifiedOn = creationTime,
@@ -1058,7 +1058,7 @@ namespace vws.web.Controllers._project
 
             bool isProjectPersonal = selectedProject.TeamId == null ? true : false;
 
-            if (isProjectPersonal && userId != selectedProject.CreateBy)
+            if (isProjectPersonal && userId != selectedProject.CreatedBy)
             {
                 response.AddError(_localizer["Updating personal project just can be done by creator."]);
                 response.Message = "Update project access denied";
@@ -1191,7 +1191,7 @@ namespace vws.web.Controllers._project
 
             bool isProjectPersonal = selectedProject.TeamId == null ? true : false;
 
-            if (isProjectPersonal && userId != selectedProject.CreateBy)
+            if (isProjectPersonal && userId != selectedProject.CreatedBy)
             {
                 response.AddError(_localizer["Updating personal project just can be done by creator."]);
                 response.Message = "Update project access denied";
@@ -1650,9 +1650,16 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            if (selectedProject.TeamId == null && userId != selectedProject.CreateBy)
+            //if (selectedProject.TeamId == null && userId != selectedProject.CreatedBy)
+            //{
+            //    response.AddError(_localizer["Deleting personal project just can be done by creator."]);
+            //    response.Message = "Delete project access denied";
+            //    return StatusCode(StatusCodes.Status403Forbidden, response);
+            //}
+
+            if (userId != selectedProject.CreatedBy)
             {
-                response.AddError(_localizer["Deleting personal project just can be done by creator."]);
+                response.AddError(_localizer["Projects can only get deleted by the creator."]);
                 response.Message = "Delete project access denied";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
@@ -1783,7 +1790,7 @@ namespace vws.web.Controllers._project
 
                 if (selectedProjectMember != null && selectedProjectMember.IsPermittedByCreator == null)
                 {
-                    if (selectedProject.CreateBy != userId)
+                    if (selectedProject.CreatedBy != userId)
                         continue;
 
                     selectedProjectMember.IsPermittedByCreator = true;
@@ -1850,9 +1857,9 @@ namespace vws.web.Controllers._project
                     IsDeleted = false,
                     ProjectId = model.ProjectId,
                     UserProfileId = modelUser,
-                    IsPermittedByCreator = (userId == selectedProject.CreateBy) ? (bool?)true : null,
+                    IsPermittedByCreator = (userId == selectedProject.CreatedBy) ? (bool?)true : null,
                 };
-                if (userId == selectedProject.CreateBy)
+                if (userId == selectedProject.CreatedBy)
                     newPorjectMember.PermittedOn = newPorjectMember.CreatedOn;
                 await _vwsDbContext.AddProjectMemberAsync(newPorjectMember);
                 _vwsDbContext.AddUsersActivity(new UsersActivity() { Time = addTime, UserId = modelUser, UserProfileId = LoggedInUserId.Value });
@@ -1984,14 +1991,14 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (selectedProjectMember.Project.CreateBy != userId)
+            if (selectedProjectMember.Project.CreatedBy != userId)
             {
                 response.Message = "Not creator";
                 response.AddError(_localizer["You are not project creator."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            if (selectedProjectMember.Project.CreateBy == userId)
+            if (selectedProjectMember.Project.CreatedBy == userId)
             {
                 response.Message = "Creator can not change his permission.";
                 response.AddError(_localizer["You are the project creator and can not change your access permission."]);
@@ -2082,14 +2089,14 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (selectedProjectMember.Project.CreateBy != userId)
+            if (selectedProjectMember.Project.CreatedBy != userId)
             {
                 response.Message = "Not creator";
                 response.AddError(_localizer["You are not project creator."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            if (selectedProjectMember.Project.CreateBy == userId)
+            if (selectedProjectMember.Project.CreatedBy == userId)
             {
                 response.Message = "Creator can not change his permission.";
                 response.AddError(_localizer["You are the project creator and can not change your access permission."]);
@@ -2332,7 +2339,7 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            if (userId != selectedProject.CreateBy)
+            if (userId != selectedProject.CreatedBy)
             {
                 response.Message = "Not creator";
                 response.AddError(_localizer["You are not project creator."]);

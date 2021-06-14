@@ -43,7 +43,7 @@ namespace vws.web.Domain._project
 
         public bool IsDeleted { get; set;}
 
-        public Guid CreateBy { get; set; }
+        public Guid CreatedBy { get; set; }
 
         public Guid ModifiedBy { get; set; }
 

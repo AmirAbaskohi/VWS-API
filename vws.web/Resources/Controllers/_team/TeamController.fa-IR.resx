@@ -204,6 +204,9 @@
   <data name="Team {0} created by {1}." xml:space="preserve">
     <value>تیم {0} توسط {1} ایجاد شد.</value>
   </data>
+  <data name="Teams can only get deleted by the creator." xml:space="preserve">
+    <value>تیم ها تنها توسط سازنده آن میتوانند حذف شوند.</value>
+  </data>
   <data name="There is more than one file." xml:space="preserve">
     <value>بیشتر از یک فایل وجود دارد.</value>
   </data>
@@ -224,6 +227,9 @@
   </data>
   <data name="You did not upload an image." xml:space="preserve">
     <value>شما عکسی آپلود نکردید.</value>
+  </data>
+  <data name="You do not have permission to do this member removal." xml:space="preserve">
+    <value>شما اجازه انجام این حذف عضو را ندارید.</value>
   </data>
   <data name="You don't have access to this team." xml:space="preserve">
     <value>شما به این تیم دسترسی ندارید.</value>

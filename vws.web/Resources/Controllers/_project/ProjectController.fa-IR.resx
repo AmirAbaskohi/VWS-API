@@ -237,6 +237,9 @@
   <data name="Project {0} created by {1}." xml:space="preserve">
     <value>پروژه {0} توسط {1} ایجاد شد.</value>
   </data>
+  <data name="Projects can only get deleted by the creator." xml:space="preserve">
+    <value>پروژه ها تنها توسط سازنده آن میتوانند حذف شوند.</value>
+  </data>
   <data name="Start Date should be before End Date." xml:space="preserve">
     <value>زمان شروع باید قبل از زمان پایان باشد.</value>
   </data>
