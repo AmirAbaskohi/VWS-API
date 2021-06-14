@@ -1841,7 +1841,7 @@ namespace vws.web.Controllers._task
         {
             Guid userId = LoggedInUserId.Value;
 
-            return _taskManager.GetUserTasks(userId).LongCount();
+            return _taskManager.GetUserTasks(userId).Where(task => !task.IsDeleted && !task.IsArchived).LongCount();
         }
 
         [HttpGet]
@@ -2449,7 +2449,6 @@ namespace vws.web.Controllers._task
         public async Task<IActionResult> GetUsersAssignedTo(long id)
         {
             var response = new ResponseModel<List<UserModel>>();
-            var assignedUsersList = new List<UserModel>();
 
             var userId = LoggedInUserId.Value;
 
@@ -2469,7 +2468,7 @@ namespace vws.web.Controllers._task
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            assignedUsersList = _taskManager.GetAssignedTo(id);
+            var assignedUsersList = _taskManager.GetAssignedTo(id);
 
             response.Message = "Users returned successfully!";
             response.Value = assignedUsersList;
