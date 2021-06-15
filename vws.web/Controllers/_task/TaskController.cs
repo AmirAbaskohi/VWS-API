@@ -75,7 +75,7 @@ namespace vws.web.Controllers._task
                     Guid = Guid.NewGuid(),
                     GeneralTaskId = taskId
                 });
-                _vwsDbContext.AddUsersActivity(new UsersActivity() { Time = creationTime, UserId = user, UserProfileId = LoggedInUserId.Value });
+                _vwsDbContext.AddUsersActivity(new UsersActivity() { Time = creationTime, TargetUserId = user, OwnerUserId = LoggedInUserId.Value });
             }
             _vwsDbContext.Save();
         }
@@ -2334,7 +2334,7 @@ namespace vws.web.Controllers._task
                     CreatedOn = assignTime
                 };
                 await _vwsDbContext.AddTaskAssignAsync(newTaskAssign);
-                _vwsDbContext.AddUsersActivity(new UsersActivity() { Time = assignTime, UserId = user, UserProfileId = LoggedInUserId.Value });
+                _vwsDbContext.AddUsersActivity(new UsersActivity() { Time = assignTime, TargetUserId = user, OwnerUserId = LoggedInUserId.Value });
                 successfulAssignedUsers.Add(user);
             }
             _vwsDbContext.Save();
@@ -2408,11 +2408,11 @@ namespace vws.web.Controllers._task
 
             var users = GetUsersCanBeAddedToTask(teamId, projectId);
 
-            var usersOrders = _vwsDbContext.UsersOrders.Where(userOrder => userOrder.UserProfileId == LoggedInUserId.Value).ToList();
+            var usersOrders = _vwsDbContext.UsersOrders.Where(userOrder => userOrder.OwnerUserId == LoggedInUserId.Value).ToList();
 
-            var validUsersFromUsersOrders = usersOrders.Where(usersOrder => users.Contains(usersOrder.UserProfileId))
+            var validUsersFromUsersOrders = usersOrders.Where(usersOrder => users.Contains(usersOrder.TargetUserId))
                                                        .OrderBy(usersOrder => usersOrder.Order)
-                                                       .Select(usersOrder => usersOrder.UserId)
+                                                       .Select(usersOrder => usersOrder.TargetUserId)
                                                        .ToList();
 
             var usersNotIncluded = validUsersFromUsersOrders.Count == users.Count ? new List<Guid>() : users.Except(validUsersFromUsersOrders);

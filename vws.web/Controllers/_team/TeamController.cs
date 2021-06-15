@@ -1592,7 +1592,7 @@ namespace vws.web.Controllers._team
                     UserProfileId = user
                 };
                 await _vwsDbContext.AddTeamMemberAsync(newTeamMember);
-                _vwsDbContext.AddUsersActivity(new UsersActivity() { Time = addTime, UserId = user, UserProfileId = LoggedInUserId.Value });
+                _vwsDbContext.AddUsersActivity(new UsersActivity() { Time = addTime, TargetUserId = user, OwnerUserId = LoggedInUserId.Value });
                 _vwsDbContext.Save();
 
                 var addedUser = await _vwsDbContext.GetUserProfileAsync(user);
@@ -1895,11 +1895,11 @@ namespace vws.web.Controllers._team
             var result = new List<UserModel>();
 
             var userTeamMates = _teamManager.GetUserTeammates(LoggedInUserId.Value);
-            var usersOrders = _vwsDbContext.UsersOrders.Where(userOrder => userOrder.UserProfileId == LoggedInUserId.Value).ToList();
+            var usersOrders = _vwsDbContext.UsersOrders.Where(userOrder => userOrder.OwnerUserId == LoggedInUserId.Value).ToList();
 
-            var validUsersFromUsersOrders = usersOrders.Where(usersOrder => userTeamMates.Contains(usersOrder.UserProfileId))
+            var validUsersFromUsersOrders = usersOrders.Where(usersOrder => userTeamMates.Contains(usersOrder.TargetUserId))
                                                        .OrderBy(usersOrder => usersOrder.Order)
-                                                       .Select(usersOrder => usersOrder.UserId)
+                                                       .Select(usersOrder => usersOrder.TargetUserId)
                                                        .ToList();
 
             var usersNotIncluded = validUsersFromUsersOrders.Count == userTeamMates.Count ? new List<Guid>() : userTeamMates.Except(validUsersFromUsersOrders);

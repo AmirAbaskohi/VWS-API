@@ -11,15 +11,16 @@ namespace vws.web.Domain._base
     {
         public int Id { get; set; }
 
-        [ForeignKey("User")]
-        public Guid UserId { get; set; }
+        [ForeignKey("TagetUser")]
+        public Guid TargetUserId { get; set; }
 
-        public Guid UserProfileId { get; set; }
+        [ForeignKey("OwnerUser")]
+        public Guid OwnerUserId { get; set; }
 
         public DateTime Time { get; set; }
 
-        public virtual UserProfile UserProfile { get; set; }
+        public virtual UserProfile OwnerUser { get; set; }
 
-        public virtual UserProfile User { get; set; }
+        public virtual UserProfile TagetUser { get; set; }
     }
 }

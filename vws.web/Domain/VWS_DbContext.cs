@@ -158,7 +158,7 @@ namespace vws.web.Domain
 
         public void DeleteUsersOrdersOfSpecificUser(List<Guid> usersOrdersIds, Guid userId)
         {
-            UsersOrders.RemoveRange(UsersOrders.Where(usersOrder => usersOrder.UserProfileId == userId && usersOrdersIds.Contains(usersOrder.UserId)));
+            UsersOrders.RemoveRange(UsersOrders.Where(usersOrder => usersOrder.OwnerUserId == userId && usersOrdersIds.Contains(usersOrder.TargetUserId)));
         }
 
         #endregion

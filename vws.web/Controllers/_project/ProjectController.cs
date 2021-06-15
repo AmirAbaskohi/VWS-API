@@ -166,7 +166,7 @@ namespace vws.web.Controllers._project
                     PermittedOn = creationTime
                 });
                 if (user != LoggedInUserId.Value)
-                    _vwsDbContext.AddUsersActivity(new UsersActivity() { Time = creationTime, UserId = user, UserProfileId = LoggedInUserId.Value });
+                    _vwsDbContext.AddUsersActivity(new UsersActivity() { Time = creationTime, TargetUserId = user, OwnerUserId = LoggedInUserId.Value });
             }
             _vwsDbContext.Save();
         }
@@ -1862,7 +1862,7 @@ namespace vws.web.Controllers._project
                 if (userId == selectedProject.CreatedBy)
                     newPorjectMember.PermittedOn = newPorjectMember.CreatedOn;
                 await _vwsDbContext.AddProjectMemberAsync(newPorjectMember);
-                _vwsDbContext.AddUsersActivity(new UsersActivity() { Time = addTime, UserId = modelUser, UserProfileId = LoggedInUserId.Value });
+                _vwsDbContext.AddUsersActivity(new UsersActivity() { Time = addTime, TargetUserId = modelUser, OwnerUserId = LoggedInUserId.Value });
                 _vwsDbContext.Save();
 
                 #region HistoryAndEmail
@@ -2208,11 +2208,11 @@ namespace vws.web.Controllers._project
             }
 
             var availableUsers = GetAvailableUsersToAddProject(Id);
-            var usersOrders = _vwsDbContext.UsersOrders.Where(userOrder => userOrder.UserProfileId == LoggedInUserId.Value).ToList();
+            var usersOrders = _vwsDbContext.UsersOrders.Where(userOrder => userOrder.OwnerUserId == LoggedInUserId.Value).ToList();
 
-            var validUsersFromUsersOrders = usersOrders.Where(usersOrder => availableUsers.Contains(usersOrder.UserProfileId))
+            var validUsersFromUsersOrders = usersOrders.Where(usersOrder => availableUsers.Contains(usersOrder.TargetUserId))
                                                        .OrderBy(usersOrder => usersOrder.Order)
-                                                       .Select(usersOrder => usersOrder.UserId)
+                                                       .Select(usersOrder => usersOrder.TargetUserId)
                                                        .ToList();
 
             var usersNotIncluded = validUsersFromUsersOrders.Count == availableUsers.Count ? new List<Guid>() : availableUsers.Except(validUsersFromUsersOrders);

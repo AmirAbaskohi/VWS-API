@@ -149,7 +149,7 @@ namespace vws.web.ServiceEngine
                                 var userTeamMates = teamManagerService.GetUserTeammates(userId);
 
                                 #region DeleteUserOrders
-                                var dbUsersOrders = vwsDbContext.UsersOrders.Where(usersOrder => usersOrder.UserProfileId == userId).Select(usersOrder => usersOrder.UserId);
+                                var dbUsersOrders = vwsDbContext.UsersOrders.Where(usersOrder => usersOrder.OwnerUserId == userId).Select(usersOrder => usersOrder.TargetUserId);
                                 var shouldBeDeleted = userTeamMates.Except(dbUsersOrders).ToList();
                                 vwsDbContext.DeleteUsersOrdersOfSpecificUser(shouldBeDeleted, userId);
                                 vwsDbContext.Save();
@@ -160,7 +160,7 @@ namespace vws.web.ServiceEngine
                                 #region UpdateUsersOrders
                                 foreach (var userTeamMate in userTeamMates)
                                 {
-                                    var usersActivities = vwsDbContext.UsersActivities.Where(usersActivity => usersActivity.UserProfileId == userId && usersActivity.UserId == userTeamMate)
+                                    var usersActivities = vwsDbContext.UsersActivities.Where(usersActivity => usersActivity.OwnerUserId == userId && usersActivity.TargetUserId == userTeamMate)
                                                                                       .OrderByDescending(usersActivity => usersActivity.Time);
                                     if (usersActivities.Count() != 0)
                                         usersOrders.Add(new IdDate<Guid>() { Id = userTeamMate, Time = usersActivities.First().Time });
@@ -179,9 +179,9 @@ namespace vws.web.ServiceEngine
                                 for (int i = 0; i < usersOrders.Count; i++)
                                 {
                                     var usersOrder = usersOrders[i];
-                                    var selectedUsersOrder = vwsDbContext.UsersOrders.FirstOrDefault(uOrder => uOrder.UserProfileId == userId && uOrder.UserId == usersOrder.Id);
+                                    var selectedUsersOrder = vwsDbContext.UsersOrders.FirstOrDefault(uOrder => uOrder.OwnerUserId == userId && uOrder.TargetUserId == usersOrder.Id);
                                     if (selectedUsersOrder == null)
-                                        vwsDbContext.AddUsersOrder(new Domain._base.UsersOrder { UserProfileId = userId, UserId = usersOrder.Id, Order = i + 1 });
+                                        vwsDbContext.AddUsersOrder(new Domain._base.UsersOrder { OwnerUserId = userId, TargetUserId = usersOrder.Id, Order = i + 1 });
                                     else
                                         selectedUsersOrder.Order = i + 1;
                                 }
