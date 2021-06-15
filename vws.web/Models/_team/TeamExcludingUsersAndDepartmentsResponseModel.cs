@@ -12,8 +12,8 @@ namespace vws.web.Models._team
         public string Name { get; set; }
         public string Description { get; set; }
         public string Color { get; set; }
-        public string CreatedBy { get; set; }
-        public string ModifiedBy { get; set; }
+        public UserModel CreatedBy { get; set; }
+        public UserModel ModifiedBy { get; set; }
         public DateTime CreatedOn { get; set; }
         public DateTime ModifiedOn { get; set; }
         public Guid Guid { get; set; }

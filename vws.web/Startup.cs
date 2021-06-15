@@ -146,6 +146,8 @@ namespace vws.web
 
             services.AddScoped<IImageService, ImageService>();
 
+            services.AddScoped<IUserService, UserService>();
+
             services.AddScoped<TokenValidationFilterAttribute>();
 
             services

@@ -40,13 +40,15 @@ namespace vws.web.Controllers._task
         private readonly ITaskManagerService _taskManager;
         private readonly IProjectManagerService _projectManager;
         private readonly ITeamManagerService _teamManager;
+        private readonly IUserService _userService;
         #endregion
 
         #region Ctor
         public TaskController(IStringLocalizer<TaskController> localizer, IVWS_DbContext vwsDbContext,
             IPermissionService permissionService, IConfiguration configuration, IFileManager fileManager,
             INotificationService notificationService, ITaskManagerService taskManager,
-            IProjectManagerService projectManager, ITeamManagerService teamManager)
+            IProjectManagerService projectManager, ITeamManagerService teamManager,
+            IUserService userService)
         {
             _localizer = localizer;
             _vwsDbContext = vwsDbContext;
@@ -57,6 +59,7 @@ namespace vws.web.Controllers._task
             _taskManager = taskManager;
             _teamManager = teamManager;
             _projectManager = projectManager;
+            _userService = userService;
         }
         #endregion
 
@@ -714,8 +717,8 @@ namespace vws.web.Controllers._task
                 StartDate = newTask.StartDate,
                 Guid = newTask.Guid,
                 ModifiedOn = newTask.ModifiedOn,
-                ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(newTask.ModifiedBy)).NickName,
-                CreatedBy = (await _vwsDbContext.GetUserProfileAsync(newTask.CreatedBy)).NickName,
+                CreatedBy = _userService.GetUser(newTask.CreatedBy),
+                ModifiedBy = _userService.GetUser(newTask.ModifiedBy),
                 PriorityId = newTask.TaskPriorityId,
                 PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)newTask.TaskPriorityId).ToString()],
                 UsersAssignedTo = _taskManager.GetAssignedTo(newTask.Id),
@@ -1812,8 +1815,8 @@ namespace vws.web.Controllers._task
                     EndDate = userTask.EndDate,
                     CreatedOn = userTask.CreatedOn,
                     ModifiedOn = userTask.ModifiedOn,
-                    CreatedBy = (await _vwsDbContext.GetUserProfileAsync(userTask.CreatedBy)).NickName,
-                    ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(userTask.ModifiedBy)).NickName,
+                    CreatedBy = _userService.GetUser(userTask.CreatedBy),
+                    ModifiedBy = _userService.GetUser(userTask.ModifiedBy),
                     Guid = userTask.Guid,
                     PriorityId = userTask.TaskPriorityId,
                     PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)userTask.TaskPriorityId).ToString()],
@@ -1890,8 +1893,8 @@ namespace vws.web.Controllers._task
                     EndDate = userUrgentTask.EndDate,
                     CreatedOn = userUrgentTask.CreatedOn,
                     ModifiedOn = userUrgentTask.ModifiedOn,
-                    CreatedBy = (await _vwsDbContext.GetUserProfileAsync(userUrgentTask.CreatedBy)).NickName,
-                    ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(userUrgentTask.ModifiedBy)).NickName,
+                    CreatedBy = _userService.GetUser(userUrgentTask.CreatedBy),
+                    ModifiedBy = _userService.GetUser(userUrgentTask.ModifiedBy),
                     Guid = userUrgentTask.Guid,
                     PriorityId = userUrgentTask.TaskPriorityId,
                     PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)userUrgentTask.TaskPriorityId).ToString()],
@@ -2112,8 +2115,8 @@ namespace vws.web.Controllers._task
                         EndDate = userTask.EndDate,
                         CreatedOn = userTask.CreatedOn,
                         ModifiedOn = userTask.ModifiedOn,
-                        CreatedBy = (await _vwsDbContext.GetUserProfileAsync(userTask.CreatedBy)).NickName,
-                        ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(userTask.ModifiedBy)).NickName,
+                        CreatedBy = _userService.GetUser(userTask.CreatedBy),
+                        ModifiedBy = _userService.GetUser(userTask.ModifiedBy),
                         Guid = userTask.Guid,
                         PriorityId = userTask.TaskPriorityId,
                         PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)userTask.TaskPriorityId).ToString()],

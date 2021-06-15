@@ -40,13 +40,14 @@ namespace vws.web.Controllers._project
         private readonly IProjectManagerService _projectManager;
         private readonly ITaskManagerService _taskManager;
         private readonly INotificationService _notificationService;
+        private readonly IUserService _userService;
         #endregion
 
         #region Ctor
         public ProjectController(UserManager<ApplicationUser> userManager, IStringLocalizer<ProjectController> localizer,
             IVWS_DbContext vwsDbContext, IFileManager fileManager, IPermissionService permissionService,
             IProjectManagerService projectManager, ITaskManagerService taskManagerService,
-            INotificationService notificationService)
+            INotificationService notificationService, IUserService userService)
         {
             _userManager = userManager;
             _localizer = localizer;
@@ -56,6 +57,7 @@ namespace vws.web.Controllers._project
             _projectManager = projectManager;
             _taskManager = taskManagerService;
             _notificationService = notificationService;
+            _userService = userService;
         }
         #endregion
 
@@ -371,7 +373,11 @@ namespace vws.web.Controllers._project
                 NumberOfUpdates = _vwsDbContext.ProjectHistories.Where(history => history.ProjectId == newProject.Id).Count(),
                 Users = _projectManager.GetProjectUsers(newProject.Id),
                 NumberOfTasks = _projectManager.GetNumberOfProjectTasks(newProject.Id),
-                SpentTimeInMinutes = _projectManager.GetProjectSpentTime(newProject.Id)
+                SpentTimeInMinutes = _projectManager.GetProjectSpentTime(newProject.Id),
+                CreatedBy = _userService.GetUser(newProject.CreatedBy),
+                ModifiedBy = _userService.GetUser(newProject.ModifiedBy),
+                CreatedOn = newProject.CreatedOn,
+                ModifiedOn = newProject.ModifiedOn
             };
 
             var users = _projectManager.GetProjectUsers(newProject.Id).Select(user => user.UserId).ToList();
@@ -1273,7 +1279,7 @@ namespace vws.web.Controllers._project
 
             var project = _projectManager.GetAllUserProjects(userId).FirstOrDefault(project => project.Id == Id);
             if (project == null)
-                return new ProjectResponseModel();
+                return null;
 
             var response = new ProjectResponseModel()
             {
@@ -1292,7 +1298,11 @@ namespace vws.web.Controllers._project
                 NumberOfUpdates = _vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
                 Users = _projectManager.GetProjectUsers(project.Id),
                 NumberOfTasks = _projectManager.GetNumberOfProjectTasks(project.Id),
-                SpentTimeInMinutes = _projectManager.GetProjectSpentTime(project.Id)
+                SpentTimeInMinutes = _projectManager.GetProjectSpentTime(project.Id),
+                CreatedBy = _userService.GetUser(project.CreatedBy),
+                ModifiedBy = _userService.GetUser(project.ModifiedBy),
+                CreatedOn = project.CreatedOn,
+                ModifiedOn = project.ModifiedOn
             };
 
             return response;
@@ -1338,7 +1348,11 @@ namespace vws.web.Controllers._project
                     NumberOfUpdates = _vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
                     Users = _projectManager.GetProjectUsers(project.Id),
                     NumberOfTasks = _projectManager.GetNumberOfProjectTasks(project.Id),
-                    SpentTimeInMinutes = _projectManager.GetProjectSpentTime(project.Id)
+                    SpentTimeInMinutes = _projectManager.GetProjectSpentTime(project.Id),
+                    CreatedBy = _userService.GetUser(project.CreatedBy),
+                    ModifiedBy = _userService.GetUser(project.ModifiedBy),
+                    CreatedOn = project.CreatedOn,
+                    ModifiedOn = project.ModifiedOn
                 });
             }
             foreach (var project in userProjectsNotIncluded)
@@ -1360,7 +1374,11 @@ namespace vws.web.Controllers._project
                     NumberOfUpdates = _vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
                     Users = _projectManager.GetProjectUsers(project.Id),
                     NumberOfTasks = _projectManager.GetNumberOfProjectTasks(project.Id),
-                    SpentTimeInMinutes = _projectManager.GetProjectSpentTime(project.Id)
+                    SpentTimeInMinutes = _projectManager.GetProjectSpentTime(project.Id),
+                    CreatedBy = _userService.GetUser(project.CreatedBy),
+                    ModifiedBy = _userService.GetUser(project.ModifiedBy),
+                    CreatedOn = project.CreatedOn,
+                    ModifiedOn = project.ModifiedOn
                 });
             }
 
@@ -1417,7 +1435,11 @@ namespace vws.web.Controllers._project
                     NumberOfUpdates = _vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
                     Users = _projectManager.GetProjectUsers(project.Id),
                     NumberOfTasks = _projectManager.GetNumberOfProjectTasks(project.Id),
-                    SpentTimeInMinutes = _projectManager.GetProjectSpentTime(project.Id)
+                    SpentTimeInMinutes = _projectManager.GetProjectSpentTime(project.Id),
+                    CreatedBy = _userService.GetUser(project.CreatedBy),
+                    ModifiedBy = _userService.GetUser(project.ModifiedBy),
+                    CreatedOn = project.CreatedOn,
+                    ModifiedOn = project.ModifiedOn
                 });
             }
             foreach (var project in userProjectsNotIncluded)
@@ -1439,7 +1461,11 @@ namespace vws.web.Controllers._project
                     NumberOfUpdates = _vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
                     Users = _projectManager.GetProjectUsers(project.Id),
                     NumberOfTasks = _projectManager.GetNumberOfProjectTasks(project.Id),
-                    SpentTimeInMinutes = _projectManager.GetProjectSpentTime(project.Id)
+                    SpentTimeInMinutes = _projectManager.GetProjectSpentTime(project.Id),
+                    CreatedBy = _userService.GetUser(project.CreatedBy),
+                    ModifiedBy = _userService.GetUser(project.ModifiedBy),
+                    CreatedOn = project.CreatedOn,
+                    ModifiedOn = project.ModifiedOn
                 });
             }
 
@@ -1486,7 +1512,11 @@ namespace vws.web.Controllers._project
                     NumberOfUpdates = _vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
                     Users = _projectManager.GetProjectUsers(project.Id),
                     NumberOfTasks = _projectManager.GetNumberOfProjectTasks(project.Id),
-                    SpentTimeInMinutes = _projectManager.GetProjectSpentTime(project.Id)
+                    SpentTimeInMinutes = _projectManager.GetProjectSpentTime(project.Id),
+                    CreatedBy = _userService.GetUser(project.CreatedBy),
+                    ModifiedBy = _userService.GetUser(project.ModifiedBy),
+                    CreatedOn = project.CreatedOn,
+                    ModifiedOn = project.ModifiedOn
                 });
             }
             foreach (var project in userProjectsNotIncluded)
@@ -1508,7 +1538,11 @@ namespace vws.web.Controllers._project
                     NumberOfUpdates = _vwsDbContext.ProjectHistories.Where(history => history.ProjectId == project.Id).Count(),
                     Users = _projectManager.GetProjectUsers(project.Id),
                     NumberOfTasks = _projectManager.GetNumberOfProjectTasks(project.Id),
-                    SpentTimeInMinutes = _projectManager.GetProjectSpentTime(project.Id)
+                    SpentTimeInMinutes = _projectManager.GetProjectSpentTime(project.Id),
+                    CreatedBy = _userService.GetUser(project.CreatedBy),
+                    ModifiedBy = _userService.GetUser(project.ModifiedBy),
+                    CreatedOn = project.CreatedOn,
+                    ModifiedOn = project.ModifiedOn
                 });
             }
 
@@ -1553,8 +1587,8 @@ namespace vws.web.Controllers._project
                     EndDate = projectTask.EndDate,
                     CreatedOn = projectTask.CreatedOn,
                     ModifiedOn = projectTask.ModifiedOn,
-                    CreatedBy = (await _vwsDbContext.GetUserProfileAsync(projectTask.CreatedBy)).NickName,
-                    ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(projectTask.ModifiedBy)).NickName,
+                    CreatedBy = _userService.GetUser(projectTask.CreatedBy),
+                    ModifiedBy = _userService.GetUser(projectTask.ModifiedBy),
                     Guid = projectTask.Guid,
                     PriorityId = projectTask.TaskPriorityId,
                     PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)projectTask.TaskPriorityId).ToString()],

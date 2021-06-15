@@ -15,6 +15,10 @@ namespace vws.web.Models._project
         public long NumberOfUpdates { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public DateTime CreatedOn { get; set; }
+        public DateTime ModifiedOn { get; set; }
+        public UserModel CreatedBy { get; set; }
+        public UserModel ModifiedBy { get; set; }
         public string Color { get; set; }
         public int? TeamId { get; set; }
         public string TeamName { get; set; }

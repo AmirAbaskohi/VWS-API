@@ -54,6 +54,7 @@ namespace vws.web.Controllers._team
         private readonly EmailAddressAttribute _emailChecker;
         private readonly IImageService _imageService;
         private readonly ILogger<TeamController> _logger;
+        private readonly IUserService _userService;
         #endregion
 
         #region Ctor
@@ -61,7 +62,8 @@ namespace vws.web.Controllers._team
             IVWS_DbContext vwsDbContext, IFileManager fileManager, IDepartmentManagerService departmentManager,
             ITeamManagerService teamManager, IEmailSender emailSender, IConfiguration configuration, IPermissionService permissionService,
             IProjectManagerService projectManager, ITaskManagerService taskManagerService,
-            INotificationService notificationService, IImageService imageService, ILogger<TeamController> logger)
+            INotificationService notificationService, IImageService imageService, ILogger<TeamController> logger,
+            IUserService userService)
         {
             _userManager = userManager;
             _localizer = localizer;
@@ -78,6 +80,7 @@ namespace vws.web.Controllers._team
             _imageService = imageService;
             _emailChecker = new EmailAddressAttribute();
             _logger = logger;
+            _userService = userService;
         }
         #endregion
 
@@ -379,8 +382,8 @@ namespace vws.web.Controllers._team
                 Name = newTeam.Name,
                 Description = newTeam.Description,
                 Color = newTeam.Color,
-                CreatedBy = (await _vwsDbContext.GetUserProfileAsync(newTeam.CreatedBy)).NickName,
-                ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(newTeam.ModifiedBy)).NickName,
+                CreatedBy = _userService.GetUser(newTeam.CreatedBy),
+                ModifiedBy = _userService.GetUser(newTeam.ModifiedBy),
                 CreatedOn = newTeam.CreatedOn,
                 ModifiedOn = newTeam.ModifiedOn,
                 Guid = newTeam.Guid,
@@ -887,8 +890,8 @@ namespace vws.web.Controllers._team
                     Name = validTeamOrderTeam.Name,
                     Description = validTeamOrderTeam.Description,
                     Color = validTeamOrderTeam.Color,
-                    CreatedBy = (await _vwsDbContext.GetUserProfileAsync(validTeamOrderTeam.CreatedBy)).NickName,
-                    ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(validTeamOrderTeam.ModifiedBy)).NickName,
+                    CreatedBy = _userService.GetUser(validTeamOrderTeam.CreatedBy),
+                    ModifiedBy = _userService.GetUser(validTeamOrderTeam.ModifiedBy),
                     CreatedOn = validTeamOrderTeam.CreatedOn,
                     ModifiedOn = validTeamOrderTeam.ModifiedOn,
                     Guid = validTeamOrderTeam.Guid,
@@ -908,8 +911,8 @@ namespace vws.web.Controllers._team
                     Name = userTeamNotIncluded.Name,
                     Description = userTeamNotIncluded.Description,
                     Color = userTeamNotIncluded.Color,
-                    CreatedBy = (await _vwsDbContext.GetUserProfileAsync(userTeamNotIncluded.CreatedBy)).NickName,
-                    ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(userTeamNotIncluded.ModifiedBy)).NickName,
+                    CreatedBy = _userService.GetUser(userTeamNotIncluded.CreatedBy),
+                    ModifiedBy = _userService.GetUser(userTeamNotIncluded.ModifiedBy),
                     CreatedOn = userTeamNotIncluded.CreatedOn,
                     ModifiedOn = userTeamNotIncluded.ModifiedOn,
                     Guid = userTeamNotIncluded.Guid,
@@ -956,9 +959,9 @@ namespace vws.web.Controllers._team
                 Name = selectedTeam.Name,
                 Description = selectedTeam.Description,
                 Color = selectedTeam.Color,
-                CreatedBy = (await _vwsDbContext.GetUserProfileAsync(selectedTeam.CreatedBy)).NickName,
+                CreatedBy = _userService.GetUser(selectedTeam.CreatedBy),
+                ModifiedBy = _userService.GetUser(selectedTeam.ModifiedBy),
                 Guid = selectedTeam.Guid,
-                ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(selectedTeam.ModifiedBy)).NickName,
                 CreatedOn = selectedTeam.CreatedOn,
                 ModifiedOn = selectedTeam.ModifiedOn,
                 TeamImageGuid = selectedTeam.TeamImageGuid,
@@ -1074,7 +1077,11 @@ namespace vws.web.Controllers._team
                     NumberOfUpdates = _vwsDbContext.ProjectHistories.Where(history => history.ProjectId == teamProject.Id).Count(),
                     Users = _projectManager.GetProjectUsers(teamProject.Id),
                     NumberOfTasks = _projectManager.GetNumberOfProjectTasks(teamProject.Id),
-                    SpentTimeInMinutes = _projectManager.GetProjectSpentTime(teamProject.Id)
+                    SpentTimeInMinutes = _projectManager.GetProjectSpentTime(teamProject.Id),
+                    CreatedBy = _userService.GetUser(teamProject.CreatedBy),
+                    ModifiedBy = _userService.GetUser(teamProject.ModifiedBy),
+                    CreatedOn = teamProject.CreatedOn,
+                    ModifiedOn = teamProject.ModifiedOn
                 });
 
             response.Value = projects;
@@ -1117,8 +1124,8 @@ namespace vws.web.Controllers._team
                     EndDate = teamTask.EndDate,
                     CreatedOn = teamTask.CreatedOn,
                     ModifiedOn = teamTask.ModifiedOn,
-                    CreatedBy = (await _vwsDbContext.GetUserProfileAsync(teamTask.CreatedBy)).NickName,
-                    ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(teamTask.ModifiedBy)).NickName,
+                    CreatedBy = _userService.GetUser(teamTask.CreatedBy),
+                    ModifiedBy = _userService.GetUser(teamTask.ModifiedBy),
                     Guid = teamTask.Guid,
                     PriorityId = teamTask.TaskPriorityId,
                     PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)teamTask.TaskPriorityId).ToString()],
