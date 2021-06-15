@@ -1852,7 +1852,7 @@ namespace vws.web.Controllers._task
             var response = new List<PriorityTaskNumberResponseModel>();
             var userId = LoggedInUserId.Value;
 
-            var userTasks = _taskManager.GetUserTasks(userId);
+            var userTasks = _taskManager.GetUserTasks(userId).Where(task => !task.IsDeleted && !task.IsArchived);
 
             foreach (var priority in Enum.GetValues(typeof(SeedDataEnum.TaskPriority)))
             {
