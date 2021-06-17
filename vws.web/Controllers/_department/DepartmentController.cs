@@ -32,7 +32,7 @@ namespace vws.web.Controllers._department
         private readonly IImageService _imageService;
         #endregion
         
-        #region Ctorr
+        #region Ctor
         public DepartmentController(IStringLocalizer<DepartmentController> localizer, IVWS_DbContext vwsDbContext,
                                     IFileManager fileManager, IDepartmentManagerService departmentManager,
                                     IImageService imageService)

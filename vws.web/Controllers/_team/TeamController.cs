@@ -404,8 +404,9 @@ namespace vws.web.Controllers._team
         [HttpPut]
         [Authorize]
         [Route("updateTeamName")]
-        public async Task<IActionResult> UpdateTeamName(int id, string newName)
+        public async Task<IActionResult> UpdateTeamName(int id, [FromBody] StringModel model)
         {
+            string newName = model.Value;
             var response = new ResponseModel();
             Guid userId = LoggedInUserId.Value;
 
@@ -509,8 +510,9 @@ namespace vws.web.Controllers._team
         [HttpPut]
         [Authorize]
         [Route("updateTeamDescription")]
-        public async Task<IActionResult> UpdateTeamDescription(int id, string newDescription)
+        public async Task<IActionResult> UpdateTeamDescription(int id, [FromBody] StringModel model)
         {
+            string newDescription = model.Value;
             var response = new ResponseModel();
             Guid userId = LoggedInUserId.Value;
 
@@ -596,8 +598,9 @@ namespace vws.web.Controllers._team
         [HttpPut]
         [Authorize]
         [Route("updateTeamColor")]
-        public async Task<IActionResult> UpdateTeamColor(int id, string newColor)
+        public async Task<IActionResult> UpdateTeamColor(int id, [FromBody] StringModel model)
         {
+            string newColor = model.Value;
             var response = new ResponseModel();
             Guid userId = LoggedInUserId.Value;
 
@@ -859,7 +862,7 @@ namespace vws.web.Controllers._team
         [HttpGet]
         [Authorize]
         [Route("getAll")]
-        public async Task<IEnumerable<TeamExcludingUsersAndDepartmentsResponseModel>> GetAllTeams()
+        public  IEnumerable<TeamExcludingUsersAndDepartmentsResponseModel> GetAllTeams()
         {
             Guid userId = LoggedInUserId.Value;
 

@@ -221,8 +221,9 @@ namespace vws.web.Controllers._calender
         [HttpPut]
         [Authorize]
         [Route("updateTitle")]
-        public IActionResult UpdateTitle(int id, string newTitle)
+        public IActionResult UpdateTitle(int id,[FromBody] StringModel model)
         {
+            string newTitle = model.Value;
             var response = new ResponseModel();
 
             var userId = LoggedInUserId.Value;
@@ -261,8 +262,9 @@ namespace vws.web.Controllers._calender
         [HttpPut]
         [Authorize]
         [Route("updateDescription")]
-        public IActionResult UpdateDescription(int id, string newDescription)
+        public IActionResult UpdateDescription(int id, [FromBody] StringModel model)
         {
+            string newDescription = model.Value;
             var response = new ResponseModel();
 
             var userId = LoggedInUserId.Value;

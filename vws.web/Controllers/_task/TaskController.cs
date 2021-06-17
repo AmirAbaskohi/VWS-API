@@ -746,8 +746,9 @@ namespace vws.web.Controllers._task
         [HttpPut]
         [Authorize]
         [Route("updateTitle")]
-        public async Task<IActionResult> UpdateTitle(long id, string newTitle)
+        public async Task<IActionResult> UpdateTitle(long id, [FromBody] StringModel model)
         {
+            string newTitle = model.Value;
             var response = new ResponseModel();
             
             if (String.IsNullOrEmpty(newTitle) || newTitle.Length > 500)
@@ -839,8 +840,9 @@ namespace vws.web.Controllers._task
         [HttpPut]
         [Authorize]
         [Route("updateDescription")]
-        public async Task<IActionResult> UpdateDescription(long id, string newDescription)
+        public async Task<IActionResult> UpdateDescription(long id, [FromBody] StringModel model)
         {
+            string newDescription = model.Value;
             var response = new ResponseModel();
 
             if (!String.IsNullOrEmpty(newDescription) && newDescription.Length > 2000)
@@ -2577,8 +2579,9 @@ namespace vws.web.Controllers._task
         [HttpPost]
         [Authorize]
         [Route("addStatus")]
-        public IActionResult AddStatus(int? projectId, int? teamId, string title)
+        public IActionResult AddStatus(int? projectId, int? teamId, [FromBody] StringModel model)
         {
+            string title = model.Value;
             var response = new ResponseModel<TaskStatusResponseModel>();
 
             if (!String.IsNullOrEmpty(title) && title.Length > 100)
@@ -2629,8 +2632,9 @@ namespace vws.web.Controllers._task
         [HttpPut]
         [Authorize]
         [Route("updateStatusTitle")]
-        public IActionResult UpdateStatusTitle(int statusId, string newTitle)
+        public IActionResult UpdateStatusTitle(int statusId, [FromBody] StringModel model)
         {
+            string newTitle = model.Value;
             var response = new ResponseModel();
 
             if (!String.IsNullOrEmpty(newTitle) && newTitle.Length > 100)
@@ -2889,8 +2893,9 @@ namespace vws.web.Controllers._task
         [HttpPut]
         [Authorize]
         [Route("updateCheckListTitle")]
-        public async Task<IActionResult> UpdateCheckListTitle(long checkListId, string newTitle)
+        public async Task<IActionResult> UpdateCheckListTitle(long checkListId, [FromBody] StringModel model)
         {
+            string newTitle = model.Value;
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
 
@@ -3199,8 +3204,9 @@ namespace vws.web.Controllers._task
         [HttpPut]
         [Authorize]
         [Route("updateCheckListItemTitle")]
-        public async Task<IActionResult> UpdateCheckListItemTitle(long checkListItemId, string newTitle)
+        public async Task<IActionResult> UpdateCheckListItemTitle(long checkListItemId, [FromBody] StringModel model)
         {
+            string newTitle = model.Value;
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
 
@@ -3681,8 +3687,9 @@ namespace vws.web.Controllers._task
         [HttpPut]
         [Authorize]
         [Route("updateTagTitle")]
-        public IActionResult UpdateTagTitle(int tagId, string newTitle)
+        public IActionResult UpdateTagTitle(int tagId, [FromBody] StringModel model)
         {
+            string newTitle = model.Value;
             var response = new ResponseModel();
 
             if (!String.IsNullOrEmpty(newTitle) && newTitle.Length > 100)
@@ -3727,8 +3734,9 @@ namespace vws.web.Controllers._task
         [HttpPut]
         [Authorize]
         [Route("updateTagColor")]
-        public IActionResult UpdateTagColor(int tagId, string newColor)
+        public IActionResult UpdateTagColor(int tagId, [FromBody] StringModel model)
         {
+            string newColor = model.Value;
             var response = new ResponseModel();
 
             if (!String.IsNullOrEmpty(newColor) && newColor.Length > 6)
@@ -4061,8 +4069,9 @@ namespace vws.web.Controllers._task
         [HttpPut]
         [Authorize]
         [Route("editComment")]
-        public async Task<IActionResult> EditComment(long commentId, string newBody)
+        public async Task<IActionResult> EditComment(long commentId, [FromBody] StringModel model)
         {
+            string newBody = model.Value;
             var response = new ResponseModel();
 
             if (String.IsNullOrEmpty(newBody) || newBody.Length > 1000)

@@ -397,8 +397,9 @@ namespace vws.web.Controllers._project
         [HttpPut]
         [Authorize]
         [Route("updateName")]
-        public async Task<IActionResult> UpdateName(int id, string newName)
+        public async Task<IActionResult> UpdateName(int id, [FromBody] StringModel model)
         {
+            string newName = model.Value;
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
 
@@ -495,8 +496,9 @@ namespace vws.web.Controllers._project
         [HttpPut]
         [Authorize]
         [Route("updateDescription")]
-        public async Task<IActionResult> UpdateDescription(int id, string newDescription)
+        public async Task<IActionResult> UpdateDescription(int id, [FromBody] StringModel model)
         {
+            string newDescription = model.Value;
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
 
@@ -586,8 +588,9 @@ namespace vws.web.Controllers._project
         [HttpPut]
         [Authorize]
         [Route("updateColor")]
-        public async Task<IActionResult> UpdateColor(int id, string newColor)
+        public async Task<IActionResult> UpdateColor(int id, [FromBody] StringModel model)
         {
+            string newColor = model.Value;
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
 
