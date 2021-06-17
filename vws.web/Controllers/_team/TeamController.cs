@@ -161,7 +161,7 @@ namespace vws.web.Controllers._team
                 FromEmail = _configuration["EmailSender:RegistrationEmail:EmailAddress"],
                 ToEmail = "",
                 Subject = "Join Team",
-                Body = $"{_configuration["Angular:Url"]}/en-US/inviteTeam?invitationCode=" + linkGuid.ToString(),
+                Body = $"{_configuration["Angular:Url"]}/inviteTeam?invitationCode=" + linkGuid.ToString(),
                 Credential = new NetworkCredential
                 {
                     UserName = _configuration["EmailSender:RegistrationEmail:UserName"],
