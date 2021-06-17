@@ -179,9 +179,8 @@ namespace vws.web.Controllers._file
 
         [HttpGet]
         [Route("get")]
-        public async Task<IActionResult> GetFile(Guid id, [FromBody] StringModel model)
+        public async Task<IActionResult> GetFile(Guid id, string quality)
         {
-            string quality = model.Value;
             var response = new ResponseModel();
             var fileContainer = await _vwsDbContext.GetFileContainerAsync(id);
             if (fileContainer == null)
