@@ -199,7 +199,7 @@ namespace vws.web.Services
             if (notificationTypeId == (byte)SeedDataEnum.NotificationTypes.Project)
             {
                 var history = _vwsDbContext.ProjectHistories.Include(projectHistory => projectHistory.ProjectHistoryParameters).Include(projectHistory => projectHistory.Project).FirstOrDefault(projectHistory => projectHistory.Id == activityId);
-                message = history.Event;
+                message = history.EventBody;
                 parameters = history.ProjectHistoryParameters.Select(parameter => parameter.Body).ToList();
                 parametersShouldBeLocalized = history.ProjectHistoryParameters.Select(parameter => parameter.ShouldBeLocalized).ToList();
                 parametersType = history.ProjectHistoryParameters.Select(parameter => parameter.ActivityParameterTypeId).ToList();
@@ -210,7 +210,7 @@ namespace vws.web.Services
             else if (notificationTypeId == (byte)SeedDataEnum.NotificationTypes.Team)
             {
                 var history = _vwsDbContext.TeamHistories.Include(teamHistory => teamHistory.TeamHistoryParameters).Include(teamHistory => teamHistory.Team).FirstOrDefault(teamHistory => teamHistory.Id == activityId);
-                message = history.Event;
+                message = history.EventBody;
                 parameters = history.TeamHistoryParameters.Select(parameter => parameter.Body).ToList();
                 parametersShouldBeLocalized = history.TeamHistoryParameters.Select(parameter => parameter.ShouldBeLocalized).ToList();
                 parametersType = history.TeamHistoryParameters.Select(parameter => parameter.ActivityParameterTypeId).ToList();
@@ -221,7 +221,7 @@ namespace vws.web.Services
             else
             {
                 var history = _vwsDbContext.TaskHistories.Include(taskHistory => taskHistory.TaskHistoryParameters).Include(taskHistory => taskHistory.GeneralTask).FirstOrDefault(taskHistory => taskHistory.Id == activityId);
-                message = history.Event;
+                message = history.EventBody;
                 parameters = history.TaskHistoryParameters.Select(parameter => parameter.Body).ToList();
                 parametersShouldBeLocalized = history.TaskHistoryParameters.Select(parameter => parameter.ShouldBeLocalized).ToList();
                 parametersType = history.TaskHistoryParameters.Select(parameter => parameter.ActivityParameterTypeId).ToList();

@@ -490,6 +490,10 @@ namespace vws.web.Domain
 
         public IQueryable<EventMember> EventUsers { get; }
 
+        public IQueryable<EventHistory> EventHistories { get; }
+
+        public IQueryable<EventHistoryParameter> EventHistoryParameters { get; }
+
         #endregion
 
         #region methods
@@ -503,6 +507,10 @@ namespace vws.web.Domain
         public void AddEventUser(EventMember eventUser);
 
         public void RemoveEventUser(EventMember eventUser);
+
+        public void AddEventHistory(EventHistory eventHistory);
+
+        public void AddEventHistoryParameter(EventHistoryParameter eventHistoryParameter);
 
         #endregion
 

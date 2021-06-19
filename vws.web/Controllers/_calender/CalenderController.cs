@@ -3,18 +3,24 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using vws.web.Domain;
 using vws.web.Domain._calendar;
+using vws.web.Domain._project;
 using vws.web.Domain._team;
+using vws.web.Enums;
 using vws.web.Models;
 using vws.web.Models._calender;
+using vws.web.Models._project;
+using vws.web.Models._team;
 using vws.web.Services;
 using vws.web.Services._calender;
 using vws.web.Services._task;
+using static vws.web.EmailTemplates.EmailTemplateTypes;
 
 namespace vws.web.Controllers._calender
 {
@@ -28,17 +34,22 @@ namespace vws.web.Controllers._calender
         private readonly IPermissionService _permissionService;
         private readonly ITaskManagerService _taskManager;
         private readonly IStringLocalizer<CalenderController> _localizer;
+        private readonly INotificationService _notificationService;
+        private readonly IUserService _userService;
         #endregion
 
         #region Ctor
         public CalenderController(IVWS_DbContext vwsDbContext, ICalenderManagerService calenderManager, IStringLocalizer<CalenderController> localizer,
-            IPermissionService permissionService, ITaskManagerService taskManager)
+            IPermissionService permissionService, ITaskManagerService taskManager, INotificationService notificationService,
+            IUserService userService)
         {
             _vwsDbContext = vwsDbContext;
             _calenderManager = calenderManager;
             _localizer = localizer;
             _permissionService = permissionService;
             _taskManager = taskManager;
+            _notificationService = notificationService;
+            _userService = userService;
         }
         #endregion
 
@@ -69,6 +80,65 @@ namespace vws.web.Controllers._calender
                 });
             }
             _vwsDbContext.Save();
+        }
+
+        private void AddTeamProjectsEventCreationHistory(TeamSummaryResponseModel team, List<ProjectSummaryResponseModel> projects, DateTime time, string title)
+        {
+            if (team == null)
+                return;
+
+            if (projects.Count != 0)
+            {
+                foreach (var project in projects)
+                {
+                    var newHistory = new ProjectHistory()
+                    {
+                        EventBody = "{0} created event {1} under this project.",
+                        EventTime = time,
+                        ProjectId = project.Id
+                    };
+                    _vwsDbContext.AddProjectHistory(newHistory);
+                    _vwsDbContext.Save();
+                    _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+                    {
+                        ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                        Body = JsonConvert.SerializeObject(_userService.GetUser(LoggedInUserId.Value)),
+                        ProjectHistoryId = newHistory.Id
+                    });
+                    _vwsDbContext.Save();
+                    _vwsDbContext.AddProjectHistoryParameter(new ProjectHistoryParameter()
+                    {
+                        ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                        Body = title,
+                        ProjectHistoryId = newHistory.Id
+                    });
+                    _vwsDbContext.Save();
+                }
+            }
+            else
+            {
+                var newHistory = new TeamHistory()
+                {
+                    EventBody = "{0} created event {1} under this team.",
+                    EventTime = time,
+                    TeamId = team.Id
+                };
+                _vwsDbContext.AddTeamHistory(newHistory);
+                _vwsDbContext.Save();
+                _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+                {
+                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                    Body = JsonConvert.SerializeObject(_userService.GetUser(LoggedInUserId.Value)),
+                    TeamHistoryId = newHistory.Id
+                });
+                _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
+                {
+                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                    Body = title,
+                    TeamHistoryId = newHistory.Id
+                });
+                _vwsDbContext.Save();
+            }
         }
         #endregion
 
@@ -198,6 +268,40 @@ namespace vws.web.Controllers._calender
             
             AddEventUsers(newEvent.Id, model.Users);
 
+            #region History
+            var newHistory = new EventHistory()
+            {
+                EventId = newEvent.Id,
+                EventTime = newEvent.CreatedOn,
+                EventBody = "Event created by {0}."
+            };
+            _vwsDbContext.AddEventHistory(newHistory);
+            _vwsDbContext.Save();
+
+            var creator = await _vwsDbContext.GetUserProfileAsync(userId);
+            _vwsDbContext.AddEventHistoryParameter(new EventHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = creator.NickName,
+                    ProfileImageGuid = creator.ProfileImageGuid,
+                    UserId = creator.UserId
+                }),
+                EventHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
+            AddTeamProjectsEventCreationHistory(_calenderManager.GetEventTeam(newEvent.Id), _calenderManager.GetEventProjects(newEvent.Id), newEvent.CreatedOn, newEvent.Title);
+
+            var users = _permissionService.GetUsersHasAccessToEvent(newEvent.Id);
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> invited you to <b>«{1}»</b> event.";
+            string[] arguments = { LoggedInNickName, newEvent.Title };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Event Create", arguments);
+
             response.Value = new EventResponseModel()
             {
                 Id = newEvent.Id,
@@ -221,7 +325,7 @@ namespace vws.web.Controllers._calender
         [HttpPut]
         [Authorize]
         [Route("updateTitle")]
-        public IActionResult UpdateTitle(int id,[FromBody] StringModel model)
+        public async Task<IActionResult> UpdateTitle(int id,[FromBody] StringModel model)
         {
             string newTitle = model.Value;
             var response = new ResponseModel();
@@ -250,10 +354,51 @@ namespace vws.web.Controllers._calender
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
+            var lastTitle = selectedEvent.Title;
             selectedEvent.Title = newTitle;
             selectedEvent.ModifiedBy = userId;
             selectedEvent.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
+
+            #region History
+            var newHistory = new EventHistory()
+            {
+                EventId = selectedEvent.Id,
+                EventTime = selectedEvent.CreatedOn,
+                EventBody = "{0} updated title from {1} to {2}."
+            };
+            _vwsDbContext.AddEventHistory(newHistory);
+            _vwsDbContext.Save();
+
+            _vwsDbContext.AddEventHistoryParameter(new EventHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(_userService.GetUser(userId)),
+                EventHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            _vwsDbContext.AddEventHistoryParameter(new EventHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = lastTitle,
+                EventHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            _vwsDbContext.AddEventHistoryParameter(new EventHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedEvent.Title,
+                EventHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
+            var users = _permissionService.GetUsersHasAccessToEvent(selectedEvent.Id);
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> updated title of event <b>«{1}»</b>, to <b>«{2}»</b>.";
+            string[] arguments = { LoggedInNickName, lastTitle, selectedEvent.Title };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Event Update", arguments);
 
             response.Message = "Event title updated successfully!";
             return Ok(response);
@@ -262,7 +407,7 @@ namespace vws.web.Controllers._calender
         [HttpPut]
         [Authorize]
         [Route("updateDescription")]
-        public IActionResult UpdateDescription(int id, [FromBody] StringModel model)
+        public async Task<IActionResult> UpdateDescription(int id, [FromBody] StringModel model)
         {
             string newDescription = model.Value;
             var response = new ResponseModel();
@@ -291,10 +436,44 @@ namespace vws.web.Controllers._calender
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
+            var lastDescription = selectedEvent.Description;
             selectedEvent.Title = newDescription;
             selectedEvent.ModifiedBy = userId;
             selectedEvent.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
+
+            #region History
+            var newHistory = new EventHistory()
+            {
+                EventId = selectedEvent.Id,
+                EventTime = selectedEvent.CreatedOn,
+                EventBody = "{0} updated description to {1}."
+            };
+            _vwsDbContext.AddEventHistory(newHistory);
+            _vwsDbContext.Save();
+
+            _vwsDbContext.AddEventHistoryParameter(new EventHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(_userService.GetUser(userId)),
+                EventHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            _vwsDbContext.AddEventHistoryParameter(new EventHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedEvent.Description,
+                EventHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
+            var users = _permissionService.GetUsersHasAccessToEvent(selectedEvent.Id);
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> updated description of your event with title <b>«{1}»</b> from <b>«{2}»</b> to <b>«{3}»</b>.";
+            string[] arguments = { LoggedInNickName, selectedEvent.Title, lastDescription, selectedEvent.Description };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Event Update", arguments);
 
             response.Message = "Event description updated successfully!";
             return Ok(response);
@@ -303,7 +482,7 @@ namespace vws.web.Controllers._calender
         [HttpPut]
         [Authorize]
         [Route("updateStartTime")]
-        public IActionResult UpdateStartTime(int id, DateTime newStartTime)
+        public async Task<IActionResult> UpdateStartTime(int id, DateTime newStartTime)
         {
             var response = new ResponseModel();
 
@@ -331,10 +510,51 @@ namespace vws.web.Controllers._calender
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
+            var lastStartTime = selectedEvent.StartTime;
             selectedEvent.StartTime = newStartTime;
             selectedEvent.ModifiedBy = userId;
             selectedEvent.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
+
+            #region History
+            var newHistory = new EventHistory()
+            {
+                EventId = selectedEvent.Id,
+                EventTime = selectedEvent.CreatedOn,
+                EventBody = "{0} updated start time from {1} to {2}."
+            };
+            _vwsDbContext.AddEventHistory(newHistory);
+            _vwsDbContext.Save();
+
+            _vwsDbContext.AddEventHistoryParameter(new EventHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(_userService.GetUser(userId)),
+                EventHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            _vwsDbContext.AddEventHistoryParameter(new EventHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = lastStartTime.ToString(),
+                EventHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            _vwsDbContext.AddEventHistoryParameter(new EventHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedEvent.StartTime.ToString(),
+                EventHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
+            var users = _permissionService.GetUsersHasAccessToEvent(selectedEvent.Id);
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> updated start time of your event with title <b>«{1}»</b> from <b>«{2}»</b> to <b>«{3}»</b>.";
+            string[] arguments = { LoggedInNickName, selectedEvent.Title, lastStartTime.ToString(), selectedEvent.StartTime.ToString() };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Event Update", arguments);
 
             response.Message = "Event start time updated successfully!";
             return Ok(response);
@@ -343,7 +563,7 @@ namespace vws.web.Controllers._calender
         [HttpPut]
         [Authorize]
         [Route("updateEndTime")]
-        public IActionResult UpdateEndTime(int id, DateTime newEndTime)
+        public async Task<IActionResult> UpdateEndTime(int id, DateTime newEndTime)
         {
             var response = new ResponseModel();
 
@@ -371,10 +591,51 @@ namespace vws.web.Controllers._calender
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
+            var lastEndTime = selectedEvent.EndTime;
             selectedEvent.EndTime = newEndTime;
             selectedEvent.ModifiedBy = userId;
             selectedEvent.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
+
+            #region History
+            var newHistory = new EventHistory()
+            {
+                EventId = selectedEvent.Id,
+                EventTime = selectedEvent.CreatedOn,
+                EventBody = "{0} updated end time from {1} to {2}."
+            };
+            _vwsDbContext.AddEventHistory(newHistory);
+            _vwsDbContext.Save();
+
+            _vwsDbContext.AddEventHistoryParameter(new EventHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(_userService.GetUser(userId)),
+                EventHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            _vwsDbContext.AddEventHistoryParameter(new EventHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = lastEndTime.ToString(),
+                EventHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            _vwsDbContext.AddEventHistoryParameter(new EventHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedEvent.EndTime.ToString(),
+                EventHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
+            var users = _permissionService.GetUsersHasAccessToEvent(selectedEvent.Id);
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> updated end time of your event with title <b>«{1}»</b> from <b>«{2}»</b> to <b>«{3}»</b>.";
+            string[] arguments = { LoggedInNickName, selectedEvent.Title, lastEndTime.ToString(), selectedEvent.EndTime.ToString() };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Event Update", arguments);
 
             response.Message = "Event end time updated successfully!";
             return Ok(response);
@@ -383,7 +644,7 @@ namespace vws.web.Controllers._calender
         [HttpPut]
         [Authorize]
         [Route("updateIsAllDay")]
-        public IActionResult UpdateIsAllDay(int id, bool newIsAllDay)
+        public async Task<IActionResult> UpdateIsAllDay(int id, bool newIsAllDay)
         {
             var response = new ResponseModel();
 
@@ -408,6 +669,32 @@ namespace vws.web.Controllers._calender
             selectedEvent.ModifiedBy = userId;
             selectedEvent.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
+
+            #region History
+            var newHistory = new EventHistory()
+            {
+                EventId = selectedEvent.Id,
+                EventTime = selectedEvent.CreatedOn,
+                EventBody = "{0}" + (newIsAllDay ? " enabled" : " disabled") + " event for all days."
+            };
+            _vwsDbContext.AddEventHistory(newHistory);
+            _vwsDbContext.Save();
+
+            _vwsDbContext.AddEventHistoryParameter(new EventHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(_userService.GetUser(userId)),
+                EventHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
+            var users = _permissionService.GetUsersHasAccessToEvent(selectedEvent.Id);
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b>" + (newIsAllDay ? " enabled" : " disabled") + " for all days in your event with title <b>«{1}»</b>.";
+            string[] arguments = { LoggedInNickName, selectedEvent.Title };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Event Update", arguments);
 
             response.Message = "Event IsAllDay updated successfully!";
             return Ok(response);
@@ -485,7 +772,7 @@ namespace vws.web.Controllers._calender
         [HttpDelete]
         [Authorize]
         [Route("deleteEvent")]
-        public IActionResult DeleteEvent(int id)
+        public async Task<IActionResult> DeleteEvent(int id)
         {
             var response = new ResponseModel();
 
@@ -510,6 +797,32 @@ namespace vws.web.Controllers._calender
             selectedEvent.ModifiedBy = userId;
             selectedEvent.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
+
+            #region History
+            var newHistory = new EventHistory()
+            {
+                EventId = selectedEvent.Id,
+                EventTime = selectedEvent.CreatedOn,
+                EventBody = "{0} deleted event."
+            };
+            _vwsDbContext.AddEventHistory(newHistory);
+            _vwsDbContext.Save();
+
+            _vwsDbContext.AddEventHistoryParameter(new EventHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(_userService.GetUser(userId)),
+                EventHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
+            var users = _permissionService.GetUsersHasAccessToEvent(selectedEvent.Id);
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> deleted <b>«{1}»</b> event.";
+            string[] arguments = { LoggedInNickName, selectedEvent.Title };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Event Update", arguments);
 
             response.Message = "Event IsAllDay updated successfully!";
             return Ok(response);

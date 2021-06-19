@@ -16,7 +16,7 @@ namespace vws.web.Domain._project
 
         public int ProjectId { get; set; }
 
-        public string Event { get; set; }
+        public string EventBody { get; set; }
 
         public DateTime EventTime { get; set; }
 

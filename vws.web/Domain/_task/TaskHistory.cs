@@ -18,7 +18,7 @@ namespace vws.web.Domain._task
 
         public long GeneralTaskId { get; set; }
 
-        public string Event { get; set; }
+        public string EventBody { get; set; }
 
         public DateTime EventTime { get; set; }
 

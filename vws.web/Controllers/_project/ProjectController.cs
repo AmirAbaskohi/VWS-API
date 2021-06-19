@@ -321,7 +321,7 @@ namespace vws.web.Controllers._project
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = newProject.Id,
-                Event = "Project {0} created by {1}.",
+                EventBody = "Project {0} created by {1}.",
                 EventTime = creationTime
             };
             _vwsDbContext.AddProjectHistory(newProjectHistory);
@@ -446,7 +446,7 @@ namespace vws.web.Controllers._project
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = selectedProject.Id,
-                Event = "Project name updated from {0} to {1} by {2}.",
+                EventBody = "Project name updated from {0} to {1} by {2}.",
                 EventTime = selectedProject.ModifiedOn
             };
             _vwsDbContext.AddProjectHistory(newProjectHistory);
@@ -538,7 +538,7 @@ namespace vws.web.Controllers._project
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = selectedProject.Id,
-                Event = "Project description updated to {0} by {1}.",
+                EventBody = "Project description updated to {0} by {1}.",
                 EventTime = selectedProject.ModifiedOn
             };
             _vwsDbContext.AddProjectHistory(newProjectHistory);
@@ -632,7 +632,7 @@ namespace vws.web.Controllers._project
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = selectedProject.Id,
-                Event = "Project color updated from {0} to {1} by {2}.",
+                EventBody = "Project color updated from {0} to {1} by {2}.",
                 EventTime = selectedProject.ModifiedOn
             };
             _vwsDbContext.AddProjectHistory(newProjectHistory);
@@ -725,7 +725,7 @@ namespace vws.web.Controllers._project
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = selectedProject.Id,
-                Event = "Project start date updated from {0} to {1} by {2}.",
+                EventBody = "Project start date updated from {0} to {1} by {2}.",
                 EventTime = selectedProject.ModifiedOn
             };
             _vwsDbContext.AddProjectHistory(newProjectHistory);
@@ -821,7 +821,7 @@ namespace vws.web.Controllers._project
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = selectedProject.Id,
-                Event = "Project end date updated from {0} to {1} by {2}.",
+                EventBody = "Project end date updated from {0} to {1} by {2}.",
                 EventTime = selectedProject.ModifiedOn
             };
             _vwsDbContext.AddProjectHistory(newProjectHistory);
@@ -990,7 +990,7 @@ namespace vws.web.Controllers._project
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = selectedProject.Id,
-                Event = "Project team and departments updated by {0}.",
+                EventBody = "Project team and departments updated by {0}.",
                 EventTime = selectedProject.ModifiedOn
             };
             _vwsDbContext.AddProjectHistory(newProjectHistory);
@@ -1121,7 +1121,7 @@ namespace vws.web.Controllers._project
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = projectId,
-                Event = "Project image updated to {0} by {1}.",
+                EventBody = "Project image updated to {0} by {1}.",
                 EventTime = selectedProject.ModifiedOn
             };
             _vwsDbContext.AddProjectHistory(newProjectHistory);
@@ -1223,7 +1223,7 @@ namespace vws.web.Controllers._project
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = id,
-                Event = "Project status changed from {0} to {1} by {2}.",
+                EventBody = "Project status changed from {0} to {1} by {2}.",
                 EventTime = selectedProject.ModifiedOn
             };
             _vwsDbContext.AddProjectHistory(newProjectHistory);
@@ -1652,7 +1652,7 @@ namespace vws.web.Controllers._project
                 }
                 events.Add(new HistoryModel()
                 {
-                    Message = _localizer[projectEvent.Event],
+                    Message = _localizer[projectEvent.EventBody],
                     Parameters = parameters.Select(param => new HistoryParameterModel() { ParameterBody = param.Body, ParameterType = param.ActivityParameterTypeId }).ToList(),
                     Time = projectEvent.EventTime
                 });
@@ -1687,13 +1687,6 @@ namespace vws.web.Controllers._project
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            //if (selectedProject.TeamId == null && userId != selectedProject.CreatedBy)
-            //{
-            //    response.AddError(_localizer["Deleting personal project just can be done by creator."]);
-            //    response.Message = "Delete project access denied";
-            //    return StatusCode(StatusCodes.Status403Forbidden, response);
-            //}
-
             if (userId != selectedProject.CreatedBy)
             {
                 response.AddError(_localizer["Projects can only get deleted by the creator."]);
@@ -1718,7 +1711,7 @@ namespace vws.web.Controllers._project
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = id,
-                Event = "Project deleted by {0}.",
+                EventBody = "Project deleted by {0}.",
                 EventTime = modificationTime,
             };
             _vwsDbContext.AddProjectHistory(newProjectHistory);
@@ -1838,7 +1831,7 @@ namespace vws.web.Controllers._project
                     newProjectHistory = new ProjectHistory()
                     {
                         ProjectId = selectedProjectMember.ProjectId,
-                        Event = "{0} gave permission to user {1}.",
+                        EventBody = "{0} gave permission to user {1}.",
                         EventTime = selectedProjectMember.PermittedOn
                     };
                     _vwsDbContext.AddProjectHistory(newProjectHistory);
@@ -1908,7 +1901,7 @@ namespace vws.web.Controllers._project
                     newProjectHistory = new ProjectHistory()
                     {
                         ProjectId = model.ProjectId,
-                        Event = "{0} added {1} to the project.",
+                        EventBody = "{0} added {1} to the project.",
                         EventTime = newPorjectMember.CreatedOn
                     };
                     _vwsDbContext.AddProjectHistory(newProjectHistory);
@@ -1958,7 +1951,7 @@ namespace vws.web.Controllers._project
                     newProjectHistory = new ProjectHistory()
                     {
                         ProjectId = model.ProjectId,
-                        Event = "{0} requested to add {1} to the project.",
+                        EventBody = "{0} requested to add {1} to the project.",
                         EventTime = newPorjectMember.CreatedOn
                     };
                     _vwsDbContext.AddProjectHistory(newProjectHistory);
@@ -2058,7 +2051,7 @@ namespace vws.web.Controllers._project
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = selectedProjectMember.ProjectId,
-                Event = "{0} gave permission to user {1}.",
+                EventBody = "{0} gave permission to user {1}.",
                 EventTime = selectedProjectMember.PermittedOn
             };
             _vwsDbContext.AddProjectHistory(newProjectHistory);
@@ -2157,7 +2150,7 @@ namespace vws.web.Controllers._project
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = selectedProjectMember.ProjectId,
-                Event = "{0} did not accepted user {1} to have access to project.",
+                EventBody = "{0} did not accepted user {1} to have access to project.",
                 EventTime = (DateTime)selectedProjectMember.DeletedOn
             };
             _vwsDbContext.AddProjectHistory(newProjectHistory);
@@ -2452,7 +2445,7 @@ namespace vws.web.Controllers._project
             var newProjectHistory = new ProjectHistory()
             {
                 ProjectId = selectedProject.Id,
-                Event = "{0} removed from project by {1}.",
+                EventBody = "{0} removed from project by {1}.",
                 EventTime = selectedProject.ModifiedOn
             };
             _vwsDbContext.AddProjectHistory(newProjectHistory);

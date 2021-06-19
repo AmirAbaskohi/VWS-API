@@ -15,5 +15,6 @@ namespace vws.web.Services
         public List<Guid> GetUsersHaveAccessToProject(int projectId);
         public List<Guid> GetUsersHaveAccessToDepartment(int departmentId);
         public List<Guid> GetUsersHaveAccessToTeam(int teamId);
+        public List<Guid> GetUsersHasAccessToEvent(int eventId);
     }
 }

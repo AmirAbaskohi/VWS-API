@@ -162,6 +162,9 @@
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; created new team with name &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; created new team with name &lt;b&gt;«{1}»&lt;/b&gt;.</value>
   </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted &lt;b&gt;«{1}»&lt;/b&gt; event." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; deleted &lt;b&gt;«{1}»&lt;/b&gt; event.</value>
+  </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted attachment &lt;b&gt;«{1}»&lt;/b&gt; from comment &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; deleted attachment &lt;b&gt;«{1}»&lt;/b&gt; from comment &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;.</value>
   </data>
@@ -189,11 +192,20 @@
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; did not give permission to you for project &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; did not give permission to you for project &lt;b&gt;«{1}»&lt;/b&gt;.</value>
   </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; disabled for all days in your event with title &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; disabled &lt;b&gt;«for all days»&lt;/b&gt; in your event with title &lt;b&gt;«{1}»&lt;/b&gt;.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; enabled for all days in your event with title &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; enabled &lt;b&gt;«for all days»&lt;/b&gt; in your event with title &lt;b&gt;«{1}»&lt;/b&gt;.</value>
+  </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; gave permission to user &lt;b&gt;«{1}»&lt;/b&gt; in project &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; gave permission to user &lt;b&gt;«{1}»&lt;/b&gt; in project &lt;b&gt;«{2}»&lt;/b&gt;.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; gave permission to you for project &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; gave permission to you for project &lt;b&gt;«{1}»&lt;/b&gt;.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; invited you to &lt;b&gt;«{1}»&lt;/b&gt; event." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; invited you to &lt;b&gt;«{1}»&lt;/b&gt; event.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; joined team &lt;b&gt;«{1}»&lt;/b&gt; via link with id &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; joined team &lt;b&gt;«{1}»&lt;/b&gt; via link with id &lt;b&gt;«{2}»&lt;/b&gt;.</value>
@@ -240,8 +252,14 @@
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated description from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in your team with name &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; updated description from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in your team with name &lt;b&gt;«{3}»&lt;/b&gt;.</value>
   </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated description of your event with title &lt;b&gt;«{1}»&lt;/b&gt; from &lt;b&gt;«{2}»&lt;/b&gt; to &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; updated description of your event with title &lt;b&gt;«{1}»&lt;/b&gt; from &lt;b&gt;«{2}»&lt;/b&gt; to &lt;b&gt;«{3}»&lt;/b&gt;.</value>
+  </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated end date from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in project &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; updated end date from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in project &lt;b&gt;«{3}»&lt;/b&gt;.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated end time of your event with title &lt;b&gt;«{1}»&lt;/b&gt; from &lt;b&gt;«{2}»&lt;/b&gt; to &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; updated end time of your event with title &lt;b&gt;«{1}»&lt;/b&gt; from &lt;b&gt;«{2}»&lt;/b&gt; to &lt;b&gt;«{3}»&lt;/b&gt;.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated project image to &lt;b&gt;«{1}»&lt;/b&gt; in project &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; updated project image to &lt;b&gt;«{1}»&lt;/b&gt; in project &lt;b&gt;«{2}»&lt;/b&gt;.</value>
@@ -255,6 +273,9 @@
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated start date from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in project &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; updated start date from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in project &lt;b&gt;«{3}»&lt;/b&gt;.</value>
   </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated start time of your event with title &lt;b&gt;«{1}»&lt;/b&gt; from &lt;b&gt;«{2}»&lt;/b&gt; to &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; updated start time of your event with title &lt;b&gt;«{1}»&lt;/b&gt; from &lt;b&gt;«{2}»&lt;/b&gt; to &lt;b&gt;«{3}»&lt;/b&gt;.</value>
+  </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated status from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in project &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; updated status from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in project &lt;b&gt;«{3}»&lt;/b&gt;.</value>
   </data>
@@ -263,6 +284,9 @@
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated team name from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; updated team name from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt;.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated title of event &lt;b&gt;«{1}»&lt;/b&gt;, to &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; updated title of event &lt;b&gt;«{1}»&lt;/b&gt;, to &lt;b&gt;«{2}»&lt;/b&gt;.</value>
   </data>
   <data name="Active" xml:space="preserve">
     <value>Active</value>

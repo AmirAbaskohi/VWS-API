@@ -120,6 +120,9 @@
   <data name="Description can not have more than 2500 characters." xml:space="preserve">
     <value>Description can not have more than 2500 characters.</value>
   </data>
+  <data name="Event created by {0}." xml:space="preserve">
+    <value>Event created by {0}.</value>
+  </data>
   <data name="Event not found." xml:space="preserve">
     <value>Event not found.</value>
   </data>
@@ -146,5 +149,26 @@
   </data>
   <data name="You do not have access to this event." xml:space="preserve">
     <value>You do not have access to this event.</value>
+  </data>
+  <data name="{0} deleted event." xml:space="preserve">
+    <value>{0} deleted event.</value>
+  </data>
+  <data name="{0} disabled event for all days." xml:space="preserve">
+    <value>{0} disabled event &lt;b&gt;«for all days»&lt;/b&gt;.</value>
+  </data>
+  <data name="{0} enabled event for all days." xml:space="preserve">
+    <value>{0} enabled event &lt;b&gt;«for all days»&lt;/b&gt;.</value>
+  </data>
+  <data name="{0} updated description to {1}." xml:space="preserve">
+    <value>{0} updated description of event to {1}.</value>
+  </data>
+  <data name="{0} updated end time from {1} to {2}." xml:space="preserve">
+    <value>{0} updated end time of event from {1} to {2}.</value>
+  </data>
+  <data name="{0} updated start time from {1} to {2}." xml:space="preserve">
+    <value>{0} updated start time of event from {1} to {2}.</value>
+  </data>
+  <data name="{0} updated title from {1} to {2}." xml:space="preserve">
+    <value>{0} updated title of event from {1} to {2}.</value>
   </data>
 </root>

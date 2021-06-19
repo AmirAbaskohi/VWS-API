@@ -162,6 +162,9 @@
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; created new team with name &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; تیم جدیدی با نام &lt;b&gt;«{1}»&lt;/b&gt; ایجاد کرد.</value>
   </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted &lt;b&gt;«{1}»&lt;/b&gt; event." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; رویداد &lt;b&gt;«{1}»&lt;/b&gt; را حذف کرد.</value>
+  </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted attachment &lt;b&gt;«{1}»&lt;/b&gt; from comment &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; ضمیمه &lt;b&gt;«{1}»&lt;/b&gt; را از کامنت &lt;b&gt;«{2}»&lt;/b&gt; در تسک شما با عنوان &lt;b&gt;«{3}»&lt;/b&gt; حذف کرد.</value>
   </data>
@@ -192,11 +195,20 @@
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; did not give permission to you for project &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; اجازه دسترسی به شما به پروژه &lt;b&gt;«{1}»&lt;/b&gt; را نداد.</value>
   </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; disabled for all days in your event with title &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; ویژگی &lt;b&gt;هر روز&lt;/b&gt; را در رویداد شما با عنوان &lt;b&gt;«{1}»&lt;/b&gt; غیر فعال کرد.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; enabled for all days in your event with title &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; ویژگی &lt;b&gt;هر روز&lt;/b&gt; را در رویداد شما با عنوان &lt;b&gt;«{1}»&lt;/b&gt; فعال کرد.</value>
+  </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; gave permission to user &lt;b&gt;«{1}»&lt;/b&gt; in project &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; به کاربر &lt;b&gt;«{1}»&lt;/b&gt; اجازه دسترسی به پروژه &lt;b&gt;«{2}»&lt;/b&gt; را داد.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; gave permission to you for project &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; به شما اجازه دسترسی به پروژه &lt;b&gt;«{1}»&lt;/b&gt; را داد.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; invited you to &lt;b&gt;«{1}»&lt;/b&gt; event." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; شما را به رویداد &lt;b&gt;«{1}»&lt;/b&gt; دعوت کرد.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; joined team &lt;b&gt;«{1}»&lt;/b&gt; via link with id &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; با استفاده از لینک با آی دی &lt;b&gt;«{1}»&lt;/b&gt; به تیم &lt;b&gt;«{2}»&lt;/b&gt; پیوست.</value>
@@ -246,8 +258,14 @@
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated description from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in your team with name &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; توضیحات را در تیم شما با نام &lt;b&gt;«{3}»&lt;/b&gt; از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; به روز کرد.</value>
   </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated description of your event with title &lt;b&gt;«{1}»&lt;/b&gt; from &lt;b&gt;«{2}»&lt;/b&gt; to &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; توضیحات رویداد شما با عنوان &lt;b&gt;«{1}»&lt;/b&gt; را از &lt;b&gt;«{2}»&lt;/b&gt; به &lt;b&gt;«{3}»&lt;/b&gt; به روز کرد.</value>
+  </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated end date from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in project &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; زمان پایان را از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; در پروژه &lt;b&gt;«{3}»&lt;/b&gt; به روز کرد.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated end time of your event with title &lt;b&gt;«{1}»&lt;/b&gt; from &lt;b&gt;«{2}»&lt;/b&gt; to &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; زمان پایان رویداد شما با عنوان &lt;b&gt;«{1}»&lt;/b&gt; را از &lt;b&gt;«{2}»&lt;/b&gt; به &lt;b&gt;«{3}»&lt;/b&gt; به روز کرد.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated project image to &lt;b&gt;«{1}»&lt;/b&gt; in project &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; تصویر پروژه را به &lt;b&gt;«{1}»&lt;/b&gt; در پروژه &lt;b&gt;«{2}»&lt;/b&gt; به روز کرد.</value>
@@ -261,6 +279,9 @@
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated start date from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in project &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; زمان شروع را از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; در پروژه &lt;b&gt;«{3}»&lt;/b&gt; به روز کرد.</value>
   </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated start time of your event with title &lt;b&gt;«{1}»&lt;/b&gt; from &lt;b&gt;«{2}»&lt;/b&gt; to &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; زمان شروع رویداد شما با عنوان &lt;b&gt;«{1}»&lt;/b&gt; را از &lt;b&gt;«{2}»&lt;/b&gt; به &lt;b&gt;«{3}»&lt;/b&gt; به روز کرد.</value>
+  </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated status from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in project &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; وضعیت را از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; در پروژه &lt;b&gt;«{3}»&lt;/b&gt; به روز کرد.</value>
   </data>
@@ -269,6 +290,9 @@
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated team name from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; نام تیم را از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; به روز کرد.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated title of event &lt;b&gt;«{1}»&lt;/b&gt;, to &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; عنوان رویداد را از &lt;b&gt;«{1}»&lt;/b&gt; به &lt;b&gt;«{2}»&lt;/b&gt; به روز کرد.</value>
   </data>
   <data name="Active" xml:space="preserve">
     <value>فعال</value>

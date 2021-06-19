@@ -120,6 +120,9 @@
   <data name="Description can not have more than 2500 characters." xml:space="preserve">
     <value>توضیحات نمی تواند دارای بیش از 2500 باشد.</value>
   </data>
+  <data name="Event created by {0}." xml:space="preserve">
+    <value>رویداد توسط {0} ساخته شد.</value>
+  </data>
   <data name="Event not found." xml:space="preserve">
     <value>رویداد یافت نشد.</value>
   </data>
@@ -146,5 +149,26 @@
   </data>
   <data name="You do not have access to this event." xml:space="preserve">
     <value>شما به این رویداد دسترسی ندارید.</value>
+  </data>
+  <data name="{0} deleted event." xml:space="preserve">
+    <value>{0} رویداد را حذف کرد.</value>
+  </data>
+  <data name="{0} disabled event for all days." xml:space="preserve">
+    <value>{0} ویژگی &lt;b&gt;«هر روز»&lt;/b&gt; را برای رویداد غیر فعال کرد.</value>
+  </data>
+  <data name="{0} enabled event for all days." xml:space="preserve">
+    <value>{0} ویژگی &lt;b&gt;«هر روز»&lt;/b&gt; را برای رویداد فعال کرد.</value>
+  </data>
+  <data name="{0} updated description to {1}." xml:space="preserve">
+    <value>{0} توضیحات رویداد را به {1} به روز کرد.</value>
+  </data>
+  <data name="{0} updated end time from {1} to {2}." xml:space="preserve">
+    <value>{0} زمان پایان رویداد را از {1} به {2} به روز کرد.</value>
+  </data>
+  <data name="{0} updated start time from {1} to {2}." xml:space="preserve">
+    <value>{0} زمان شروع رویداد را از {1} به {2} به روز کرد.</value>
+  </data>
+  <data name="{0} updated title from {1} to {2}." xml:space="preserve">
+    <value>{0} عنوان  رویداد را از {1} به {2} به روز کرد.</value>
   </data>
 </root>

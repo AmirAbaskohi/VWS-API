@@ -16,7 +16,7 @@ namespace vws.web.Domain._team
 
         public int TeamId { get; set; }
 
-        public string Event { get; set; }
+        public string EventBody { get; set; }
 
         public DateTime EventTime { get; set; }
 

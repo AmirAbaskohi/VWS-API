@@ -122,7 +122,7 @@ namespace vws.web.Controllers._notification
                 if (userNotif.NotificationTypeId == (byte)SeedDataEnum.NotificationTypes.Project)
                 {
                     var history = _vwsDbContext.ProjectHistories.Include(projectHistory => projectHistory.ProjectHistoryParameters).Include(projectHistory => projectHistory.Project).FirstOrDefault(projectHistory => projectHistory.Id == userNotif.ActivityId);
-                    message = history.Event;
+                    message = history.EventBody;
                     parameters = history.ProjectHistoryParameters.Select(parameter => parameter.Body).ToList();
                     parametersShouldBeLocalized = history.ProjectHistoryParameters.Select(parameter => parameter.ShouldBeLocalized).ToList();
                     parametersType = history.ProjectHistoryParameters.Select(parameter => parameter.ActivityParameterTypeId).ToList();
@@ -133,7 +133,7 @@ namespace vws.web.Controllers._notification
                 else if (userNotif.NotificationTypeId == (byte)SeedDataEnum.NotificationTypes.Team)
                 {
                     var history = _vwsDbContext.TeamHistories.Include(teamHistory => teamHistory.TeamHistoryParameters).Include(teamHistory => teamHistory.Team).FirstOrDefault(teamHistory => teamHistory.Id == userNotif.ActivityId);
-                    message = history.Event;
+                    message = history.EventBody;
                     parameters = history.TeamHistoryParameters.Select(parameter => parameter.Body).ToList();
                     parametersShouldBeLocalized = history.TeamHistoryParameters.Select(parameter => parameter.ShouldBeLocalized).ToList();
                     parametersType = history.TeamHistoryParameters.Select(parameter => parameter.ActivityParameterTypeId).ToList();
@@ -144,7 +144,7 @@ namespace vws.web.Controllers._notification
                 else
                 {
                     var history = _vwsDbContext.TaskHistories.Include(taskHistory => taskHistory.TaskHistoryParameters).Include(taskHistory => taskHistory.GeneralTask).FirstOrDefault(taskHistory => taskHistory.Id == userNotif.ActivityId);
-                    message = history.Event;
+                    message = history.EventBody;
                     parameters = history.TaskHistoryParameters.Select(parameter => parameter.Body).ToList();
                     parametersShouldBeLocalized = history.TaskHistoryParameters.Select(parameter => parameter.ShouldBeLocalized).ToList();
                     parametersType = history.TaskHistoryParameters.Select(parameter => parameter.ActivityParameterTypeId).ToList();

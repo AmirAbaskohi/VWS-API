@@ -897,6 +897,14 @@ namespace vws.web.Domain
 
         public DbSet<EventMember> EventUsers { get; set; }
 
+        IQueryable<EventHistory> IVWS_DbContext.EventHistories { get => EventHistories; }
+
+        public DbSet<EventHistory> EventHistories { get; set; }
+
+        IQueryable<EventHistoryParameter> IVWS_DbContext.EventHistoryParameters { get => EventHistoryParameters; }
+
+        public DbSet<EventHistoryParameter> EventHistoryParameters { get; set; }
+
         public void AddEvent(Event newEvent)
         {
             Events.Add(newEvent);
@@ -920,6 +928,16 @@ namespace vws.web.Domain
         public void RemoveEventUser(EventMember eventUser)
         {
             EventUsers.Remove(eventUser);
+        }
+
+        public void AddEventHistory(EventHistory eventHistory)
+        {
+            EventHistories.Add(eventHistory);
+        }
+
+        public void AddEventHistoryParameter(EventHistoryParameter eventHistoryParameter)
+        {
+            EventHistoryParameters.Add(eventHistoryParameter);
         }
 
         #endregion

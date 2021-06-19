@@ -64,7 +64,8 @@ namespace vws.web.Enums
             Team = 1,
             Project = 2,
             Department = 3,
-            Task = 4
+            Task = 4,
+            Calender = 5
         }
 
         public enum ActivityParameterTypes : byte

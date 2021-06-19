@@ -341,7 +341,7 @@ namespace vws.web.Controllers._team
             {
                 TeamId = newTeam.Id,
                 EventTime = newTeam.CreatedOn,
-                Event = "Team {0} created by {1}."
+                EventBody = "Team {0} created by {1}."
             };
             _vwsDbContext.AddTeamHistory(newHistory);
             _vwsDbContext.Save();
@@ -460,7 +460,7 @@ namespace vws.web.Controllers._team
             {
                 TeamId = selectedTeam.Id,
                 EventTime = selectedTeam.ModifiedOn,
-                Event = "Team name updated from {0} to {1} by {2}."
+                EventBody = "Team name updated from {0} to {1} by {2}."
             };
             _vwsDbContext.AddTeamHistory(newHistory);
             _vwsDbContext.Save();
@@ -555,7 +555,7 @@ namespace vws.web.Controllers._team
             {
                 TeamId = selectedTeam.Id,
                 EventTime = selectedTeam.ModifiedOn,
-                Event = "Team description updated to {0} by {1}."
+                EventBody = "Team description updated to {0} by {1}."
             };
             _vwsDbContext.AddTeamHistory(newHistory);
             _vwsDbContext.Save();
@@ -643,7 +643,7 @@ namespace vws.web.Controllers._team
             {
                 TeamId = selectedTeam.Id,
                 EventTime = selectedTeam.ModifiedOn,
-                Event = "Team color updated from {0} to {1} by {2}."
+                EventBody = "Team color updated from {0} to {1} by {2}."
             };
             _vwsDbContext.AddTeamHistory(newHistory);
             _vwsDbContext.Save();
@@ -797,7 +797,7 @@ namespace vws.web.Controllers._team
             {
                 TeamId = selectedTeam.Id,
                 EventTime = selectedTeam.ModifiedOn,
-                Event = "Team image updated to {0} by {1}."
+                EventBody = "Team image updated to {0} by {1}."
             };
             _vwsDbContext.AddTeamHistory(newHistory);
             _vwsDbContext.Save();
@@ -1189,7 +1189,7 @@ namespace vws.web.Controllers._team
                 }
                 events.Add(new HistoryModel()
                 {
-                    Message = _localizer[teamEvent.Event],
+                    Message = _localizer[teamEvent.EventBody],
                     Parameters = parameters.Select(param => new HistoryParameterModel() { ParameterBody = param.Body, ParameterType = param.ActivityParameterTypeId }).ToList(),
                     Time = teamEvent.EventTime
                 });
@@ -1272,7 +1272,7 @@ namespace vws.web.Controllers._team
             {
                 TeamId = selectedTeam.Id,
                 EventTime = selectedTeam.ModifiedOn,
-                Event = "{0} deleted team."
+                EventBody = "{0} deleted team."
             };
             _vwsDbContext.AddTeamHistory(newHistory);
             _vwsDbContext.Save();
@@ -1354,7 +1354,7 @@ namespace vws.web.Controllers._team
             {
                 TeamId = id,
                 EventTime = creationTime,
-                Event = "{0} created new invite link with id {1}."
+                EventBody = "{0} created new invite link with id {1}."
             };
             _vwsDbContext.AddTeamHistory(newHistory);
             _vwsDbContext.Save();
@@ -1447,7 +1447,7 @@ namespace vws.web.Controllers._team
             {
                 TeamId = selectedInviteLink.TeamId,
                 EventTime = selectedTeam.ModifiedOn,
-                Event = "Invite link with id {0} revoked by {1}."
+                EventBody = "Invite link with id {0} revoked by {1}."
             };
             _vwsDbContext.AddTeamHistory(newHistory);
             _vwsDbContext.Save();
@@ -1612,7 +1612,7 @@ namespace vws.web.Controllers._team
                 {
                     TeamId = selectedTeam.Id,
                     EventTime = newTeamMember.CreatedOn,
-                    Event = "{0} added {1} to team."
+                    EventBody = "{0} added {1} to team."
                 };
                 _vwsDbContext.AddTeamHistory(newHistory);
                 _vwsDbContext.Save();
@@ -1711,7 +1711,7 @@ namespace vws.web.Controllers._team
             {
                 TeamId = newTeamMember.TeamId,
                 EventTime = newTeamMember.CreatedOn,
-                Event = "{0} joined the team using invite link with guid {1}."
+                EventBody = "{0} joined the team using invite link with guid {1}."
             };
             _vwsDbContext.AddTeamHistory(newHistory);
             _vwsDbContext.Save();
@@ -1801,7 +1801,7 @@ namespace vws.web.Controllers._team
             {
                 TeamId = selectedTeam.Id,
                 EventTime = selectedTeamMemeber.DeletedOn.Value,
-                Event = "{0} removed {1} from team."
+                EventBody = "{0} removed {1} from team."
             };
             _vwsDbContext.AddTeamHistory(newHistory);
             _vwsDbContext.Save();

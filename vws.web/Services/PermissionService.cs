@@ -138,5 +138,12 @@ namespace vws.web.Services
                                            .Select(teamMember => teamMember.UserProfileId)
                                            .ToList();
         }
+
+        public List<Guid> GetUsersHasAccessToEvent(int eventId)
+        {
+            return vwsDbContext.EventUsers.Where(eventUser => eventUser.EventId == eventId && !eventUser.IsDeleted)
+                                          .Select(eventUser => eventUser.UserProfileId)
+                                          .ToList();
+        }
     }
 }
