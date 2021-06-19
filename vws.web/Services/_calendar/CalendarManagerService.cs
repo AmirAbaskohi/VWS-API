@@ -10,11 +10,11 @@ using vws.web.Models._team;
 
 namespace vws.web.Services._calender
 {
-    public class CalenderManagerService : ICalenderManagerService
+    public class CalendarManagerService : ICalendarManagerService
     {
         private readonly IVWS_DbContext _vwsDbContext;
 
-        public CalenderManagerService(IVWS_DbContext vwsDbContext)
+        public CalendarManagerService(IVWS_DbContext vwsDbContext)
         {
             _vwsDbContext = vwsDbContext;
         }

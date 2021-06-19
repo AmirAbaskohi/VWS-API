@@ -8,7 +8,7 @@ using vws.web.Models._team;
 
 namespace vws.web.Services._calender
 {
-    public interface ICalenderManagerService
+    public interface ICalendarManagerService
     {
         public Task<List<UserModel>> GetEventUsers(int id);
 

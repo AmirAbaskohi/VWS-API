@@ -26,20 +26,20 @@ namespace vws.web.Controllers._calender
 {
     [Route("{culture:culture}/[controller]")]
     [ApiController]
-    public class CalenderController : BaseController
+    public class CalendarController : BaseController
     {
         #region Feilds
         private readonly IVWS_DbContext _vwsDbContext;
-        private readonly ICalenderManagerService _calenderManager;
+        private readonly ICalendarManagerService _calenderManager;
         private readonly IPermissionService _permissionService;
         private readonly ITaskManagerService _taskManager;
-        private readonly IStringLocalizer<CalenderController> _localizer;
+        private readonly IStringLocalizer<CalendarController> _localizer;
         private readonly INotificationService _notificationService;
         private readonly IUserService _userService;
         #endregion
 
         #region Ctor
-        public CalenderController(IVWS_DbContext vwsDbContext, ICalenderManagerService calenderManager, IStringLocalizer<CalenderController> localizer,
+        public CalendarController(IVWS_DbContext vwsDbContext, ICalendarManagerService calenderManager, IStringLocalizer<CalendarController> localizer,
             IPermissionService permissionService, ITaskManagerService taskManager, INotificationService notificationService,
             IUserService userService)
         {

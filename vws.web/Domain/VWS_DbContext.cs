@@ -883,7 +883,7 @@ namespace vws.web.Domain
 
         #endregion
 
-        #region calender
+        #region calendar
 
         IQueryable<Event> IVWS_DbContext.Events { get => Events; }
 

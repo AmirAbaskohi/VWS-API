@@ -7,7 +7,7 @@ using vws.web.Domain._project;
 
 namespace vws.web.Domain._calendar
 {
-    [Table("Calender_EventProject")]
+    [Table("Calendar_EventProject")]
     public class EventProject
     {
         public int ProjectId { get; set; }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace vws.web.Domain._calendar
 {
-    [Table("Calender_EventHistoryParameter")]
+    [Table("Calendar_EventHistoryParameter")]
     public class EventHistoryParameter
     {
         public long Id { get; set; }

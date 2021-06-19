@@ -142,7 +142,7 @@ namespace vws.web
 
             services.AddScoped<ITaskManagerService, TaskManagerService>();
 
-            services.AddScoped<ICalenderManagerService, CalenderManagerService>();
+            services.AddScoped<ICalendarManagerService, CalendarManagerService>();
 
             services.AddScoped<IImageService, ImageService>();
 

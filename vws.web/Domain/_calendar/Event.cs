@@ -9,7 +9,7 @@ using vws.web.Domain._team;
 
 namespace vws.web.Domain._calendar
 {
-    [Table("Calender_Event")]
+    [Table("Calendar_Event")]
     public class Event
     {
         public Event()

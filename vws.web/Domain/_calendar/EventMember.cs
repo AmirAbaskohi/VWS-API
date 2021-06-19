@@ -7,7 +7,7 @@ using vws.web.Domain._base;
 
 namespace vws.web.Domain._calendar
 {
-    [Table("Calender_EventMember")]
+    [Table("Calendar_EventMember")]
     public class EventMember
     {
         public int Id { get; set; }

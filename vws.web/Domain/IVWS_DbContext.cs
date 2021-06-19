@@ -480,7 +480,7 @@ namespace vws.web.Domain
         #endregion
 
 
-        #region Calender
+        #region calendar
 
         #region models
 
