@@ -218,7 +218,7 @@ namespace vws.web.Services
                 notifiedOnName = history.Team.Name;
                 eventTime = history.EventTime;
             }
-            else
+            else if (notificationTypeId == (byte)SeedDataEnum.NotificationTypes.Task)
             {
                 var history = _vwsDbContext.TaskHistories.Include(taskHistory => taskHistory.TaskHistoryParameters).Include(taskHistory => taskHistory.GeneralTask).FirstOrDefault(taskHistory => taskHistory.Id == activityId);
                 message = history.EventBody;
@@ -229,6 +229,19 @@ namespace vws.web.Services
                 notifiedOnName = history.GeneralTask.Title;
                 eventTime = history.EventTime;
             }
+            else if (notificationTypeId == (byte)SeedDataEnum.NotificationTypes.Calendar)
+            {
+                var history = _vwsDbContext.EventHistories.Include(eventHistory => eventHistory.EventHistoryParameters).Include(eventHistory => eventHistory.Event).FirstOrDefault(eventHistory => eventHistory.Id == activityId);
+                message = history.EventBody;
+                parameters = history.EventHistoryParameters.Select(parameter => parameter.Body).ToList();
+                parametersShouldBeLocalized = history.EventHistoryParameters.Select(parameter => parameter.ShouldBeLocalized).ToList();
+                parametersType = history.EventHistoryParameters.Select(parameter => parameter.ActivityParameterTypeId).ToList();
+                notifiedOnId = history.EventId;
+                notifiedOnName = history.Event.Title;
+                eventTime = history.EventTime;
+            }
+            else
+                return;
 
             Task.Run(() =>
             {
@@ -236,8 +249,8 @@ namespace vws.web.Services
                 {
                     if (UserHandler.ConnectedIds.Keys.Contains(userIds[i].ToString()))
                         UserHandler.ConnectedIds[userIds[i].ToString()]
-                                   .ConnectionIds
-                                   .ForEach(connectionId => _hub.Clients.Client(connectionId)
+                                    .ConnectionIds
+                                    .ForEach(connectionId => _hub.Clients.Client(connectionId)
                                                                         .ReceiveNotification(new NotificationResponseModel()
                                                                         {
                                                                             Id = notificationIds[i],
