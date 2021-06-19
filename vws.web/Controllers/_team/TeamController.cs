@@ -1711,7 +1711,7 @@ namespace vws.web.Controllers._team
             {
                 TeamId = newTeamMember.TeamId,
                 EventTime = newTeamMember.CreatedOn,
-                EventBody = "{0} joined the team using invite link with guid {1}."
+                EventBody = "{0} joined the team using invite link."
             };
             _vwsDbContext.AddTeamHistory(newHistory);
             _vwsDbContext.Save();
@@ -1729,20 +1729,13 @@ namespace vws.web.Controllers._team
                 TeamHistoryId = newHistory.Id
             });
             _vwsDbContext.Save();
-            _vwsDbContext.AddTeamHistoryParameter(new TeamHistoryParameter()
-            {
-                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
-                Body = selectedTeamLink.LinkGuid.ToString(),
-                TeamHistoryId = newHistory.Id
-            });
-            _vwsDbContext.Save();
             #endregion
 
             var users = (await _teamManager.GetTeamMembers(selectedTeam.Id)).Select(user => user.UserId).ToList();
             users = users.Distinct().ToList();
             users.Remove(LoggedInUserId.Value);
-            string emailMessage = "<b>«{0}»</b> joined team <b>«{1}»</b> via link with id <b>«{2}»</b>.";
-            string[] arguments = { LoggedInNickName, selectedTeam.Name, selectedTeamLink.LinkGuid.ToString() };
+            string emailMessage = "<b>«{0}»</b> joined team <b>«{1}»</b> using invite link.";
+            string[] arguments = { LoggedInNickName, selectedTeam.Name };
             await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Team Update", arguments);
 
             _notificationService.SendMultipleNotification(users, (byte)SeedDataEnum.NotificationTypes.Team, newHistory.Id);

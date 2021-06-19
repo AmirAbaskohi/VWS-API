@@ -207,6 +207,9 @@
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; invited you to &lt;b&gt;«{1}»&lt;/b&gt; event." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; invited you to &lt;b&gt;«{1}»&lt;/b&gt; event.</value>
   </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; joined team &lt;b&gt;«{1}»&lt;/b&gt; using invite link." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; joined team &lt;b&gt;«{1}»&lt;/b&gt; via link.</value>
+  </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; joined team &lt;b&gt;«{1}»&lt;/b&gt; via link with id &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; joined team &lt;b&gt;«{1}»&lt;/b&gt; via link with id &lt;b&gt;«{2}»&lt;/b&gt;.</value>
   </data>

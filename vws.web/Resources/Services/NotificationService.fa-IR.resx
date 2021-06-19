@@ -210,8 +210,11 @@
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; invited you to &lt;b&gt;«{1}»&lt;/b&gt; event." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; شما را به رویداد &lt;b&gt;«{1}»&lt;/b&gt; دعوت کرد.</value>
   </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; joined team &lt;b&gt;«{1}»&lt;/b&gt; using invite link." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; با استفاده از لینک به تیم &lt;b&gt;«{1}»&lt;/b&gt; پیوست.</value>
+  </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; joined team &lt;b&gt;«{1}»&lt;/b&gt; via link with id &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; با استفاده از لینک با آی دی &lt;b&gt;«{1}»&lt;/b&gt; به تیم &lt;b&gt;«{2}»&lt;/b&gt; پیوست.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; با استفاده از لینک با آی دی &lt;b&gt;«{2}»&lt;/b&gt; به تیم &lt;b&gt;«{1}»&lt;/b&gt; پیوست.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; removed &lt;b&gt;«{1}»&lt;/b&gt; from project &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; &lt;b&gt;«{1}»&lt;/b&gt; را از پروژه &lt;b&gt;«{2}»&lt;/b&gt; حذف کرد.</value>

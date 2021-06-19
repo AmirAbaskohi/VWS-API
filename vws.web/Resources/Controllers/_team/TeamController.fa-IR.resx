@@ -252,6 +252,9 @@
   <data name="{0} joined the team using invite link with guid {1}." xml:space="preserve">
     <value>{0} با استفاده از لینک با آی دی {1} به تیم پیوست.</value>
   </data>
+  <data name="{0} joined the team using invite link." xml:space="preserve">
+    <value>{0} با استفاده از لینک دعوت به تیم پیوست.</value>
+  </data>
   <data name="{0} removed {1} from team." xml:space="preserve">
     <value>{0} {1} را از تیم حذف کرد.</value>
   </data>
