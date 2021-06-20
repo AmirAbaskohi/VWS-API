@@ -52,4 +52,25 @@ namespace vws.web.Domain._calendar
 
         public virtual ICollection<EventMember> EventUsers { get; set; }
     }
+
+    class EventComparer : IEqualityComparer<Event>
+    {
+        public bool Equals(Event firstEvent, Event secondEvent)
+        {
+
+            if (Object.ReferenceEquals(firstEvent, secondEvent)) return true;
+
+            if (Object.ReferenceEquals(firstEvent, null) || Object.ReferenceEquals(secondEvent, null))
+                return false;
+
+            return firstEvent.Id == secondEvent.Id;
+        }
+
+        public int GetHashCode(Event _event)
+        {
+            if (Object.ReferenceEquals(_event, null)) return 0;
+
+            return _event.Id.GetHashCode();
+        }
+    }
 }

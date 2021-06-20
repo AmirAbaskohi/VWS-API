@@ -711,7 +711,12 @@ namespace vws.web.Controllers._calender
 
             var userEvents = _vwsDbContext.EventUsers.Include(eventUser => eventUser.Event)
                                                      .Where(eventUser => eventUser.UserProfileId == userId && !eventUser.Event.IsDeleted && !eventUser.IsDeleted)
-                                                     .Select(eventUser => eventUser.Event);
+                                                     .Select(eventUser => eventUser.Event)
+                                                     .ToList();
+
+            userEvents.AddRange(_vwsDbContext.Events.Where(_event => _event.CreatedBy == userId && !_event.IsDeleted));
+
+            userEvents = userEvents.Distinct().ToList();
 
             foreach (var userEvent in userEvents)
             {
@@ -759,10 +764,17 @@ namespace vws.web.Controllers._calender
 
             var selectedEventsCount = _vwsDbContext.EventUsers.Include(eventUser => eventUser.Event)
                                                               .Where(eventUser => eventUser.UserProfileId == userId &&
+                                                                                  eventUser.Event.CreatedBy != userId &&
                                                                                   !eventUser.Event.IsDeleted && !eventUser.IsDeleted &&
                                                                                   eventUser.Event.StartTime > from && eventUser.Event.StartTime < to &&
                                                                                   eventUser.Event.EndTime > from && eventUser.Event.EndTime < to)
                                                               .Count();
+
+            selectedEventsCount += _vwsDbContext.Events.Where(_event => _event.CreatedBy == userId &&
+                                                                        !_event.IsDeleted && !_event.IsDeleted &&
+                                                                        _event.StartTime > from && _event.StartTime < to &&
+                                                                        _event.EndTime > from && _event.EndTime < to)
+                                                        .Count();
 
             response.Value = new { NumberOfTasks = selectedTasks.Intersect(userTasks).Count(), NumberOfEvents = selectedEventsCount };
             response.Message = "Number of task and event in wanted period are returned.";
