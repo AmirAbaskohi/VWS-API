@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using vws.web.Domain;
 using vws.web.Domain._task;
@@ -27,18 +28,20 @@ namespace vws.web.Controllers._task
         private readonly IStringLocalizer<TimeController> _localizer;
         private readonly IHubContext<ChatHub, IChatHub> _hub;
         private readonly ITaskManagerService _taskManager;
+        private readonly IUserService _userService;
         #endregion
 
         #region Ctor
         public TimeController(IVWS_DbContext vwsDbContext, IPermissionService permissionService,
                               IStringLocalizer<TimeController> localizer, IHubContext<ChatHub, IChatHub> hub,
-                              ITaskManagerService taskManager)
+                              ITaskManagerService taskManager, IUserService userService)
         {
             _vwsDbContext = vwsDbContext;
             _permissionService = permissionService;
             _localizer = localizer;
             _hub = hub;
             _taskManager = taskManager;
+            _userService = userService;
         }
         #endregion
 
@@ -250,6 +253,64 @@ namespace vws.web.Controllers._task
                                                                 .ReceiveStopTime(wantedTimeTrack.GeneralTaskId, wantedTimeTrack.StartDate, wantedTimeTrack.EndDate.Value, wantedTimeTrack.TotalTimeInMinutes.Value));
 
             response.Message = "Time tracking stoped";
+            return Ok(response);
+        }
+        #endregion
+
+        #region WorkLoadAPIS
+        [HttpGet]
+        [Authorize]
+        [Route("getWorkLoad")]
+        public IActionResult GetWorkLoad(long taskId)
+        {
+            var userId = LoggedInUserId.Value;
+            var response = new ResponseModel<List<UserSpentTimeModel>>();
+            var result = new List<UserSpentTimeModel>();
+
+            var selectedTask = _vwsDbContext.GeneralTasks.FirstOrDefault(task => task.Id == taskId);
+            if (selectedTask == null || selectedTask.IsDeleted || selectedTask.IsArchived)
+            {
+                response.Message = "Task not found";
+                response.AddError(_localizer["Task does not exist."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!_permissionService.HasAccessToTask(userId, taskId))
+            {
+                response.Message = "Task access forbidden";
+                response.AddError(_localizer["You don't have access to this task."]);
+                return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            var taskUsers = _taskManager.GetAssignedTo(taskId);
+            taskUsers.Add(_userService.GetUser(selectedTask.CreatedBy));
+            taskUsers = taskUsers.Distinct().ToList();
+
+            foreach (var taskUser in taskUsers)
+            {
+                double totalTime = 0;
+                var times = _vwsDbContext.TimeTracks.Where(timeTrack => timeTrack.GeneralTaskId == taskId);
+                bool isActive = true;
+                foreach (var time in times)
+                {
+                    if (time.TotalTimeInMinutes != null)
+                        totalTime += (double)time.TotalTimeInMinutes;
+                    else
+                    {
+                        totalTime += (DateTime.UtcNow - time.StartDate).TotalMinutes;
+                        isActive = false;
+                    }
+                }
+
+                result.Add(new UserSpentTimeModel()
+                {
+                    IsFinished = isActive,
+                    TotalTimeInMinutes = totalTime,
+                    User = taskUser
+                });
+            }
+
+            response.Message = "Returned workload";
             return Ok(response);
         }
         #endregion
