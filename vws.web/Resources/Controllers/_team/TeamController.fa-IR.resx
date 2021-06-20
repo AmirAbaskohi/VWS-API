@@ -246,6 +246,9 @@
   <data name="{0} created new invite link with id {1}." xml:space="preserve">
     <value>{0} لینک دعوت جدیدی با آی دی {1} ایجاد کرد.</value>
   </data>
+  <data name="{0} deleted team." xml:space="preserve">
+    <value>{0} تیم را حذف کرد.</value>
+  </data>
   <data name="{0} joined the group using {1} invite link." xml:space="preserve">
     <value>{0} با استفاده از لینک {1} به تیم اضافه شد.</value>
   </data>
