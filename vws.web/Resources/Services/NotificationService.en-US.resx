@@ -118,10 +118,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; added &lt;b&gt;«{1}»&lt;/b&gt; to project &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; added &lt;b&gt;«{1}»&lt;/b&gt; to project &lt;b&gt;«{2}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; added &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; project.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; added &lt;b&gt;«{1}»&lt;/b&gt; to team &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; added &lt;b&gt;«{1}»&lt;/b&gt; to team &lt;b&gt;«{2}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; added &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; team.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; added below attachments to comment &lt;b&gt;«{1}»&lt;/b&gt; in your task with title &lt;b&gt;«{2}»&lt;/b&gt;:\n &lt;br&gt; {3}" xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; added below attachments to comment &lt;b&gt;«{1}»&lt;/b&gt; in your task with title &lt;b&gt;«{2}»&lt;/b&gt;:\n &lt;br&gt; {3}</value>
@@ -139,22 +139,22 @@
     <value>&lt;b&gt;«{0}»&lt;/b&gt; added new tag &lt;b&gt;«{1}»&lt;/b&gt; to your task with title &lt;b&gt;«{2}»&lt;/b&gt;.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; added you to project &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; added you to project &lt;b&gt;«{1}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; added you to &lt;b&gt;«{1}»&lt;/b&gt; project.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; added you to team &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; added you to team &lt;b&gt;«{1}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; added you to &lt;b&gt;«{1}»&lt;/b&gt; team.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; assigned task &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; assigned task &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; assigned &lt;b&gt;«{1}»&lt;/b&gt; task to &lt;b&gt;«{2}»&lt;/b&gt;.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; changed permission of user &lt;b&gt;«{1}»&lt;/b&gt; from &lt;b&gt;«{2}»&lt;/b&gt; to &lt;b&gt;«{3}»&lt;/b&gt; in project &lt;b&gt;«{4}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; changed permission of user &lt;b&gt;«{1}»&lt;/b&gt; from &lt;b&gt;«{2}»&lt;/b&gt; to &lt;b&gt;«{3}»&lt;/b&gt; in project &lt;b&gt;«{4}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; changed permission of user &lt;b&gt;«{1}»&lt;/b&gt; from &lt;b&gt;«{2}»&lt;/b&gt; to &lt;b&gt;«{3}»&lt;/b&gt; in &lt;b&gt;«{4}»&lt;/b&gt; project.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; created new department with name &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; created new department with name &lt;b&gt;«{1}»&lt;/b&gt;.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; created new invite link with id &lt;b&gt;«{1}»&lt;/b&gt; for team &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; created new invite link with id &lt;b&gt;«{1}»&lt;/b&gt; for team &lt;b&gt;«{2}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; created new invite link with id &lt;b&gt;«{1}»&lt;/b&gt; for &lt;b&gt;«{2}»&lt;/b&gt; team.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; created new project with name &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; created new project with name &lt;b&gt;«{1}»&lt;/b&gt;.</value>
@@ -166,10 +166,10 @@
     <value>&lt;b&gt;«{0}»&lt;/b&gt; deleted &lt;b&gt;«{1}»&lt;/b&gt; event.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted attachment &lt;b&gt;«{1}»&lt;/b&gt; from comment &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; deleted attachment &lt;b&gt;«{1}»&lt;/b&gt; from comment &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; deleted &lt;b&gt;«{1}»&lt;/b&gt; attachment from &lt;b&gt;«{2}»&lt;/b&gt; comment in your task with title &lt;b&gt;«{3}»&lt;/b&gt;.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted attachment &lt;b&gt;«{1}»&lt;/b&gt; from your task with title &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; deleted attachment &lt;b&gt;«{1}»&lt;/b&gt; from your task with title &lt;b&gt;«{2}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; deleted &lt;b&gt;«{1}»&lt;/b&gt; attachment from your task with title &lt;b&gt;«{2}»&lt;/b&gt;.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted check list item with title &lt;b&gt;«{1}»&lt;/b&gt; in your check list with title &lt;b&gt;«{2}»&lt;/b&gt; of &lt;b&gt;«{3}»&lt;/b&gt; task." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; deleted check list item with title &lt;b&gt;«{1}»&lt;/b&gt; in your check list with title &lt;b&gt;«{2}»&lt;/b&gt; of &lt;b&gt;«{3}»&lt;/b&gt; task.</value>
@@ -178,19 +178,19 @@
     <value>&lt;b&gt;«{0}»&lt;/b&gt; deleted check list with title &lt;b&gt;«{1}»&lt;/b&gt; in your task with title &lt;b&gt;«{2}»&lt;/b&gt;</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted comment &lt;b&gt;«{1}»&lt;/b&gt; in your task with title &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; deleted comment &lt;b&gt;«{1}»&lt;/b&gt; in your task with title &lt;b&gt;«{2}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; deleted &lt;b&gt;«{1}»&lt;/b&gt; comment in your task with title &lt;b&gt;«{2}»&lt;/b&gt;.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted project &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; deleted project &lt;b&gt;«{1}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; deleted &lt;b&gt;«{1}»&lt;/b&gt; project.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted team &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; deleted team &lt;b&gt;«{1}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; deleted &lt;b&gt;«{1}»&lt;/b&gt; team.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; did not give permission to user &lt;b&gt;«{1}»&lt;/b&gt; in project &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; did not give permission to user &lt;b&gt;«{1}»&lt;/b&gt; in project &lt;b&gt;«{2}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; did not give permission to &lt;b&gt;«{1}»&lt;/b&gt; in &lt;b&gt;«{2}»&lt;/b&gt; project.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; did not give permission to you for project &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; did not give permission to you for project &lt;b&gt;«{1}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; did not give permission to you for &lt;b&gt;«{1}»&lt;/b&gt; project.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; disabled for all days in your event with title &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; disabled &lt;b&gt;«for all days»&lt;/b&gt; in your event with title &lt;b&gt;«{1}»&lt;/b&gt;.</value>
@@ -199,37 +199,37 @@
     <value>&lt;b&gt;«{0}»&lt;/b&gt; enabled &lt;b&gt;«for all days»&lt;/b&gt; in your event with title &lt;b&gt;«{1}»&lt;/b&gt;.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; gave permission to user &lt;b&gt;«{1}»&lt;/b&gt; in project &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; gave permission to user &lt;b&gt;«{1}»&lt;/b&gt; in project &lt;b&gt;«{2}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; gave permission to user &lt;b&gt;«{1}»&lt;/b&gt; in &lt;b&gt;«{2}»&lt;/b&gt; project.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; gave permission to you for project &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; gave permission to you for project &lt;b&gt;«{1}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; gave permission to you for &lt;b&gt;«{1}»&lt;/b&gt; project.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; invited you to &lt;b&gt;«{1}»&lt;/b&gt; event." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; invited you to &lt;b&gt;«{1}»&lt;/b&gt; event.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; joined team &lt;b&gt;«{1}»&lt;/b&gt; using invite link." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; joined team &lt;b&gt;«{1}»&lt;/b&gt; via link.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; joined &lt;b&gt;«{1}»&lt;/b&gt; team using invite link.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; joined team &lt;b&gt;«{1}»&lt;/b&gt; via link with id &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; joined team &lt;b&gt;«{1}»&lt;/b&gt; via link with id &lt;b&gt;«{2}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; joined &lt;b&gt;«{1}»&lt;/b&gt; team using invite with id &lt;b&gt;«{2}»&lt;/b&gt;.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; removed &lt;b&gt;«{1}»&lt;/b&gt; from project &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; removed &lt;b&gt;«{1}»&lt;/b&gt; from project &lt;b&gt;«{2}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; removed &lt;b&gt;«{1}»&lt;/b&gt; from &lt;b&gt;«{2}»&lt;/b&gt; project.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; removed &lt;b&gt;«{1}»&lt;/b&gt; from team &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; removed &lt;b&gt;«{1}»&lt;/b&gt; from team &lt;b&gt;«{2}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; removed &lt;b&gt;«{1}»&lt;/b&gt; from &lt;b&gt;«{2}»&lt;/b&gt; team.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; removed you from team &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; removed you from team &lt;b&gt;«{1}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; removed you from &lt;b&gt;«{1}»&lt;/b&gt; team.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; requested to project creator &lt;b&gt;«{1}»&lt;/b&gt; to project &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; requested to project creator &lt;b&gt;«{1}»&lt;/b&gt; to project &lt;b&gt;«{2}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; requested to project creator to add &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; project.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; requested to project creator to added you to project &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; requested to project creator to added you to project &lt;b&gt;«{1}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; requested to project creator to add you to &lt;b&gt;«{1}»&lt;/b&gt; project.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; revoked invite link with id &lt;b&gt;«{1}»&lt;/b&gt; in team &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; revoked invite link with id &lt;b&gt;«{1}»&lt;/b&gt; in team &lt;b&gt;«{2}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; revoked invite link with id &lt;b&gt;«{1}»&lt;/b&gt; in &lt;b&gt;«{2}»&lt;/b&gt; team.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; unassigned &lt;b&gt;«{1}»&lt;/b&gt; from task with title &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; unassigned &lt;b&gt;«{1}»&lt;/b&gt; from task with title &lt;b&gt;«{2}»&lt;/b&gt;.</value>
@@ -244,13 +244,13 @@
     <value>&lt;b&gt;«{0}»&lt;/b&gt; updated check list title from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated color from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in project &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; updated color from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in project &lt;b&gt;«{3}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; updated color from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in &lt;b&gt;«{3}»&lt;/b&gt; project.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated comment from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; updated comment from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated description from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in project &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; updated description from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in project &lt;b&gt;«{3}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; updated description from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in &lt;b&gt;«{3}»&lt;/b&gt; project.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated description from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in your team with name &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; updated description from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in your team with name &lt;b&gt;«{3}»&lt;/b&gt;.</value>
@@ -259,7 +259,7 @@
     <value>&lt;b&gt;«{0}»&lt;/b&gt; updated description of your event with title &lt;b&gt;«{1}»&lt;/b&gt; from &lt;b&gt;«{2}»&lt;/b&gt; to &lt;b&gt;«{3}»&lt;/b&gt;.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated end date from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in project &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; updated end date from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in project &lt;b&gt;«{3}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; updated end date from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in &lt;b&gt;«{3}»&lt;/b&gt; project.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated end time of your event with title &lt;b&gt;«{1}»&lt;/b&gt; from &lt;b&gt;«{2}»&lt;/b&gt; to &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; updated end time of your event with title &lt;b&gt;«{1}»&lt;/b&gt; from &lt;b&gt;«{2}»&lt;/b&gt; to &lt;b&gt;«{3}»&lt;/b&gt;.</value>
@@ -271,16 +271,16 @@
     <value>&lt;b&gt;«{0}»&lt;/b&gt; updated project name from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt;.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated project team and department in project &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; updated project team and department in project &lt;b&gt;«{1}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; updated project team and department in &lt;b&gt;«{1}»&lt;/b&gt; project.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated start date from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in project &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; updated start date from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in project &lt;b&gt;«{3}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; updated start date from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in &lt;b&gt;«{3}»&lt;/b&gt; project.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated start time of your event with title &lt;b&gt;«{1}»&lt;/b&gt; from &lt;b&gt;«{2}»&lt;/b&gt; to &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; updated start time of your event with title &lt;b&gt;«{1}»&lt;/b&gt; from &lt;b&gt;«{2}»&lt;/b&gt; to &lt;b&gt;«{3}»&lt;/b&gt;.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated status from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in project &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
-    <value>&lt;b&gt;«{0}»&lt;/b&gt; updated status from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in project &lt;b&gt;«{3}»&lt;/b&gt;.</value>
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; updated status from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in &lt;b&gt;«{3}»&lt;/b&gt; project.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated team image to &lt;b&gt;«{1}»&lt;/b&gt; in your team with name &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; updated tema image to &lt;b&gt;«{1}»&lt;/b&gt; in your team with name &lt;b&gt;«{2}»&lt;/b&gt;.</value>

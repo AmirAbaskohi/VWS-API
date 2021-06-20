@@ -1236,6 +1236,7 @@ namespace vws.web.Controllers._team
             selectedTeam.IsDeleted = true;
             selectedTeam.ModifiedBy = userId;
             selectedTeam.ModifiedOn = deletionTime;
+            _vwsDbContext.Save();
 
             var teamProjects = _vwsDbContext.Projects.Where(project => project.TeamId == id &&
                                                                       !project.IsDeleted);
