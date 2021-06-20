@@ -781,6 +781,60 @@ namespace vws.web.Controllers._calender
             return Ok(response);
         }
 
+        [HttpGet]
+        [Authorize]
+        [Route("getEventIPeriod")]
+        public async Task<IActionResult> GetEventsInPeriod(DateTime from, DateTime to)
+        {
+            var response = new ResponseModel<List<EventResponseModel>>();
+            var result = new List<EventResponseModel>();
+            var userId = LoggedInUserId.Value;
+
+            if (from > to)
+            {
+                response.Message = "Invalid period";
+                response.AddError(_localizer["From should be before To."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var userEvents = _vwsDbContext.EventUsers.Include(eventUser => eventUser.Event)
+                                                     .Where(eventUser => eventUser.UserProfileId == userId && !eventUser.Event.IsDeleted && !eventUser.IsDeleted &&
+                                                                         eventUser.Event.StartTime > from && eventUser.Event.StartTime < to &&
+                                                                         eventUser.Event.EndTime > from && eventUser.Event.EndTime < to)
+                                                     .Select(eventUser => eventUser.Event)
+                                                     .ToList();
+
+            userEvents.AddRange(_vwsDbContext.Events.Where(_event => _event.CreatedBy == userId && !_event.IsDeleted &&
+                                                                     _event.StartTime > from && _event.StartTime < to &&
+                                                                     _event.EndTime > from && _event.EndTime < to));
+
+            userEvents = userEvents.Distinct().ToList();
+
+            foreach (var userEvent in userEvents)
+            {
+                result.Add(new EventResponseModel()
+                {
+                    Id = userEvent.Id,
+                    Title = userEvent.Title,
+                    Description = userEvent.Description,
+                    IsAllDay = userEvent.IsAllDay,
+                    CreatedBy = (await _vwsDbContext.GetUserProfileAsync(userEvent.CreatedBy)).NickName,
+                    CreatedOn = userEvent.CreatedOn,
+                    ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(userEvent.ModifiedBy)).NickName,
+                    ModifiedOn = userEvent.ModifiedOn,
+                    StartTime = userEvent.StartTime,
+                    EndTime = userEvent.EndTime,
+                    Team = _calenderManager.GetEventTeam(userEvent.Id),
+                    Projects = _calenderManager.GetEventProjects(userEvent.Id),
+                    Users = await _calenderManager.GetEventUsers(userEvent.Id)
+                });
+            }
+
+            response.Value = result;
+            response.Message = "Number of task and event in wanted period are returned.";
+            return Ok(response);
+        }
+
         [HttpDelete]
         [Authorize]
         [Route("deleteEvent")]
