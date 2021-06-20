@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using vws.web.Models;
+using vws.web.Models._task;
 
 namespace vws.web.Hubs
 {
@@ -31,7 +32,7 @@ namespace vws.web.Hubs
 
         Task ReceiveDeliverMessage(long messageId, Guid channelId, byte channelTypeId);
 
-        Task ReceiveStartTime(long taskId, DateTime startDate);
+        Task ReceiveStartTime(FullRunningTaskResponseModel startedTask);
 
         Task ReceivePauseTime(long taskId, DateTime startDate, DateTime endDate, double totalMinutes);
 

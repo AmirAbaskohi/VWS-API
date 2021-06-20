@@ -8,9 +8,12 @@ using System;
 using System.Linq;
 using vws.web.Domain;
 using vws.web.Domain._task;
+using vws.web.Enums;
 using vws.web.Hubs;
 using vws.web.Models;
+using vws.web.Models._task;
 using vws.web.Services;
+using vws.web.Services._task;
 
 namespace vws.web.Controllers._task
 {
@@ -23,16 +26,19 @@ namespace vws.web.Controllers._task
         private readonly IPermissionService _permissionService;
         private readonly IStringLocalizer<TimeController> _localizer;
         private readonly IHubContext<ChatHub, IChatHub> _hub;
+        private readonly ITaskManagerService _taskManager;
         #endregion
 
         #region Ctor
         public TimeController(IVWS_DbContext vwsDbContext, IPermissionService permissionService,
-                              IStringLocalizer<TimeController> localizer, IHubContext<ChatHub, IChatHub> hub)
+                              IStringLocalizer<TimeController> localizer, IHubContext<ChatHub, IChatHub> hub,
+                              ITaskManagerService taskManager)
         {
             _vwsDbContext = vwsDbContext;
             _permissionService = permissionService;
             _localizer = localizer;
             _hub = hub;
+            _taskManager = taskManager;
         }
         #endregion
 
@@ -98,8 +104,36 @@ namespace vws.web.Controllers._task
             if (UserHandler.ConnectedIds.Keys.Contains(userId.ToString()))
                 UserHandler.ConnectedIds[userId.ToString()]
                            .ConnectionIds
-                           .ForEach(connectionId => _hub.Clients.Client(connectionId)
-                                                                .ReceiveStartTime(newTimeTrack.GeneralTaskId, newTimeTrack.StartDate));
+                           .ForEach(async connectionId => _hub.Clients.Client(connectionId)
+                                                                .ReceiveStartTime(new FullRunningTaskResponseModel() 
+                                                                {
+                                                                    Id = selectedTask.Id,
+                                                                    Title = selectedTask.Title,
+                                                                    Description = selectedTask.Description,
+                                                                    StartDate = selectedTask.StartDate,
+                                                                    EndDate = selectedTask.EndDate,
+                                                                    CreatedOn = selectedTask.CreatedOn,
+                                                                    ModifiedOn = selectedTask.ModifiedOn,
+                                                                    CreatedBy = (await _vwsDbContext.GetUserProfileAsync(selectedTask.CreatedBy)).NickName,
+                                                                    ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(selectedTask.ModifiedBy)).NickName,
+                                                                    Guid = selectedTask.Guid,
+                                                                    PriorityId = selectedTask.TaskPriorityId,
+                                                                    PriorityTitle = _localizer[((SeedDataEnum.TaskPriority)selectedTask.TaskPriorityId).ToString()],
+                                                                    UsersAssignedTo = _taskManager.GetAssignedTo(selectedTask.Id),
+                                                                    ProjectId = selectedTask.ProjectId,
+                                                                    TeamId = selectedTask.TeamId,
+                                                                    TeamName = selectedTask.TeamId == null ? null : _vwsDbContext.Teams.FirstOrDefault(team => team.Id == selectedTask.TeamId).Name,
+                                                                    ProjectName = selectedTask.ProjectId == null ? null : _vwsDbContext.Projects.FirstOrDefault(project => project.Id == selectedTask.ProjectId).Name,
+                                                                    StatusId = selectedTask.TaskStatusId,
+                                                                    StatusTitle = _vwsDbContext.TaskStatuses.FirstOrDefault(statuse => statuse.Id == selectedTask.TaskStatusId).Title,
+                                                                    CheckLists = _taskManager.GetCheckLists(selectedTask.Id),
+                                                                    Tags = _taskManager.GetTaskTags(selectedTask.Id),
+                                                                    Comments = await _taskManager.GetTaskComments(selectedTask.Id),
+                                                                    Attachments = _taskManager.GetTaskAttachments(selectedTask.Id),
+                                                                    IsUrgent = selectedTask.IsUrgent,
+                                                                    TimeTrackStartDate = newTimeTrack.StartDate,
+                                                                    IsPaused = true
+                                                                }));
 
             response.Message = "Time tracking started";
             return Ok(response);
