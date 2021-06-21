@@ -150,6 +150,9 @@
   <data name="Length of name is more than 500 characters." xml:space="preserve">
     <value>Length of name is more than 500 characters.</value>
   </data>
+  <data name="Name can not be empty or have more than 500 characters." xml:space="preserve">
+    <value>Name can not be empty or have more than 500 characters.</value>
+  </data>
   <data name="There is already a department with given name, in given team." xml:space="preserve">
     <value>There is already a department with given name, in given team.</value>
   </data>

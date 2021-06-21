@@ -150,6 +150,9 @@
   <data name="Length of name is more than 500 characters." xml:space="preserve">
     <value>تعداد کاراکتر های بخش اسم بیشتر از 500 کاراکتر است.</value>
   </data>
+  <data name="Name can not be empty or have more than 500 characters." xml:space="preserve">
+    <value>نام نمی تواند خالی یا دارای بیش از 500 کاراکتر باشد.</value>
+  </data>
   <data name="There is already a department with given name, in given team." xml:space="preserve">
     <value>در حال حاضر دپارتمانی با این نام در تیم داده شده وجود دارد.</value>
   </data>
