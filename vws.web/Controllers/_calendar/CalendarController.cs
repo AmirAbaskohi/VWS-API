@@ -783,7 +783,7 @@ namespace vws.web.Controllers._calender
 
         [HttpGet]
         [Authorize]
-        [Route("getEventIPeriod")]
+        [Route("GetEventsInPeriod")]
         public async Task<IActionResult> GetEventsInPeriod(DateTime from, DateTime to)
         {
             var response = new ResponseModel<List<EventResponseModel>>();
