@@ -15,9 +15,9 @@ namespace vws.web.Models._calender
         public bool IsAllDay { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
-        public string CreatedBy { get; set; }
+        public UserModel CreatedBy { get; set; }
         public DateTime CreatedOn { get; set; }
-        public string ModifiedBy { get; set; }
+        public UserModel ModifiedBy { get; set; }
         public DateTime ModifiedOn { get; set; }
         public TeamSummaryResponseModel Team { get; set; }
         public List<ProjectSummaryResponseModel> Projects { get; set; }
