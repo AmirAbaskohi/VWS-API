@@ -6,8 +6,13 @@
     }
 
     @font-face {
-        src: url('https://test-app.seventask.com/assets/Fonts/Avenir-Medium-09.ttf');
+        src: url('https://app.seventask.com/assets/Fonts/Avenir-Medium-09.ttf');
         font-family: 'primaryFont-En';
+    }
+
+    @font-face {
+        src: url('https://app.seventask.com/assets/Fonts/Kohinoor-Arabic-Medium.ttf');
+        font-family: 'primaryFont-Ar';
     }
 
     a:link, a:visited {
@@ -27,13 +32,13 @@
 
 </style>
 <html>
-<body style='background-color: #ffffff; color: #4e79bf; font-family: primaryFont-En;'>
+<body style='background-color: #ffffff; color: #4e79bf; font-family: primaryFont-En, primaryFont-Ar;'>
     <div style='padding: 10px;'>
         <img src='https://app.seventask.com/assets/logotype-min.png' style='max-width: 100px;'>
     </div>
     <br>
     <div class='center' style='border: 2px solid; border-radius: 10px 10px 10px 10px; width: 70%; min-height: 100px'>
-        <div style='padding: 10px; color: #2e4a77; font-size:larger; align: center; margin:1.3em auto' >
+        <div style='padding: 10px; color: #2e4a77; font-size:larger; align: center; margin:1.3em auto' dir="auto">
             {0} 
         </div>
     </div>
