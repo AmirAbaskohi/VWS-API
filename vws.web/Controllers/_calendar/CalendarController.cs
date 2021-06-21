@@ -354,6 +354,12 @@ namespace vws.web.Controllers._calender
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
+            if (selectedEvent.Title == newTitle)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
+            }
+
             var lastTitle = selectedEvent.Title;
             selectedEvent.Title = newTitle;
             selectedEvent.ModifiedBy = userId;
@@ -436,6 +442,12 @@ namespace vws.web.Controllers._calender
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
+            if (selectedEvent.Description == newDescription)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
+            }
+
             var lastDescription = selectedEvent.Description;
             selectedEvent.Title = newDescription;
             selectedEvent.ModifiedBy = userId;
@@ -508,6 +520,12 @@ namespace vws.web.Controllers._calender
                 response.Message = "Model has problem.";
                 response.AddError(_localizer["Start time should be before end time."]);
                 return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (selectedEvent.StartTime == newStartTime)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
             }
 
             var lastStartTime = selectedEvent.StartTime;
@@ -591,6 +609,12 @@ namespace vws.web.Controllers._calender
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
+            if (selectedEvent.EndTime == newEndTime)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
+            }
+
             var lastEndTime = selectedEvent.EndTime;
             selectedEvent.EndTime = newEndTime;
             selectedEvent.ModifiedBy = userId;
@@ -663,6 +687,12 @@ namespace vws.web.Controllers._calender
                 response.Message = "Access denied.";
                 response.AddError(_localizer["You do not have access to this event."]);
                 return StatusCode(StatusCodes.Status403Forbidden, response);
+            }
+
+            if (selectedEvent.IsAllDay == newIsAllDay)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
             }
 
             selectedEvent.IsAllDay = newIsAllDay;
