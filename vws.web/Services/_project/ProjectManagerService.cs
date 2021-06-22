@@ -7,16 +7,19 @@ using vws.web.Domain;
 using vws.web.Domain._base;
 using vws.web.Domain._project;
 using vws.web.Models;
+using vws.web.Services._team;
 
 namespace vws.web.Services._project
 {
     public class ProjectManagerService : IProjectManagerService
     {
         private readonly IVWS_DbContext _vwsDbContext;
+        private readonly ITeamManagerService _teamManager;
 
-        public ProjectManagerService(IVWS_DbContext vwsDbContext)
+        public ProjectManagerService(IVWS_DbContext vwsDbContext, ITeamManagerService teamManager)
         {
             _vwsDbContext = vwsDbContext;
+            _teamManager = teamManager;
         }
 
         public List<UserModel> GetProjectUsers(int id)
@@ -79,7 +82,7 @@ namespace vws.web.Services._project
         {
             List<Project> userProjects = new List<Project>();
 
-            List<int> userTeams = _vwsDbContext.GetUserTeams(userId).Select(team => team.Id).ToList();
+            List<int> userTeams = _teamManager.GetAllUserTeams(userId).Select(team => team.Id).ToList();
             List<int> userDepartments = _vwsDbContext.DepartmentMembers.Include(departmentMember => departmentMember.Department)
                                                                       .Where(departmentMember => !departmentMember.IsDeleted &&
                                                                                                  departmentMember.UserProfileId == userId &&

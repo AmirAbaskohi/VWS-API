@@ -23,6 +23,7 @@ using vws.web.Services;
 using vws.web.Services._chat;
 using vws.web.Services._project;
 using vws.web.Services._task;
+using vws.web.Services._team;
 using static vws.web.EmailTemplates.EmailTemplateTypes;
 
 namespace vws.web.Controllers._project
@@ -41,13 +42,14 @@ namespace vws.web.Controllers._project
         private readonly ITaskManagerService _taskManager;
         private readonly INotificationService _notificationService;
         private readonly IUserService _userService;
+        private readonly ITeamManagerService _teamManager;
         #endregion
 
         #region Ctor
         public ProjectController(UserManager<ApplicationUser> userManager, IStringLocalizer<ProjectController> localizer,
             IVWS_DbContext vwsDbContext, IFileManager fileManager, IPermissionService permissionService,
             IProjectManagerService projectManager, ITaskManagerService taskManagerService,
-            INotificationService notificationService, IUserService userService)
+            INotificationService notificationService, IUserService userService, ITeamManagerService teamManager)
         {
             _userManager = userManager;
             _localizer = localizer;
@@ -58,6 +60,7 @@ namespace vws.web.Controllers._project
             _taskManager = taskManagerService;
             _notificationService = notificationService;
             _userService = userService;
+            _teamManager = teamManager;
         }
         #endregion
 
@@ -121,7 +124,7 @@ namespace vws.web.Controllers._project
             {
                 var selectedDepartmentMember = _vwsDbContext.DepartmentMembers.FirstOrDefault(departmentMember => departmentMember.UserProfileId == userId &&
                                                                                                                  departmentMember.DepartmentId == departmentId &&
-                                                                                                                 departmentMember.IsDeleted == false);
+                                                                                                                 !departmentMember.IsDeleted);
 
                 var selectedDepartment = _vwsDbContext.Departments.FirstOrDefault(department => department.Id == departmentId);
 
@@ -143,7 +146,7 @@ namespace vws.web.Controllers._project
                                                                                    !projectMember.IsDeleted)
                                                           .Select(projectMember => projectMember.UserProfileId).ToList();
 
-            List<Team> userTeams = _vwsDbContext.GetUserTeams(LoggedInUserId.Value).ToList();
+            List<Team> userTeams = _teamManager.GetAllUserTeams(LoggedInUserId.Value);
             List<Guid> userTeamMates = _vwsDbContext.TeamMembers
                 .Where(teamMember => userTeams.Select(userTeam => userTeam.Id).Contains(teamMember.TeamId) && !teamMember.IsDeleted)
                 .Select(teamMember => teamMember.UserProfileId).Distinct().Where(id => id != LoggedInUserId.Value).ToList();

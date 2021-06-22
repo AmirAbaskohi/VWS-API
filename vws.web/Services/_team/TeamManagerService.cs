@@ -90,7 +90,7 @@ namespace vws.web.Services._team
 
         public List<Guid> GetUserTeammates(Guid userId)
         {
-            List<Team> userTeams = _vwsDbContext.GetUserTeams(userId).ToList();
+            List<Team> userTeams = GetAllUserTeams(userId);
             return _vwsDbContext.TeamMembers
                                .Where(teamMember => userTeams.Select(userTeam => userTeam.Id).Contains(teamMember.TeamId) && !teamMember.IsDeleted)
                                .Select(teamMember => teamMember.UserProfileId).Distinct().Where(id => id != userId).ToList();

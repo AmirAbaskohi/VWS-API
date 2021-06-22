@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,11 +14,11 @@ namespace vws.web.Services._department
 {
     public class DepartmentManagerService : IDepartmentManagerService
     {
-        private readonly IVWS_DbContext vwsDbContext;
+        private readonly IVWS_DbContext _vwsDbContext;
 
-        public DepartmentManagerService(IVWS_DbContext _vwsDbContext)
+        public DepartmentManagerService(IVWS_DbContext vwsDbContext)
         {
-            vwsDbContext = _vwsDbContext;
+            _vwsDbContext = vwsDbContext;
         }
 
         public async Task<Department> CreateDepartment(DepartmentModel model, Guid userId)
@@ -36,15 +37,15 @@ namespace vws.web.Services._department
                 CreatedOn = creationTime,
                 ModifiedOn = creationTime
             };
-            await vwsDbContext.AddDepartmentAsync(newDepartment);
-            vwsDbContext.Save();
+            await _vwsDbContext.AddDepartmentAsync(newDepartment);
+            _vwsDbContext.Save();
 
             model.Users.Add(userId);
             model.Users = model.Users.Distinct().ToList();
 
             foreach (var user in model.Users)
             {
-                await vwsDbContext.AddDepartmentMemberAsync(new DepartmentMember()
+                await _vwsDbContext.AddDepartmentMemberAsync(new DepartmentMember()
                 {
                     CreatedOn = creationTime,
                     IsDeleted = false,
@@ -52,10 +53,11 @@ namespace vws.web.Services._department
                     UserProfileId = user
                 });
             }
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
 
             return newDepartment;
         }
+
         public List<string> CheckDepartmentModel(DepartmentModel model)
         {
             var result = new List<string>();
@@ -73,34 +75,35 @@ namespace vws.web.Services._department
 
             #region CheckUsers
             foreach (var user in model.Users)
-                if (!vwsDbContext.TeamMembers.Any(teamMember => teamMember.UserProfileId == user && teamMember.TeamId == model.TeamId && !teamMember.IsDeleted))
+                if (!_vwsDbContext.TeamMembers.Any(teamMember => teamMember.UserProfileId == user && teamMember.TeamId == model.TeamId && !teamMember.IsDeleted))
                     result.Add("Invalid users to add to department.");
             #endregion
 
             return result;
         }
+
         public async Task AddUserToDepartment(Guid user, int departmentId)
         {
-            await vwsDbContext.AddDepartmentMemberAsync(new DepartmentMember()
+            await _vwsDbContext.AddDepartmentMemberAsync(new DepartmentMember()
             {
                 CreatedOn = DateTime.UtcNow,
                 IsDeleted = false,
                 DepartmentId = departmentId,
                 UserProfileId = user
             });
-            vwsDbContext.Save();
+            _vwsDbContext.Save();
         }
 
         public async Task<List<UserModel>> GetDepartmentMembers(int departmentId)
         {
             var result = new List<UserModel>();
 
-            var members = vwsDbContext.DepartmentMembers.Where(member => member.DepartmentId == departmentId && !member.IsDeleted)
+            var members = _vwsDbContext.DepartmentMembers.Where(member => member.DepartmentId == departmentId && !member.IsDeleted)
                                                         .Select(member => member.UserProfileId);
 
             foreach (var member in members)
             {
-                UserProfile userProfile = await vwsDbContext.GetUserProfileAsync(member);
+                UserProfile userProfile = await _vwsDbContext.GetUserProfileAsync(member);
                 result.Add(new UserModel()
                 {
                     UserId = member,
@@ -110,6 +113,16 @@ namespace vws.web.Services._department
             }
 
             return result;
+        }
+
+        public List<Department> GetAllUserDepartments(Guid userId)
+        {
+            return _vwsDbContext.DepartmentMembers.Include(departmentMember => departmentMember.Department)
+                                                 .Where(departmentMember => !departmentMember.IsDeleted &&
+                                                                            departmentMember.UserProfileId == userId &&
+                                                                            !departmentMember.Department.IsDeleted)
+                                                 .Select(departmentMember => departmentMember.Department)
+                                                 .ToList() ;
         }
     }
 }

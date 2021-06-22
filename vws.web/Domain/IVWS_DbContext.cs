@@ -170,6 +170,10 @@ namespace vws.web.Domain
 
         public IQueryable<DepartmentMember> DepartmentMembers { get; }
 
+        public IQueryable<DepartmentHistory> DepartmentHistories { get; }
+
+        public IQueryable<DepartmentHistoryParameter> DepartmentHistoryParameters { get; }
+
         #endregion
 
         #region methods
@@ -178,7 +182,9 @@ namespace vws.web.Domain
 
         public Task<DepartmentMember> AddDepartmentMemberAsync(DepartmentMember departmentMember);
 
-        public IQueryable<Department> GetUserDepartments(Guid userId);
+        public void AddDepartmentHistory(DepartmentHistory departmentHistory);
+
+        public void AddDepartmentHistoryParameter(DepartmentHistoryParameter departmentHistoryParameter);
 
         #endregion
 
@@ -208,8 +214,6 @@ namespace vws.web.Domain
         #endregion
 
         #region methods
-
-        public IQueryable<Project> GetUserPrivateProjects(Guid userId);
 
         public void AddProjectStatus(ProjectStatus projectStatus);
 
@@ -384,8 +388,6 @@ namespace vws.web.Domain
         public Task<TeamInviteLink> GetTeamInviteLinkByIdAsync(int id);
 
         public Task<TeamMember> GetTeamMemberAsync(int teamId, Guid memberId);
-
-        public IQueryable<Team> GetUserTeams(Guid userId);
 
         public void AddTeamType(TeamType teamType);
 

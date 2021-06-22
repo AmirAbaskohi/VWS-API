@@ -14,5 +14,6 @@ namespace vws.web.Services._department
         public List<string> CheckDepartmentModel(DepartmentModel model);
         public Task AddUserToDepartment(Guid user, int departmentId);
         public Task<List<UserModel>> GetDepartmentMembers(int departmentId);
+        public List<Department> GetAllUserDepartments(Guid userId);
     }
 }

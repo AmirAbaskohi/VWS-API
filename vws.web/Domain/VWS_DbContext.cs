@@ -308,6 +308,14 @@ namespace vws.web.Domain
 
         public DbSet<DepartmentMember> DepartmentMembers { get; set; }
 
+        IQueryable<DepartmentHistory> IVWS_DbContext.DepartmentHistories { get => DepartmentHistories; }
+
+        public DbSet<DepartmentHistory> DepartmentHistories { get; set; }
+
+        IQueryable<DepartmentHistoryParameter> IVWS_DbContext.DepartmentHistoryParameters { get => DepartmentHistoryParameters; }
+
+        public DbSet<DepartmentHistoryParameter> DepartmentHistoryParameters { get; set; }
+
         public async Task<Department> AddDepartmentAsync(Department department)
         {
             await Departments.AddAsync(department);
@@ -320,16 +328,16 @@ namespace vws.web.Domain
             return departmentMember;
         }
 
-        public IQueryable<Department> GetUserDepartments(Guid userId)
+        public void AddDepartmentHistory(DepartmentHistory departmentHistory)
         {
-            return DepartmentMembers.Include(departmentMember => departmentMember.Department)
-                                    .ThenInclude(department => department.Team)
-                                    .Where(departmentMember => departmentMember.IsDeleted == false &&
-                                                                departmentMember.UserProfileId == userId &&
-                                                                !departmentMember.Department.IsDeleted &&
-                                                                !departmentMember.Department.Team.IsDeleted)
-                                    .Select(departmentMember => departmentMember.Department);
+            DepartmentHistories.Add(departmentHistory);
         }
+
+        public void AddDepartmentHistoryParameter(DepartmentHistoryParameter departmentHistoryParameter)
+        {
+            DepartmentHistoryParameters.Add(departmentHistoryParameter);
+        }
+
 
         #endregion
 
@@ -366,13 +374,6 @@ namespace vws.web.Domain
         IQueryable<UserProjectActivity> IVWS_DbContext.UserProjectActivities { get => UserProjectActivities; }
 
         public DbSet<UserProjectActivity> UserProjectActivities { get; set; }
-
-        public IQueryable<Project> GetUserPrivateProjects(Guid userId)
-        {
-            return ProjectMembers.Include(projectMember => projectMember.Project)
-                .Where(projectMember => projectMember.UserProfileId == userId && projectMember.Project.IsDeleted == false && projectMember.IsDeleted == false)
-                .Select(projectMember => projectMember.Project);
-        }
 
         public void AddProjectStatus(ProjectStatus projectStatus)
         {
@@ -739,13 +740,6 @@ namespace vws.web.Domain
         public async Task<TeamMember> GetTeamMemberAsync(int teamId, Guid memberId)
         {
             return await TeamMembers.FirstOrDefaultAsync(teamMember => teamMember.TeamId == teamId && teamMember.UserProfileId == memberId && teamMember.IsDeleted == false);
-        }
-
-        public IQueryable<Team> GetUserTeams(Guid userId)
-        {
-            return TeamMembers.Include(teamMember => teamMember.Team)
-                              .Where(teamMember => teamMember.UserProfileId == userId && teamMember.IsDeleted == false && teamMember.Team.IsDeleted == false)
-                              .Select(teamMember => teamMember.Team);
         }
 
         public void AddTeamType(TeamType teamType)

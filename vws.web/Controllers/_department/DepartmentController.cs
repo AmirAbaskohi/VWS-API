@@ -427,7 +427,7 @@ namespace vws.web.Controllers._department
 
             var userId = LoggedInUserId.Value;
 
-            var userDepartments = _vwsDbContext.GetUserDepartments(userId).ToList();
+            var userDepartments = _departmentManager.GetAllUserDepartments(userId);
 
             foreach (var userDepartment in userDepartments)
             {
