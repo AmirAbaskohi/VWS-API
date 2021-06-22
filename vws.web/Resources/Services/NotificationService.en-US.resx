@@ -123,6 +123,9 @@
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; added &lt;b&gt;«{1}»&lt;/b&gt; to team &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; added &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; team.</value>
   </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; added &lt;b&gt;«{1}»&lt;/b&gt; to your department with name &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; added &lt;b&gt;«{1}»&lt;/b&gt; to your department with name &lt;b&gt;«{2}»&lt;/b&gt;.</value>
+  </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; added below attachments to comment &lt;b&gt;«{1}»&lt;/b&gt; in your task with title &lt;b&gt;«{2}»&lt;/b&gt;:\n &lt;br&gt; {3}" xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; added below attachments to comment &lt;b&gt;«{1}»&lt;/b&gt; in your task with title &lt;b&gt;«{2}»&lt;/b&gt;:\n &lt;br&gt; {3}</value>
   </data>
@@ -149,6 +152,9 @@
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; changed permission of user &lt;b&gt;«{1}»&lt;/b&gt; from &lt;b&gt;«{2}»&lt;/b&gt; to &lt;b&gt;«{3}»&lt;/b&gt; in project &lt;b&gt;«{4}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; changed permission of user &lt;b&gt;«{1}»&lt;/b&gt; from &lt;b&gt;«{2}»&lt;/b&gt; to &lt;b&gt;«{3}»&lt;/b&gt; in &lt;b&gt;«{4}»&lt;/b&gt; project.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; created new department with name &lt;b&gt;«{1}»&lt;/b&gt; undeer &lt;b&gt;«{2}»&lt;/b&gt; team." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; created new department with name &lt;b&gt;«{1}»&lt;/b&gt; under &lt;b&gt;«{2}»&lt;/b&gt; team.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; created new department with name &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; created new department with name &lt;b&gt;«{1}»&lt;/b&gt;.</value>
@@ -185,6 +191,9 @@
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted team &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; deleted &lt;b&gt;«{1}»&lt;/b&gt; team.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; deleted your department with name &lt;b&gt;«{1}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; deleted your department with name &lt;b&gt;«{1}»&lt;/b&gt;.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; did not give permission to user &lt;b&gt;«{1}»&lt;/b&gt; in project &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; did not give permission to &lt;b&gt;«{1}»&lt;/b&gt; in &lt;b&gt;«{2}»&lt;/b&gt; project.</value>
@@ -234,6 +243,18 @@
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; unassigned &lt;b&gt;«{1}»&lt;/b&gt; from task with title &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; unassigned &lt;b&gt;«{1}»&lt;/b&gt; from task with title &lt;b&gt;«{2}»&lt;/b&gt;.</value>
   </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated &lt;b&gt;«{1}»&lt;/b&gt; department's color from &lt;b&gt;«{2}»&lt;/b&gt; to &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; updated department's color from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; team.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated &lt;b&gt;«{1}»&lt;/b&gt; department's description from &lt;b&gt;«{2}»&lt;/b&gt; to &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; updated &lt;b&gt;«{1}»&lt;/b&gt; department's description from &lt;b&gt;«{2}»&lt;/b&gt; to &lt;b&gt;«{3}»&lt;/b&gt;.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated &lt;b&gt;«{1}»&lt;/b&gt; department's name to &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; updated &lt;b&gt;«{1}»&lt;/b&gt; department's name to &lt;b&gt;«{2}»&lt;/b&gt;.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated &lt;b&gt;«{1}»&lt;/b&gt; department's team from &lt;b&gt;«{2}»&lt;/b&gt; to &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; updated &lt;b&gt;«{1}»&lt;/b&gt; department's team from &lt;b&gt;«{2}»&lt;/b&gt; to &lt;b&gt;«{3}»&lt;/b&gt;.</value>
+  </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated check list item status from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in check list with title &lt;b&gt;«{3}»&lt;/b&gt; of your task with title &lt;b&gt;«{4}»&lt;/b&gt;" xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; updated check list item status from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in check list with title &lt;b&gt;«{3}»&lt;/b&gt; of your task with title &lt;b&gt;«{4}»&lt;/b&gt;</value>
   </data>
@@ -248,6 +269,9 @@
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated comment from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; updated comment from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in your task with title &lt;b&gt;«{3}»&lt;/b&gt;.</value>
+  </data>
+  <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated department's image to &lt;b&gt;«{1}»&lt;/b&gt; in your department with name &lt;b&gt;«{2}»&lt;/b&gt;." xml:space="preserve">
+    <value>&lt;b&gt;«{0}»&lt;/b&gt; updated department's image to &lt;b&gt;«{1}»&lt;/b&gt; in your department with name &lt;b&gt;«{2}»&lt;/b&gt;.</value>
   </data>
   <data name="&lt;b&gt;«{0}»&lt;/b&gt; updated description from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in project &lt;b&gt;«{3}»&lt;/b&gt;." xml:space="preserve">
     <value>&lt;b&gt;«{0}»&lt;/b&gt; updated description from &lt;b&gt;«{1}»&lt;/b&gt; to &lt;b&gt;«{2}»&lt;/b&gt; in &lt;b&gt;«{3}»&lt;/b&gt; project.</value>

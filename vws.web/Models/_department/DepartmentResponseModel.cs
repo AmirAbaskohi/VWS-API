@@ -18,6 +18,6 @@ namespace vws.web.Models._department
         public DateTime CreatedOn { get; set; }
         public DateTime ModifiedOn { get; set; }
         public Guid? DepartmentImageGuid { get; set; }
-        public List<UserModel> DepartmentMembers { get; set; }
+        public List<UserModel> Users { get; set; }
     }
 }

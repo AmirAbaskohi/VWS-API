@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Department's image updated to {0} by {1}." xml:space="preserve">
+    <value>تصویر دپارتمان توسط {1} به {0} به روز شد.</value>
+  </data>
   <data name="Error in writing files." xml:space="preserve">
     <value>در نوشتن فایل مشکلی پیش آمد.</value>
   </data>
@@ -188,5 +191,26 @@
   </data>
   <data name="Your file does not have extension." xml:space="preserve">
     <value>فایل شما پسوند ندارد.</value>
+  </data>
+  <data name="{0} added {1} to department." xml:space="preserve">
+    <value>{0} {1} را به دپارتمان اضافه کرد.</value>
+  </data>
+  <data name="{0} deleted {1} department." xml:space="preserve">
+    <value>{0} دپارتمان {1} را حذف کرد.</value>
+  </data>
+  <data name="{0} department created by {1} under {2} team." xml:space="preserve">
+    <value>دپارتمان {0} توسط {1} تحت تیم {2} ایجاد شد.</value>
+  </data>
+  <data name="{0} updated department's color from {1} to {2}." xml:space="preserve">
+    <value>{0} رنگ دپارتمان را از {1} به {2} به روز کرد.</value>
+  </data>
+  <data name="{0} updated department's description from {1} to {2}." xml:space="preserve">
+    <value>{0} توضیحات دپارتمان را از {1} به {2} به روز کرد.</value>
+  </data>
+  <data name="{0} updated department's name from {1} to {2}." xml:space="preserve">
+    <value>{0} نام دپارتمان را از {1} به {2} به روز کرد.</value>
+  </data>
+  <data name="{0} updated department's team from {1} to {2}." xml:space="preserve">
+    <value>{0} تیم دپارتمان را از {1} به {2} به روز کرد.</value>
   </data>
 </root>

@@ -17,6 +17,9 @@ using System.Collections.Generic;
 using vws.web.Domain._file;
 using vws.web.Services._department;
 using vws.web.Services;
+using vws.web.Enums;
+using Newtonsoft.Json;
+using static vws.web.EmailTemplates.EmailTemplateTypes;
 
 namespace vws.web.Controllers._department
 {
@@ -31,12 +34,15 @@ namespace vws.web.Controllers._department
         private readonly IDepartmentManagerService _departmentManager;
         private readonly IImageService _imageService;
         private readonly IPermissionService _permissionService;
+        private readonly INotificationService _notificationService;
+        private readonly IUserService _userService;
         #endregion
         
         #region Ctor
         public DepartmentController(IStringLocalizer<DepartmentController> localizer, IVWS_DbContext vwsDbContext,
                                     IFileManager fileManager, IDepartmentManagerService departmentManager,
-                                    IImageService imageService, IPermissionService permissionService)
+                                    IImageService imageService, IPermissionService permissionService,
+                                    INotificationService notificationService, IUserService userService)
         {
             _localizer = localizer;
             _vwsDbContext = vwsDbContext;
@@ -44,6 +50,8 @@ namespace vws.web.Controllers._department
             _departmentManager = departmentManager;
             _imageService = imageService;
             _permissionService = permissionService;
+            _notificationService = notificationService;
+            _userService = userService;
         }
         #endregion
 
@@ -117,6 +125,47 @@ namespace vws.web.Controllers._department
 
             var addedDepartment = await _departmentManager.CreateDepartment(model, userId);
 
+            #region History
+            var newHistory = new DepartmentHistory()
+            {
+                DepartmentId = addedDepartment.Id,
+                EventTime = addedDepartment.ModifiedOn,
+                EventBody = "{0} department created by {1} under {2} team."
+            };
+            _vwsDbContext.AddDepartmentHistory(newHistory);
+            _vwsDbContext.Save();
+
+            var creator = await _vwsDbContext.GetUserProfileAsync(userId);
+            _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = addedDepartment.Name,
+                DepartmentHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(creator),
+                DepartmentHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedTeam.Name,
+                DepartmentHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
+            var users = (await _departmentManager.GetDepartmentMembers(addedDepartment.Id)).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> created new department with name <b>«{1}»</b> undeer <b>«{2}»</b> team.";
+            string[] arguments = { LoggedInNickName, addedDepartment.Name, selectedTeam.Name };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Department Create", arguments);
+
             var departmentResponse = new DepartmentResponseModel()
             {
                 Id = addedDepartment.Id,
@@ -130,7 +179,7 @@ namespace vws.web.Controllers._department
                 CreatedOn = addedDepartment.CreatedOn,
                 ModifiedOn = addedDepartment.ModifiedOn,
                 DepartmentImageGuid = addedDepartment.DepartmentImageGuid,
-                DepartmentMembers = await _departmentManager.GetDepartmentMembers(addedDepartment.Id)
+                Users = await _departmentManager.GetDepartmentMembers(addedDepartment.Id)
             };
 
             response.Value = departmentResponse;
@@ -141,7 +190,7 @@ namespace vws.web.Controllers._department
         [HttpPut]
         [Authorize]
         [Route("updateName")]
-        public IActionResult UpdateName(int id, StringModel model)
+        public async Task<IActionResult> UpdateName(int id, StringModel model)
         {
             var userId = LoggedInUserId.Value;
             var response = new ResponseModel();
@@ -169,8 +218,58 @@ namespace vws.web.Controllers._department
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
+            if (newName == selectedDepartment.Name)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
+            }
+
+            var lastName = selectedDepartment.Name;
+            selectedDepartment.ModifiedBy = userId;
+            selectedDepartment.ModifiedOn = DateTime.UtcNow;
             selectedDepartment.Name = newName;
             _vwsDbContext.Save();
+
+            #region History
+            var newHistory = new DepartmentHistory()
+            {
+                DepartmentId = selectedDepartment.Id,
+                EventTime = selectedDepartment.ModifiedOn,
+                EventBody = "{0} updated department's name from {1} to {2}."
+            };
+            _vwsDbContext.AddDepartmentHistory(newHistory);
+            _vwsDbContext.Save();
+
+            _vwsDbContext.Save();
+            _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(_userService.GetUser(LoggedInUserId.Value)),
+                DepartmentHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = lastName,
+                DepartmentHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedDepartment.Name,
+                DepartmentHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
+            var users = (await _departmentManager.GetDepartmentMembers(selectedDepartment.Id)).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> updated <b>«{1}»</b> department's name to <b>«{2}»</b>.";
+            string[] arguments = { LoggedInNickName, lastName, selectedDepartment.Name };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Department Update", arguments);
 
             response.Message = "Name updated successfully!";
             return Ok(response);
@@ -179,7 +278,7 @@ namespace vws.web.Controllers._department
         [HttpPut]
         [Authorize]
         [Route("updateDescription")]
-        public IActionResult UpdateDescription(int id, StringModel model)
+        public async Task<IActionResult> UpdateDescription(int id, StringModel model)
         {
             var userId = LoggedInUserId.Value;
             var response = new ResponseModel();
@@ -207,8 +306,58 @@ namespace vws.web.Controllers._department
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
+            if (newDescription == selectedDepartment.Description)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
+            }
+
+            var lastDescription = selectedDepartment.Description;
+            selectedDepartment.ModifiedBy = userId;
+            selectedDepartment.ModifiedOn = DateTime.UtcNow;
             selectedDepartment.Description = newDescription;
             _vwsDbContext.Save();
+
+            #region History
+            var newHistory = new DepartmentHistory()
+            {
+                DepartmentId = selectedDepartment.Id,
+                EventTime = selectedDepartment.ModifiedOn,
+                EventBody = "{0} updated department's description from {1} to {2}."
+            };
+            _vwsDbContext.AddDepartmentHistory(newHistory);
+            _vwsDbContext.Save();
+
+            _vwsDbContext.Save();
+            _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(_userService.GetUser(LoggedInUserId.Value)),
+                DepartmentHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = lastDescription,
+                DepartmentHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedDepartment.Description,
+                DepartmentHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
+            var users = (await _departmentManager.GetDepartmentMembers(selectedDepartment.Id)).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> updated <b>«{1}»</b> department's description from <b>«{2}»</b> to <b>«{3}»</b>.";
+            string[] arguments = { LoggedInNickName, selectedDepartment.Name,lastDescription, selectedDepartment.Description };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Department Update", arguments);
 
             response.Message = "Description updated successfully!";
             return Ok(response);
@@ -217,7 +366,7 @@ namespace vws.web.Controllers._department
         [HttpPut]
         [Authorize]
         [Route("updateColor")]
-        public IActionResult UpdateColor(int id, StringModel model)
+        public async Task<IActionResult> UpdateColor(int id, StringModel model)
         {
             var userId = LoggedInUserId.Value;
             var response = new ResponseModel();
@@ -245,8 +394,58 @@ namespace vws.web.Controllers._department
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
+            if (newColor == selectedDepartment.Color)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
+            }
+
+            var lastColor = selectedDepartment.Color;
             selectedDepartment.Color = newColor;
+            selectedDepartment.ModifiedBy = userId;
+            selectedDepartment.ModifiedOn = DateTime.UtcNow;
             _vwsDbContext.Save();
+
+            #region History
+            var newHistory = new DepartmentHistory()
+            {
+                DepartmentId = selectedDepartment.Id,
+                EventTime = selectedDepartment.ModifiedOn,
+                EventBody = "{0} updated department's color from {1} to {2}."
+            };
+            _vwsDbContext.AddDepartmentHistory(newHistory);
+            _vwsDbContext.Save();
+
+            _vwsDbContext.Save();
+            _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(_userService.GetUser(LoggedInUserId.Value)),
+                DepartmentHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = lastColor,
+                DepartmentHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedDepartment.Color,
+                DepartmentHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
+            var users = (await _departmentManager.GetDepartmentMembers(selectedDepartment.Id)).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> updated <b>«{1}»</b> department's color from <b>«{2}»</b> to <b>«{3}»</b>.";
+            string[] arguments = { LoggedInNickName, selectedDepartment.Name, lastColor, selectedDepartment.Color };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Department Update", arguments);
 
             response.Message = "Color updated successfully!";
             return Ok(response);
@@ -298,8 +497,58 @@ namespace vws.web.Controllers._department
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
+            if (newTeamId == selectedDepartment.TeamId)
+            {
+                response.Message = "Duplicate data";
+                return Ok(response);
+            }
+
+            var lastTeamName = _vwsDbContext.Teams.FirstOrDefault(team => team.Id == selectedDepartment.TeamId).Name;
+            selectedDepartment.ModifiedBy = userId;
+            selectedDepartment.ModifiedOn = DateTime.UtcNow;
             selectedDepartment.TeamId = newTeamId;
             _vwsDbContext.Save();
+
+            #region History
+            var newHistory = new DepartmentHistory()
+            {
+                DepartmentId = selectedDepartment.Id,
+                EventTime = selectedDepartment.ModifiedOn,
+                EventBody = "{0} updated department's team from {1} to {2}."
+            };
+            _vwsDbContext.AddDepartmentHistory(newHistory);
+            _vwsDbContext.Save();
+
+            _vwsDbContext.Save();
+            _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(_userService.GetUser(LoggedInUserId.Value)),
+                DepartmentHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = lastTeamName,
+                DepartmentHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedTeam.Name,
+                DepartmentHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
+            var users = (await _departmentManager.GetDepartmentMembers(selectedDepartment.Id)).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> updated <b>«{1}»</b> department's team from <b>«{2}»</b> to <b>«{3}»</b>.";
+            string[] arguments = { LoggedInNickName, selectedDepartment.Name, lastTeamName, selectedTeam.Name };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Department Update", arguments);
 
             response.Message = "Team updated successfully!";
             return Ok(response);
@@ -342,10 +591,7 @@ namespace vws.web.Controllers._department
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var selectedDepartmentMember = _vwsDbContext.DepartmentMembers.FirstOrDefault(departmentMember => departmentMember.UserProfileId == userId &&
-                                                                                                    departmentMember.DepartmentId == id &&
-                                                                                                    !departmentMember.IsDeleted);
-            if (selectedDepartmentMember == null)
+            if (!_permissionService.HasAccessToDepartment(userId, id))
             {
                 response.AddError(_localizer["You are not member of given department."]);
                 response.Message = "Not member of department";
@@ -413,6 +659,51 @@ namespace vws.web.Controllers._department
 
             _imageService.SaveInOtherQualities(fileResponse.Value);
 
+            #region History
+            var newHistory = new DepartmentHistory()
+            {
+                DepartmentId = selectedDepartment.Id,
+                EventTime = selectedDepartment.ModifiedOn,
+                EventBody = "Department's image updated to {0} by {1}."
+            };
+            _vwsDbContext.AddDepartmentHistory(newHistory);
+            _vwsDbContext.Save();
+
+            var user = await _vwsDbContext.GetUserProfileAsync(userId);
+            _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.File,
+                Body = JsonConvert.SerializeObject(new FileModel()
+                {
+                    Extension = fileResponse.Value.Extension,
+                    FileContainerGuid = fileResponse.Value.FileContainerGuid,
+                    Name = fileResponse.Value.Name,
+                    Size = fileResponse.Value.Size
+                }),
+                DepartmentHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(new UserModel()
+                {
+                    NickName = user.NickName,
+                    ProfileImageGuid = user.ProfileImageGuid,
+                    UserId = user.UserId
+                }),
+                DepartmentHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
+            var users = (await _departmentManager.GetDepartmentMembers(selectedDepartment.Id)).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> updated department's image to <b>«{1}»</b> in your department with name <b>«{2}»</b>.";
+            string[] arguments = { LoggedInNickName, $"<a href='{Request.Scheme}://{Request.Host}/en-US/File/get?id={fileResponse.Value.FileContainerGuid}'>{fileResponse.Value.Name}</a>", selectedDepartment.Name };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Department Update", arguments);
+
             response.Value = fileResponse.Value.FileContainerGuid;
             response.Message = "Department image added successfully!";
             return Ok(response);
@@ -444,7 +735,7 @@ namespace vws.web.Controllers._department
                     CreatedOn = userDepartment.CreatedOn,
                     ModifiedOn = userDepartment.ModifiedOn,
                     DepartmentImageGuid = userDepartment.DepartmentImageGuid,
-                    DepartmentMembers = await _departmentManager.GetDepartmentMembers(userDepartment.Id)
+                    Users = await _departmentManager.GetDepartmentMembers(userDepartment.Id)
                 });
             }
 
@@ -492,7 +783,7 @@ namespace vws.web.Controllers._department
                 CreatedOn = selectedDepartment.CreatedOn,
                 ModifiedOn = selectedDepartment.ModifiedOn,
                 DepartmentImageGuid = selectedDepartment.DepartmentImageGuid,
-                DepartmentMembers = await _departmentManager.GetDepartmentMembers(selectedDepartment.Id)
+                Users = await _departmentManager.GetDepartmentMembers(selectedDepartment.Id)
             };
             response.Message = "Department retured successfully!";
             return Ok(response);
@@ -501,7 +792,7 @@ namespace vws.web.Controllers._department
         [HttpDelete]
         [Authorize]
         [Route("delete")]
-        public IActionResult DeleteDepartment(int id)
+        public async Task<IActionResult> DeleteDepartment(int id)
         {
             var response = new ResponseModel();
 
@@ -531,8 +822,41 @@ namespace vws.web.Controllers._department
             selectedDepartment.IsDeleted = true;
             selectedDepartment.ModifiedBy = userId;
             selectedDepartment.ModifiedOn = DateTime.UtcNow;
+            _vwsDbContext.Save();
+
+            #region History
+            var newHistory = new DepartmentHistory()
+            {
+                DepartmentId = selectedDepartment.Id,
+                EventTime = selectedDepartment.ModifiedOn,
+                EventBody = "{0} deleted {1} department."
+            };
+            _vwsDbContext.AddDepartmentHistory(newHistory);
+            _vwsDbContext.Save();
 
             _vwsDbContext.Save();
+            _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(_userService.GetUser(LoggedInUserId.Value)),
+                DepartmentHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.Text,
+                Body = selectedDepartment.Name,
+                DepartmentHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
+            var users = (await _departmentManager.GetDepartmentMembers(selectedDepartment.Id)).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> deleted your department with name <b>«{1}»</b>.";
+            string[] arguments = { LoggedInNickName, selectedDepartment.Name };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Department Update", arguments);
 
             response.Message = "Department deleted successfully!";
             return Ok(response);
@@ -582,8 +906,41 @@ namespace vws.web.Controllers._department
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-
             await _departmentManager.AddUserToDepartment(model.UserId, model.DepartmentId);
+
+            #region History
+            var newHistory = new DepartmentHistory()
+            {
+                DepartmentId = selectedDepartment.Id,
+                EventTime = selectedDepartment.ModifiedOn,
+                EventBody = "{0} added {1} to department."
+            };
+            _vwsDbContext.AddDepartmentHistory(newHistory);
+            _vwsDbContext.Save();
+
+            _vwsDbContext.Save();
+            _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(_userService.GetUser(LoggedInUserId.Value)),
+                DepartmentHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(_userService.GetUser(model.UserId)),
+                DepartmentHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
+            var users = (await _departmentManager.GetDepartmentMembers(selectedDepartment.Id)).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            string emailMessage = "<b>«{0}»</b> added <b>«{1}»</b> to your department with name <b>«{2}»</b>.";
+            string[] arguments = { LoggedInNickName, _userService.GetUser(model.UserId).NickName, selectedDepartment.Name };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Department Update", arguments);
 
             response.Message = "User added to department successfully!";
             return Ok(response);

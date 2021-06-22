@@ -115,7 +115,7 @@ namespace vws.web.Controllers._team
                     ModifiedOn = department.ModifiedOn,
                     Name = department.Name,
                     TeamId = department.TeamId,
-                    DepartmentMembers = await _departmentManager.GetDepartmentMembers(department.Id)
+                    Users = await _departmentManager.GetDepartmentMembers(department.Id)
                 });
             }
 
@@ -1029,7 +1029,7 @@ namespace vws.web.Controllers._team
                     ModifiedBy = (await _vwsDbContext.GetUserProfileAsync(teamDepartment.ModifiedBy)).NickName,
                     ModifiedOn = teamDepartment.ModifiedOn,
                     TeamId = teamDepartment.TeamId,
-                    DepartmentMembers = await _departmentManager.GetDepartmentMembers(teamDepartment.Id)
+                    Users = await _departmentManager.GetDepartmentMembers(teamDepartment.Id)
                 });
 
             response.Value = departments;
