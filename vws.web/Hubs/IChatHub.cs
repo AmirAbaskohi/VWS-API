@@ -34,7 +34,7 @@ namespace vws.web.Hubs
 
         Task ReceiveStartTime(FullRunningTaskResponseModel startedTask);
 
-        Task ReceivePauseTime(long taskId, DateTime startDate, DateTime endDate, double totalMinutes);
+        Task ReceivePauseTime(long taskId, DateTime startDate, DateTime endDate, double totalMinutes, double totalTimePausedTillNow);
 
         Task ReceiveStopTime(long taskId, DateTime startDate, DateTime endDate, double totalMinutes);
     }

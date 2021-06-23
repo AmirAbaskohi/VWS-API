@@ -172,7 +172,8 @@ namespace vws.web.Controllers._task
                                                                     Attachments = _taskManager.GetTaskAttachments(selectedTask.Id),
                                                                     IsUrgent = selectedTask.IsUrgent,
                                                                     TimeTrackStartDate = newTimeTrack.StartDate,
-                                                                    IsPaused = true
+                                                                    IsPaused = false,
+                                                                    TotalTimeInMinutes = null
                                                                 }));
 
             response.Message = "Time tracking started";
@@ -231,7 +232,7 @@ namespace vws.web.Controllers._task
                 UserHandler.ConnectedIds[userId.ToString()]
                            .ConnectionIds
                            .ForEach(connectionId => _hub.Clients.Client(connectionId)
-                                                                .ReceivePauseTime(unfinishedTimeTrack.GeneralTaskId, unfinishedTimeTrack.StartDate, unfinishedTimeTrack.EndDate.Value, unfinishedTimeTrack.TotalTimeInMinutes.Value));
+                                                                .ReceivePauseTime(unfinishedTimeTrack.GeneralTaskId, unfinishedTimeTrack.StartDate, unfinishedTimeTrack.EndDate.Value, unfinishedTimeTrack.TotalTimeInMinutes.Value, newTimeTrackPause.TotalTimeInMinutes));
 
             response.Message = "Time tracking paused";
             return Ok(response);

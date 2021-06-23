@@ -1993,11 +1993,11 @@ namespace vws.web.Controllers._task
 
             var pausedTaskIds = _vwsDbContext.TimeTrackPauses.Include(timeTrackPause => timeTrackPause.GeneralTask)
                                                              .Where(timeTrackPause => timeTrackPause.UserProfileId == userId && !timeTrackPause.GeneralTask.IsDeleted)
-                                                             .Select(timeTrackPause => new RunningTaskResponseModel() { IsPaused = true, StartDate = null, TaskId = timeTrackPause.GeneralTaskId });
+                                                             .Select(timeTrackPause => new RunningTaskResponseModel() { IsPaused = true, StartDate = null, TaskId = timeTrackPause.GeneralTaskId, TotalTimeInMinutes = timeTrackPause.TotalTimeInMinutes });
 
             var notEndedTaskIds = _vwsDbContext.TimeTracks.Include(timeTrack => timeTrack.GeneralTask)
                                                           .Where(timeTrack => timeTrack.UserProfileId == userId && timeTrack.EndDate == null && !timeTrack.GeneralTask.IsDeleted)
-                                                          .Select(timeTrack => new RunningTaskResponseModel() { IsPaused = false, StartDate = timeTrack.StartDate, TaskId = timeTrack.GeneralTaskId });
+                                                          .Select(timeTrack => new RunningTaskResponseModel() { IsPaused = false, StartDate = timeTrack.StartDate, TaskId = timeTrack.GeneralTaskId, TotalTimeInMinutes = null });
 
             var allRunningTasks = pausedTaskIds.Union(notEndedTaskIds);
             return allRunningTasks;
@@ -2049,7 +2049,8 @@ namespace vws.web.Controllers._task
                     Attachments = _taskManager.GetTaskAttachments(pausedTask.GeneralTask.Id),
                     IsUrgent = pausedTask.GeneralTask.IsUrgent,
                     TimeTrackStartDate = null,
-                    IsPaused = true
+                    IsPaused = true,
+                    TotalTimeInMinutes = pausedTask.TotalTimeInMinutes
                 });
             }
             #endregion
@@ -2084,7 +2085,8 @@ namespace vws.web.Controllers._task
                     Attachments = _taskManager.GetTaskAttachments(notEndedTask.GeneralTask.Id),
                     IsUrgent = notEndedTask.GeneralTask.IsUrgent,
                     IsPaused = false,
-                    TimeTrackStartDate = notEndedTask.StartDate
+                    TimeTrackStartDate = notEndedTask.StartDate,
+                    TotalTimeInMinutes = null
                 });
             }
             #endregion
