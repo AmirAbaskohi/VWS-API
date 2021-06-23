@@ -371,6 +371,8 @@ namespace vws.web.Domain
 
         public IQueryable<UserTeamOrder> UserTeamOrders { get; }
 
+        public IQueryable<TimeTrackPausedSpentTime> TimeTrackPausedSpentTimes { get; }
+
         #endregion
 
         #region methods
@@ -404,6 +406,10 @@ namespace vws.web.Domain
         public void AddUserTeamOrder(UserTeamOrder userTeamActivitiy);
 
         public void DeleteUserTeamOrders(IEnumerable<int> userTeamOrdersIds);
+
+        public void AddTimeTrackPausedSpentTime(TimeTrackPausedSpentTime timeTrackPauseSpentTime);
+
+        public void DeleteTimeTrackPausedSpentTime(TimeTrackPausedSpentTime timeTrackPauseSpentTime);
 
 
         #endregion

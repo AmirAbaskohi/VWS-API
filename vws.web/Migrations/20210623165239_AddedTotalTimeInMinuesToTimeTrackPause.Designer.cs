@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using vws.web.Domain;
 
 namespace vws.web.Migrations
 {
     [DbContext(typeof(VWS_DbContext))]
-    partial class VWS_DbContextModelSnapshot : ModelSnapshot
+    [Migration("20210623165239_AddedTotalTimeInMinuesToTimeTrackPause")]
+    partial class AddedTotalTimeInMinuesToTimeTrackPause
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1835,7 +1837,7 @@ namespace vws.web.Migrations
                     b.ToTable("Task_TimeTrackPause");
                 });
 
-            modelBuilder.Entity("vws.web.Domain._task.TimeTrackPausedSpentTime", b =>
+            modelBuilder.Entity("vws.web.Domain._task.TimeTrackPauseSpentTime", b =>
                 {
                     b.Property<Guid>("UserProfileId")
                         .HasColumnType("uniqueidentifier");
@@ -1850,7 +1852,7 @@ namespace vws.web.Migrations
 
                     b.HasIndex("GeneralTaskId");
 
-                    b.ToTable("Task_TimeTrackPausedSpentTime");
+                    b.ToTable("Task_TimeTrackPauseSpentTime");
                 });
 
             modelBuilder.Entity("vws.web.Domain._team.Team", b =>
@@ -2949,7 +2951,7 @@ namespace vws.web.Migrations
                     b.Navigation("UserProfile");
                 });
 
-            modelBuilder.Entity("vws.web.Domain._task.TimeTrackPausedSpentTime", b =>
+            modelBuilder.Entity("vws.web.Domain._task.TimeTrackPauseSpentTime", b =>
                 {
                     b.HasOne("vws.web.Domain._task.GeneralTask", "GeneralTask")
                         .WithMany()

@@ -519,6 +519,10 @@ namespace vws.web.Domain
 
         public DbSet<TimeTrackPause> TimeTrackPauses { get; set; }
 
+        IQueryable<TimeTrackPausedSpentTime> IVWS_DbContext.TimeTrackPausedSpentTimes { get => TimeTrackPausedSpentTimes; }
+
+        public DbSet<TimeTrackPausedSpentTime> TimeTrackPausedSpentTimes { get; set; }
+
         IQueryable<TaskHistory> IVWS_DbContext.TaskHistories { get => TaskHistories; }
 
         public DbSet<TaskHistory> TaskHistories { get; set; }
@@ -666,6 +670,16 @@ namespace vws.web.Domain
         public void DeleteTimeTrackPauses(IEnumerable<TimeTrackPause> timeTrackPauses)
         {
             TimeTrackPauses.RemoveRange(timeTrackPauses);
+        }
+
+        public void AddTimeTrackPausedSpentTime(TimeTrackPausedSpentTime timeTrackPauseSpentTime)
+        {
+            TimeTrackPausedSpentTimes.Add(timeTrackPauseSpentTime);
+        }
+
+        public void DeleteTimeTrackPausedSpentTime(TimeTrackPausedSpentTime timeTrackPauseSpentTime)
+        {
+            TimeTrackPausedSpentTimes.Remove(timeTrackPauseSpentTime);
         }
 
         #endregion
@@ -945,6 +959,9 @@ namespace vws.web.Domain
 
             builder.Entity<TaskAttachment>()
                 .HasKey(taskAttachment => new { taskAttachment.FileContainerId, taskAttachment.GeneralTaskId });
+
+            builder.Entity<TimeTrackPausedSpentTime>()
+                .HasKey(ttpst => new { ttpst.UserProfileId, ttpst.GeneralTaskId });
 
             builder.Entity<ProjectDepartment>()
                 .HasKey(pd => new { pd.ProjectId, pd.DepartmentId });
