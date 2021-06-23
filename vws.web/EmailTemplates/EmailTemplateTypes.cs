@@ -6,7 +6,8 @@ namespace vws.web.EmailTemplates
         public enum EmailTemplateEnum : int
         {
             EmailCode = 1,
-            NotificationEmail = 2
+            NotificationEmail = 2,
+            WelcomeEmail = 3
         };
     }
 }

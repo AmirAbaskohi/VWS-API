@@ -210,4 +210,22 @@
   <data name="Invalid file." xml:space="preserve">
     <value>فایل نامعتبر است.</value>
   </data>
+  <data name="click on this link" xml:space="preserve">
+    <value>برای شروع به سادگی به  &lt;a href="https://app.seventask.com/"&gt;&lt;img src='https://app.seventask.com/assets/logotype-min.png' style='max-width: 60px;'&gt;&lt;/a&gt; مراجعه کنید. </value>
+  </data>
+  <data name="Have a great day!" xml:space="preserve">
+    <value>روز فوق العاده ای داشته باشید.</value>
+  </data>
+  <data name="Hi" xml:space="preserve">
+    <value>سلام</value>
+  </data>
+  <data name="SeventTask team" xml:space="preserve">
+    <value>تیم سون تسک</value>
+  </data>
+  <data name="we cant wait" xml:space="preserve">
+    <value>ما مشتاقانه منتظر شروع کار شما با &lt;b&gt;&lt;i&gt;SevenTask&lt;/i&gt;&lt;/b&gt; هستیم تا تاثیر آن در کسب و کار شما را ببینیم. </value>
+  </data>
+  <data name="Welcome" xml:space="preserve">
+    <value>خوش آمدید</value>
+  </data>
 </root>

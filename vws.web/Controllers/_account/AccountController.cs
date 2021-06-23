@@ -830,6 +830,32 @@ namespace vws.web.Controllers._account
             userProfile.NickNameSecurityStamp = Guid.NewGuid();
             _vwsDbContext.Save();
 
+            SendEmailModel emailModel = new SendEmailModel
+            {
+                FromEmail = _configuration["EmailSender:RegistrationEmail:EmailAddress"],
+                ToEmail = "amirhossein.abaskohi@gmail.com",
+                Subject = "Welcome",
+                Body = EmailTemplateUtility.GetEmailTemplate((int)EmailTemplateEnum.WelcomeEmail).Replace("{0}", _localizer["Welcome"])
+                                                                                                 .Replace("{1}", _localizer["Hi"])
+                                                                                                 .Replace("{2}", userProfile.NickName)
+                                                                                                 .Replace("{3}", _localizer["we cant wait"])
+                                                                                                 .Replace("{4}", _localizer["click on this link"])
+                                                                                                 .Replace("{5}", _localizer["Have a great day!"])
+                                                                                                 .Replace("{6}", _localizer["SeventTask team"]),
+                Credential = new NetworkCredential
+                {
+                    UserName = _configuration["EmailSender:RegistrationEmail:UserName"],
+                    Password = _configuration["EmailSender:RegistrationEmail:Password"]
+                },
+                IsBodyHtml = true
+            };
+            string emailErrorMessage;
+            await _emailSender.SendEmailAsync(emailModel, out emailErrorMessage);
+            if (string.IsNullOrEmpty(emailErrorMessage))
+                responseModel.Message = "Logged in successfully! | Welcome Email sent";
+            else
+                responseModel.Message = "Logged in successfully! | Welcome Email not sent";
+
             responseModel.Value = await GenerateJWT(user, model.NickName, userProfile.ProfileImageGuid);
             responseModel.Message = "Logged in successfully!";
             return Ok(responseModel);

@@ -207,4 +207,22 @@
   <data name="Invalid file." xml:space="preserve">
     <value>Invalid file.</value>
   </data>
+  <data name="click on this link" xml:space="preserve">
+    <value>Simply go here &lt;a href="https://app.seventask.com/"&gt;&lt;img src='https://app.seventask.com/assets/logotype-min.png' style='max-width: 60px;'&gt;&lt;/a&gt; to get started.</value>
+  </data>
+  <data name="Have a great day!" xml:space="preserve">
+    <value>Have a great day!</value>
+  </data>
+  <data name="Hi" xml:space="preserve">
+    <value>Hi</value>
+  </data>
+  <data name="SeventTask team" xml:space="preserve">
+    <value>SeventTask team</value>
+  </data>
+  <data name="we cant wait" xml:space="preserve">
+    <value>We can’t wait for you to start using &lt;b&gt;&lt;i&gt;SevenTask&lt;/i&gt;&lt;/b&gt; and seeing results in your business.</value>
+  </data>
+  <data name="Welcome" xml:space="preserve">
+    <value>Welcome</value>
+  </data>
 </root>
