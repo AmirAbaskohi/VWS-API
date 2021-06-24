@@ -1997,7 +1997,14 @@ namespace vws.web.Controllers._task
 
             var notEndedTaskIds = _vwsDbContext.TimeTracks.Include(timeTrack => timeTrack.GeneralTask)
                                                           .Where(timeTrack => timeTrack.UserProfileId == userId && timeTrack.EndDate == null && !timeTrack.GeneralTask.IsDeleted)
-                                                          .Select(timeTrack => new RunningTaskResponseModel() { IsPaused = false, StartDate = timeTrack.StartDate, TaskId = timeTrack.GeneralTaskId, TotalTimeInMinutes = null });
+                                                          .Select(timeTrack => new RunningTaskResponseModel() 
+                                                          {
+                                                              IsPaused = false,
+                                                              StartDate = timeTrack.StartDate,
+                                                              TaskId = timeTrack.GeneralTaskId,
+                                                              TotalTimeInMinutes = _vwsDbContext.TimeTrackPausedSpentTimes.Any(ttpst => ttpst.GeneralTaskId == timeTrack.GeneralTaskId && ttpst.UserProfileId == userId) == false ? 0 :
+                                                                                   _vwsDbContext.TimeTrackPausedSpentTimes.FirstOrDefault(ttpst => ttpst.GeneralTaskId == timeTrack.GeneralTaskId && ttpst.UserProfileId == userId).TotalTimeInMinutes
+                                                          });
 
             var allRunningTasks = pausedTaskIds.Union(notEndedTaskIds);
             return allRunningTasks;
@@ -2058,6 +2065,8 @@ namespace vws.web.Controllers._task
             #region notEnded
             foreach (var notEndedTask in notEndedTasks)
             {
+                var notEnderPauseSpentTime = _vwsDbContext.TimeTrackPausedSpentTimes.FirstOrDefault(ttpst => ttpst.GeneralTaskId == notEndedTask.GeneralTaskId && ttpst.UserProfileId == userId);
+
                 notEndedTasksResponse.Add(new FullRunningTaskResponseModel()
                 {
                     Id = notEndedTask.GeneralTask.Id,
@@ -2086,7 +2095,7 @@ namespace vws.web.Controllers._task
                     IsUrgent = notEndedTask.GeneralTask.IsUrgent,
                     IsPaused = false,
                     TimeTrackStartDate = notEndedTask.StartDate,
-                    TotalTimeInMinutes = null
+                    TotalTimeInMinutes = notEnderPauseSpentTime == null ? 0 : notEnderPauseSpentTime.TotalTimeInMinutes
                 });
             }
             #endregion

@@ -141,6 +141,7 @@ namespace vws.web.Controllers._task
             _vwsDbContext.AddTimeTrack(newTimeTrack);
             _vwsDbContext.Save();
 
+            var pausedTimeTrackSpentTime = _vwsDbContext.TimeTrackPausedSpentTimes.FirstOrDefault(ttpst => ttpst.GeneralTaskId == newTimeTrack.GeneralTaskId && ttpst.UserProfileId == userId);
             if (UserHandler.ConnectedIds.Keys.Contains(userId.ToString()))
                 UserHandler.ConnectedIds[userId.ToString()]
                            .ConnectionIds
@@ -173,7 +174,7 @@ namespace vws.web.Controllers._task
                                                                     IsUrgent = selectedTask.IsUrgent,
                                                                     TimeTrackStartDate = newTimeTrack.StartDate,
                                                                     IsPaused = false,
-                                                                    TotalTimeInMinutes = null
+                                                                    TotalTimeInMinutes = pausedTimeTrackSpentTime == null ? 0 : pausedTimeTrackSpentTime.TotalTimeInMinutes
                                                                 }));
 
             response.Message = "Time tracking started";

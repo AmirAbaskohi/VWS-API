@@ -41,7 +41,7 @@ namespace vws.web.Models._task
         public List<FileModel> Attachments { get; set; }
         public bool IsPaused { get; set; }
         public DateTime? TimeTrackStartDate { get; set; }
-        public double? TotalTimeInMinutes { get; set; }
+        public double TotalTimeInMinutes { get; set; }
     }
 
     class FullRunningTaskResponseModelComparer : IEqualityComparer<FullRunningTaskResponseModel>
