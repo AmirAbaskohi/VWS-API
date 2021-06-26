@@ -538,7 +538,7 @@ namespace vws.web.Controllers._account
 
             if (user.EmailVerificationSendTime != null)
             {
-                var timeDiff = DateTime.UtcNow - user.EmailVerificationSendTime;
+                var timeDiff = DateTime.UtcNow - user.EmailVerificationSendTime.Value;
                 if (timeDiff.TotalDays < 365 && timeDiff.TotalMinutes < Int16.Parse(_configuration["EmailCode:EmailTimeDifferenceInMinutes"]))
                 {
                     errors.Add(_localizer["Too many requests."]);
@@ -597,16 +597,15 @@ namespace vws.web.Controllers._account
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "User does not exist!", Errors = errors });
             }
 
-            var timeDiff = user.EmailVerificationSendTime - DateTime.UtcNow;
-
             if (user.EmailConfirmed)
             {
                 errors.Add(_localizer["Email already confirmed."]);
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "Email already confirmed!", Errors = errors });
             }
 
-            if (user.EmailVerificationCode == model.ValidationCode &&
-                timeDiff.TotalMinutes <= Int16.Parse(_configuration["EmailCode:ValidDurationTimeInMinutes"]))
+            if (user.EmailVerificationSendTime != null &&
+                user.EmailVerificationCode == model.ValidationCode &&
+                (user.EmailVerificationSendTime.Value - DateTime.UtcNow).TotalMinutes <= Int16.Parse(_configuration["EmailCode:ValidDurationTimeInMinutes"]))
             {
                 user.EmailConfirmed = true;
                 var result = await _userManager.UpdateAsync(user);
@@ -645,7 +644,7 @@ namespace vws.web.Controllers._account
 
             if (user.ResetPasswordSendTime != null)
             {
-                var timeDiff = DateTime.UtcNow - user.ResetPasswordSendTime;
+                var timeDiff = DateTime.UtcNow - user.ResetPasswordSendTime.Value;
                 if (timeDiff.TotalDays < 365 && timeDiff.TotalMinutes < Int16.Parse(_configuration["EmailCode:EmailTimeDifferenceInMinutes"]))
                 {
                     errors.Add(_localizer["Too many requests."]);
@@ -703,16 +702,15 @@ namespace vws.web.Controllers._account
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "User does not exist!", Errors = errors });
             }
 
-            var timeDiff = user.ResetPasswordSendTime - DateTime.UtcNow;
-
             if (!user.ResetPasswordCodeIsValid)
             {
                 errors.Add(_localizer["Request for reset password is not valid. Request for reset password again."]);
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Message = "Reset password is not valid!", Errors = errors });
             }
 
-            if (user.ResetPasswordCode == model.ValidationCode &&
-                timeDiff.TotalMinutes <= Int16.Parse(_configuration["EmailCode:ValidDurationTimeInMinutes"]))
+            if (user.ResetPasswordSendTime != null &&
+                user.ResetPasswordCode == model.ValidationCode &&
+                (user.ResetPasswordSendTime.Value - DateTime.UtcNow).TotalMinutes <= Int16.Parse(_configuration["EmailCode:ValidDurationTimeInMinutes"]))
             {
                 var passwordValidator = new PasswordValidator<ApplicationUser>();
                 var result = await passwordValidator.ValidateAsync(_userManager, user, model.NewPassword);

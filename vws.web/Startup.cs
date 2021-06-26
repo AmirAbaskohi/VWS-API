@@ -243,6 +243,8 @@ namespace vws.web
 
             ActivityEngine.UpdateUsersOrder(app);
 
+            InactiveUsersEngine.RemoveInactiveUsers(app);
+
             // Automatically Create database and tables and do the migrations
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
