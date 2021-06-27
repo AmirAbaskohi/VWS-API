@@ -37,5 +37,7 @@ namespace vws.web.Hubs
         Task ReceivePauseTime(long taskId, DateTime startDate, DateTime endDate, double totalMinutes, double totalTimePausedTillNow);
 
         Task ReceiveStopTime(long taskId, DateTime startDate, DateTime endDate, double totalMinutes);
+
+        Task ReceiveChangedCulture(int newCultureId, string newCultureName);
     }
 }

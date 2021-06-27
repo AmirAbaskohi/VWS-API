@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
@@ -24,6 +25,7 @@ using vws.web.Domain._base;
 using vws.web.Domain._file;
 using vws.web.EmailTemplates;
 using vws.web.Enums;
+using vws.web.Hubs;
 using vws.web.Models;
 using vws.web.Models._account;
 using vws.web.Repositories;
@@ -47,12 +49,14 @@ namespace vws.web.Controllers._account
         private readonly IVWS_DbContext _vwsDbContext;
         private readonly IFileManager _fileManager;
         private readonly IImageService _imageService;
+        private readonly IHubContext<ChatHub, IChatHub> _hub;
         #endregion
 
         #region Ctor
         public AccountController(UserManager<ApplicationUser> userManager, IConfiguration configuration, IEmailSender emailSender,
             IPasswordHasher<ApplicationUser> passwordHasher, IStringLocalizer<AccountController> localizer,
-            IVWS_DbContext vwsDbContext, IFileManager fileManager, IImageService imageService)
+            IVWS_DbContext vwsDbContext, IFileManager fileManager, IImageService imageService,
+            IHubContext<ChatHub, IChatHub> hub)
         {
             _userManager = userManager;
             _configuration = configuration;
@@ -64,6 +68,7 @@ namespace vws.web.Controllers._account
             _vwsDbContext = vwsDbContext;
             _fileManager = fileManager;
             _imageService = imageService;
+            _hub = hub;
         }
         #endregion
 
@@ -923,6 +928,12 @@ namespace vws.web.Controllers._account
             var userProfile = _vwsDbContext.UserProfiles.FirstOrDefault(profile => profile.UserId == userId);
             userProfile.CultureId = cultureId;
             _vwsDbContext.Save();
+
+            if (UserHandler.ConnectedIds.Keys.Contains(userId.ToString()))
+                UserHandler.ConnectedIds[userId.ToString()]
+                           .ConnectionIds
+                           .ForEach(connectionId => _hub.Clients.Client(connectionId)
+                                                                .ReceiveChangedCulture(cultureId, ((SeedDataEnum.Cultures)cultureId).ToString().Replace('_', '-')));
 
             response.Message = "Culture set successfully!";
             return Ok(response);
