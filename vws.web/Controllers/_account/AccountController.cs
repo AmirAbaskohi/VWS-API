@@ -836,7 +836,7 @@ namespace vws.web.Controllers._account
             SendEmailModel emailModel = new SendEmailModel
             {
                 FromEmail = _configuration["EmailSender:RegistrationEmail:EmailAddress"],
-                ToEmail = "amirhossein.abaskohi@gmail.com",
+                ToEmail = user.Email,
                 Subject = "Welcome",
                 Body = EmailTemplateUtility.GetEmailTemplate((int)EmailTemplateEnum.WelcomeEmail).Replace("{0}", _localizer["Welcome"])
                                                                                                  .Replace("{1}", _localizer["Hi"])
