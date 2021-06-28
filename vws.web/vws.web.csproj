@@ -46,4 +46,7 @@
     <Content Remove="appsettings1.json" />
     <Content Remove="wwwroot\whatsnew\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\domain\domain.csproj" />
+  </ItemGroup>
 </Project>

@@ -13,7 +13,6 @@ using vws.web.Domain._notification;
 using vws.web.Domain._project;
 using vws.web.Domain._task;
 using vws.web.Domain._team;
-using vws.web.Models._chat;
 
 namespace vws.web.Domain
 {
