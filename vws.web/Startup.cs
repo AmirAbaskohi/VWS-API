@@ -338,9 +338,26 @@ namespace vws.web
                 context.Save();
                 #endregion
 
-                //#region AddAdminUsers
-                //if ((await roleManager.FindByNameAsync("Admin")) != null)
-                //#endregion
+                #region AddAdminUsers
+                var adminExists = roleManager.RoleExistsAsync("Admin");
+                adminExists.Wait();
+                if (!adminExists.Result)
+                {
+                    var addedRole = roleManager.CreateAsync(new IdentityRole() { Name = "Admin" });
+                    addedRole.Wait();
+                    context.Save();
+                }
+                var admin = userManager.FindByEmailAsync(Configuration["Admin:Email"]);
+                admin.Wait();
+                var hasAdminRole = userManager.IsInRoleAsync(admin.Result, "Admin");
+                hasAdminRole.Wait();
+                if (!hasAdminRole.Result)
+                {
+                    var addedRoleToUser = userManager.AddToRoleAsync(admin.Result, "Admin");
+                    addedRoleToUser.Wait();
+                    context.Save();
+                }
+                #endregion
             }
         }
     }

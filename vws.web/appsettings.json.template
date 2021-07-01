@@ -89,5 +89,8 @@
   },
   "TimeDifference": {
     "EditTaskComment": 5
+  },
+  "Admin": {
+    "Email":  "amirhossein2324236@gmail.com"
   }
 }
