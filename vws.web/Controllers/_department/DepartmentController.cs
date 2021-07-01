@@ -886,6 +886,8 @@ namespace vws.web.Controllers._department
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
 
+            model.Users = model.Users.Distinct().ToList();
+
             if (model.Users.Count == 0)
             {
                 response.Message = "No Users to add";
