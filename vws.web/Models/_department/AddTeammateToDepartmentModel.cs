@@ -11,6 +11,6 @@ namespace vws.web.Models._department
         [Required]
         public int DepartmentId { get; set; }
         [Required]
-        public Guid UserId { get; set; }
+        public List<Guid> Users { get; set; }
     }
 }

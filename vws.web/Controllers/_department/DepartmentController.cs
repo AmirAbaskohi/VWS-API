@@ -20,6 +20,7 @@ using vws.web.Services;
 using vws.web.Enums;
 using Newtonsoft.Json;
 using static vws.web.EmailTemplates.EmailTemplateTypes;
+using vws.web.Services._team;
 
 namespace vws.web.Controllers._department
 {
@@ -36,13 +37,15 @@ namespace vws.web.Controllers._department
         private readonly IPermissionService _permissionService;
         private readonly INotificationService _notificationService;
         private readonly IUserService _userService;
+        private readonly ITeamManagerService _teamManager;
         #endregion
         
         #region Ctor
         public DepartmentController(IStringLocalizer<DepartmentController> localizer, IVWS_DbContext vwsDbContext,
                                     IFileManager fileManager, IDepartmentManagerService departmentManager,
                                     IImageService imageService, IPermissionService permissionService,
-                                    INotificationService notificationService, IUserService userService)
+                                    INotificationService notificationService, IUserService userService,
+                                    ITeamManagerService teamManager)
         {
             _localizer = localizer;
             _vwsDbContext = vwsDbContext;
@@ -52,6 +55,17 @@ namespace vws.web.Controllers._department
             _permissionService = permissionService;
             _notificationService = notificationService;
             _userService = userService;
+            _teamManager = teamManager;
+        }
+        #endregion
+
+        #region PrivateMethod
+        private bool HaveUsersAccessToTeam(int teamId, List<Guid> users)
+        {
+            foreach (var user in users)
+                if (!_permissionService.HasAccessToTeam(user, teamId))
+                    return false;
+            return true;
         }
         #endregion
 
@@ -872,6 +886,12 @@ namespace vws.web.Controllers._department
             var response = new ResponseModel();
             var userId = LoggedInUserId.Value;
 
+            if (model.Users.Count == 0)
+            {
+                response.Message = "No Users to add";
+                return Ok(response);
+            }
+
             var selectedDepartment = _vwsDbContext.Departments.Include(department => department.Team).FirstOrDefault(department => department.Id == model.DepartmentId);
             if (selectedDepartment == null || selectedDepartment.IsDeleted || selectedDepartment.Team.IsDeleted)
             {
@@ -880,69 +900,75 @@ namespace vws.web.Controllers._department
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var selectedTeamMember = await _vwsDbContext.GetTeamMemberAsync(selectedDepartment.TeamId, model.UserId);
-            if(selectedTeamMember == null)
-            {
-                response.AddError(_localizer["User you want to to add, is not a member of selected team."]);
-                response.Message = "Not member of team";
-                return StatusCode(StatusCodes.Status406NotAcceptable, response);
-            }
-
-            if(!_vwsDbContext.DepartmentMembers.Any(departmentMember => departmentMember.UserProfileId == userId &&
-                                                                       departmentMember.DepartmentId == model.DepartmentId &&
-                                                                       !departmentMember.IsDeleted))
+            if (!_permissionService.HasAccessToDepartment(userId, selectedDepartment.Id))
             {
                 response.AddError(_localizer["You are not member of given department."]);
                 response.Message = "Department access denied";
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            if (_vwsDbContext.DepartmentMembers.Any(departmentMember => departmentMember.UserProfileId == model.UserId &&
-                                                                       departmentMember.DepartmentId == model.DepartmentId &&
-                                                                       !departmentMember.IsDeleted))
+            if (HaveUsersAccessToTeam(selectedDepartment.TeamId, model.Users))
             {
-                response.AddError(_localizer["User you want to add, is already a member of selected department."]);
-                response.Message = "User added before";
-                return StatusCode(StatusCodes.Status400BadRequest, response);
+                response.AddError(_localizer["User you want to to add, is not a member of selected team."]);
+                response.Message = "Not member of team";
+                return StatusCode(StatusCodes.Status406NotAcceptable, response);
             }
 
-            await _departmentManager.AddUserToDepartment(model.UserId, model.DepartmentId);
-
-            #region History
-            var newHistory = new DepartmentHistory()
+            var creationTime = DateTime.UtcNow;
+            var adderUser = JsonConvert.SerializeObject(_userService.GetUser(LoggedInUserId.Value));
+            foreach (var user in model.Users)
             {
-                DepartmentId = selectedDepartment.Id,
-                EventTime = selectedDepartment.ModifiedOn,
-                EventBody = "{0} added {1} to department."
-            };
-            _vwsDbContext.AddDepartmentHistory(newHistory);
-            _vwsDbContext.Save();
+                if (_permissionService.HasAccessToDepartment(user, selectedDepartment.Id))
+                    continue;
+                await _vwsDbContext.AddDepartmentMemberAsync(new DepartmentMember()
+                {
+                    CreatedOn = creationTime,
+                    IsDeleted = false,
+                    DepartmentId = selectedDepartment.Id,
+                    UserProfileId = user
+                });
+                _vwsDbContext.Save();
 
-            _vwsDbContext.Save();
-            _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
-            {
-                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
-                Body = JsonConvert.SerializeObject(_userService.GetUser(LoggedInUserId.Value)),
-                DepartmentHistoryId = newHistory.Id
-            });
-            _vwsDbContext.Save();
-            _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
-            {
-                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
-                Body = JsonConvert.SerializeObject(_userService.GetUser(model.UserId)),
-                DepartmentHistoryId = newHistory.Id
-            });
-            _vwsDbContext.Save();
-            #endregion
+                #region History
+                var newHistory = new DepartmentHistory()
+                {
+                    DepartmentId = selectedDepartment.Id,
+                    EventTime = selectedDepartment.ModifiedOn,
+                    EventBody = "{0} added {1} to department."
+                };
+                _vwsDbContext.AddDepartmentHistory(newHistory);
+                _vwsDbContext.Save();
 
-            var users = (await _departmentManager.GetDepartmentMembers(selectedDepartment.Id)).Select(user => user.UserId).ToList();
-            users = users.Distinct().ToList();
-            users.Remove(LoggedInUserId.Value);
-            string emailMessage = "<b>«{0}»</b> added <b>«{1}»</b> to your department with name <b>«{2}»</b>.";
-            string[] arguments = { LoggedInNickName, _userService.GetUser(model.UserId).NickName, selectedDepartment.Name };
-            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Department Update", arguments);
+                _vwsDbContext.Save();
+                _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
+                {
+                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                    Body = adderUser,
+                    DepartmentHistoryId = newHistory.Id
+                });
+                _vwsDbContext.Save();
+                _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
+                {
+                    ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                    Body = JsonConvert.SerializeObject(_userService.GetUser(user)),
+                    DepartmentHistoryId = newHistory.Id
+                });
+                _vwsDbContext.Save();
+                #endregion
 
-            response.Message = "User added to department successfully!";
+                var users = (await _departmentManager.GetDepartmentMembers(selectedDepartment.Id)).Select(user => user.UserId).ToList();
+                users = users.Distinct().ToList();
+                users.Remove(LoggedInUserId.Value);
+                users.Remove(user);
+                string emailMessage = "<b>«{0}»</b> added <b>«{1}»</b> to your department with name <b>«{2}»</b>.";
+                string[] arguments = { LoggedInNickName, _userService.GetUser(user).NickName, selectedDepartment.Name };
+                await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Department Update", arguments);
+
+                string[] args = { LoggedInNickName, selectedDepartment.Name };
+                await _notificationService.SendSingleEmail((int)EmailTemplateEnum.NotificationEmail, "<b>«{0}»</b> added you <b>«{2}»</b> department.", "Department Update", user, args);
+            }
+
+            response.Message = "Users added to department successfully!";
             return Ok(response);
         }
 
