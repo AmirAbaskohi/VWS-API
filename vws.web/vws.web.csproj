@@ -47,6 +47,7 @@
     <Content Remove="wwwroot\whatsnew\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Core\Core.csproj" />
     <ProjectReference Include="..\domain\domain.csproj" />
   </ItemGroup>
 </Project>

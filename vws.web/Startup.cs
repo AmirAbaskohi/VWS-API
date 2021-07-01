@@ -249,9 +249,12 @@ namespace vws.web
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
                 var context = serviceScope.ServiceProvider.GetRequiredService<IVWS_DbContext>();
+                var roleManager = serviceScope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
                 context.DatabaseFacade.Migrate();
 
-                // Seed data:
+                #region SeedData
                 foreach (var messageType in Enum.GetValues(typeof(SeedDataEnum.MessageTypes)))
                 {
                     string dbMessageType = context.GetMessageType((byte)messageType);
@@ -333,6 +336,11 @@ namespace vws.web
                         context.UpdateActivityParameterType((byte)activityParamType, activityParamType.ToString());
                 }
                 context.Save();
+                #endregion
+
+                //#region AddAdminUsers
+                //if ((await roleManager.FindByNameAsync("Admin")) != null)
+                //#endregion
             }
         }
     }
