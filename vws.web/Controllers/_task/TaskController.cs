@@ -4264,8 +4264,8 @@ namespace vws.web.Controllers._task
         #region CommentAttachmentAPIS
         [HttpPost]
         [Authorize]
-        [Route("addAtachmentToComment")]
-        public async Task<IActionResult> AddAtachmentToComment([FromBody] AddAtachmentModel model)
+        [Route("addAttachmentToComment")]
+        public async Task<IActionResult> AddAttachmentToComment([FromBody] AddAtachmentModel model)
         {
             var response = new ResponseModel<List<FileModel>>();
 
