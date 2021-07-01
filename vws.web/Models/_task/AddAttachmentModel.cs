@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace vws.web.Models._task
 {
-    public class AddAtachmentModel
+    public class AddAttachmentModel
     {
         [Required]
         public long Id { get; set; }

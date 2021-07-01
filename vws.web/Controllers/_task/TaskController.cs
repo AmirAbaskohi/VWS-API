@@ -4265,7 +4265,7 @@ namespace vws.web.Controllers._task
         [HttpPost]
         [Authorize]
         [Route("addAttachmentToComment")]
-        public async Task<IActionResult> AddAttachmentToComment([FromBody] AddAtachmentModel model)
+        public async Task<IActionResult> AddAttachmentToComment([FromBody] AddAttachmentModel model)
         {
             var response = new ResponseModel<List<FileModel>>();
 
@@ -4448,8 +4448,8 @@ namespace vws.web.Controllers._task
         #region TaskAttachmentAPIS
         [HttpPost]
         [Authorize]
-        [Route("addAtachment")]
-        public async Task<IActionResult> AddAtachment([FromBody] AddAtachmentModel model)
+        [Route("addAttachment")]
+        public async Task<IActionResult> AddAttachment([FromBody] AddAttachmentModel model)
         {
             var response = new ResponseModel<List<FileModel>>();
 
