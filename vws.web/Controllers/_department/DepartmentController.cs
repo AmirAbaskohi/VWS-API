@@ -909,7 +909,7 @@ namespace vws.web.Controllers._department
                 return StatusCode(StatusCodes.Status403Forbidden, response);
             }
 
-            if (HaveUsersAccessToTeam(selectedDepartment.TeamId, model.Users))
+            if (!HaveUsersAccessToTeam(selectedDepartment.TeamId, model.Users))
             {
                 response.AddError(_localizer["User you want to to add, is not a member of selected team."]);
                 response.Message = "Not member of team";
