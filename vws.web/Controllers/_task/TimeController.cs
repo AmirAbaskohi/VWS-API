@@ -352,6 +352,7 @@ namespace vws.web.Controllers._task
                 });
             }
 
+            response.Value = result;
             response.Message = "Returned workload";
             return Ok(response);
         }
