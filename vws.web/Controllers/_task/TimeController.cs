@@ -331,7 +331,7 @@ namespace vws.web.Controllers._task
             foreach (var taskUser in taskUsers)
             {
                 double totalTime = 0;
-                var times = _vwsDbContext.TimeTracks.Where(timeTrack => timeTrack.GeneralTaskId == taskId);
+                var times = _vwsDbContext.TimeTracks.Where(timeTrack => timeTrack.GeneralTaskId == taskId && timeTrack.UserProfileId == taskUser.UserId);
                 bool isActive = true;
                 foreach (var time in times)
                 {
