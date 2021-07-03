@@ -249,9 +249,12 @@ namespace vws.web
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
                 var context = serviceScope.ServiceProvider.GetRequiredService<IVWS_DbContext>();
+                var roleManager = serviceScope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
                 context.DatabaseFacade.Migrate();
 
-                // Seed data:
+                #region SeedData
                 foreach (var messageType in Enum.GetValues(typeof(SeedDataEnum.MessageTypes)))
                 {
                     string dbMessageType = context.GetMessageType((byte)messageType);
@@ -333,6 +336,28 @@ namespace vws.web
                         context.UpdateActivityParameterType((byte)activityParamType, activityParamType.ToString());
                 }
                 context.Save();
+                #endregion
+
+                #region AddAdminUsers
+                var adminExists = roleManager.RoleExistsAsync("Admin");
+                adminExists.Wait();
+                if (!adminExists.Result)
+                {
+                    var addedRole = roleManager.CreateAsync(new IdentityRole() { Name = "Admin" });
+                    addedRole.Wait();
+                    context.Save();
+                }
+                var admin = userManager.FindByEmailAsync(Configuration["Admin:Email"]);
+                admin.Wait();
+                var hasAdminRole = userManager.IsInRoleAsync(admin.Result, "Admin");
+                hasAdminRole.Wait();
+                if (!hasAdminRole.Result)
+                {
+                    var addedRoleToUser = userManager.AddToRoleAsync(admin.Result, "Admin");
+                    addedRoleToUser.Wait();
+                    context.Save();
+                }
+                #endregion
             }
         }
     }

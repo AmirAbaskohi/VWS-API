@@ -99,15 +99,18 @@ namespace vws.web.Controllers._account
             }
         }
 
-        private async Task<JwtTokenModel> GenerateJWT(IdentityUser user, string nickName, Guid? userProfileImageId)
+        private async Task<JwtTokenModel> GenerateJWT(ApplicationUser user, string nickName, Guid? userProfileImageId)
         {
+            var userRoles = await _userManager.GetRolesAsync(user);
             var authClaims = new List<Claim>
-                {
-                    new Claim("UserEmail", user.Email),
-                    new Claim("NickName", nickName),
-                    new Claim("UserId", user.Id),
-                    new Claim("UserProfileImageId", userProfileImageId.HasValue ? userProfileImageId.Value.ToString(): string.Empty),
-                };
+            {
+                new Claim("UserEmail", user.Email),
+                new Claim("NickName", nickName),
+                new Claim("UserId", user.Id),
+                new Claim("UserProfileImageId", userProfileImageId.HasValue ? userProfileImageId.Value.ToString(): string.Empty),
+            };
+            foreach (var role in userRoles)
+                authClaims.Add(new Claim(ClaimTypes.Role, role));
 
             var token = GenerateToken(authClaims);
 
