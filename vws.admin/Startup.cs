@@ -26,6 +26,7 @@ using vws.web.Domain;
 using vws.web.Domain._base;
 using vws.web.Enums;
 using vws.web.Extensions;
+using vws.web.Services;
 
 namespace vws.admin
 {
@@ -114,6 +115,8 @@ namespace vws.admin
                 opts.Password.RequireUppercase = Boolean.Parse(Configuration["Security:RequireUppercase"]);
                 opts.Password.RequireDigit = Boolean.Parse(Configuration["Security:RequireDigit"]);
             });
+
+            services.AddScoped<IUserService, UserService>();
 
             services
             .AddAuthentication(option =>

@@ -27,5 +27,22 @@ namespace vws.web.Services
                 UserId = profile.UserId
             };
         }
+
+        public UserModel GetUserWithJoinDate(Guid guid, out DateTime joinDate)
+        {
+            var profile = _vwsDbContext.UserProfiles.FirstOrDefault(profile => profile.UserId == guid);
+            if (profile == null)
+            {
+                joinDate = new DateTime();
+                return null;
+            }
+            joinDate = profile.CreatedOn;
+            return new UserModel()
+            {
+                NickName = profile.NickName,
+                ProfileImageGuid = profile.ProfileImageGuid,
+                UserId = profile.UserId
+            };
+        }
     }
 }

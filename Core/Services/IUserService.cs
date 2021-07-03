@@ -9,5 +9,6 @@ namespace vws.web.Services
     public interface IUserService
     {
         public UserModel GetUser(Guid guid);
+        public UserModel GetUserWithJoinDate(Guid guid, out DateTime joinDate);
     }
 }
