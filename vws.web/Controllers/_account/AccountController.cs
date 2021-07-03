@@ -852,8 +852,7 @@ namespace vws.web.Controllers._account
                 },
                 IsBodyHtml = true
             };
-            string emailErrorMessage;
-            Task.Run(async () => await _emailSender.SendEmailAsync(emailModel, out emailErrorMessage));
+            Task.Run(async () => await _emailSender.SendEmailAsync(emailModel, out string emailErrorMessage));
 
             responseModel.Value = await GenerateJWT(user, model.NickName, userProfile.ProfileImageGuid);
             responseModel.Message = "Logged in successfully!";
