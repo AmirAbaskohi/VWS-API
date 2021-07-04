@@ -156,6 +156,9 @@
   <data name="Name can not be empty or have more than 500 characters." xml:space="preserve">
     <value>Name can not be empty or have more than 500 characters.</value>
   </data>
+  <data name="Selected user is not member of given department." xml:space="preserve">
+    <value>Selected user is not member of given department.</value>
+  </data>
   <data name="There is already a department with given name, in given team." xml:space="preserve">
     <value>There is already a department with given name, in given team.</value>
   </data>
@@ -173,6 +176,9 @@
   </data>
   <data name="There is no user with given Id." xml:space="preserve">
     <value>There is no user with given Id.</value>
+  </data>
+  <data name="There is no user with such id." xml:space="preserve">
+    <value>There is no user with such id.</value>
   </data>
   <data name="User you want to add, is already a member of selected department." xml:space="preserve">
     <value>User you want to add, is already a member of selected department.</value>
@@ -200,6 +206,9 @@
   </data>
   <data name="{0} department created by {1} under {2} team." xml:space="preserve">
     <value>{0} department created by {1} under {2} team.</value>
+  </data>
+  <data name="{0} removed {1} from department." xml:space="preserve">
+    <value>{0} removed {1} from department.</value>
   </data>
   <data name="{0} updated department's color from {1} to {2}." xml:space="preserve">
     <value>{0} updated department's color from {1} to {2}.</value>

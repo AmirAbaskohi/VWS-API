@@ -992,11 +992,7 @@ namespace vws.web.Controllers._department
                 return StatusCode(StatusCodes.Status400BadRequest, response);
             }
 
-            var selectedDepartmentMember = _vwsDbContext.DepartmentMembers.FirstOrDefault(departmentMember => departmentMember.UserProfileId == userId &&
-                                                                                                             departmentMember.IsDeleted == false &&
-                                                                                                             departmentMember.DepartmentId == id);
-
-            if (selectedDepartmentMember == null)
+            if (!_permissionService.HasAccessToDepartment(userId, id))
             {
                 response.Message = "Not member of department";
                 response.AddError(_localizer["You are not member of given department."]);
@@ -1020,6 +1016,96 @@ namespace vws.web.Controllers._department
 
             response.Message = "Co-departments are given successfully!";
             response.Value = coDepartmentsList;
+            return Ok(response);
+        }
+
+        [HttpDelete]
+        [Authorize]
+        [Route("deleteDepartmentMember")]
+        public async Task<IActionResult> DeleteDepartmentMemeber(int id, Guid userId)
+        {
+            var response = new ResponseModel();
+
+            var selectedUser = _vwsDbContext.UserProfiles.FirstOrDefault(user => user.UserId == userId);
+            if (selectedUser == null)
+            {
+                response.Message = "User does not exists.";
+                response.AddError(_localizer["There is no user with such id."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var selectedDepartment = _vwsDbContext.Departments.Include(department => department.Team).FirstOrDefault(department => department.Id == id);
+            if (selectedDepartment == null || selectedDepartment.IsDeleted || selectedDepartment.Team.IsDeleted)
+            {
+                response.Message = "Department not found";
+                response.AddError(_localizer["There is no department with such id."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            if (!_permissionService.HasAccessToDepartment(userId, id))
+            {
+                response.Message = "Not member of department";
+                response.AddError(_localizer["You are not member of given department."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var selectedDepartmentMemeber = _vwsDbContext.DepartmentMembers.FirstOrDefault(departmentMember => departmentMember.UserProfileId == userId &&
+                                                                                                               departmentMember.DepartmentId == id &&
+                                                                                                               !departmentMember.IsDeleted);
+            if (selectedDepartmentMemeber == null)
+            {
+                response.Message = "Not member of department";
+                response.AddError(_localizer["Selected user is not member of given department."]);
+                return StatusCode(StatusCodes.Status400BadRequest, response);
+            }
+
+            var time = DateTime.UtcNow;
+            selectedDepartment.ModifiedOn = time;
+            selectedDepartmentMemeber.DeletedOn = time;
+            selectedDepartmentMemeber.DeletedOn = time;
+            selectedDepartmentMemeber.IsDeleted = true;
+            _vwsDbContext.Save();
+
+            var removedUser = _userService.GetUser(userId);
+
+            #region History
+            var newHistory = new DepartmentHistory()
+            {
+                DepartmentId = selectedDepartment.Id,
+                EventTime = selectedDepartment.ModifiedOn,
+                EventBody = "{0} removed {1} from department."
+            };
+            _vwsDbContext.AddDepartmentHistory(newHistory);
+            _vwsDbContext.Save();
+
+            _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(_userService.GetUser(LoggedInUserId.Value)),
+                DepartmentHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            _vwsDbContext.AddDepartmentHistoryParameter(new DepartmentHistoryParameter()
+            {
+                ActivityParameterTypeId = (byte)SeedDataEnum.ActivityParameterTypes.User,
+                Body = JsonConvert.SerializeObject(removedUser),
+                DepartmentHistoryId = newHistory.Id
+            });
+            _vwsDbContext.Save();
+            #endregion
+
+            var users = (await _departmentManager.GetDepartmentMembers(selectedDepartment.Id)).Select(user => user.UserId).ToList();
+            users = users.Distinct().ToList();
+            users.Remove(LoggedInUserId.Value);
+            users.Remove(userId);
+            string emailMessage = "<b>«{0}»</b> removed <b>«{1}»</b> from <b>«{2}»</b> department.";
+            string[] arguments = { LoggedInNickName, removedUser.NickName, selectedDepartment.Name };
+            await _notificationService.SendMultipleEmails((int)EmailTemplateEnum.NotificationEmail, users, emailMessage, "Department Update", arguments);
+
+            string[] args = { LoggedInNickName, selectedDepartment.Name };
+            await _notificationService.SendSingleEmail((int)EmailTemplateEnum.NotificationEmail, "<b>«{0}»</b> removed you from <b>«{1}»</b> department.", "Department Updated", userId, args);
+
+            response.Message = "User deleted successfully";
             return Ok(response);
         }
         #endregion
