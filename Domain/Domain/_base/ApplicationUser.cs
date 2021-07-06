@@ -8,7 +8,6 @@ namespace vws.web.Domain._base
     [Table("Base_ApplicationUser")]
     public class ApplicationUser : IdentityUser
     {
-
         public string EmailVerificationCode { get; set; }
 
         public DateTime? EmailVerificationSendTime { get; set; }

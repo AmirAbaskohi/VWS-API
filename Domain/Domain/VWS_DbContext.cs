@@ -16,6 +16,7 @@ using Microsoft.Data.SqlClient;
 using vws.web.Domain._notification;
 using vws.web.Domain._feedback;
 using vws.web.Domain._calendar;
+using Domain.Domain._base;
 
 namespace vws.web.Domain
 {
@@ -39,6 +40,18 @@ namespace vws.web.Domain
 
         public DbSet<ActivityParameterType> ActivityParameterTypes { get; set; }
 
+        IQueryable<UserWeekend> IVWS_DbContext.UserWeekends { get => UserWeekends; }
+
+        public DbSet<UserWeekend> UserWeekends { get; set; }
+
+        IQueryable<CalendarType> IVWS_DbContext.CalendarTypes { get => CalendarTypes; }
+
+        public DbSet<CalendarType> CalendarTypes { get; set; }
+
+        IQueryable<WeekDay> IVWS_DbContext.WeekDays { get => WeekDays; }
+
+        public DbSet<WeekDay> WeekDays { get; set; }
+
         public void AddActivityParameterType(ActivityParameterType activityParameterType)
         {
             ActivityParameterTypes.Add(activityParameterType);
@@ -55,6 +68,51 @@ namespace vws.web.Domain
             var selectedActivityParameterType = ActivityParameterTypes.FirstOrDefault(activityParamType => activityParamType.Id == id);
             return selectedActivityParameterType == null ? null : selectedActivityParameterType.Name;
         }
+
+        public void AddUserWeekend(UserWeekend userWeekend)
+        {
+            UserWeekends.Add(userWeekend);
+        }
+
+        public void DeleteUserWeekend(UserWeekend userWeekend)
+        {
+            UserWeekends.Remove(userWeekend);
+        }
+
+        public void AddCalendarType(CalendarType calendarType)
+        {
+            CalendarTypes.Add(calendarType);
+        }
+
+        public void AddWeekDay(WeekDay weekDay)
+        {
+            WeekDays.Add(weekDay);
+        }
+
+        public void UpdateCalendarType(byte id, string newName)
+        {
+            var selectedCalendarType = CalendarTypes.FirstOrDefault(calendarType => calendarType.Id == id);
+            selectedCalendarType.Name = newName;
+        }
+
+        public void UpdateWeekDay(byte id, string newName)
+        {
+            var selectedWeekDay = WeekDays.FirstOrDefault(weekDay => weekDay.Id == id);
+            selectedWeekDay.Name = newName;
+        }
+
+        public string GetCalendarType(byte id)
+        {
+            var selectedCalendarType = CalendarTypes.FirstOrDefault(calendarType => calendarType.Id == id);
+            return selectedCalendarType == null ? null : selectedCalendarType.Name;
+        }
+
+        public string GetWeekDay(byte id)
+        {
+            var selectedWeekDay = WeekDays.FirstOrDefault(weekDay => weekDay.Id == id);
+            return selectedWeekDay == null ? null : selectedWeekDay.Name;
+        }
+
         #endregion
 
         #region version
@@ -973,6 +1031,17 @@ namespace vws.web.Domain
                 .HasOne(pd => pd.Department)
                 .WithMany(d => d.ProjectDepartments)
                 .HasForeignKey(pd => pd.DepartmentId);
+
+            builder.Entity<UserWeekend>()
+                .HasKey(uw => new { uw.WeekDayId, uw.UserProfileId });
+            builder.Entity<UserWeekend>()
+                .HasOne(uw => uw.WeekDay)
+                .WithMany(w => w.UserWeekends)
+                .HasForeignKey(uw => uw.WeekDayId);
+            builder.Entity<UserWeekend>()
+                .HasOne(uw => uw.UserProfile)
+                .WithMany(u => u.UserWeekends)
+                .HasForeignKey(uw => uw.UserProfileId);
 
             builder.Entity<EventProject>()
                 .HasKey(ep => new { ep.ProjectId, ep.EventId });

@@ -76,5 +76,22 @@ namespace vws.web.Enums
             Color = 4,
             ListOfFiles = 5
         }
+
+        public enum WeekDay : byte
+        {
+            Saturday = 1,
+            Sunday = 2,
+            Monday = 3,
+            Tuesday = 4,
+            Wednesday = 5,
+            Thursday = 6,
+            Friday = 7
+        }
+
+        public enum CalendarType : byte
+        {
+            Gregorian = 1,
+            SolarHijri = 2
+        }
     }
 }

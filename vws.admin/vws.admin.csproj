@@ -33,6 +33,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" />
     <ProjectReference Include="..\Domain\Domain.csproj" />
+    <ProjectReference Include="..\vws.web\vws.web.csproj" />
   </ItemGroup>
 
 

@@ -3,21 +3,64 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using vws.web.Domain;
 
 namespace vws.web.Migrations
 {
     [DbContext(typeof(VWS_DbContext))]
-    partial class VWS_DbContextModelSnapshot : ModelSnapshot
+    [Migration("20210706112828_AddedSettingsColumnsInProfile")]
+    partial class AddedSettingsColumnsInProfile
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .UseIdentityColumns()
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("ProductVersion", "5.0.3");
+
+            modelBuilder.Entity("Domain.Domain._base.CalendarType", b =>
+                {
+                    b.Property<byte>("Id")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Base_CalendarType");
+                });
+
+            modelBuilder.Entity("Domain.Domain._base.UserWeekend", b =>
+                {
+                    b.Property<byte>("WeekDayId")
+                        .HasColumnType("tinyint");
+
+                    b.Property<Guid>("UserProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("WeekDayId", "UserProfileId");
+
+                    b.HasIndex("UserProfileId");
+
+                    b.ToTable("Base_UserWeekends");
+                });
+
+            modelBuilder.Entity("Domain.Domain._base.WeekDay", b =>
+                {
+                    b.Property<byte>("Id")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Base_DayOfWeek");
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -289,6 +332,18 @@ namespace vws.web.Migrations
                     b.Property<byte?>("CultureId")
                         .HasColumnType("tinyint");
 
+                    b.Property<byte>("FirstCalendarTypeId")
+                        .HasColumnType("tinyint");
+
+                    b.Property<byte>("FirstWeekDayId")
+                        .HasColumnType("tinyint");
+
+                    b.Property<bool>("IsDarkModeOn")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSecondCalendarOn")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime>("ModifiedOn")
                         .HasColumnType("datetime2");
 
@@ -308,15 +363,27 @@ namespace vws.web.Migrations
                     b.Property<Guid>("ProfileImageSecurityStamp")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<byte?>("SecondCalendarTypeId")
+                        .HasColumnType("tinyint");
+
                     b.Property<string>("ThemeColorCode")
                         .HasMaxLength(6)
                         .HasColumnType("nvarchar(6)");
+
+                    b.Property<float>("ZoomRatio")
+                        .HasColumnType("real");
 
                     b.HasKey("UserId");
 
                     b.HasIndex("CultureId");
 
+                    b.HasIndex("FirstCalendarTypeId");
+
+                    b.HasIndex("FirstWeekDayId");
+
                     b.HasIndex("ProfileImageId");
+
+                    b.HasIndex("SecondCalendarTypeId");
 
                     b.ToTable("Base_UserProfile");
                 });
@@ -2137,6 +2204,25 @@ namespace vws.web.Migrations
                     b.ToTable("Version_VersionLog");
                 });
 
+            modelBuilder.Entity("Domain.Domain._base.UserWeekend", b =>
+                {
+                    b.HasOne("vws.web.Domain._base.UserProfile", "UserProfile")
+                        .WithMany("UserWeekends")
+                        .HasForeignKey("UserProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Domain._base.WeekDay", "WeekDay")
+                        .WithMany("UserWeekends")
+                        .HasForeignKey("WeekDayId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UserProfile");
+
+                    b.Navigation("WeekDay");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -2194,13 +2280,35 @@ namespace vws.web.Migrations
                         .WithMany()
                         .HasForeignKey("CultureId");
 
+                    b.HasOne("Domain.Domain._base.CalendarType", "FirstCalendarType")
+                        .WithMany()
+                        .HasForeignKey("FirstCalendarTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Domain._base.WeekDay", "FirstWeekDay")
+                        .WithMany()
+                        .HasForeignKey("FirstWeekDayId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("vws.web.Domain._file.FileContainer", "ProfileImage")
                         .WithMany()
                         .HasForeignKey("ProfileImageId");
 
+                    b.HasOne("Domain.Domain._base.CalendarType", "SecondCalendarType")
+                        .WithMany()
+                        .HasForeignKey("SecondCalendarTypeId");
+
                     b.Navigation("Culture");
 
+                    b.Navigation("FirstCalendarType");
+
+                    b.Navigation("FirstWeekDay");
+
                     b.Navigation("ProfileImage");
+
+                    b.Navigation("SecondCalendarType");
                 });
 
             modelBuilder.Entity("vws.web.Domain._base.UsersActivity", b =>
@@ -3094,11 +3202,18 @@ namespace vws.web.Migrations
                     b.Navigation("Version");
                 });
 
+            modelBuilder.Entity("Domain.Domain._base.WeekDay", b =>
+                {
+                    b.Navigation("UserWeekends");
+                });
+
             modelBuilder.Entity("vws.web.Domain._base.UserProfile", b =>
                 {
                     b.Navigation("EventUsers");
 
                     b.Navigation("TaskAssigns");
+
+                    b.Navigation("UserWeekends");
                 });
 
             modelBuilder.Entity("vws.web.Domain._calendar.Event", b =>

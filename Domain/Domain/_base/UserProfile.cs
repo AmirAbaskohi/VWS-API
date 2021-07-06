@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Domain._base;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -15,6 +16,7 @@ namespace vws.web.Domain._base
         {
             TaskAssigns = new HashSet<TaskAssign>();
             EventUsers = new HashSet<EventMember>();
+            UserWeekends = new HashSet<UserWeekend>();
         }
         [Key]
         public Guid UserId { get; set; }
@@ -40,12 +42,35 @@ namespace vws.web.Domain._base
 
         public DateTime ModifiedOn { get; set; }
 
+        [ForeignKey("FirstWeekDay")]
+        public byte FirstWeekDayId { get; set; }
+
+        public bool IsDarkModeOn { get; set; }
+
+        public float ZoomRatio { get; set; }
+
+        public bool IsSecondCalendarOn { get; set; }
+
+        [ForeignKey("FirstCalendarType")]
+        public byte FirstCalendarTypeId { get; set; }
+
+        [ForeignKey("SecondCalendarType")]
+        public byte? SecondCalendarTypeId { get; set; }
+
         public virtual Culture Culture { get; set; }
 
         public virtual FileContainer ProfileImage { get; set; }
 
+        public virtual WeekDay FirstWeekDay { get; set; }
+
+        public virtual CalendarType FirstCalendarType { get; set; }
+
+        public virtual CalendarType SecondCalendarType { get; set; }
+
         public virtual ICollection<TaskAssign> TaskAssigns { get; set; }
 
         public virtual ICollection<EventMember> EventUsers { get; set; }
+
+        public virtual ICollection<UserWeekend> UserWeekends { get; set; }
     }
 }

@@ -33,6 +33,7 @@ using vws.web.Services._team;
 using vws.web.Services._project;
 using vws.web.Services._task;
 using vws.web.Services._calender;
+using Domain.Domain._base;
 
 namespace vws.web
 {
@@ -334,6 +335,24 @@ namespace vws.web
                         context.AddActivityParameterType(new Domain.ActivityParameterType { Id = (byte)activityParamType, Name = activityParamType.ToString() });
                     else if (dbActivityParamType != activityParamType.ToString())
                         context.UpdateActivityParameterType((byte)activityParamType, activityParamType.ToString());
+                }
+                context.Save();
+                foreach (var calendarType in Enum.GetValues(typeof(SeedDataEnum.CalendarType)))
+                {
+                    string dbCalendarType = context.GetCalendarType((byte)calendarType);
+                    if (dbCalendarType == null)
+                        context.AddCalendarType(new CalendarType { Id = (byte)calendarType, Name = calendarType.ToString() });
+                    else if (dbCalendarType != calendarType.ToString())
+                        context.UpdateCalendarType((byte)calendarType, calendarType.ToString());
+                }
+                context.Save();
+                foreach (var weekDay in Enum.GetValues(typeof(SeedDataEnum.WeekDay)))
+                {
+                    string dbWeekDay = context.GetWeekDay((byte)weekDay);
+                    if (dbWeekDay == null)
+                        context.AddWeekDay(new WeekDay { Id = (byte)weekDay, Name = weekDay.ToString() });
+                    else if (dbWeekDay != weekDay.ToString())
+                        context.UpdateWeekDay((byte)weekDay, weekDay.ToString());
                 }
                 context.Save();
                 #endregion

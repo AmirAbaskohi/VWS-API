@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Domain.Domain._base;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using vws.web.Domain._base;
 using vws.web.Domain._calendar;
@@ -35,6 +36,7 @@ namespace vws.web.Domain
         #endregion
         #endregion
 
+
         #region version
 
         #region models
@@ -61,6 +63,12 @@ namespace vws.web.Domain
         public IQueryable<UsersOrder> UsersOrders { get; }
 
         public IQueryable<UsersActivity> UsersActivities { get; }
+
+        public IQueryable<UserWeekend> UserWeekends { get; }
+
+        public IQueryable<CalendarType> CalendarTypes { get; }
+
+        public IQueryable<WeekDay> WeekDays { get; }
 
 
         #endregion
@@ -92,6 +100,22 @@ namespace vws.web.Domain
         public void DeleteUsersOrder(UsersOrder usersOrder);
 
         public void DeleteUsersOrdersOfSpecificUser(List<Guid> usersOrdersIds, Guid userId);
+
+        public void AddUserWeekend(UserWeekend userWeekend);
+
+        public void DeleteUserWeekend(UserWeekend userWeekend);
+
+        public void AddCalendarType(CalendarType calendarType);
+
+        public void AddWeekDay(WeekDay weekDay);
+
+        public void UpdateCalendarType(byte id, string newName);
+
+        public void UpdateWeekDay(byte id, string newName);
+
+        public string GetCalendarType(byte id);
+
+        public string GetWeekDay(byte id);
 
         #endregion
 
