@@ -74,9 +74,10 @@ namespace vws.web.Domain
             UserWeekends.Add(userWeekend);
         }
 
-        public void DeleteUserWeekend(UserWeekend userWeekend)
+        public void DeleteUserWeekend(byte day, Guid userId)
         {
-            UserWeekends.Remove(userWeekend);
+            var selectedUserWeekend = UserWeekends.FirstOrDefault(userWeekend => userWeekend.UserProfileId == userId && userWeekend.WeekDayId == day);
+            UserWeekends.Remove(selectedUserWeekend);
         }
 
         public void AddCalendarType(CalendarType calendarType)

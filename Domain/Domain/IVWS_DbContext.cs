@@ -103,7 +103,7 @@ namespace vws.web.Domain
 
         public void AddUserWeekend(UserWeekend userWeekend);
 
-        public void DeleteUserWeekend(UserWeekend userWeekend);
+        public void DeleteUserWeekend(byte day, Guid userId);
 
         public void AddCalendarType(CalendarType calendarType);
 
