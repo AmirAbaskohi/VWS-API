@@ -40,7 +40,7 @@
   "JWT": {
     "Audience": "VWS App",
     "Issuer": "https://vws.ir",
-    "Secret": "ByYM000OLlMQG6VVVp1OH7Xzyr7gHuw1qvUC5dcGt3SNM",
+    "Secret": "2988809F48238552C4DA3116C493CB37D724177F9E5CDB07E17F63C6A3CF9D4A",
     "ValidTimeInMinutes": 1440
   },
   "Angular": {
