@@ -35,17 +35,16 @@
     ]
   },
   "ConnectionStrings": {
-    "SqlServer": "Server=DESKTOP-PJ47C24;Database=VWS_DB;Integrated security=True;MultipleActiveResultSets=True;"
   },
   "JWT": {
     "Audience": "VWS App",
     "Issuer": "https://vws.ir",
-    "Secret": "ByYM000OLlMQG6VVVp1OH7Xzyr7gHuw1qvUC5dcGt3SNM",
+    "Secret": "2988809F48238552C4DA3116C493CB37D724177F9E5CDB07E17F63C6A3CF9D4A",
     "ValidTimeInMinutes": 30
   },
   "Google": {
-    "ClientId": "592198124436-24rg7bm3850gk8q14h5o6anrmuhtmojp.apps.googleusercontent.com",
-    "Secret": "R5THzn3N6YEGUXrbcSD_iVUm"
+    "ClientId": "CLIENT ID",
+    "Secret": "SECTET"
   },
   "EmailCode": {
     "SizeOfCode": 5,
@@ -58,14 +57,14 @@
   },
   "EmailSender": {
     "RegistrationEmail": {
-      "UserName": "seventasktest",
-      "Password": "reallyStrongPWD123!",
-      "EmailAddress": "seventasktest@gmail.com"
+      "UserName": "your email usename",
+      "Password": "your email password",
+      "EmailAddress": "your email address"
     },
     "NotificationEmail": {
-      "UserName": "seventasktest",
-      "Password": "reallyStrongPWD123!",
-      "EmailAddress": "seventasktest@gmail.com"
+      "UserName": "your email usename",
+      "Password": "your email password",
+      "EmailAddress": "your email address"
     },
     "SMTPHost": "smtp.gmail.com"
   },
@@ -91,6 +90,6 @@
     "EditTaskComment": 5
   },
   "Admin": {
-    "Email":  "amirhossein2324236@gmail.com"
+    "Email":  "ADMIN EMAIL"
   }
 }
