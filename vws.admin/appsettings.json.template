@@ -35,7 +35,7 @@
     ]
   },
   "ConnectionStrings": {
-    "SqlServer": "Server=DESKTOP-PJ47C24;Database=VWS_DB;Integrated security=True;MultipleActiveResultSets=True;"
+    ""
   },
   "JWT": {
     "Audience": "VWS App",
@@ -48,14 +48,14 @@
   },
   "EmailSender": {
     "RegistrationEmail": {
-      "UserName": "seventasktest",
-      "Password": "reallyStrongPWD123!",
-      "EmailAddress": "seventasktest@gmail.com"
+      "UserName": "your email usename",
+      "Password": "your email password",
+      "EmailAddress": "your email address"
     },
     "NotificationEmail": {
-      "UserName": "seventasktest",
-      "Password": "reallyStrongPWD123!",
-      "EmailAddress": "seventasktest@gmail.com"
+      "UserName": "your email usename",
+      "Password": "your email password",
+      "EmailAddress": "your email address"
     },
     "SMTPHost": "smtp.gmail.com"
   },
